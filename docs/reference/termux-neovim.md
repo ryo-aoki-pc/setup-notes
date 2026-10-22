@@ -5,7 +5,7 @@
 ## 選択した方針
 
 - Neovim と、コンパイラー・パーサー・LSP・整形の外部コマンドは Termux の `pkg` で入れる。LazyVimStarter の custom と md-format を組み合わせる
-- marksman は入れない。`dotnet-host` と `dotnet-runtime-9.0` に依存するので、Markdown のために入れるものを増やさない（利用者の決定。marksman の導入は確かめていない）
+- marksman は入れない。`dotnet-host` と `dotnet-runtime-9.0` に依存し、Markdown のために入れるものが大きくなる。入れたときは PATH の marksman を使う（marksman の導入は確かめていない）
 
 ## 補足
 
@@ -14,17 +14,18 @@
 - Termux の Neovim は、`LD_PRELOAD` に libluajit を足すラッパーで起動する。`has("android")` と `has("termux")` はどちらも `1`
 - `tree-sitter` のパッケージには CLI も含まれる。パーサーは Termux の clang でビルドできた
 
-### Termux の Neovim / Termux の Neovim: md-format を入れる / 手順 1・3: 補足: Markdown の整形と PATH
+### Termux の Neovim / Termux の Neovim: md-format を入れる / 手順 1・2: 補足: Markdown の整形と PATH
 
 - LazyVimStarter は md-format を Markdown の整形に使う。md-format が無いと、保存時に `Formatter failed` が出る
-- `mdfmt` は `~/.local/bin` に置かれる。共通の bash 設定を入れた新しいシェルで、この場所が PATH に入る
-- md-format を入れた後は、Markdown の保存で行末の空白と、続いた空行が消えた
+- `mdfmt` は `~/.local/bin` に置かれる。共通の bash 設定は Termux で `~/.local/bin` を PATH に足すので、md-format を入れたシェルのまま `--check` が通った
+- md-format を入れた後は、Markdown の保存で、見出しの `#` の後の空白がそろい、末尾の空行が消えた
 
 ### Termux の Neovim / Termux の Neovim: LazyVim の設定を導入する / 手順 3: 補足: Mason と Termux の分岐
 
 - Mason が入れる glibc 向けのバイナリは Termux で動かない。Mason の版が PATH の先に来ると、`pkg` で入れた外部コマンドも使われなくなる
 - `lua/plugins/termux.lua` は `has("termux")` のときだけ設定を変え、lua_ls・taplo・marksman は PATH にあるものを使う。入っていない marksman は有効にしない
 - Mason が入れるものは、npm の bash-language-server・json-lsp・yaml-language-server・markdownlint-cli2 だけ。`mason/bin` は PATH の後ろに置く
+- 手順 3 の headless の導入で markdownlint-cli2 が入り、Markdown を開くと残りの 3 つを入れ始めた。入れている途中で Neovim を閉じると、Mason のログに `Installation was aborted.` が残り、次に開いたときに入った
 - blink.cmp は Lua の実装を使う。エミュレーターの x86_64 では、自動で取得した aarch64 向けの Rust のライブラリを読み込めなかった
 
 ### Termux の Neovim / Termux の Neovim: LazyVim の設定を導入する / 手順 4・5: 補足: 診断とクリップボード

@@ -12,23 +12,27 @@
 
 ### Termux の AI エージェント / 手順 1: 補足: Codex CLI の導入とサンドボックス
 
-- `pkg install codex` で Termux の Codex CLI が入った。`codex --version` と `codex doctor` は未ログインでも起動した
+- `pkg install codex` で Termux の Codex CLI が入った（取得 88.3 MB、展開後 355 MB）。`codex --version` と `codex doctor` は未ログインでも起動した
 - Android で `codex sandbox` を実行すると、`not supported on this operating system` になる。`codex doctor` の `linux helper` は `none` だった
-- Codex が動かすコマンドは OS のサンドボックスで囲まれない。`doctor` の設定の表示だけで、OS の制限が働くと判断しない
-- ログイン後の操作は確かめていない
-<!-- Claude Code が確かめる: Codex CLI のログインと、使い捨てのリポジトリでの codex exec。確かめてから実行手順と成功条件を書く。 -->
+- Codex が動かすコマンドは OS のサンドボックスで囲まれない。`doctor` の `sandbox` の行（`restricted fs + restricted network`）は設定の表示で、OS の制限が働くとは判断しない
+- ログインの前の `codex doctor` は、`✗ auth`（資格情報が無い）と、`⚠ websocket`（`401 Unauthorized`）を出した
+
+### Termux の AI エージェント / 手順 2〜4: 補足: デバイス認証
+
+- `codex login --device-auth` は、`https://auth.openai.com/codex/device` と 15 分で切れるワンタイムコードを出して待った。`Ctrl+C` で止まり、`codex login status` は `Not logged in` を出した（終了コード 1）
+- ログインと、ログインの後の操作（`codex exec` など）は確かめていない
 
 ### Termux の AI エージェント / Termux の AI エージェント: proot の Ubuntu で Claude Code を使う / 手順 3・4: 補足: インストール先と PATH
 
 - 公式のインストーラーは `~/.local/bin/claude` にリンクを置く。Ubuntu の中で Claude Code の `--version` が動いた
 - Ubuntu の root のログインシェルでは `~/.local/bin` が PATH に無かった。`~/.bashrc` に PATH の行を置いて、新しいシェルでも見つかるようにする
-- `--isolated` で Termux のホームが見えない Ubuntu でも、Claude Code の `--version` が動いた。ログイン後の操作は確かめていない
-<!-- Claude Code が確かめる: proot の Ubuntu での Claude Code のログインと、その後の操作。 -->
+- `--isolated` で Termux のホームが見えない Ubuntu でも、Claude Code の `--version` が動いた
+- インストーラーの取得が `502` で失敗したことが 1 回あり、少し置いて貼り直すと入った
+- 初めての起動では、文字の色の選択の後に、ログインの方法の選択が出た。ログインと、ログインの後の操作は確かめていない
 
 ### Termux の AI エージェント / Termux の AI エージェント: 更新 / 手順 3: 補足: Claude Code の更新
 
-- proot の Ubuntu の中の `claude update` は確かめていない
-<!-- Claude Code が確かめる: proot の Ubuntu で claude update を実行し、成功条件を確定する。 -->
+- proot の Ubuntu の中の `claude update` は、`Current version: 2.1.308` の後に `Claude Code is up to date (2.1.308)` を出した。新しい版へ上げる動きは確かめていない
 
 ## 参照
 

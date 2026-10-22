@@ -21,8 +21,9 @@
 - Termux とプラグインは、同じ入手元（GitHub・F-Droid）の APK でそろえる。入手元で署名が違い、混ぜると入らない（[termux-app の README](https://github.com/termux/termux-app#installation)）
 - Google Play の Termux は、機能が欠ける試験版（[termux-app の README](https://github.com/termux/termux-app#google-play-store-experimental-branch)）
 - Termux は Android 7 以降が対象。Android 17 のエミュレーター（x86_64）で確かめた。実機の aarch64 は確かめていない
-- `universal` は、複数の CPU 向けの APK をまとめたもの。エミュレーターでは x86_64 の APK でも通した
-- Termux v0.118.3 の APK の targetSdk は 28。Android 17 の Play プロテクトは「Android の以前のバージョンを対象」としてブロックし、「詳細」の「インストールする」で入った。入れ直し（更新）では止めなかった
+- `universal` は、複数の CPU 向けの APK をまとめたもの。エミュレーター（x86_64）でも、この APK で入った
+- Termux v0.118.3 の APK の targetSdk は 28。Android 17 の Play プロテクトは「Android の以前のバージョンを対象」としてブロックし、「詳細」の「インストールする」で入った。同じ版の入れ直し（「このアプリを更新しますか？」→「更新」）では止めなかった。Termux:API v0.53.0 も同じだった
+- Termux の APK を入れ直すと、開いていたセッションは閉じた。開き直すと新しいセッションになり、ホームのファイル・`~/.termux` の設定・パッケージは残った
 - ブラウザから APK を開いたときの提供元の許可の画面は、エミュレーターでは確かめていない（「ファイル」アプリから開いた）
 
 ### Termux / Termux: 基本の設定 / 手順 1: 補足: ストレージの場所

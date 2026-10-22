@@ -16,18 +16,18 @@
 
 ## 補足
 
-### Termux の Firefox / 手順 2: 補足: サンドボックスと更新
-
-- termux-packages の `x11-packages/firefox/mozconfig.cfg` は、`--disable-sandbox`・`--disable-hardening`・`--disable-updater` を付けてビルドしている（[mozconfig.cfg](https://github.com/termux/termux-packages/blob/master/x11-packages/firefox/mozconfig.cfg)）
-- サンドボックスが無いので、ページを描く処理が破られたときに、Termux のファイル（ホームの鍵など）まで届くおそれがある。知らないサイトの普段の閲覧には使わない
-- 自分で更新する仕組みも外してあるので、Firefox は Termux の `pkg upgrade` で上げる
-
 ### Termux の Firefox / 手順 1: 補足: Termux:X11 の APK
 
 - Termux:X11 の sharedUid 版は Termux と同じプロセスの扱いになり、Android が Termux を遅くするのを避けられる。GitHub の Termux でだけ使える（[Termux:X11 の README](https://github.com/termux/termux-x11#setup-instructions)）
 - F-Droid の Termux と通常版の組み合わせは確かめていない
 - Termux:X11 は Android 8 以降（同じ README）。エミュレーターの Android 17 でだけ確かめた
 - Termux:X11 の APK の targetSdk は 28。Android 17 の Play プロテクトで止められたときは、「詳細」の「インストールする」で入った
+
+### Termux の Firefox / 手順 2: 補足: サンドボックスと更新
+
+- termux-packages の `x11-packages/firefox/mozconfig.cfg` は、`--disable-sandbox`・`--disable-hardening`・`--disable-updater` を付けてビルドしている（[mozconfig.cfg](https://github.com/termux/termux-packages/blob/master/x11-packages/firefox/mozconfig.cfg)）
+- サンドボックスが無いので、ページを描く処理が破られたときに、Termux のファイル（ホームの鍵など）まで届くおそれがある。知らないサイトの普段の閲覧には使わない
+- 自分で更新する仕組みも外してあるので、Firefox は Termux の `pkg upgrade` で上げる
 
 ### Termux の Firefox / 手順 2・3・5: 補足: dwm と Firefox の画面
 
@@ -142,7 +142,6 @@
 - 証明書の名前はルート証明書の commonName から取り、信頼の指定を `C,,`（Web サイトの識別に使う認証局）にする
 - Windows 11 の Codeg 専用の Caddy で、ホストと指紋を照合してから取り込み、警告の画面で進まずに `/api/` からログインの画面が開くところまで確かめた
 - AlmaLinux 10 のホストの Caddy と、取り込んでから 12 時間以上たった後は、確かめていない
-
 
 ### Termux の Firefox: 更新 / 手順 2: 補足: Termux:Widget の更新
 

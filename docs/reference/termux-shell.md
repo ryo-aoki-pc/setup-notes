@@ -9,11 +9,17 @@
 
 ## 補足
 
+### Termux のシェル / 手順 1: 補足: 推奨パッケージ
+
+- Termux の apt は、推奨パッケージ（Recommends）も入れる（`APT::Install-Recommends "1"`）
+- git は openssh を推奨するので、git と一緒に OpenSSH が入る。入れただけでは sshd は起動しない
+- yazi は 7zip・chafa・fd・ffmpeg・fzf・imagemagick・jq・poppler・ripgrep・zoxide を推奨する。手順書の `pkg install` に書いていない chafa と imagemagick も入る
+
 ### Termux のシェル / 手順 2・3: 補足: ログインシェルの読み込み
 
 - Termux の `$PREFIX/etc/profile` は、ログインの対話シェルで `~/.bashrc` を読む。共通設定の `install.sh` は Termux では `~/.bash_profile` を作らない
 - `$PREFIX/etc/bash.bashrc` は bash-completion を読む。共通設定は、入っている starship・zoxide・fzf・eza・bat・Neovim を有効にする
-- Termux の新しいログインシェルでは、`~/.local/bin` があれば PATH の先頭に入る。md-format の `mdfmt` もこの場所を使う
+- 共通の bash 設定は、Termux のときだけ `~/.local/bin` を PATH の先頭に足す（Termux はこの場所を PATH に入れない）。フォルダーが無くても足すので、後から md-format が `mdfmt` を置いても、同じシェルで使える
 
 ### Termux のシェル / 手順 5: 補足: inputrc の場所
 
@@ -25,7 +31,7 @@
 - `ya env` は端末が要る。端末の無いところでは `Inappropriate ioctl for device` になる
 - custom の Android 用の行では、`gT` は `$TMPDIR`、`gd` は `~/storage/downloads`、`g/` は `$PREFIX`、`gt` は `~/.local/share/Trash/files` を開く
 - Termux から `/tmp` は読めない。`TMPDIR` は Termux が渡す `$PREFIX/tmp` なので、一時ファイルにはこちらを使う
-- Termux の yazi は、`d` で捨てたファイルを `~/.local/share/Trash/files` に置く。`gt` の行先は、一度 `d` を使うまで無い
+- Termux の yazi は、`d` で捨てたファイルを `~/.local/share/Trash/files` に置く（Termux の yazi のゴミ箱のパッチ）
 - yazi の上流の `gt`（`plugin trash`）は Termux で使えなかった。custom の Android の行でゴミ箱の場所へ直接移る
 
 ## 参照

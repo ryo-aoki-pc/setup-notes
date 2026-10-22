@@ -16,8 +16,8 @@
 
 ### Termux の Git / Termux の Git: GitHub CLI を入れる / 手順 2・3: 補足: ブラウザでの認証
 
-- GitHub CLI は、ワンタイムコードを出した後に Android のブラウザを開く。Termux のターミナルとブラウザで操作を分ける
-<!-- Claude Code が確かめる: gh auth login の Android のブラウザ起動と、認証後の gh auth status。 -->
+- GitHub CLI 2.103.0 の `gh auth login` は、接続先・認証の方法・Git の通信の方式・Git の認証の順に聞き、ワンタイムコードを出して Enter を待った
+- Enter の後のブラウザの起動と、認証の後の `gh auth status` は確かめていない（ログインはしていない）。ログインの前の `gh auth status` は `You are not logged into any GitHub hosts.` を出した
 
 ### Termux の Git / Termux の Git: lazygit の設定を導入する / 手順 2・3: 補足: 設定の場所とファイルを開く操作
 

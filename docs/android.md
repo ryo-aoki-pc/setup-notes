@@ -27,10 +27,13 @@
 
    - [termux-app のリリース](https://github.com/termux/termux-app/releases)の最新の `termux-app_v<版>+github-debug_universal.apk` をダウンロードする
    - Termux とプラグインの APK は、同じ入手元（GitHub・F-Droid）でそろえる。Google Play の Termux は使わない
-   - ダウンロードした APK を開く。提供元の許可を求められたら許可し、「続行」→「インストール」を押す
-   - 開くアプリを聞かれたら、「パッケージ インストーラ」（「パッケージ インストーラで開く」）の「1 回のみ」を押す
+   - ダウンロードした APK を「ファイル」アプリの「ダウンロード」などから開く
+   - 開くアプリを聞かれたら、「パッケージ インストーラで開く」の「1 回のみ」を押す
+   - 提供元の許可を求められたら許可する。不明なアプリの注意が出たら「続行」を押す
+   - 「このアプリをインストールしますか？」では「インストール」を押す
    - 「Google Play プロテクト」の「安全ではないアプリをブロックしました」が出たら、「詳細」→「インストールする」を押す
    - ![Google Play プロテクトの「安全ではないアプリをブロックしました」と「インストールする」](images/android/termux-firefox-play-protect-v0.118.3.png)
+   - 「アプリをインストールしました」と出ればよい
 
 1. Termux を開き、パッケージを更新する。
 
@@ -91,7 +94,7 @@
    }
    ```
 
-   - `HackGen_NF_v2.10.0.zip: OK` と、サイズが 0 でない `font.ttf` の行が出ればよい
+   - `…/HackGen_NF_v2.10.0.zip: OK` と、サイズが 0 でない `font.ttf` の行が出ればよい
    - `FAILED` や `中断:` が出たら、この項の手順 4 へ進まない
 
 1. Termux で、設定とフォントを読み直す。
@@ -106,8 +109,7 @@
 
    - キーの帯が 2 段 8 列になり、`ESC`・`CTRL`・矢印・`|`・`~` が並んでいればよい
    - [Termux のシェル: シェルのツールを入れる](#termux-のシェル-シェルのツールを入れる)を通したときは、プロンプトや `eza --icons` の記号が四角に化けないことも確かめる
-   - ![Termux のキーの帯の ESC・CTRL・矢印・縦棒・チルダと HackGen Console NF の記号](images/android/termux-extra-keys-font-v0.118.3.png)
-   <!-- Claude Code がキーの帯とフォントの画面を撮り、画像を置いて判定条件を確かめる。 -->
+   - ![Termux の 2 段のキーの帯（ESC・縦棒・スラッシュ・ハイフン・HOME・上・END・PGUP と、TAB・CTRL・ALT・チルダ・左・下・右・PGDN）](images/android/termux-extra-keys-v0.118.3.png)
 
 #### Termux: Termux:API を入れる
 
@@ -128,7 +130,7 @@
    pkg install -y termux-api &&
    printf '%s' 'termux-clipboard-test' | termux-clipboard-set
    printf '\n\033[7m 確認 \033[0m\n'
-   termux-clipboard-get
+   printf '%s\n' "$(termux-clipboard-get)"
    ```
 
    - `termux-clipboard-test` と出ればよい
@@ -168,19 +170,21 @@
    - 設定ファイルの扱いを聞かれたら Enter を押す
    - **次の手順は、更新が終わって `$` に戻ってから行う**
 
+1. Termux:API を入れていて新しい版が出ているときは、スマートフォンで APK を入れ直す。
+
+   - [termux-api のリリース](https://github.com/termux/termux-api/releases)から `termux-api-app_v<版>+github.debug.apk` をダウンロードして開く
+   - F-Droid の Termux を使っているときは、F-Droid の Termux:API を更新する
+   - APK の開き方は、[Termux](#termux)の手順 1 と同じ
+   - 「このアプリを更新しますか？」→「更新」を押し、「アプリを更新しました」と出ればよい
+
 1. Termux の新しい版が出ているときは、スマートフォンで APK を入れ直す。
 
    - GitHub の Termux は、[termux-app のリリース](https://github.com/termux/termux-app/releases)から APK をダウンロードして開く
    - F-Droid の Termux は、F-Droid で更新する
-   - APK の入れ方は、[Termux](#termux)の手順 1 と同じ
+   - APK の開き方は、[Termux](#termux)の手順 1 と同じ
+   - 更新すると、開いている Termux のセッションと、その中で動かしているもの（sshd・Neovim など）が止まる。作業を閉じてから行う
    - 「このアプリを更新しますか？」→「更新」を押し、「アプリを更新しました」と出ればよい
-
-1. Termux:API を入れているときは、スマートフォンで APK を入れ直す。
-
-   - [termux-api のリリース](https://github.com/termux/termux-api/releases)から `termux-api-app_v<版>+github.debug.apk` をダウンロードして開く
-   - F-Droid の Termux を使っているときは、F-Droid の Termux:API を入れる
-   - 「このアプリを更新しますか？」→「更新」を押し、「アプリを更新しました」と出ればよい
-   <!-- Claude Code が Termux と Termux:API の APK の更新を確かめる。 -->
+   - Termux を開き直すと、新しいセッションが開く。設定とパッケージは残る
 
 ---
 
@@ -200,6 +204,7 @@
    - [nightly](https://github.com/termux/termux-x11/releases/tag/nightly) の `termux-x11-universal-sharedUid-debug.apk` をダウンロードする
    - F-Droid の Termux を使っているときは、sharedUid の付かない `termux-x11-universal-debug.apk` にする
    - APK の入れ方は、[Termux](#termux)の手順 1 と同じ
+   - 「アプリをインストールしました」と出ればよい
 
 1. Termux で、Firefox・Termux:X11 のコマンド・dwm を入れる。
 
@@ -611,6 +616,7 @@
    ```
 
    - エラーが出ず、プロンプトに戻ればよい
+   - git の推奨パッケージの openssh も入り、termux-services の案内が出る。sshd は起動しない
 
 1. Termux で、共通の bash 設定を入れる。
 
@@ -680,6 +686,7 @@
 - starship・zoxide・fzf・eza・bat・tmux と、シェルスクリプトの検査・整形の道具を入れる
 - 前提: [Termux のシェル](#termux-のシェル)と[Termux: 基本の設定](#termux-基本の設定)を通してある
 - 実行場所: スマートフォンの Termux の画面（自分のユーザーの bash）
+- starship・bat・tmux の設定ファイルを置くときは、この項の後に[シェルと端末の「starship の設定ファイル」](shell-terminal.md#starship-の設定ファイル)・[「bat の設定ファイル」](shell-terminal.md#bat-の設定ファイル)・[「tmux の設定ファイル」](shell-terminal.md#tmux-の設定ファイル)のブロックを Termux の画面に貼る。各項の既存ファイルの確認と退避を省かない。bat の設定ファイルの場所は `/data/data/com.termux/files/home/.config/bat/config` と出る
 
 1. Termux で、シェルの道具を入れる。
 
@@ -711,12 +718,6 @@
    - `function` が 2 行出て、`ll`・`la`・`lt` が eza のエイリアスになり、最後に `bat -plman` が出ればよい
    - プロンプトが starship に変わり、Nerd Fonts の記号が表示されればよい
 
-1. Termux で、starship・bat・tmux の設定ファイルを置く。
-
-   - [シェルと端末の「starship の設定ファイル」](shell-terminal.md#starship-の設定ファイル)・[「bat の設定ファイル」](shell-terminal.md#bat-の設定ファイル)・[「tmux の設定ファイル」](shell-terminal.md#tmux-の設定ファイル)を通す
-   - 同書の bash のブロックは Termux の画面に貼る。各項の既存ファイルの確認と退避を省かない
-   - bat の設定ファイルは `/data/data/com.termux/files/home/.config/bat/config` と出ればよい。ほかの成功条件は同書と同じ
-
 #### Termux のシェル: yazi を入れる
 
 - yazi と自分用の `custom` の設定を入れ、Android 用のキーを確かめる
@@ -730,6 +731,7 @@
    ```
 
    - エラーが出ず、プロンプトに戻ればよい
+   - yazi の推奨パッケージの chafa・imagemagick なども入る
 
 1. yazi を終了してから、Termux で自分用の設定を clone する。
 
@@ -885,14 +887,15 @@
    gh auth login
    ```
 
-   - GitHub.com / HTTPS / ブラウザ認証を選ぶ
+   - `Where do you use GitHub?` は `GitHub.com`、認証の方法は `Login with a web browser`、`What is your preferred protocol for Git operations on this host?` は `HTTPS` を選ぶ（どれも既定のまま Enter）
    - `Authenticate Git with your GitHub credentials?` は `Y` と答える
-   - ワンタイムコードが出たら Enter を押す。Android のブラウザが開く
+   - `! One-time code (…) copied to clipboard` と `Press Enter to open https://github.com/login/device in your browser...` が出たら、コードを控えて Enter を押す
    - トークン（`gh auth token` の出力）とワンタイムコードを、この文書や画面の記録に載せない
 
 1. Android のブラウザで、GitHub の認証を済ませる。
 
-   - この項の手順 2 のワンタイムコードを `https://github.com/login/device` に入れ、画面の案内に従う
+   - ブラウザが開かなければ、`https://github.com/login/device` を Android のブラウザで開く
+   - この項の手順 2 のワンタイムコードを入れ、画面の案内に従う
    - **次の手順は、Termux に戻って `gh auth login` が終わってから貼る**（続けて貼ると対話への入力として読まれる）
 
 1. Termux で、GitHub にログインできたか確かめる。
@@ -903,7 +906,6 @@
 
    - `github.com` のログイン済みアカウントが出ればよい
    - `You are not logged into any GitHub hosts.` と出たら、この項の手順 2・3 を通し直す
-   <!-- Claude Code が確かめる: gh auth login の対話、Android のブラウザの起動、認証後の gh auth status の成功条件。 -->
 
 #### Termux の Git: lazygit の設定を導入する
 
@@ -969,6 +971,7 @@
    - [AlmaLinux 10 の初期設定の「lazygit の設定を更新する」](almalinux-setup.md#lazygit-の設定を更新する)の手順 1〜5 を Termux の画面で行う
    - 手元の変更と分岐の確認を省かない。成功条件は同書と同じ
    - 本体の方が古ければ、[Termux: 更新](#termux-更新)で上げる
+   - Termux の lazygit が設定の元の版より新しい（`version=0.66.2` と `lazygit v0.66.0 …` など）ときは、そのまま使う
 
 ---
 
@@ -1013,7 +1016,8 @@
      node ~/md-format/scripts/setup.mjs
    ```
 
-   - エラーが出ず、プロンプトに戻ればよい
+   - `起動役を置きました: /data/data/com.termux/files/home/.local/bin/mdfmt` と `導入済み: mdfmt` の行が出ればよい
+   - `npm notice` の行（npm の新しい版の案内）は、そのままでよい
    - clone 済みなら、[Termux の Neovim: 更新](#termux-の-neovim-更新)の手順 1 で上げる
    - `ほかの導入が動いています` で止まったら、表示のプロセスが終わるまで待ち、`node ~/md-format/scripts/setup.mjs` を貼り直す
 
@@ -1023,9 +1027,8 @@
    node ~/md-format/scripts/setup.mjs --check
    ```
 
-   - `導入済み: mdfmt` と版、`~/.local/bin/mdfmt` の起動コマンドのパスが出ればよい
+   - `導入済み: mdfmt` と版、起動コマンドの `/data/data/com.termux/files/home/.local/bin/mdfmt` が出ればよい
    - `問題: … が PATH にありません` と出たら、[Termux のシェル: 更新](#termux-のシェル-更新)の手順 1 で共通の bash 設定を上げ、`exec bash -l` で開き直してから貼り直す
-   <!-- Claude Code が確かめる: 新しい bash の設定を読んだシェルで setup.mjs --check が成功することと、起動コマンドの表示。 -->
 
 #### Termux の Neovim: LazyVim の設定を導入する
 
@@ -1042,6 +1045,7 @@
    ```
 
    - 退避したものは `renamed '…/nvim' -> '…/nvim.bak'` と出る。何も出なければ、退避するものは無かった
+   - [Termux の Neovim](#termux-の-neovim)の `nvim --version` だけでも `~/.local/state/nvim` ができ、それが退避される
    - `.bak` がすでにあって `cannot overwrite` と出たら、古い `.bak` の内容を確認して別名へ退避してから貼り直す
 
 1. Termux で、自分用の LazyVim の設定を clone する。
@@ -1071,20 +1075,19 @@
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - `Lock file '…' appears stale` が出たら、[LazyVimStarter の注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)で鍵を消してから、この項の手順 3 を貼り直す
    - **次の手順は、プロンプトが戻ってから貼る**（最後のメッセージの行末に続けて出ることがある）
-   <!-- Claude Code が確かめる: Termux 向けの設定の初回導入で出る通知と、進めてよいメッセージ。 -->
 
 1. Termux で、試験用の Markdown を開き、Mason の導入を待つ。
 
    ```bash
-   printf '%s\n' '#  動作確認' '' '日本語の検索を試す。  ' '' '' > "$TMPDIR/lazyvim-check.md"
+   printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' '' '' > "$TMPDIR/lazyvim-check.md"
    nvim "$TMPDIR/lazyvim-check.md"
    ```
 
-   - `:Mason` を開き、`markdownlint-cli2` が Installed に入り、導入中のものが無くなるまで待つ。`q` で閉じる
-   - `:w` で保存し、行末の空白と続いた空行が消え、`Formatter failed` が出なければよい
-   - 待ったら `:qa` で閉じる
+   - `:Mason` を開き、Installed に `bash-language-server`・`json-lsp`・`markdownlint-cli2`・`yaml-language-server` の 4 つが入り、導入中のものが無くなるまで待つ（数分かかる）。`q` で閉じる
+   - 導入中に `:qa` で閉じると、その導入は止まる。次に Neovim を開いたときに続きが入る
+   - `:w` で保存し、見出しの `#` の後の 2 つの空白が 1 つになり、末尾の空行が消え、`Formatter failed` が出なければよい
+   - `:qa` で閉じる
    - **次の手順は、`:qa` で閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
-   <!-- Claude Code が確かめる: 初回の Markdown で必要な Mason の Installed の数、未完了の導入、markdownlint-cli2 の導入前に出る通知。 -->
 
 1. Termux で、外部コマンドと Mason のツールを checkhealth で確かめる。
 
@@ -1095,9 +1098,9 @@
    grep -E 'ERROR|WARNING' "$TMPDIR/lazyvim-health.txt"
    ```
 
-   - `mason/bin` に `markdownlint-cli2` が出ればよい
+   - `mason/bin` に `bash-language-server`・`markdownlint-cli2`・`vscode-json-language-server`・`yaml-language-server` が出ればよい
+   - 最後の `grep` が何も出さなければよい
    - `ERROR` が出たら、`$TMPDIR/lazyvim-health.txt` と [LazyVimStarter の注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)を確かめてから進む
-   <!-- Claude Code が確かめる: checkhealth の ERROR / WARNING の有無と、無視してよい行。Mason の npm の道具はファイルを開いてから増えるため、この段階の一覧も確かめる。 -->
 
 #### Termux の Neovim: 更新
 
@@ -1116,7 +1119,6 @@
 
    - [Neovim の「LazyVim の本体・外部コマンド・プラグインを更新する」の手順 2](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)を Termux の画面で行う
    - パーサーの導入が終わり、プロンプトが戻るまで待つ。`lazy-lock.json` の差分と動作の確認を省かない
-   <!-- Claude Code が確かめる: Termux でのプラグインの更新と、更新後の checkhealth。 -->
 
 ---
 
@@ -1154,6 +1156,7 @@
    ```
 
    - エラーが出ずに `$` に戻ればよい
+   - [Termux のシェル](#termux-のシェル)で git と一緒に入っていれば、`openssh is already the newest version` と出る
 
 1. Termux で、鍵が無ければ Ed25519 の鍵を作る。
 
@@ -1230,9 +1233,9 @@
    fi
    ```
 
-   - ホストの tmux の `main` セッションに入れればよい。`Ctrl+B` の後に `D` で離れる
+   - ホストの tmux の `main` セッションに入れればよい。`Ctrl+B` の後に `D` で離れる（Termux のキーの帯の `CTRL` を押してから `b`）
+   - 離れると `[detached (from session main)]` と出て、Termux の `$` に戻る
    - ホストの AI エージェントは、[AI コーディングエージェントの手順書](ai-agents.md)に従ってホスト側で入れる
-   <!-- Claude Code がホストの tmux の対話接続を確かめる。facts-probe では tmux -V まで。 -->
 
 #### Termux の SSH: PC から Termux に入る
 
@@ -1274,10 +1277,10 @@
    printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' > "$PREFIX/etc/ssh/sshd_config.d/50-keys-only.conf"
    chmod 600 "$PREFIX/etc/ssh/sshd_config.d/50-keys-only.conf"
    printf '\n\033[7m 確認 \033[0m\n'
-   sshd -t && sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
+   sshd -t && sshd -T | grep -iE '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
    ```
 
-   - `passwordauthentication no`・`kbdinteractiveauthentication no`・`pubkeyauthentication yes` が出ればよい
+   - `PubkeyAuthentication yes`・`PasswordAuthentication no`・`KbdInteractiveAuthentication no` が出ればよい
    - `sshd -t` が誤りを出したら、この項の手順 3 へ進まない
 
 1. Termux で、sshd を起動する。
@@ -1295,7 +1298,7 @@
    ```
 
    - 「アプリにバックグラウンドでの常時実行を許可しますか？」では「許可」を押す
-   - 通知に `wake lock held` が出ればよい
+   - Termux の通知が `1 session (wake lock held)` のようになればよい
    - **次の手順は、許可して Termux の画面に戻ってから貼る**
 
 1. Termux で、スマートフォンの IP と sshd のホスト鍵の指紋を控える。
@@ -1315,7 +1318,6 @@
    - 初めての接続で出る指紋が、この項の手順 5 の指紋と同じときだけ `yes` を入力する。違えば進まない
    - Termux のシェルに入れればよい。`exit` で PC に戻る
    - **次の手順は、PC の接続を閉じてスマートフォンの Termux に戻ってから貼る**
-   <!-- Claude Code が LAN / WireGuard の接続を確かめる。facts-probe の PC からの接続は adb forward 経由。 -->
 
 1. 接続を止めるときは、Termux で sshd と wake lock を止める。
 
@@ -1324,8 +1326,7 @@
    termux-wake-unlock
    ```
 
-   - PC から SSH で接続できなくなればよい
-   <!-- Claude Code が termux-wake-unlock と通知の変化を確かめる。 -->
+   - Termux の通知から `wake lock held` が消え、PC から SSH で接続できなくなればよい
 
 #### Termux の SSH: sshd を termux-services で動かす
 
@@ -1369,17 +1370,18 @@
    tail "$PREFIX/var/log/sv/sshd/current"
    ```
 
-   - `run: sshd: (pid …)` と、ログの `Server listening on … port 8022.` が出ればよい
+   - `run: sshd: (pid …)` と、ログの `Server listening on 0.0.0.0 port 8022.`・`Server listening on :: port 8022.` が出ればよい
    - `unable to change to service directory` が出たら、この項の手順 2 でログインシェルを開き直す
 
 1. サービスを止めるときは、Termux で sshd を無効にする。
 
    ```bash
    sv-disable sshd
+   printf '\n\033[7m 確認 \033[0m\n'
+   sv status sshd
    ```
 
-   - PC から SSH で接続できなくなればよい
-   <!-- Claude Code が sv-disable sshd の停止を確かめる。 -->
+   - `down: sshd: …` が出て、PC から SSH で接続できなくなればよい
 
 ---
 
@@ -1407,7 +1409,7 @@
    proot-distro install ubuntu
    ```
 
-   - エラーが出ずに Termux の `$` に戻ればよい
+   - `[*] Finished installation.` と `Start shell: proot-distro login ubuntu` が出て、Termux の `$` に戻ればよい
 
 1. Termux で、ファイルを共有しない形で Ubuntu に入る。
 
@@ -1415,7 +1417,7 @@
    proot-distro login --isolated ubuntu
    ```
 
-   - Ubuntu の root のプロンプト（`#`）が出ればよい
+   - Ubuntu の root のプロンプト（`root@localhost:~#`）が出ればよい
    - **次の手順は、Ubuntu のプロンプトが出てから貼る**（続けて貼ると、切り替わる前の Termux で実行されるおそれがある）
 
 1. Ubuntu の中で、パッケージを更新する。
@@ -1424,8 +1426,8 @@
    apt-get update && apt-get upgrade -y
    ```
 
-   - エラーが出ずに Ubuntu の `#` に戻ればよい
-   <!-- Claude Code が Ubuntu の apt-get upgrade -y と成功条件を確かめる。 -->
+   - `… upgraded, … newly installed, …` の行の後、`E:` の行が出ずに Ubuntu の `#` に戻ればよい
+   - `debconf: unable to initialize frontend: Dialog` などの `debconf:` の行は、対話の画面が無いことの案内で、そのままでよい
 
 1. Ubuntu の中で、Termux に戻る。
 
@@ -1456,8 +1458,8 @@
    apt-get update && apt-get upgrade -y
    ```
 
-   - エラーが出ずに Ubuntu の `#` に戻ればよい
-   <!-- Claude Code が Ubuntu の apt-get upgrade -y と成功条件を確かめる。 -->
+   - `… upgraded, … newly installed, …` の行の後、`E:` の行が出ずに Ubuntu の `#` に戻ればよい
+   - `debconf: unable to initialize frontend: Dialog` などの `debconf:` の行は、対話の画面が無いことの案内で、そのままでよい
 
 1. Ubuntu の中で、Termux に戻る。
 
@@ -1488,7 +1490,10 @@
    codex doctor
    ```
 
-   - `codex-cli` の版と、`codex doctor` の `linux helper: none` を確かめる
+   - `codex-cli 0.163.0` のような版と、`Codex Doctor v… · android-…` が出ればよい
+   - `linux helper` の行が `none` になる（[警告](#termux-の-ai-エージェント)のとおり、OS のサンドボックスが無い）
+   - ログインの前は、`✗ auth` の `no Codex credentials were found` と、`⚠ websocket` の `401 Unauthorized` が出る。この項の手順 2〜4 でログインする
+   - 空きが少ないと `⚠ disk` が、画面の幅が 80 桁より狭いと `⚠ terminal` が出る
 
 1. Termux で、Codex CLI のデバイス認証を始める。
 
@@ -1496,7 +1501,8 @@
    codex login --device-auth
    ```
 
-   - 表示された URL とワンタイムコードを使い、利用者が認証する。コードは文書やログに残さない
+   - `Welcome to Codex` の後に、`https://auth.openai.com/codex/device` とワンタイムコード（15 分で切れる）が出ればよい
+   - コードは文書やログに残さない。自分で始めたログインでなければ、`Ctrl+C` で止める
 
 1. Android のブラウザで、Codex CLI にログインする。
 
@@ -1510,7 +1516,7 @@
    ```
 
    - ログイン済みと表示されればよい
-   <!-- Claude Code が利用者のログイン後に login status の判定条件を確かめる。使い捨てのリポジトリで codex exec を確かめてから、その手順を書く。 -->
+   - `Not logged in` と出たら、この項の手順 2・3 を通し直す
 
 #### Termux の AI エージェント: proot の Ubuntu で Claude Code を使う
 
@@ -1543,7 +1549,9 @@
    curl -fsSL https://claude.ai/install.sh | bash
    ```
 
-   - エラーが出ずに Ubuntu の `#` に戻ればよい
+   - `Claude Code successfully installed!` と版、`Location: ~/.local/bin/claude` が出ればよい
+   - `~/.local/bin is not in your PATH` の案内は、この項の手順 4 で直す
+   - `curl: (22) The requested URL returned error: 502` と `Download failed` が出たら、少し置いて貼り直す
 
 1. Ubuntu の中で、Claude Code の PATH を設定して版を確かめる。
 
@@ -1557,7 +1565,7 @@
    claude --version
    ```
 
-   - `~/.local/bin/claude` の場所と、Claude Code の版が出ればよい
+   - `/root/.local/bin/claude` と、`2.1.308 (Claude Code)` のような版が出ればよい
 
 1. Ubuntu の中で、Claude Code を起動してログインする。
 
@@ -1565,10 +1573,10 @@
    claude
    ```
 
-   - 認証は利用者が行う。トークンやワンタイムコードを文書やログに残さない
+   - 初めての起動では、文字の色の選択（`Choose the text style …`）が出る。選んで Enter を押すと、ログインの方法の選択（`Select login method:`）が出る
+   - ログインの方法を選び、画面の案内に従って認証する。トークンやワンタイムコードを文書やログに残さない
    - 終了は `/exit` を入力する
    - **次の手順は、Claude Code を終了して Ubuntu の `#` に戻ってから貼る**（続けて貼ると、Claude Code への入力になる）
-   <!-- Claude Code が利用者のログイン後に起動と終了を確かめる。root の既定の権限のまま使い、権限を飛ばすフラグは足さない。 -->
 
 1. Ubuntu の中で、Termux に戻る。
 
@@ -1603,8 +1611,7 @@
    claude update
    ```
 
-   - エラーが出ずに Ubuntu の `#` に戻ればよい
-   <!-- Claude Code が claude update の動作と成功条件を確かめる。facts-probe では未実施。 -->
+   - `Current version: …` の後に、`Claude Code is up to date (<版>)` か、新しい版に上げたことが出ればよい
 
 1. Claude Code を入れているときは、Ubuntu の中で Termux に戻る。
 
