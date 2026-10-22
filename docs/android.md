@@ -346,7 +346,6 @@
 
    - 「確認」の後に `ffmpeg 9.…` と `firefox 158.…` などの 2 行と、`libavcodec.so.63` などのファイルが出ればよい
    - `libavcodec.so.` の後の数字が、Firefox の読める上限（Firefox 158 では 63）以下ならよい
-   - FFmpeg が既に入っていれば、`ffmpeg is already the newest version` と出て、何も入れない
 
 1. Termux:X11 の画面で、H.264 の動画を再生する。
 

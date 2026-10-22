@@ -124,6 +124,7 @@
 
 - Linux の Firefox は、H.264 の復号の仕組みを持たず、システムの FFmpeg（`libavcodec`）を `dlopen` で読み込む
 - Termux の `firefox` は、依存で `ffmpeg` を入れる。termux-packages の `x11-packages/firefox/build.sh` は、FFmpeg と PulseAudio が `dlopen` を通した依存であると記している
+- そのため、手順 1 の `pkg install -y ffmpeg` は、ふつう何も入れず（`ffmpeg is already the newest version`）、`ffmpeg` を手で入れたものとして記録するだけになる（`ffmpeg set to manually installed.`。`apt autoremove` の対象にならない）
 - Firefox 158 の `FFmpegLibWrapper.h` では、`FFMPEG_MAX_MAJOR_VERSION` が `63`。Firefox 158 が読めるのは libavcodec 63（FFmpeg 9）まで
 - `FFmpegRuntimeLinker.cpp` は、`libavcodec.so.63` から `libavcodec.so.53` まで順に探す
 - 確かめたときの版は Firefox 158.0.1 と FFmpeg 9.0.2
