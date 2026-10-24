@@ -472,7 +472,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - デスクトップのショートカットとスタートアップのタスクは既定で外れていて、入れた後の起動は `postinstall skipifsilent` なので、黙って入れると起動しない。PATH には入らない
 - 自分のユーザーにしたのは、「アプリを入れる」の手順 4・5 の UniGet UI・PowerToys と同じく、管理者が要らず、ほかのユーザーにかからないため。更新も、管理者ではない窓の `## 更新` の winget で上がる
 - 17.0.0 は、データを `%LOCALAPPDATA%\copyq` に移し、前の版では読めなくなる（`CHANGES.md`）
-- 前に別の場所へ入れた CopyQ があると、インストーラはその場所に入れる（`UsePreviousAppDir`）。そのときは、この節の手順 3・4・7 の決め打ちのパスが外れる
+- 前に別の場所へ入れた CopyQ があると、インストーラはその場所に入れる（`UsePreviousAppDir`）。そのときは、この節の手順 3・4・7〜9 の決め打ちのパスが外れる
 - 最後の表の版は、実行した日の最新
 
 ### CopyQ を使う / 手順 4: 補足: 自動の起動の仕組み
@@ -489,10 +489,25 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - CopyQ のグローバル ショートカットは `RegisterHotKey` を使う。Windows キーを含むキーは OS が予約していて、ほかが登録済みのキーと同じく失敗することがある（文書）。失敗はサーバーの記録に出るだけで、画面には出ない（コード）
 - 「アプリを入れる」の手順 5 の PowerToys の高度な貼り付けは、既定で Win+Shift+V と Ctrl+Win+Alt+V を使う（文書）。Ctrl+Shift+V は、Windows 11 の書式なしの貼り付けのキー（サポートの記事）
 - CopyQ は Ctrl+V などのキーを `SendInput` で送って貼る。`SendInput` は、同じか低い整合性のレベルの窓にしか届かないので、管理者の窓には貼れない（文書。UIPI）
-- CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP で窓が見えない不具合は 16.0.0 で直った（`CHANGES.md`）
+- CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP での見え方は、[この節の手順 7 の補足](#copyq-を使う--手順-7-補足-rdp-で窓の中身が空になる仕組み)
 - パスワード マネージャーなどが付ける除外の印（`ExcludeClipboardContentFromMonitorProcessing`・`CanIncludeInClipboardHistory` など）があるものは、記録しない（コード）
 - 履歴は暗号化しないで保存する（`encrypt_tabs` の既定は false。項目は既定で 200 まで）。16.0.0 は `%APPDATA%\copyq`、17.0.0 からは `%LOCALAPPDATA%\copyq` の下
 - 画面の日本語は、同梱の訳（約 94%）が、Windows の地域の形式に合わせて出る（推測）
+
+### CopyQ を使う / 手順 7: 補足: RDP で窓の中身が空になる仕組み
+
+- `prevent_screen_capture` の既定は true（`appconfig.h`）。画面では「ファイル」→「設定...」→「全般」の「スクリーンショットや録画に写らない」（`configtabgeneral.ui` と訳のファイル）
+- オンなら、サーバーは窓が出るたび（Qt の `QEvent::Show`）に、`SetWindowDisplayAffinity` で `WDA_EXCLUDEFROMCAPTURE`（0x11）を付ける（`clipboardserver.cpp`・`winplatform.cpp`）
+- `WDA_EXCLUDEFROMCAPTURE` の窓は、モニターにだけ出て、ほかの所には出ない。Windows 10 2004 から（文書）
+- 付ける前に `GetSystemMetrics(SM_REMOTESESSION)` を見て、0 でなければ（RDP のセッションの中なら）付けずに `WDA_NONE` にする（`winplatform.cpp`）。16.0.0 の「Fixed window invisible in remote desktop sessions」はこれ（`CHANGES.md`）
+- `SM_REMOTESESSION` は、PC の画面（コンソールのセッション）では 0（文書）
+- 見るのは窓を出したときだけなので、PC の画面で出した窓は、その後に RDP でつないでも付いたままで、中身が空に見える（コード）。「RDP をロックせずに切断」の `tscon` で PC の画面へ戻して使うと、PC の画面で窓を出すことが多いので起きやすい
+- Chrome リモート デスクトップのように PC の画面（コンソールのセッション）を取り込んで送る遠隔操作では、`SM_REMOTESESSION` が 0 のままなので、付いた窓は写らないはず（文書とコードからの推測。確かめていない）
+- 設定を変えると、サーバーは開いている窓すべてに付け直すか外す（`ClipboardServer::setPreventScreenCapture`）ので、起動し直さなくてよい。値は `copyq.ini`（16.0.0 は `%APPDATA%\copyq\copyq.ini`）の `[Options]` の `prevent_screen_capture` に残る
+- RDP の中でオンのまま初めて窓を出すと、英語の警告（「Screen Capture Prevention Unavailable」。訳は無い）を 1 回だけ出し、出したことを `screen_capture_warning_acknowledged` に残す（`winplatform.cpp`。確かめていない）
+- 上流の報告 [hluk/CopyQ#3621](https://github.com/hluk/CopyQ/issues/3621)（「Blank window if RDP is used」、16.0.0）は、RDP の中で起動しても空の窓が出るというもの。報告者は `prevent_screen_capture=false` で直ったと書いていて、作者が試した開発版では直らなかった。2026-10-24 の時点で開いたまま
+- 17.0.0 でも、窓が出たときの呼び出し・`WinPlatform::setPreventScreenCapture`・既定の true は、16.0.0 と同じ（両方のタグのソース）
+- 切ると、PC の画面のスクリーンショット・録画・画面共有に、CopyQ の窓（クリップボードの履歴）が写る
 
 ### PowerToys のユーティリティを絞る / 手順 2: 補足: 入る場所と、切るユーティリティの案
 
@@ -1199,6 +1214,8 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 | Win+V を CopyQ に割り当てる | OS が予約しているキー | 不採用 |
 | インストーラの `/MERGETASKS=startup` | 起動のショートカットは作れるが、CopyQ の設定（`autostart`）とずれる | 不採用 |
 | ポリシー `AllowClipboardHistory` で Windows の履歴を禁止する | 設定の画面が灰色になる。既定でオフなので要らない | 不採用 |
+| **RDP や画面を取り込む遠隔操作で使うときは、`prevent_screen_capture` を切る** | 開いている窓にもすぐ効き、PC の画面で開いた窓にも付かない（コード）。PC の画面のスクリーンショットにも写る | **採用**（そのときだけ。この節の手順 7） |
+| RDP の中で窓を開き直す | 開き直せば外れるはず（コード）だが、上流の報告では RDP の中で起動しても空の窓が出る（確かめていない）。PC の画面へ戻して開くと、また付く。Chrome リモート デスクトップ（コンソールのセッション）では、開き直しても付く（コード） | 不採用 |
 
 #### PowerToys のユーティリティを絞る
 
@@ -1375,8 +1392,8 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - 文書: [New-Item（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1) — 既にあるレジストリのキーに `-Force` を付けると空のキーになる
 - 文書: [StartupBoostEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/startupboostenabled)・[BackgroundModeEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/backgroundmodeenabled)・[Configure Microsoft Edge](https://learn.microsoft.com/en-us/deployedge/configure-microsoft-edge)（Microsoft Learn）と [Get help with startup boost — Microsoft Support](https://support.microsoft.com/en-us/topic/get-help-with-startup-boost-ebef73ed-5c72-462f-8726-512782c5e442)
 - 文書: [Materials — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/develop/ui/materials) — 透明効果を切るとアクリルが単色になる
-- 文書: [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)・[SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)・[PowerToys Advanced Paste](https://learn.microsoft.com/en-us/windows/powertoys/advanced-paste) — Microsoft Learn
-- コード: [hluk/CopyQ](https://github.com/hluk/CopyQ)（`shared/copyq.iss`・`src/platform/win/winplatform.cpp`・`CHANGES.md`）と [CopyQ の known-issues](https://copyq.readthedocs.io/en/latest/known-issues.html)、[winget-pkgs の hluk.CopyQ](https://github.com/microsoft/winget-pkgs/tree/master/manifests/h/hluk/CopyQ)、[Inno Setup の PrivilegesRequiredOverridesAllowed](https://jrsoftware.org/ishelp/topic_setup_privilegesrequiredoverridesallowed.htm)
+- 文書: [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)・[SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)・[SetWindowDisplayAffinity](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowdisplayaffinity)・[GetSystemMetrics](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsystemmetrics)・[PowerToys Advanced Paste](https://learn.microsoft.com/en-us/windows/powertoys/advanced-paste) — Microsoft Learn
+- コード: [hluk/CopyQ](https://github.com/hluk/CopyQ)（`shared/copyq.iss`・`src/app/clipboardserver.cpp`・`src/platform/win/winplatform.cpp`・`CHANGES.md`）と [hluk/CopyQ#3621](https://github.com/hluk/CopyQ/issues/3621)（RDP で空の窓が出る報告）、[CopyQ の known-issues](https://copyq.readthedocs.io/en/latest/known-issues.html)、[winget-pkgs の hluk.CopyQ](https://github.com/microsoft/winget-pkgs/tree/master/manifests/h/hluk/CopyQ)、[Inno Setup の PrivilegesRequiredOverridesAllowed](https://jrsoftware.org/ishelp/topic_setup_privilegesrequiredoverridesallowed.htm)
 - コード: [microsoft/winget-dsc](https://github.com/microsoft/winget-dsc)（`Microsoft.Windows.Setting.Accessibility`）・[microsoft/WindowsDeveloperConfig](https://github.com/microsoft/WindowsDeveloperConfig)（`TaskbarEndTask`）
 - コード: [ReactOS の input.cpl](https://github.com/reactos/reactos/blob/master/dll/cpl/input/key_settings_dialog.c)・[Wine の sysparams.c](https://github.com/wine-mirror/wine/blob/master/dlls/win32u/sysparams.c)・[Chromium の animation_win.cc](https://chromium.googlesource.com/chromium/src/+/HEAD/ui/gfx/animation/animation_win.cc)・[Chromium の auto_launch_util.cc](https://chromium.googlesource.com/chromium/src/+/main/chrome/installer/util/auto_launch_util.cc)、[MDN の prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - 広く: [privacy.sexy の windows.yaml](https://github.com/undergroundwires/privacy.sexy/blob/master/src/application/collections/windows.yaml)・[Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
