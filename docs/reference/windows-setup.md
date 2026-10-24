@@ -489,7 +489,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - CopyQ のグローバル ショートカットは `RegisterHotKey` を使う。Windows キーを含むキーは OS が予約していて、ほかが登録済みのキーと同じく失敗することがある（文書）。失敗はサーバーの記録に出るだけで、画面には出ない（コード）
 - 「アプリを入れる」の手順 5 の PowerToys の高度な貼り付けは、既定で Win+Shift+V と Ctrl+Win+Alt+V を使う（文書）。Ctrl+Shift+V は、Windows 11 の書式なしの貼り付けのキー（サポートの記事）
 - CopyQ は Ctrl+V などのキーを `SendInput` で送って貼る。`SendInput` は、同じか低い整合性のレベルの窓にしか届かないので、管理者の窓には貼れない（文書。UIPI）
-- CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP での見え方は、この節の手順 7 の補足
+- CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP での見え方は、[この節の手順 7 の補足](#copyq-を使う--手順-7-補足-rdp-で窓の中身が空になる仕組み)
 - パスワード マネージャーなどが付ける除外の印（`ExcludeClipboardContentFromMonitorProcessing`・`CanIncludeInClipboardHistory` など）があるものは、記録しない（コード）
 - 履歴は暗号化しないで保存する（`encrypt_tabs` の既定は false。項目は既定で 200 まで）。16.0.0 は `%APPDATA%\copyq`、17.0.0 からは `%LOCALAPPDATA%\copyq` の下
 - 画面の日本語は、同梱の訳（約 94%）が、Windows の地域の形式に合わせて出る（推測）
@@ -503,7 +503,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `SM_REMOTESESSION` は、PC の画面（コンソールのセッション）では 0（文書）
 - 見るのは窓を出したときだけなので、PC の画面で出した窓は、その後に RDP でつないでも付いたままで、中身が空に見える（コード）。「RDP をロックせずに切断」の `tscon` で PC の画面へ戻して使うと、PC の画面で窓を出すことが多いので起きやすい
 - Chrome リモート デスクトップのように PC の画面（コンソールのセッション）を取り込んで送る遠隔操作では、`SM_REMOTESESSION` が 0 のままなので、付いた窓は写らないはず（文書とコードからの推測。確かめていない）
-- 設定を変えると、サーバーは開いている窓すべてに付け直すか外す（`ClipboardServer::setPreventScreenCapture`）ので、起動し直さなくてよい。値は `copyq.ini`（16.0.0 は `%APPDATA%\copyq`）の `[Options]` に残る
+- 設定を変えると、サーバーは開いている窓すべてに付け直すか外す（`ClipboardServer::setPreventScreenCapture`）ので、起動し直さなくてよい。値は `copyq.ini`（16.0.0 は `%APPDATA%\copyq\copyq.ini`）の `[Options]` の `prevent_screen_capture` に残る
 - RDP の中でオンのまま初めて窓を出すと、英語の警告（「Screen Capture Prevention Unavailable」。訳は無い）を 1 回だけ出し、出したことを `screen_capture_warning_acknowledged` に残す（`winplatform.cpp`。確かめていない）
 - 上流の報告 [hluk/CopyQ#3621](https://github.com/hluk/CopyQ/issues/3621)（「Blank window if RDP is used」、16.0.0）は、RDP の中で起動しても空の窓が出るというもの。報告者は `prevent_screen_capture=false` で直ったと書いていて、作者が試した開発版では直らなかった。2026-10-24 の時点で開いたまま
 - 17.0.0 でも、窓が出たときの呼び出し・`WinPlatform::setPreventScreenCapture`・既定の true は、16.0.0 と同じ（両方のタグのソース）
@@ -1214,8 +1214,8 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 | Win+V を CopyQ に割り当てる | OS が予約しているキー | 不採用 |
 | インストーラの `/MERGETASKS=startup` | 起動のショートカットは作れるが、CopyQ の設定（`autostart`）とずれる | 不採用 |
 | ポリシー `AllowClipboardHistory` で Windows の履歴を禁止する | 設定の画面が灰色になる。既定でオフなので要らない | 不採用 |
-| **RDP や画面を取り込む遠隔操作で使うときは、`prevent_screen_capture` を切る** | 開いている窓にすぐ効き、PC の画面で開いた窓も RDP で見える。PC の画面のスクリーンショットにも写る | **採用**（そのときだけ。この節の手順 7） |
-| RDP の中で窓を開き直す | 開き直せば外れるはず（コード）だが、上流の報告では RDP の中で起動しても空の窓が出る（確かめていない）。PC の画面へ戻して開くと、また付く。Chrome リモート デスクトップでは外れない | 不採用 |
+| **RDP や画面を取り込む遠隔操作で使うときは、`prevent_screen_capture` を切る** | 開いている窓にもすぐ効き、PC の画面で開いた窓にも付かない（コード）。PC の画面のスクリーンショットにも写る | **採用**（そのときだけ。この節の手順 7） |
+| RDP の中で窓を開き直す | 開き直せば外れるはず（コード）だが、上流の報告では RDP の中で起動しても空の窓が出る（確かめていない）。PC の画面へ戻して開くと、また付く。Chrome リモート デスクトップ（コンソールのセッション）では、開き直しても付く（コード） | 不採用 |
 
 #### PowerToys のユーティリティを絞る
 
