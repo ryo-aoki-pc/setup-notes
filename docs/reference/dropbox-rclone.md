@@ -14,6 +14,12 @@
 
 - `>/dev/null` は、登録が終わったときに出る設定（トークン入り）を画面に出さないため
 
+### Dropbox と rclone / 手順 2: 補足: 待っている間の rclone config
+
+- OAuth の許可待ちの間に、同じユーザーの別の端末で crypt の登録を行うと、許可が届いた後に設定が読み直され、`[dropbox]` が `type` の行の無い、トークンだけの節になることがあった。許可が終わってプロンプトが戻るまで、ほかの `rclone config` を実行しない
+- `type` の無い節では、`rclone config redacted` もトークンを伏せなかった。設定の確認は `rclone listremotes --long` と `rclone about dropbox:` で行い、設定の中身を表示しない
+- この状態になり、トークンが表示されたときは、Dropbox 側で接続を解除してトークンを無効にし、登録し直す。実測は[検証記録の実機の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#付録-raspberry-pi-5-の実機で手順-14-を実際の-dropbox-に通した記録2026-10-24)に置く
+
 ### Dropbox と rclone / 手順 4: 補足: 出力の項目
 
 - `listremotes` の `dropbox: dropbox` は、名前と種類

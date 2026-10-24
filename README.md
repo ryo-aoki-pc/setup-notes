@@ -18,7 +18,7 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 | [Syncthing のセットアップ](docs/syncthing.md) | Windows 11・AlmaLinux 10 | フォルダの同期と、設定のバックアップ・復元 |
 | [GNOME のリモート操作のセットアップ](docs/gnome-remote.md) | AlmaLinux 10 | デスクトップ共有、ヘッドレスセッション、リモートログイン |
 | [コンテナのセットアップ](docs/containers.md) | AlmaLinux 10 | Podman、podman-compose、podman-tui、lazydocker、Distrobox |
-| [Dropbox のセットアップ](docs/dropbox.md) | AlmaLinux 10 | Dropbox の公式クライアントと、rclone による同期 |
+| [Dropbox のセットアップ](docs/dropbox.md) | AlmaLinux 10 | Dropbox の公式クライアントと、rclone による同期・バックアップ |
 | [Forgejo のセットアップ](docs/forgejo.md) | AlmaLinux 10 | Git サーバーの導入、公開、使い方、バックアップと更新 |
 
 - 新しく入れた PC では、OS の初期設定（[Windows 11](docs/windows-setup.md) / [AlmaLinux 10](docs/almalinux-setup.md)）→ [シェルと端末](docs/shell-terminal.md) → 要る手順書の順に通す
@@ -57,7 +57,7 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 ### ファイル共有・同期
 
 - 共有は Samba の[サーバー](docs/samba.md#samba-サーバー)・クライアント（[AlmaLinux 10](docs/samba.md#samba-クライアント) / [Windows 11](docs/samba.md#windows-11-で-samba-クライアントを使う)）、同期は Syncthing（[AlmaLinux 10](docs/syncthing.md#syncthing) / [Windows 11](docs/syncthing.md#windows-11-で-syncthing-を使う)）の手順を通す
-- Dropbox は AlmaLinux 10 の「[Dropbox](docs/dropbox.md#dropbox)」か「[Dropbox と rclone](docs/dropbox.md#dropbox-と-rclone)」で入れる
+- Dropbox は AlmaLinux 10 の「[Dropbox](docs/dropbox.md#dropbox)」か「[Dropbox と rclone](docs/dropbox.md#dropbox-と-rclone)」で入れる。毎日の片方向のバックアップは「[Dropbox へのバックアップ](docs/dropbox.md#dropbox-へのバックアップ)」を通す
 
 ### 端末とシェル
 

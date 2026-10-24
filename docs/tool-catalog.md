@@ -71,7 +71,7 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](neovim.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt) |
 | Syncthing | Homebrew + systemd ユーザーサービス | [Syncthing](syncthing.md#syncthing) |
 | Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [Dropbox](dropbox.md#dropbox) |
-| rclone（Dropbox の同期） | Homebrew + systemd ユーザータイマー（aarch64 の Dropbox 用） | [Dropbox と rclone](dropbox.md#dropbox-と-rclone) |
+| rclone（Dropbox の同期・バックアップ） | Homebrew + systemd ユーザータイマー | [Dropbox と rclone](dropbox.md#dropbox-と-rclone) / [Dropbox へのバックアップ](dropbox.md#dropbox-へのバックアップ) |
 | btop | EPEL | [btop](almalinux-setup.md#btop) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [初期設定の「Firefox」](almalinux-setup.md#firefox) |
 | Claude Code / GitHub CLI | 公式 dnf リポジトリ | [AI エージェントの「Claude Code」](ai-agents.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
