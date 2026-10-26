@@ -4,6 +4,7 @@
 - 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
+>
 > - **前提と実行場所は、各項のリードに従う**。コマンドはスマートフォンの Termux の画面に貼る
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
@@ -914,6 +915,7 @@
 - 実行場所: スマートフォンの Termux（bash）。この項の手順 2 の前に、既存の `~/.config/lazygit/config.yml` の確認と退避を行う
 
 > [!CAUTION]
+>
 > - この項の手順 2 は既存の `~/.config/lazygit/config.yml` を置き換える
 > - 残す通常ファイルがある場合は止め、別名へ退避してから、この項の手順 2 を貼る
 
@@ -1035,6 +1037,7 @@
 - 自分用の LazyVim の設定を入れ、プラグインとパーサーを `lazy-lock.json` の版に揃える
 - 前提: [Termux の Neovim: md-format を入れる](#termux-の-neovim-md-format-を入れる)と[Termux: 基本の設定](#termux-基本の設定)を通してある
 - 実行場所: スマートフォンの Termux（bash）。この項の手順 1 の既存の設定とデータの退避を省かない
+- この項の手順 6 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 
 1. Termux で、既存の Neovim の設定とデータがあれば退避する。
 
@@ -1102,12 +1105,23 @@
    - 最後の `grep` が何も出さなければよい
    - `ERROR` が出たら、`$TMPDIR/lazyvim-health.txt` と [LazyVimStarter の注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)を確かめてから進む
 
+1. Termux で、GitLab プレビューの公式スタイルを取得する。
+
+   ```bash
+   nvim --headless -u NONE -i NONE -l ~/.config/nvim/tools/install_gitlab_preview.lua
+   ```
+
+   - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
+   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 6 を貼り直す
+   - この手順を通せないときも、プレビューは独自のスタイルで表示できる
+
 #### Termux の Neovim: 更新
 
 - md-format と LazyVim のプラグインを上げる
 - 前提: [Termux の Neovim: LazyVim の設定を導入する](#termux-の-neovim-lazyvim-の設定を導入する)を通してある
 - 実行場所: スマートフォンの Termux（bash）
 - Neovim と外部コマンドは[Termux: 更新](#termux-更新)で上げる
+- この項の手順 3 は、まだ入れていない版の公式スタイルを取得するときに約 785 MB をダウンロードする
 
 1. Termux で、md-format を更新する。
 
@@ -1119,6 +1133,15 @@
 
    - [Neovim の「LazyVim の本体・外部コマンド・プラグインを更新する」の手順 2](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)を Termux の画面で行う
    - パーサーの導入が終わり、プロンプトが戻るまで待つ。`lazy-lock.json` の差分と動作の確認を省かない
+
+1. Termux で、GitLab プレビューの公式スタイルを設定が指定する版に揃える。
+
+   ```bash
+   nvim --headless -u NONE -i NONE -l ~/.config/nvim/tools/install_gitlab_preview.lua
+   ```
+
+   - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
+   - 失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 3 を貼り直す
 
 ---
 
