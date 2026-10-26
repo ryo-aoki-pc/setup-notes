@@ -7,6 +7,8 @@
 
 ## 注意点
 
+- **GitLab プレビューに「公式スタイル未導入」と出る**: [LazyVimStarter の注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)で取得先への通信と導入状態を確かめる
+  - `近似表示` は Markdown をどこで描いたかを示す表示で、公式スタイルの導入状態とは別
 - **Neovim: EPEL の `neovim` と両方入れない**: PATH の先頭が Homebrew なので、Homebrew 版が勝つ。どちらか一方にする
 - **Neovim: `sudo nvim` は、そのままでは動かない**: sudo の PATH に Homebrew が無い
   - [Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通すと動く。root の Neovim は `/root/.config/nvim` を読む

@@ -5,6 +5,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#端末とエディタを消す)・[Windows 11](extra/windows-setup.md#エディタとシェルのツールを消す)）で行う
 
 > [!IMPORTANT]
+>
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
@@ -92,6 +93,7 @@
 - 前提: [EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)・[共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[HackGen Console NF](shell-terminal.md#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1・2 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
 - 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 3 の既存の設定の退避を省かない
 - [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
+- この項の手順 13 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 
 1. 外部コマンドと日本語入力 (ibus-anthy) を dnf で入れる。
 
@@ -242,6 +244,16 @@
    - `grep` が何も出さないか、`` WARNING `fzf` is not installed `` の 1 行だけならよい (無視してよい。fzf が入っていれば出ない)
    - `ERROR` が出たら[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)
 
+1. GitLab プレビューの公式スタイルを取得する。
+
+   ```bash
+   nvim --headless -u NONE -i NONE -l ~/.config/nvim/tools/install_gitlab_preview.lua
+   ```
+
+   - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
+   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 13 を貼り直す
+   - この手順を通せないときも、プレビューは独自のスタイルで表示できる
+
 #### LazyVim の日本語検索・整形・IME 連携を確かめる
 
 - 試験用の Markdown で、LazyVim の日本語検索・保存のときの整形・IME 連携・アイコンの表示を確かめる
@@ -274,6 +286,7 @@
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
 - Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)の手順 2 で上げる
 - 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
+- この項の手順 2 は、まだ入れていない版の公式スタイルを取得するときに約 785 MB をダウンロードする
 
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
@@ -293,6 +306,15 @@
    - `:Lazy update` の結果として残すのでなければ、`git -C ~/.config/nvim checkout -- lazy-lock.json` で戻して、この手順を貼り直す
    - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 1 のブロックを貼り直す
+
+1. GitLab プレビューの公式スタイルを、設定が指定する版に揃える。
+
+   ```bash
+   nvim --headless -u NONE -i NONE -l ~/.config/nvim/tools/install_gitlab_preview.lua
+   ```
+
+   - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
+   - 失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 2 を貼り直す
 
 #### LazyVim の安全な Markdown 整形を導入する
 
@@ -490,6 +512,8 @@
 
    - `<leader>cp` を押すとブラウザが開き、右上に `GitLab: gitlab.com` (設定した GitLab のホスト名) と出ればよい
    - `近似表示` と出たら、上のバナーに理由が出る ([注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点))
+   - `公式スタイル未導入` と出たら、Neovim で `:GitLabPreviewInstall` を実行し、完了を待ってから表示を確かめる
+   - 上部のテーマと幅を切り替え、本文と表の配色・表示幅が変わることを確かめる
    - `<leader>cp` をもう一度押すと止まる。`:qa` で閉じる
 
 #### LazyVim の本体・外部コマンド・プラグインを更新する
@@ -642,6 +666,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
+- この項の手順 11 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 - [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -770,7 +795,18 @@
    - 初めてなら [md-format を導入・更新する](windows-setup.md#md-format-を導入更新する) で整形器を入れ、[安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) で確かめる
    - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
    - OS 側で IME を切り替えると、lualine の `あ` / `A` がずれることがある（[README](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#日本語入力検索)）
-   - `:qa!` で閉じる。これで導入は終わり
+   - `:qa!` で閉じる
+   - **次の手順は、`:qa!` で閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
+
+1. Windows 11 で、GitLab プレビューの公式スタイルを取得する。
+
+   ```powershell
+   nvim --headless -u NONE -i NONE -l "$env:LOCALAPPDATA\nvim\tools\install_gitlab_preview.lua"
+   ```
+
+   - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
+   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 11 を貼り直す
+   - この手順を通せないときも、プレビューは独自のスタイルで表示できる
 
 #### Windows 11 で LazyVim の設定とプラグインの版を揃える
 
@@ -780,6 +816,7 @@
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)の手順 3 で上げる
 - 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
+- この項の手順 3 は、まだ入れていない版の公式スタイルを取得するときに約 785 MB をダウンロードする
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -803,6 +840,15 @@
    - `:Lazy update` の結果として残すのでなければ、`git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json` で戻してから、この手順を貼り直す
    - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
+
+1. Windows 11 で、GitLab プレビューの公式スタイルを設定が指定する版に揃える。
+
+   ```powershell
+   nvim --headless -u NONE -i NONE -l "$env:LOCALAPPDATA\nvim\tools\install_gitlab_preview.lua"
+   ```
+
+   - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
+   - 失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 3 を貼り直す
 
 #### Windows 11 で LazyVim の安全な Markdown 整形を導入する
 
@@ -902,7 +948,10 @@
    nvim "$env:LOCALAPPDATA\nvim\README.md"
    ```
 
-   - `<leader>cp` の右上に `GitLab: <ホスト名>` が出ればよい。近似表示ならバナーの理由を確認する。もう一度 `<leader>cp` で止め、`:qa` で閉じる
+   - `<leader>cp` の右上に `GitLab: <ホスト名>` が出ればよい。近似表示ならバナーの理由を確認する
+   - `公式スタイル未導入` と出たら、Neovim で `:GitLabPreviewInstall` を実行し、完了を待ってから表示を確かめる
+   - 上部のテーマと幅を切り替え、本文と表の配色・表示幅が変わることを確かめる
+   - もう一度 `<leader>cp` で止め、`:qa` で閉じる
    - Neovide で使うなら、Neovide も起動し直す
 
 #### Windows 11 で LazyVim の本体・外部コマンド・プラグインを更新する

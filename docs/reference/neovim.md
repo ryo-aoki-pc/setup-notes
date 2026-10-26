@@ -22,6 +22,16 @@
 - nvim-treesitter は、ほかで始まった同じ言語の導入を最大 60 秒しか待たないので、パーサーの更新と導入が両方とも成功するまで最大 20 回繰り返す
 - [検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#付録-headless-の-neovim-が-treesitter-のパーサーの導入を途中で止めるのを直したとき2026-10-16)
 
+### LazyVim の設定を導入する / 手順 13: 補足: GitLab プレビューの公式スタイル
+
+- Windows 11 の「LazyVim の設定を導入する」の手順 11、両 OS の「LazyVim の設定とプラグインの版を揃える」の最後の手順も同じ取得処理を使う
+- CSS・フォント・SVG は設定リポジトリに含めず、GitLab CE の公式資産イメージから取得する。初回の取得量は約 785 MB で、GitLab サーバーや Docker・Python は入れない
+- Node.js で必要なファイルだけを取り出し、Neovim のデータ領域の `gitlab-preview/assets/` に保存する。ライセンス原文・著作権表示も保存する
+- 指定した版・ハッシュと導入済みの資産が一致すれば取得を省く。設定だけを pull しても資産は自動更新せず、版を揃える手順で明示的に取得する
+- 通常の Neovim の起動やプレビューの表示では公式スタイルの取得を始めない。資産が無いときは独自 CSS を使い、GitLab API の利用可否とは別に「公式スタイル未導入」と表示する
+- API が返す HTML の解釈と、表示する CSS は別のもの。近似表示でも公式 CSS は使えるが、未対応の GLFM 記法が増えるわけではない
+- 対象版・取得元・ライセンスの扱いは [LazyVimStarter の設計](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/dev/architecture.md#markdown--glfm)を参照する
+
 ### Windows 11 で Neovim を入れる / 手順 2: 補足: 確かめる値の意味
 
 - `Nvim` が空なら、Neovim は入っていない。`C:\Users\<WIN_USER>\scoop\shims\nvim.exe` だけなら、もう scoop で入っている
