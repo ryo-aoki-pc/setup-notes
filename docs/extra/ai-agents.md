@@ -24,7 +24,8 @@
 
 ### Claude Code のフックを外す
 
-- Claude Code の `NO_COLOR` のフックを外す
+- Claude Code の `NO_COLOR` のフックと、Codex の片付けのフックを外す
+- 片付けのフックの記録（`~/.claude/hooks/codex-reaper.log`）は消さない。要らなければ手で消す
 - 前提: [Claude Code のフックを入れる](../ai-agents.md#claude-code-のフックを入れる)を通してある。Python 3.9 以上（`python3`）がある
 - 実行場所: このリポジトリのルート。自分のユーザーの bash で行う
 - Claude Code 本体も消すなら、[AI エージェントとプラグインを消す](#ai-エージェントとプラグインを消す)より先にこの項を通す
@@ -242,7 +243,8 @@
 
 ### Windows 11 で Claude Code のフックを外す
 
-- Claude Code の `NO_COLOR` のフックを外す
+- Claude Code の `NO_COLOR` のフックと、Codex の片付けのフックを外す
+- 片付けのフックの記録（`%USERPROFILE%\.claude\hooks\codex-reaper.log`）は消さない。要らなければ手で消す
 - 前提: [Windows 11 で Claude Code のフックを入れる](../ai-agents.md#windows-11-で-claude-code-のフックを入れる)を通してある。scoop の Python 3.9 以上がある
 - 実行場所: このリポジトリのルート。この PC のデスクトップの、管理者ではない Windows PowerShell（5.1）で行う
 - Claude Code 本体も消すなら、[Windows 11 で AI エージェントとプラグインを消す](#windows-11-で-ai-エージェントとプラグインを消す)より先にこの項を通す

@@ -14,7 +14,7 @@
   - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、lazygit での 2 つのブックの取り込みを扱う
     - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「lazygit で 2 つの Word の変更を取り込む」を置く
 - `docs/ai-agents.md` — AI コーディングエージェント（Claude Code・Codex CLI・Grok Build・Antigravity CLI）の導入と更新、Remote Control・GNOME 操作・共同作業・Codeg。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が AlmaLinux 10、`## Windows 11 で使う` が Windows 11
-  - 「Claude Code のフックを入れる」「Windows 11 で Claude Code のフックを入れる」で、端末の窓や TUI への NO_COLOR の引き継ぎを止めるフックを導入・確認する
+  - 「Claude Code のフックを入れる」「Windows 11 で Claude Code のフックを入れる」で、端末の窓や TUI への NO_COLOR の引き継ぎを止めるフックと、Codex のプラグインが残した古い broker をセッションの開始ごとに止めるフックを導入・確認する
   - Codeg は常に自動で最新の安定版にする（2026-10-16、利用者の決定）。AlmaLinux 10 と Windows 11 で毎日更新し、失敗時は本体と DB を戻してその版を保留する。復旧は専用 CLI で行い、両 OS の専用ログで結果を確認する。
   - ロールバックと注意点は `docs/extra/ai-agents.md`、採用理由と方針は `docs/reference/ai-agents.md` に置く。共同作業・Codeg・Claude Code の GNOME 操作・Windows の Remote Control の検証記録・参考資料・extra は、用途ごとに `coding-agents`・`codeg`・`claude-code-gui`・`windows-claude-remote-control` を使う
   - Claude Code・Codex CLI・Grok Build の導入の検証記録と参考資料は、`almalinux-setup.md`・`windows-setup.md` の検証記録と参考資料にある
@@ -232,7 +232,7 @@
 - `docs/diagrams/*.diag` — nwdiag（構成図）と seqdiag（パケットの流れ）の原本。`*.svg` は生成物なので直接編集しない
 - `scripts/render-diagrams.py` — 先頭のキーワードで方言（nwdiag / seqdiag）を選び、blockdiag 3.0.0 と Pillow 10 の非互換を shim で埋め、SVG に背景・CJK フォント・viewBox 幅の後処理をする
 - `scripts/gnome-gui.py` — ai-agents.md の「AlmaLinux 10 で Claude Code の GNOME 操作を使う」で使う、ヘッドレスのセッションを撮って操作する Python（`#!/usr/bin/python3`。Homebrew の `python3` には `gi` が無い）。`shot` は ScreenCast の `RecordMonitor` → PipeWire（`pipewiresrc path=`。`target-object=` はノードの ID を受け付けなかった）→ GStreamer で PNG。`key` / `type` / `move` / `click` / `scroll` は RemoteDesktop の Notify* で、コマンドごとにセッションを作る（作った直後と止める直前の入力が捨てられたので、`Control_L` と動かない相対移動を先に送り、前後に 0.3 秒置く）。`windows` は AT-SPI、`launch` は `.desktop` の `Exec` を `systemd-run --user` の主のプロセスにする（`gio launch` を挟むと、`gio` が終わったときにアプリも止められた）
-- `scripts/claude-code/` — Claude Code の NO_COLOR フック本体、設定を保って導入・確認・撤去する Python スクリプトと、その判定・導入の unittest
+- `scripts/claude-code/` — Claude Code の NO_COLOR フック本体と Codex の broker の片付けのフック本体、設定を保って導入・確認・撤去する Python スクリプトと、その判定・導入の unittest
 - `scripts/wireguard/wg-vpn.sh` — 約 1,250 行の bash。`site.env.example` / `clients.list.example` が入力ファイルの形式。実物の `site.env` / `clients.list` / バックアップは `.gitignore` 済み
 - `docs/extra/codeg.md` — Codeg の撤去、共通パスワードの復元、接続元の制限の復帰、自動更新の控えから本体と DB を戻す手順。復元 CLI に控え名と問題版を指定し、停止・復元・旧版の起動確認を行う。`backing-up`・`restart-failed` は元 DB を保持する。
 - `docs/reference/codeg.md` — Codeg と Caddy の構成、ACP、認証、権限の補足。自動更新は SHA-256 と digest、使い捨ての版確認、トークンを使わない起動確認、本体と DB 一式を戻す復元 CLI、両 OS の専用ログ、毎日の時刻と会話の切断の理由をまとめる

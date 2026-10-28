@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Test the guard and installer using subprocesses and temporary settings only."""
+"""Test the hooks and installer using subprocesses and temporary settings only."""
 
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 GUARD = SCRIPT_DIR / "no-color-guard.py"
+REAPER = SCRIPT_DIR / "codex-reaper.py"
 INSTALLER = SCRIPT_DIR / "setup-claude-code-hooks.py"
 BLOCK = [
     r"$p = Start-Process 'C:\Program Files\WezTerm\wezterm-gui.exe' -ArgumentList 'start','--','pwsh' -PassThru",
@@ -121,6 +123,7 @@ class InstallerTests(unittest.TestCase):
         self.config = self.root / "設定 with spaces"
         self.settings = self.config / "settings.json"
         self.hook = self.config / "hooks" / "no-color-guard.py"
+        self.reaper = self.config / "hooks" / "codex-reaper.py"
         self.environment = os.environ.copy()
         self.environment["CLAUDE_CONFIG_DIR"] = str(self.config)
         self.environment["PYTHONIOENCODING"] = "utf-8"
@@ -152,12 +155,28 @@ class InstallerTests(unittest.TestCase):
     def read_settings(self):
         return json.loads(self.settings.read_text(encoding="utf-8"))
 
-    def expected_entry(self, config=None):
-        path = ((config or self.config) / "hooks" / "no-color-guard.py").resolve()
-        command = '{} "{}"'.format(
+    def command(self, name, config=None):
+        path = ((config or self.config) / "hooks" / name).resolve()
+        return '{} "{}"'.format(
             "python" if os.name == "nt" else "python3",
             path.as_posix() if os.name == "nt" else str(path),
         )
+
+    def reaper_entry(self, config=None):
+        return {"hooks": [{
+            "type": "command",
+            "command": self.command("codex-reaper.py", config),
+            "async": True,
+        }]}
+
+    def expected_settings(self, config=None):
+        return {"hooks": {
+            "PreToolUse": [self.expected_entry(config)],
+            "SessionStart": [self.reaper_entry(config)],
+        }}
+
+    def expected_entry(self, config=None):
+        command = self.command("no-color-guard.py", config)
         return {
             "matcher": "Bash|PowerShell",
             "hooks": [{
@@ -185,13 +204,19 @@ class InstallerTests(unittest.TestCase):
         ]
         self.assertEqual(len(guard_hooks), 1)
         self.assertEqual(self.hook.read_bytes(), GUARD.read_bytes())
+        session = self.read_settings()["hooks"]["SessionStart"]
+        self.assertEqual(session.count(self.reaper_entry()), 1)
+        reaper_hooks = [
+            hook for entry in session for hook in entry.get("hooks", [])
+            if "codex-reaper.py" in hook.get("command", "")
+        ]
+        self.assertEqual(len(reaper_hooks), 1)
+        self.assertEqual(self.reaper.read_bytes(), REAPER.read_bytes())
 
     def test_install_without_settings_creates_current_hook(self):
         output = self.run_installer()
         self.assert_installation()
-        self.assertEqual(self.read_settings(), {
-            "hooks": {"PreToolUse": [self.expected_entry()]}
-        })
+        self.assertEqual(self.read_settings(), self.expected_settings())
         self.assertIn("Claude Code", output)
         self.assertIn("設定", output)
 
@@ -218,7 +243,7 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(first["theme"], original["theme"])
         self.assertEqual(first["permissions"], original["permissions"])
         self.assertEqual(first["language"], original["language"])
-        self.assertEqual(first["hooks"]["SessionStart"], session_hooks)
+        self.assertEqual(first["hooks"]["SessionStart"], session_hooks + [self.reaper_entry()])
         self.assertEqual(
             [entry for entry in first["hooks"]["PreToolUse"]
              if entry != self.expected_entry()], [read_hook, bash_hook]
@@ -290,10 +315,25 @@ class InstallerTests(unittest.TestCase):
                 else:
                     entry["hooks"][0]["timeout"] = 2
                     entries = [entry]
-                self.write_settings({"hooks": {"PreToolUse": entries}})
+                self.write_settings({"hooks": {"PreToolUse": entries, "SessionStart": [self.reaper_entry()]}})
                 before = self.snapshot()
                 self.run_installer("--check", expected=1)
                 self.assertEqual(self.snapshot(), before)
+
+    def test_check_changed_or_old_reaper_fails_and_reinstall_repairs_it(self):
+        self.run_installer()
+        self.reaper.write_bytes(b"old reaper body\n")
+        self.run_installer("--check", expected=1)
+        self.run_installer()
+        old = self.reaper_entry()
+        old["hooks"][0]["timeout"] = 30
+        del old["hooks"][0]["async"]
+        self.write_settings({"hooks": {"PreToolUse": [self.expected_entry()], "SessionStart": [old]}})
+        output = self.run_installer("--check", expected=1)
+        self.assertIn("codex-reaper.py", output)
+        self.run_installer()
+        self.assertEqual(self.read_settings(), self.expected_settings())
+        self.run_installer("--check")
 
     def test_uninstall_preserves_other_settings_and_hooks_and_second_is_noop(self):
         self.run_installer()
@@ -303,11 +343,13 @@ class InstallerTests(unittest.TestCase):
         session = [{"hooks": [{"type": "command", "command": "echo session"}]}]
         self.write_settings({
             "theme": "dark",
-            "hooks": {"PreToolUse": [self.expected_entry(), other], "SessionStart": session},
+            "hooks": {"PreToolUse": [self.expected_entry(), other],
+                      "SessionStart": session + [self.reaper_entry()]},
             "language": "日本語",
         })
         self.run_installer("--uninstall")
         self.assertFalse(self.hook.exists())
+        self.assertFalse(self.reaper.exists())
         self.assertEqual(self.read_settings(), {
             "theme": "dark",
             "hooks": {"PreToolUse": [other], "SessionStart": session},
@@ -321,11 +363,12 @@ class InstallerTests(unittest.TestCase):
     def test_uninstall_removes_empty_pretooluse_and_hooks(self):
         self.run_installer()
         self.write_settings({"theme": "dark", "hooks": {
-            "PreToolUse": [self.expected_entry()]
+            "PreToolUse": [self.expected_entry()], "SessionStart": [self.reaper_entry()]
         }})
         self.run_installer("--uninstall")
         self.assertEqual(self.read_settings(), {"theme": "dark"})
         self.assertFalse(self.hook.exists())
+        self.assertFalse(self.reaper.exists())
 
     def test_uninstall_without_settings_creates_nothing(self):
         before = self.snapshot()
@@ -357,7 +400,7 @@ class InstallerTests(unittest.TestCase):
                     self.assertEqual(self.snapshot(), before)
 
     def test_invalid_settings_shapes_stop_without_changes(self):
-        for value in ([], {"hooks": []}, {"hooks": {"PreToolUse": {}}}):
+        for value in ([], {"hooks": []}, {"hooks": {"PreToolUse": {}}}, {"hooks": {"SessionStart": [1]}}):
             with self.subTest(value=value):
                 self.write_settings(value)
                 before = self.snapshot()
@@ -371,8 +414,113 @@ class InstallerTests(unittest.TestCase):
         fallback = self.home / ".claude"
         self.assertEqual((fallback / "hooks" / "no-color-guard.py").read_bytes(), GUARD.read_bytes())
         settings = json.loads((fallback / "settings.json").read_text(encoding="utf-8"))
-        self.assertEqual(settings, {"hooks": {"PreToolUse": [self.expected_entry(fallback)]}})
+        self.assertEqual((fallback / "hooks" / "codex-reaper.py").read_bytes(), REAPER.read_bytes())
+        self.assertEqual(settings, self.expected_settings(fallback))
         self.assertFalse(self.config.exists())
+
+
+class ReaperTests(unittest.TestCase):
+    """Only --dry-run with a fake process list: nothing real is ever killed."""
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="codex-reaper-")
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.environment = os.environ.copy()
+        self.environment["CLAUDE_CONFIG_DIR"] = str(self.root / "config")
+        self.environment["PYTHONIOENCODING"] = "utf-8"
+        self.now = time.time()
+
+    def broker(self, pid, hours, cwd, pid_file=None):
+        cmdline = r"C:\scoop\nodejs\node.exe C:\Users\x\.claude\plugins\cache\openai-codex\codex\1.0.6\scripts\app-server-broker.mjs serve --endpoint pipe:\\.\pipe\cxc-a-codex-app-server"
+        if cwd is not None:
+            cmdline += " --cwd " + (cwd if " " not in cwd else '"{}"'.format(cwd))
+        cmdline += " --pid-file " + (pid_file or r"C:\Temp\cxc-{}\broker.pid".format(pid))
+        return {"pid": pid, "started": self.now - hours * 3600, "cmdline": cmdline}
+
+    def companion(self, pid, cwd, command="task"):
+        return {"pid": pid, "started": self.now - 60, "argv": [
+            "/usr/bin/node", "/home/x/.claude/plugins/cache/openai-codex/codex/1.0.6/scripts/codex-companion.mjs",
+            command, "--cwd", cwd,
+        ]}
+
+    def run_reaper(self, processes, *arguments, expected=0):
+        listing = self.root / "processes.json"
+        listing.write_text(json.dumps(processes, ensure_ascii=False), encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, "-B", str(REAPER), "--dry-run", "--processes-from", str(listing), *arguments],
+            capture_output=True, env=self.environment, timeout=15,
+        )
+        output = (result.stdout + result.stderr).decode("utf-8")
+        self.assertEqual(result.returncode, expected, output)
+        return output
+
+    def decisions(self, output):
+        return {
+            int(line.split("PID ")[1].split("（")[0]): line.split(":")[0]
+            for line in output.splitlines() if line.startswith(("消す:", "残す:"))
+        }
+
+    def test_old_unused_broker_is_killed_and_young_one_kept(self):
+        output = self.run_reaper([
+            self.broker(101, 5, "C:/Users/x/Temp/claude/a/scratchpad/codex-wt"),
+            self.broker(102, 1, "C:/Users/x/Temp/claude/b/scratchpad/codex-wt"),
+        ])
+        self.assertEqual(self.decisions(output), {101: "消す", 102: "残す"})
+        self.assertIn("何も変更していません", output)
+
+    def test_broker_used_by_companion_is_kept_across_separators_and_case(self):
+        output = self.run_reaper([
+            self.broker(201, 5, "C:/Users/x/Temp/claude/a/scratchpad/codex-wt"),
+            self.broker(202, 5, "C:/Users/x/Temp/claude/b/scratchpad/codex-wt"),
+            self.broker(203, 5, "C:/Users/x/Temp/claude/a/scratchpad/codex-wt2"),
+            self.companion(301, r"c:\users\x\temp\claude\a\scratchpad\codex-wt\sub", "task-worker"),
+        ])
+        self.assertEqual(self.decisions(output), {201: "残す", 202: "消す", 203: "消す"})
+
+    def test_companion_without_cwd_keeps_every_broker(self):
+        companion = self.companion(301, "/tmp")
+        companion["argv"] = companion["argv"][:3]
+        output = self.run_reaper([self.broker(401, 5, "C:/a"), companion])
+        self.assertEqual(self.decisions(output), {401: "残す"})
+
+    def test_broker_without_cwd_and_quoted_cwd(self):
+        output = self.run_reaper([
+            self.broker(501, 5, None),
+            self.broker(502, 5, "C:/Users/x/作業 フォルダ/codex"),
+            self.companion(301, "C:/Users/x/作業 フォルダ/codex"),
+        ])
+        self.assertEqual(self.decisions(output), {501: "残す", 502: "残す"})
+
+    def test_other_codex_processes_are_not_brokers(self):
+        output = self.run_reaper([
+            {"pid": 601, "started": self.now - 9 * 3600, "cmdline": r'"C:\Users\x\AppData\Local\OpenAI\Codex\bin\codex.exe" app-server'},
+            {"pid": 602, "started": self.now - 9 * 3600, "cmdline": r"C:\Program Files\ChatGPT\ChatGPT.exe --type=renderer"},
+            {"pid": 603, "started": self.now - 9 * 3600, "cmdline": "node app-server-broker.mjs status"},
+        ])
+        self.assertEqual(self.decisions(output), {})
+        self.assertIn("消すもの 0 個", output)
+
+    def test_single_object_listing_and_min_age_option(self):
+        output = self.run_reaper(self.broker(701, 1, "C:/a"), "--min-age-hours", "0.5")
+        self.assertEqual(self.decisions(output), {701: "消す"})
+
+    def test_processes_from_requires_dry_run_and_bad_listing_stops(self):
+        listing = self.root / "processes.json"
+        listing.write_text("[]", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, "-B", str(REAPER), "--processes-from", str(listing)],
+            capture_output=True, env=self.environment, timeout=15,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        listing.write_text("{broken", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, "-B", str(REAPER), "--dry-run", "--processes-from", str(listing)],
+            capture_output=True, env=self.environment, timeout=15,
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("中断:", result.stderr.decode("utf-8"))
+        self.assertFalse((self.root / "config").exists())
 
 
 if __name__ == "__main__":

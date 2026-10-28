@@ -314,6 +314,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 ### Claude Code のフックを入れる
 
 - Claude Code が `NO_COLOR` を外さずに端末の窓や TUI を開くのを止めるフックを入れる。引き継いだ `NO_COLOR=1` で lazygit や delta の色が消えるのを防ぐ（[補足](reference/ai-agents.md#almalinux-10-で使う--claude-code-のフックを入れる--手順-1-補足-no_color-の引き継ぎと判定)）
+- 同じスクリプトで、Codex のプラグインが残した古いプロセスを、セッションを始めるたびに止めるフックも入れる。落ちたセッションの broker と、その下の `codex` のプロセスが溜まるのを防ぐ（[補足](reference/ai-agents.md#almalinux-10-で使う--claude-code-のフックを入れる--手順-4-補足-残った-codex-の-broker-の片付け)）
 - 前提: [Claude Code](#claude-code)を通してある。Python 3.9 以上（`python3`）がある
 - 実行場所: Claude Code を使うホストの、自分のユーザーの bash。このリポジトリのルートで行う
 - このリポジトリを更新してスクリプトが変わったら、この項を通し直す
@@ -336,6 +337,13 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    - Claude Code を起動し直して、新しいセッションを始める
    - 「`echo check  # tmux new-session` を Bash で実行して」と頼む
    - `PreToolUse:Bash hook error: このツールの環境には NO_COLOR=1 があり…` と出て、実行が止まればよい
+1. Codex の片付けのフックが何を止めるかを、止めずに確かめる。
+   ```bash
+   python3 scripts/claude-code/codex-reaper.py --dry-run
+   ```
+   - 最後に `消すもの <N> 個、残すもの <M> 個。何も変更していません。` と出ればよい。Codex をまだ使っていなければ、どちらも 0 個になる
+   - `消す:` の行は、次にセッションを始めたときに止める broker。`残す:` の行には、残す理由が出る
+   - `中断:` と出たら、表示された原因を直してから貼り直す
 
 ---
 
@@ -660,6 +668,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 ### Windows 11 で Claude Code のフックを入れる
 
 - Claude Code が `NO_COLOR` を外さずに端末の窓や TUI を開くのを止めるフックを入れる。引き継いだ `NO_COLOR=1` で lazygit や delta の色が消えるのを防ぐ（[補足](reference/ai-agents.md#windows-11-で使う--windows-11-で-claude-code-のフックを入れる--手順-2-補足-python-と-git-bash)）
+- 同じスクリプトで、Codex のプラグインが残した古いプロセスを、セッションを始めるたびに止めるフックも入れる。落ちたセッションの broker と、その下の `codex.exe` などが溜まるのを防ぐ（[補足](reference/ai-agents.md#windows-11-で使う--windows-11-で-claude-code-のフックを入れる--手順-5-補足-プロセスの一覧と止め方)）
 - 前提: [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)を通してある。scoop の Python 3.9 以上を使う。無ければ、この項の手順 1 で入れる
 - 実行場所: この PC のデスクトップの、管理者ではない Windows PowerShell（5.1）。このリポジトリのルートで行う
 - このリポジトリを更新してスクリプトが変わったら、この項を通し直す
@@ -690,6 +699,13 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    - Claude Code を起動し直して、新しいセッションを始める
    - 「`echo check  # tmux new-session` を Bash で実行して」と頼む
    - `PreToolUse:Bash hook error: このツールの環境には NO_COLOR=1 があり…` と出て、実行が止まればよい
+1. Codex の片付けのフックが何を止めるかを、止めずに確かめる。
+   ```powershell
+   python scripts/claude-code/codex-reaper.py --dry-run
+   ```
+   - 最後に `消すもの <N> 個、残すもの <M> 個。何も変更していません。` と出ればよい。Codex をまだ使っていなければ、どちらも 0 個になる
+   - `消す:` の行は、次にセッションを始めたときに止める broker。`残す:` の行には、残す理由が出る
+   - `中断:` と出たら、表示された原因を直してから貼り直す
 
 ---
 
