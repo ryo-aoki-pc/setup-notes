@@ -1,6 +1,6 @@
 # Homebrew のオフライン導入の参考資料
 
-[AlmaLinux 10 の「Homebrew のオフライン導入」](../almalinux-setup.md#homebrew-のオフライン導入)・[ロールバックと注意点](../extra/homebrew-offline.md)
+[AlmaLinux 10 の「Homebrew のオフライン導入」](../almalinux-setup.md#homebrew-のオフライン導入)・[注意点](../extra/homebrew-offline.md)
 
 ## 補足
 
@@ -11,7 +11,6 @@
 ### Homebrew のオフライン導入 / 手順 2: 補足: dnf の設定
 
 - AlmaLinux 10 の初期設定の「Homebrew」の手順 1 の dnf が、トンネルを通るようになる
-- 足した行は、[ロールバック](../extra/homebrew-offline.md#ロールバック)のリードのとおり、ssh-socks-tunnel.md のロールバックで消す
 
 ### Homebrew のオフライン導入 / 手順 3: 補足: Homebrew の導入とトンネル
 

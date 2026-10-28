@@ -1,6 +1,6 @@
 # Secure Boot の署名鍵の参考資料
 
-[AlmaLinux 10 の「Secure Boot の署名鍵」](../almalinux-setup.md#secure-boot-の署名鍵)・[ロールバックと注意点](../extra/secure-boot-mok.md)
+[AlmaLinux 10 の「Secure Boot の署名鍵」](../almalinux-setup.md#secure-boot-の署名鍵)・[注意点](../extra/secure-boot-mok.md)
 
 ## 補足
 

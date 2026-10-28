@@ -1,6 +1,6 @@
 # Windows 11 で Claude Code の Remote Control を使うの参考資料
 
-[手順書](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)・[ロールバックと注意点](../extra/windows-claude-remote-control.md)
+[手順書](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)・[注意点](../extra/windows-claude-remote-control.md)
 
 ## 補足
 

@@ -1,53 +1,9 @@
-# Dropbox のロールバックと注意点
+# Dropbox の注意点
 
 [手順書](../dropbox.md#dropbox)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](../reference/dropbox.md)
 
 - 「手順 N」は[手順書](../dropbox.md#dropbox)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- 上から順に実行する
-- 同期していたファイルはクラウドに残る。この PC の `~/Dropbox` を消すのは、この節の手順 4 だけ
-- 手順 2 で作られた `~/.gnupg` は、ほかでも使うので消さない
-- linger も切るときは、この節の後に [ユーザーサービスの常駐 のロールバック](linger.md#ロールバック)を行う（ほかに linger を使うものが無いかは、そこで確かめる）
-
-> [!CAUTION]
-> **この節の**手順 4 で、`~/.dropbox`（リンクの情報）と `~/Dropbox`（この PC の複製）を消す。まだ同期していない変更があれば失われる。
->
-> - **デーモンが動いている間に `~/Dropbox` を消すと、クラウドからも消える**。手順 4 は、デーモンが動いていれば `中断:` で止まる
-> - 入れ直す可能性があるなら残す
-
-1. サービスを止めて外す。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   systemctl --user disable --now dropbox.service
-   rm -f ~/.config/systemd/user/dropbox.service
-   systemctl --user daemon-reload
-   ```
-
-   - `Removed '.../default.target.wants/dropbox.service'.` が出る
-
-1. ブラウザで Dropbox の Web を開き、この PC のリンクを解除する。
-
-   - アカウントの設定 → セキュリティ → デバイス にある
-
-1. デーモンと CLI を消す。
-
-   ```bash
-   rm -rf ~/.dropbox-dist ~/.local/bin/dropbox
-   ```
-
-1. 完全に消すときだけ、リンクの情報とこの PC の複製を消す（取り戻せない）。
-
-   ```bash
-   if pgrep -u "$(id -un)" -x dropbox >/dev/null; then echo '中断: Dropbox のデーモンがまだ動いている。この節の手順 1 を先に貼る' >&2; else
-   rm -rf ~/.dropbox ~/Dropbox
-   fi
-   ```
-
----
 
 ## 注意点
 

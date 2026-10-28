@@ -44,10 +44,6 @@
 
 - git の `core.editor` が無ければ、PowerShell から動かす `git commit` も Neovim で開く（Git for Windows の既定の Vim から変わる。`git config --get core.editor` で確かめられる）
 
-### Neovim を既定のエディタにする / 手順 3: 補足: Git Bash の共通設定
-
-- Git Bash の共通設定の `EDITOR`・`VISUAL` は、この手順では変わらない
-
 ### 更新のリード: 補足: :checkhealth の読み方
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#neovim-実施手順--手順-2-補足-checkhealth-の読み方)
@@ -64,7 +60,7 @@
 
 #### Windows 11 で Neovim を入れる
 
-[Windows 11 で使う](../neovim.md#windows-11-で-neovim-を入れる)・[既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)の手順 2・3 の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#neovim-windows-11-で使う-検証状況の記録)）。
+[Windows 11 で使う](../neovim.md#windows-11-で-neovim-を入れる)・[既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#neovim-windows-11-で使う-検証状況の記録)）。
 
 - **scoop の main の `neovim` で、自分のユーザーに入れる**（管理者の権限は要らない）
   - [Windows 11 の初期設定の「アプリを入れる」](../windows-setup.md#アプリを入れる)の手順 1・2 で入れた scoop に、CLI のツールをまとめる。自分用の設定（LazyVimStarter）の Windows の導入も scoop の `neovim` を使う
@@ -85,7 +81,7 @@
   - lazygit 0.66.0 は、`os.edit` などが無いと、git の `core.editor` → `GIT_EDITOR` → `VISUAL` → `EDITOR` の順に探し、最初の語のファイル名で既知のプリセットを選ぶ。どれも無いと `vim` のプリセットになる。Windows の lazygit はエディタを `cmd.exe` で動かすので、Git for Windows の `usr\bin\vim` は見つからない
   - 値を `nvim` だけにするのは、`nvim.exe` やフルパスでは `nvim` のプリセットに合わないため
   - Git for Windows のインストーラで Vim を選ぶと、`core.editor` は書かれず、git は `EDITOR` を使う。そのため PowerShell の `git commit` も Neovim になる
-  - ほかの値があれば止め、元に戻す手順は値が `nvim` のときだけ消す（元の値を消さないため）
+  - ほかの値があれば止める
 - **健全性の確かめは `:checkhealth`**
 
 ### 参照

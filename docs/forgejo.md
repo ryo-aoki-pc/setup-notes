@@ -1,7 +1,7 @@
 # Forgejo のセットアップ（AlmaLinux 10）
 
 - AlmaLinux 10 の PC で Forgejo のサーバーを動かし、LAN か VPN の PC から HTTPS の Web と SSH の Git で使う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)
 - 前提・実行場所は[Forgejo](#forgejo)のリードに従う。サーバーの手順は、サーバーを動かす一般ユーザーの bash に貼る
 - 別の PC からは Git とブラウザで使う。Git は、AlmaLinux 10 の PC は[Git](almalinux-setup.md#git)、Windows 11 の PC は[Git for Windows](windows-setup.md#git-for-windows)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)で入れて設定する
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -13,7 +13,7 @@
 
 ### Forgejo
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)・[ロールバックと注意点](extra/forgejo.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)・[参考資料](reference/forgejo.md)
 - Forgejo を rootless の Podman（Quadlet）で動かし、LAN か VPN の PC から HTTPS の Web と SSH の Git で使う
 - 導入は、[イメージを取得して localhost で起動する](#forgejo-イメージを取得して-localhost-で起動する)から[自動更新を有効にする](#forgejo-自動更新を有効にする)までの項を順に通す
 - [起動手順](#forgejo-イメージを取得して-localhost-で起動する)の手順 2 で公式の最新安定版を入れる
@@ -400,7 +400,7 @@
    - runtime と permanent に、指定した送信元・宛先・Web と Git 用 SSH の 2 規則があればよい
    - `LAN_SUBNET='0.0.0.0/0'` のときは、指定した宛先とポートへの全 IPv4 送信元を許可する
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない。公開前に管理者へ既存の許可を確認する
-   - **中断や失敗が出たらこの項の手順 3 へ進まない**。追加できた規則を外す場合は[ロールバック](extra/forgejo.md#ロールバック)の手順 3 を使う
+   - **中断や失敗が出たらこの項の手順 3 へ進まない**
 
 1. 初期設定済みの Quadlet を LAN 用に変え、サービスを再起動する。
 
@@ -1263,7 +1263,7 @@
 | `~/.local/state/forgejo-auto-update/` | 保留した版（`skip-version`）と、自動更新を重ねて動かさないためのロック |
 | `~/.local/state/forgejo-backups/forgejo-<日時>.tar.gz` | [バックアップ](#forgejo-バックアップ)で作る停止中のバックアップ |
 | `~/.local/state/forgejo-backups/forgejo-auto-<日時>-<旧版>.tar.gz` | 自動更新が更新の直前に作る停止中のバックアップ。新しい 3 つを残す |
-| `~/.local/state/forgejo-backups/` の残り | 復元前の退避（`before-restore-*`）、自動更新で戻したときの退避（`failed-update-*`）、ロールバックで外した定義（`removed-*`） |
+| `~/.local/state/forgejo-backups/` の残り | 復元前の退避（`before-restore-*`）、自動更新で戻したときの退避（`failed-update-*`） |
 
 - コンテナでは `~/.local/share/forgejo` が `/var/lib/gitea` に見える
 - Quadlet の `FORGEJO__...` で指定した項目は、再起動時に `app.ini` へ反映される。同じ項目は Quadlet 側を変更する

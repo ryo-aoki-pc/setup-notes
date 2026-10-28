@@ -1,6 +1,6 @@
 # Forgejo の参考資料
 
-[AlmaLinux 10 の「Forgejo」](../forgejo.md#forgejo)・[ロールバック](../extra/forgejo.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)
+[AlmaLinux 10 の「Forgejo」](../forgejo.md#forgejo)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/forgejo.md)
 
 ## 補足
 
@@ -114,7 +114,7 @@
 
 ### LAN に公開する / 手順 2・8: 通信の範囲
 
-- 本書の rich rule は `family=ipv4`・送信元 CIDR・宛先 IPv4・対象ポート・`priority=100` を組にする。最初から存在する同じ規則には重ねず、撤去ではその組に一致する規則だけを外す
+- 本書の rich rule は `family=ipv4`・送信元 CIDR・宛先 IPv4・対象ポート・`priority=100` を組にする。最初から存在する同じ規則には重ねない
 - runtime と permanent の両方へ追加・削除する。既存のほかの runtime の設定も保存してしまう `--runtime-to-permanent` は使わない
 - 送信元を CIDR で制限する場合、許可の規則を追加しても、既存の `trusted` zone や `target=ACCEPT`、ポートやサービスへの広い許可を打ち消すものにはならない。許可外の送信元から接続できないことの確認を別に行う
 - `LAN_SUBNET=0.0.0.0/0` は全 IPv4 の送信元を許可する。その場合には許可外の送信元が無いため、拒否試験は行わない。runtime・permanent の規則確認と、指定 IP・ポートへの LAN・VPN クライアントの接続を確かめる

@@ -398,8 +398,8 @@
    printf 'FF_DARK=%s\n' "${FF_DARK}"
    ```
 
-   - 暗い表示にするときは `FF_DARK='1'` のままでよい。明るい表示に戻すときは `'0'` に変える
-   - `FF_DARK=1`（明るい表示に戻すときは `FF_DARK=0`）と出ればよい
+   - 暗い表示にするときは `FF_DARK='1'` のままでよい
+   - `FF_DARK=1` と出ればよい
 
 1. Firefox を閉じてから、Termux でダークテーマを設定する。
 
@@ -419,7 +419,7 @@
    fi
    ```
 
-   - `user_pref("ui.systemUsesDarkTheme", 1);` が 1 行出ればよい（明るい表示に戻すときは `user_pref("ui.systemUsesDarkTheme", 0);`）
+   - `user_pref("ui.systemUsesDarkTheme", 1);` が 1 行出ればよい
    - `中断:` が出たら、Firefox を閉じているかと、この項の手順 1 の値を確かめてから貼り直す
    - 設定の意味は[補足](reference/termux-firefox.md#termux-の-firefox-ダークテーマにする--手順-2-補足-テーマの指定と-userjs)
 
@@ -428,7 +428,6 @@
    - [Termux の Firefox: 起動と終了](#termux-の-firefox-起動と終了)の手順 1 か、[Termux の Firefox: ホーム画面のアイコンで起動する](#termux-の-firefox-ホーム画面のアイコンで起動する)の手順 5 で起動する
    - Firefox のツールバー・タブ・「New Tab」が暗い色になればよい
    - ダーク表示に対応したサイト（[MDN の日本語版](https://developer.mozilla.org/ja/)など）を開くと、本文まで暗い色になる。対応していないサイトは明るいまま
-   - 明るい表示に戻すときは、この項の手順 1 で `FF_DARK='0'` にし、Firefox を閉じてこの項の手順 2 を貼り直してから起動する
    - ![ツールバー・タブ・「New Tab」が暗い色の Firefox](images/android/termux-firefox-dark-v158.0.1.png)
 
 #### Termux の Firefox: 日本語の表示と入力

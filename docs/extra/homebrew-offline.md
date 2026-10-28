@@ -1,29 +1,9 @@
-# Homebrew のオフライン導入のロールバックと注意点
+# Homebrew のオフライン導入の注意点
 
 [手順書](../almalinux-setup.md#homebrew-のオフライン導入)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](../reference/homebrew-offline.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#homebrew-のオフライン導入)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- オフラインのホストで貼る。トンネルは要らない
-- Homebrew ごと消すなら、この節の手順 1 の代わりに、[SSH の SOCKS トンネルの手順 1〜3](../almalinux-setup.md#ssh-の-socks-トンネル) でトンネルを張ったシェルで [AlmaLinux 10 の初期設定のロールバックの「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 1〜3 を行う（アンインストーラを取得するため。本書では実行していない）
-- [手順 2](../almalinux-setup.md#homebrew-のオフライン導入) で dnf にプロキシを設定したときは、[SSH の SOCKS トンネル のロールバック](ssh-socks-tunnel.md#ロールバック)で dnf の行を消す
-
-1. 手順 4 で入れた jq を使わないときだけ、jq と、一緒に入った依存を消す。
-
-   ```bash
-   brew uninstall jq
-   brew autoremove
-   printf '\n\033[7m 確認 \033[0m\n'
-   brew list --versions
-   ```
-
-   - `brew autoremove` は、依存として入って、もうどの formula も使っていないものを消す（[AlmaLinux 10 の初期設定の Homebrew の使い方の基本](../almalinux-setup.md#homebrew-の使い方の基本)）
-   - 最後の一覧に `jq` が無ければよい
-
----
 
 ## 注意点
 

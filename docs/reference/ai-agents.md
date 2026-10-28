@@ -1,6 +1,6 @@
 # AI コーディングエージェントのセットアップ（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../ai-agents.md)・[ロールバックと注意点](../extra/ai-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)
+[手順書](../ai-agents.md)・[注意点](../extra/ai-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)
 
 ## 選択した方針
 
@@ -88,7 +88,7 @@
 ### AlmaLinux 10 で使う / Antigravity CLI / 手順 4: 補足: PATH の行を外す理由
 
 - AlmaLinux 10 の既定の `~/.bashrc` は、`~/.local/bin` を PATH に足す。`~/.bash_profile` は `~/.bashrc` を読む。インストーラーが足した行は重なるだけなので外し、`~/.bashrc` を共通の設定の形のままにする
-- 各ツールの手順には `~/.bashrc` を直接書き換えるブロックを置かない決まりなので、エディタで消し、消えたことだけを `grep` で確かめる形にした（Codex の PATH のブロックを外す、extra の手順と同じ）
+- 各ツールの手順には `~/.bashrc` を直接書き換えるブロックを置かない決まりなので、エディタで消し、消えたことだけを `grep` で確かめる形にした
 - 足された 4 行を消すと、2 つのファイルは入れる前と同じになった。新しいログインシェルでも `agy` が見つかった
 - 新しい版が無いときの `agy update` は、2 つのファイルを変えなかった。新しい版に上がるときに足すかは、確かめていない
 

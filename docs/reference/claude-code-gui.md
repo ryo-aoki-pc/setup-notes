@@ -1,6 +1,6 @@
 # Claude Code の GNOME 操作の参考資料
 
-[手順書](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)・[ロールバックと注意点](../extra/claude-code-gui.md)
+[手順書](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)・[注意点](../extra/claude-code-gui.md)
 
 ## 補足
 

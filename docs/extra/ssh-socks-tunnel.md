@@ -1,29 +1,9 @@
-# SSH の SOCKS トンネルのロールバックと注意点
+# SSH の SOCKS トンネルの注意点
 
 [手順書](../almalinux-setup.md#ssh-の-socks-トンネル)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](../reference/ssh-socks-tunnel.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#ssh-の-socks-トンネル)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- オフラインのホストで貼る。トンネルは要らない
-- トンネルを使った手順書のロールバックは、それぞれの手順書で行う
-- オンラインのホストには、`~/.ssh/known_hosts` のオフラインのホストの行だけが残る
-
-1. [dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)を行ったときだけ、dnf のプロキシの行を消す。
-
-   ```bash
-   {
-     sudo sed -i '/^proxy=socks5h:\/\/127\.0\.0\.1:1080$/d' /etc/dnf/dnf.conf
-     printf '\n\033[7m 確認 \033[0m\n'
-     grep -c '^proxy' /etc/dnf/dnf.conf
-   }
-   ```
-
-   - `0` が出ればよい
-
----
 
 ## 注意点
 
@@ -33,5 +13,5 @@
 - **`https_proxy` や git の `http.proxy` が入っていると、そちらが勝つ**: 手順 3 の補足
 - **`sudo` は `ALL_PROXY` を渡さない**: dnf は[dnf の節](../almalinux-setup.md#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)の設定で、podman はコマンドの前の `https_proxy` で通す
 - **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm のオフライン導入の手順 2](../almalinux-setup.md#npm-のオフライン導入)）
-- **dnf の節の行は残る**: トンネルが無い間は、dnf が `127.0.0.1 port 1080` につながらずに失敗する。dnf で外のリポジトリを使わなくなったら、[ロールバック](#ロールバック)で消す
+- **dnf の節の行は残る**: トンネルが無い間は、dnf が `127.0.0.1 port 1080` につながらずに失敗する
 - **ssh が切れると、トンネルも消える**: 取得の途中なら失敗するはず。そのときは手順 2 から張り直して、同じコマンドを貼り直す

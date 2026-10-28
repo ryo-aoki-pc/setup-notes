@@ -1,6 +1,6 @@
 # AlmaLinux 10 のセットアップの参考資料
 
-[AlmaLinux 10 のセットアップ](../almalinux-setup.md)・[ロールバックと注意点](../extra/almalinux-setup.md)
+[AlmaLinux 10 のセットアップ](../almalinux-setup.md)・[注意点](../extra/almalinux-setup.md)
 
 ## 補足
 
@@ -54,7 +54,7 @@
 
 `epel-release` は、repo ファイル（`/etc/yum.repos.d/epel.repo` と、無効の `epel-testing.repo`）と、鍵のファイル `/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10` を置く。
 
-取り込んだ鍵は、`rpm -q gpg-pubkey` に `gpg-pubkey-e37ed158-65785fa9` として出る（[ロールバック](../extra/almalinux-setup.md#flatpakrpm-fusionepel-を消す)の手順 8 で使う）。
+取り込んだ鍵は、`rpm -q gpg-pubkey` に `gpg-pubkey-e37ed158-65785fa9` として出る。
 
 ### EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
 
@@ -110,7 +110,7 @@
 - 2026-10-11 の通しでは、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できなかった。直しの確かめは Hyper-V の VM に限る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#手順書を直した所とその確かめ)）
   - FXA では、Homebrew の `python3` が無い状態で手順 4 を置き、「yazi」の手順 2 で `python@3.15` を入れ、再起動した後に、テキストエディターで「日本語」への変換と確定を確かめた
   - FXB では、入力不能の状態から手順 4 と再起動を通し、テキストエディターと WezTerm の Neovim で日本語入力と IME 切り替えを確かめた。Neovim の整形は、初めから整形済みで、変化を見分けられなかった
-  - FXB では、Homebrew とドロップインを消すロールバックの後も、再起動してログインしたテキストエディターで変換と確定を確かめた。ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
+  - ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
 
 ### Homebrew を root のシェルでも使う / 手順 1: 補足: シェルごとの PATH
 
@@ -123,10 +123,6 @@
 
 - **`su`（`-` 無し）も、Homebrew のユーザーの PATH を引き継がない**: PATH は root のものに置き換わる
 - **cron や systemd の unit では見えない**: `~/.bashrc` を読まないため（[注意点](../extra/almalinux-setup.md#注意点)の「`~/.bashrc` を読まない文脈」と同じ）。フルパスで書く
-
-### Homebrew を root のシェルでも使う / 手順 2: 補足: Homebrew を消したとき
-
-- Homebrew 自体を削除した場合は、共通設定が自動で読み込みを省略する
 
 ### Homebrew を sudo でも使う / 手順 1: 補足: 使い方
 
@@ -144,10 +140,6 @@
 | `sudoedit`（`EDITOR=nvim`） | エディタを `secure_path` で探し、自分のユーザーと自分の環境で動かす | Homebrew の `nvim`。設定は自分の `~/.config/nvim` |
 | `sudo EDITOR=nvim visudo` | エディタを `secure_path` で探し、root で動かす | Homebrew の `nvim`。設定は `/root/.config/nvim` |
 | `su -`、`sudo su -`、ssh での root のログイン | sudo の `secure_path` を通らない | 使えない（[root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節で使える） |
-
-### Homebrew を sudo でも使う / 手順 2: 補足: root のシェルの PATH
-
-- [Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節も通していれば、root のシェル（`sudo -i` も）では、root の共通の bash 設定が Homebrew を PATH に入れたまま
 
 ### dnf-automatic で自動で更新する / 手順 2: 補足: 入れる更新の設定
 
@@ -252,10 +244,6 @@
 - `HandleLidSwitch` の既定は `s "suspend"`
 - 蓋の無い PC では何も変わらない（置いても害は無い）
 
-### 画面オフ・画面ロック・自動サスペンドを止める / 手順 9: 補足: 残るディレクトリ
-
-- 空の `/etc/systemd/logind.conf.d` は残る
-
 ### Git / 手順 1: 補足: 変数について
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-補足の実測)
@@ -285,7 +273,6 @@
 | `branch.sort` | `-committerdate` | `git branch` を、最近コミットしたブランチから並べる |
 | `tag.sort` | `version:refname` | `git tag` を版の順（`v1.9` の後に `v1.10`）に並べる |
 
-- 要らないものは、[ロールバック](../extra/almalinux-setup.md#git-の道具を消す)の手順 9・12 に従い、そのキーだけ元の設定に戻せる
 - `merge.conflictStyle zdiff3` は [git-delta 手順 3](../almalinux-setup.md#git-delta) と同じ設定で、どちらを先に通してもよい
 
 入れなかったもの:
@@ -474,7 +461,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 ### Firefox / 手順 1: 補足: 扱う範囲
 
-- ESR / Beta の導入・確認・ロールバックは本書では扱わない
+- ESR / Beta の導入・確認は本書では扱わない
 - 手順 1 のブロックは、最後の行で値を読み戻す
 
 ### Firefox / 手順 3: 補足: 期限切れの副鍵の warning
@@ -500,10 +487,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 ### SSH を公開鍵だけにする / 手順 1: 補足: restorecon
 
 - `restorecon` は、`~/.ssh` の SELinux のラベルを、sshd が読めるものに合わせる
-
-### SSH を公開鍵だけにする / 手順 5: 補足: 既定値
-
-- `passwordauthentication yes` と `kbdinteractiveauthentication no` は、AlmaLinux 10 の既定
 
 ### Wake on LAN を使う / 手順 2: 補足: Wake-on の値
 
@@ -567,7 +550,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
   - 初回は元の `~/.bashrc` を `~/.bashrc.bak.<UNIX 時刻>` に控える。2 回目からは、前のブロックを消して末尾に足し直す（ブロックの前の空行が 1 つずつ増える）
   - 書かせない設定（環境変数など）はインストーラーに無い。`SHELL` が bash・zsh・fish 以外のときだけ書かない
   - `~/.bashrc` がリンクなら、リンク先のファイルを書き換える
-- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残し、[ロールバック](../extra/ai-agents.md#ai-エージェントとプラグインを消す)の手順 10 で消す（Codex CLI のインストーラーが足すブロックと同じ扱い）
+- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残す（Codex CLI のインストーラーが足すブロックと同じ扱い）
   - 共通の bash 設定より後ろで読まれるので、`~/.grok/bin` が PATH の先頭に来る
 - インストーラー（`install.sh`）は、配布物のハッシュや署名を確かめない（Windows の `install.ps1` が同梱の Git の zip の SHA-256 を確かめるだけ）
 
@@ -673,15 +656,10 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - 動いている tmux のサーバーは、前の版のまま動き続ける。新しい版を使うのは、セッションを全部閉じて `tmux ls` が `no server running on …` になってから
 - fzf は、開いているシェルには前の版の `fzf --bash` が読まれたまま。新しい端末から新しい版になる。zoxide のデータベース（`~/.local/share/zoxide/db.zo`）は更新で消えない
 
-### ロールバック / Git の道具を消す / 手順 9: 補足: 残るもの
-
-- `rerere.enabled` で覚えた解き方は、各リポジトリの `.git/rr-cache` に残る。要らなければ手で消す
-- `git init` 済みのリポジトリのブランチ名（`main`）は変わらない
-
 ### 選択した方針
 
 - **sudo をパスワード無しにする（「ログインと sudo」の手順 3）**: このリポジトリの手順書は、`sudo` の後ろに続く行がパスワードの入力に食われないように、NOPASSWD を前提に書いてある（README の記法）。最初に設定する
-  - `/etc/sudoers.d/nopasswd` に、このユーザーだけの 2 行を置く。`/etc/sudoers` の `%wheel ALL=(ALL) ALL` は残す（ロールバックで、ファイルを消せば元に戻る）
+  - `/etc/sudoers.d/nopasswd` に、このユーザーだけの 2 行を置く。`/etc/sudoers` の `%wheel ALL=(ALL) ALL` は残す
   - `Defaults:<USER> verifypw=any` も置く。`sudo -v`（`-v` は資格を更新するだけ）は、`verifypw` の既定の `all` では、そのユーザーに当たるすべての行が NOPASSWD のときだけパスワードを聞かない。`%wheel` の行が残るので、`verifypw=any` が無いと Homebrew のインストーラの `sudo -v` がパスワードを聞いた（sudoers(5) の `verifypw`）
   - 書く前に `visudo -cf -` で確かめ、`install -m 0440` で置き、最後に `visudo -c` で全体を確かめる（書式の誤りがあると `sudo` そのものが使えなくなるため）
 - **ファームウェアは fwupd（「OS とファームウェアの更新」の手順 2・3）**: Workstation に入っている `fwupdmgr` で、LVFS から入れる。AlmaLinux 10 の既定では LVFS のリモートが無効で、`refresh` が有効にするかを聞く
@@ -689,7 +667,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - **journal を永続にする（「システムの設定」の手順 5）**: `/etc/systemd/journald.conf.d/` のドロップインで `Storage=persistent` にする（`/etc/systemd/journald.conf` は書き換えない）
   - journald が作った `/var/log/journal` には、`systemd-journal` のグループと ACL が付かなかった。`systemd-tmpfiles --create --prefix /var/log/journal` で、パッケージの tmpfiles の定義どおりに付け直す
   - tmpfiles の定義（`/usr/lib/tmpfiles.d/systemd.conf` の `z`・`a+`）は、すでにあるものだけを直す。`/var/log/journal` は `journalctl --flush` のときに作られるので、tmpfiles はその後に行う（前に行うと、何も直らなかった）
-  - 元に戻すときは、`journalctl --relinquish-var` で journald に `/var/log/journal` を手放させてから消す。手放させずに消すと、動いている journald がすぐに作り直し、`Storage=auto` のまま書き続けた
 - **kdump を止める（「システムの設定」の手順 6・7）**: カーネルが落ちたときの記録が要らない PC では、予約されるメモリー（`crashkernel=`）を空ける
   - `/etc/kdump.conf` の `auto_reset_crashkernel` を `no` にする。`yes` のままだと、カーネルを入れたときに kernel-install の `92-crashkernel.install` が `crashkernel=` を付け直す
   - `crashkernel=` は `grubby --update-kernel=ALL --remove-args=crashkernel` で、入っているすべてのカーネルの起動の項目から外す
@@ -937,7 +914,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
 - [ScoopInstaller/Extras — lazygit.json](https://github.com/ScoopInstaller/Extras/blob/master/bucket/lazygit.json) — Windows 11 の scoop の定義
 - [lazygit Config Docs（v0.66.0）](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md) — Windows の設定の場所（`%LOCALAPPDATA%\lazygit\config.yml`）と `LG_CONFIG_FILE`
-- [ryo-aoki-pc/lazygit — README の導入方法](../almalinux-setup.md#lazygit-の設定を導入する) — 自分用の設定の Windows の clone の例と元に戻し方
+- [ryo-aoki-pc/lazygit — README の導入方法](../almalinux-setup.md#lazygit-の設定を導入する) — 自分用の設定の Windows の clone の例
 
 #### yazi
 
@@ -956,7 +933,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 #### Claude Code
 
-- [Advanced setup — Claude Code Docs](https://code.claude.com/docs/en/setup) — dnf / apt / apk リポジトリの設定、チャンネル、アンインストール、署名の検証。Windows 11 の節は、Set up on Windows・Install a specific version（チャンネルを選ぶ形）・Update manually・Binary integrity and code signing・Uninstall の Windows PowerShell
+- [Advanced setup — Claude Code Docs](https://code.claude.com/docs/en/setup) — dnf / apt / apk リポジトリの設定、チャンネル、署名の検証。Windows 11 の節は、Set up on Windows・Install a specific version（チャンネルを選ぶ形）・Update manually・Binary integrity and code signing
 - [Troubleshoot installation and login — Claude Code Docs](https://code.claude.com/docs/en/troubleshoot-install) — インストールが失敗したときの切り分け。Windows 11 の節は、Verify your PATH・Check for conflicting installations・`claude.exe` missing after an update on Windows・Claude Code does not support 32-bit Windows・Git Bash を探す順
 - [CLI reference — Claude Code Docs](https://code.claude.com/docs/en/cli-reference) — `claude` のオプションとサブコマンド（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
 - [Interactive mode](https://code.claude.com/docs/en/interactive-mode) / [Commands](https://code.claude.com/docs/en/commands) — セッションの中のキーとスラッシュコマンド

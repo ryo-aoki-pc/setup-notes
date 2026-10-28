@@ -1,6 +1,6 @@
 # podman-tui の参考資料
 
-[手順書](../containers.md#podman-tui)・[ロールバックと注意点](../extra/podman-tui.md)
+[手順書](../containers.md#podman-tui)・[注意点](../extra/podman-tui.md)
 
 ## 補足
 

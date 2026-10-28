@@ -2,7 +2,7 @@
 
 - Neovim を入れ、自分用の設定（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)。LazyVim をもとにした設定）を導入する。AlmaLinux 10 は Homebrew、Windows 11 は scoop で入れる
 - Android の Termux で使う Neovim は、Android のセットアップの「[Termux の Neovim](android.md#termux-の-neovim)」で入れる
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#端末とエディタを消す)・[Windows 11](extra/windows-setup.md#エディタとシェルのツールを消す)）で行う
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)
 
 > [!IMPORTANT]
 >
@@ -129,7 +129,6 @@
 
    - 退避したものは `renamed '…/nvim' -> '…/nvim.bak'` と出る。何も出なければ、退避するものは無かった
    - **注意**: `.bak` がすでにあると `mv` が `cannot overwrite` で止まる。古い `.bak` を片付けてから、この手順を貼り直す
-   - 戻し方は[ロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#ロールバック)
 
 1. この設定を `~/.config/nvim` に clone する。
 
@@ -482,7 +481,6 @@
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通し、GitLab でスコープ `read_api` の個人アクセストークンを用意してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 3 は、この項の手順 1・2 の後に開いた新しい端末
 - 編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る
-- 削除は [LazyVim のロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#gitlab-プレビューの設定を消す)で行う
 
 1. AlmaLinux 10 では、トークンを入力して `~/.bashrc` に書く。
 
@@ -585,7 +583,7 @@
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](windows-setup.md#git-for-windows)
    - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
-   - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。外してから始める
+   - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。中断し、既存の導入元と設定を確かめる
 
 1. scoop で Neovim を入れる。
 
@@ -647,17 +645,6 @@
    - `EDITOR = nvim` と `VISUAL = nvim` が出ればよい（何度貼ってもよい）
    - `中断:` と出たら、何も変えていない。ほかのエディタを使っているなら、この手順は行わない
    - 効くのは、この後に開いた窓とアプリから（開いている窓には入らない。WezTerm は新しいタブから）
-
-1. 元に戻すときは、ユーザーの環境変数 `EDITOR`・`VISUAL` を消す。
-
-   ```powershell
-   foreach ($n in 'EDITOR', 'VISUAL') { if ([Environment]::GetEnvironmentVariable($n, 'User') -eq 'nvim') { [Environment]::SetEnvironmentVariable($n, $null, 'User') } }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
-   ```
-
-   - `EDITOR = ` と `VISUAL = `（どちらも値が空）が出ればよい
-   - 値が `nvim` のときだけ消す（ほかの値は残る）
 
 #### Windows 11 で LazyVim の設定を導入する
 
@@ -909,7 +896,6 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4 で通常の窓を開き直し、手順 5 で Neovim を起動する
 - 編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る
 - 設定しなくても近似プレビューは使える
-- 削除は[LazyVim のロールバック](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#gitlab-プレビューの設定を消す)で行う
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 

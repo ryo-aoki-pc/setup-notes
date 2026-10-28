@@ -1,6 +1,6 @@
 # RDP をロックせずに切断の参考資料
 
-[手順書](../windows-setup.md#rdp-をロックせずに切断)・[ロールバックと注意点](../extra/windows-rdp-disconnect.md)
+[手順書](../windows-setup.md#rdp-をロックせずに切断)・[注意点](../extra/windows-rdp-disconnect.md)
 
 ## 補足
 

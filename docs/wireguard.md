@@ -1,7 +1,7 @@
 # WireGuard のセットアップ（AlmaLinux 10・Windows 11）
 
 - 2 つの拠点の AlmaLinux 10 の PC（WG ホスト）を WireGuard の VPN でつなぎ、外出先の AlmaLinux 10・Windows 11 の PC から、どちらかの拠点へつなぐ
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - **前提と実行場所（どのホスト・どの窓か）は、各項のリードに従う**。AlmaLinux 10 の項は自分のユーザーの bash で行い、`sudo -i`・`su -` のシェルでは行わない
@@ -21,7 +21,7 @@
 
 ### WireGuard
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[注意点](extra/wireguard.md)
 
 > [!IMPORTANT]
 > - **拠点の WG ホスト用の手順**。外出先の PC は[AlmaLinux](#wireguard-almalinux-10-の-pc-からつなぐ)・[Windows](#windows-11-で-wireguard-を使う)の手順から通す
@@ -667,7 +667,7 @@
 - クライアントを受ける拠点のホストで行う。登録簿から消しただけでは、動いているトンネルの接続許可は残る
 - 前提: [クライアントを登録する](#wireguard-クライアントを登録する)で、消すクライアントを登録してある
 - 実行場所: クライアントを受ける拠点の WG ホストの、自分のユーザーのシェル（bash）
-- 鍵の交換や PC のロールバックでも、この項を使う
+- 鍵の交換でも、この項を使う
 - `WG_USE_EXISTING_CONF=0`（既定）の、登録簿から conf を生成する構成が対象。`1` のままでは `apply` が peer を書き換えないので、この項では削除できない
 - **トンネル越しに ssh して作業している場合、この項の手順 5 の restart で自分のセッションが切れる**（→ [落とし穴](#wireguard-落とし穴-apply-は作業中の-ssh-経路そのものを切る)）
 
@@ -888,7 +888,7 @@
 ### Windows 11 で WireGuard を使う
 
 - Windows のクライアントから、拠点の WireGuard に接続する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[ロールバックと注意点](extra/wireguard.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/wireguard.md)・[参考資料](reference/wireguard.md)・[注意点](extra/wireguard.md)
 
 - Windows の操作は管理者の Windows PowerShell（5.1）で行う。各項で窓を開く
 - WG ホストで行う操作は、各項の説明に従って拠点の bash に貼る
@@ -917,8 +917,8 @@
    ```
 
    - `入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）と、`False` だけが出れば、まだ入っていない
-   - `WireGuardTunnel$wg0` か `wg0.conf.dpapi` が出たら、同名のトンネルがある。[ロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消してから始める（鍵は取り戻せない）
-   - 最後が `True` なら、前に作った鍵が残っている（この項の手順 5 で止まる）。使わないなら、[Windows 11 のロールバック](extra/wireguard.md#windows-11-のロールバック)の手順 1 で消す
+   - `WireGuardTunnel$wg0` か `wg0.conf.dpapi` が出たら、同名のトンネルがあるので中断する。既存の構成を使うか、トンネルの無い別の PC で始める
+   - 最後が `True` なら、前に作った鍵が残っているので中断する。既存の構成と鍵の用途を確かめる
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
 
 1. WireGuard を winget で入れる。

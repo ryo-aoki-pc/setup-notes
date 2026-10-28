@@ -1,6 +1,6 @@
 # Hyper-V の参考資料
 
-[手順書](../virtual-machines.md#hyper-v)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[ロールバックと注意点](../extra/hyper-v.md)
+[手順書](../virtual-machines.md#hyper-v)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[注意点](../extra/hyper-v.md)
 
 ## 補足
 

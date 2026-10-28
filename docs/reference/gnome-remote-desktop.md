@@ -1,6 +1,6 @@
 # GNOME のリモートログインの参考資料
 
-[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン)・[ロールバックと注意点](../extra/gnome-remote-desktop.md)
+[AlmaLinux 10 の「GNOME のリモートログイン」](../gnome-remote.md#gnome-のリモートログイン)・[注意点](../extra/gnome-remote-desktop.md)
 
 ## 補足
 
@@ -177,7 +177,6 @@ journalctl -u gdm -f
 RHEL 10 のドキュメントは `freerdp` パッケージの `winpr-makecert` で証明書を作る手順を載せている。これは Red Hat のドキュメントがそのツールを採用しているだけで、GRD の要件ではない。**GNOME 本家の README は openssl による生成を正規の手順として記載しており、機能的にも openssl の方が上位**（SAN・有効期間を指定できる）。本書のメイン手順が openssl を使うのはこのため。
 
 `winpr-makecert --help` では `-eku` や `-b`/`-e` が "Unsupported" と明記されており、SAN を付けるオプションは存在しない。
-
 
 #### 方式 1: ホストに freerdp をインストールする
 

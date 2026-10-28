@@ -1,6 +1,6 @@
 # VirtualBox の bootc ゲストの参考資料
 
-[手順書](../virtual-machines.md#virtualbox-の-bootc-ゲスト)・[ロールバックと注意点](../extra/virtualbox-guest-bootc.md)
+[手順書](../virtual-machines.md#virtualbox-の-bootc-ゲスト)・[注意点](../extra/virtualbox-guest-bootc.md)
 
 ## 補足
 
@@ -52,11 +52,6 @@
 
 - `tar: … time stamp … is … s in the future` が混ざるのは、VM の時計が進んでいるため
 
-### ホストオンリーアダプターだけの VM でビルドする / 手順 11: 補足: 切り替えた後の表示
-
-- 切り替えた後の `● Booted image:` が `containers-storage:…` になるのは、レジストリではなく、この VM の podman のイメージを追うため
-- `Digest:` がレジストリのものと違うのは、ファイルから取り込んだイメージの digest だから
-
 ### ホストオンリーアダプターだけの VM でビルドする / 手順 12: 補足: 自動で消すもの
 
 - 同じ項の手順 7 で新規作成し、その後に内容が変わっていない設定だけを自動で消す
@@ -69,14 +64,6 @@
 ### 更新 / 手順 3: 補足: ベースの取り込み
 
 - `--pull=newer` なので、ベースが新しくなっていれば取り込み直す
-
-### ロールバック / 手順 3: 補足: これらが自然には消えない理由
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#ロールバック--手順-3-補足-これらが自然には消えない理由)
-
-- ユーザーとグループは、`systemd-sysusers` が手元の `/etc/passwd`・`/etc/group` に書いたもの。元のイメージに戻しても、手元で変更済みのファイルは 3-way マージで残る
-- `/var` は、イメージを切り替えても戻らない
-- 一方、イメージが足した `/etc` のファイルは、手元で変えていなければ、元のイメージに戻したときに消える（ostree の `/etc` のマージの仕組み）
 
 ### 選択した方針
 

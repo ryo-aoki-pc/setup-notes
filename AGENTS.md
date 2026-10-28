@@ -6,7 +6,7 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md`、仮想マシンは両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md`、GNOME のリモート操作（AlmaLinux 10）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md`、コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md`、シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は両 OS とも `docs/shell-terminal.md`、Android（Termux・Termux の Firefox・Termux の開発環境）は `docs/android.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、ロールバック（「全部消す」などを含む）と注意点は `docs/extra/<手順書名>.md` に分ける。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md`、仮想マシンは両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md`、GNOME のリモート操作（AlmaLinux 10）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md`、コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md`、シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は両 OS とも `docs/shell-terminal.md`、Android（Termux・Termux の Firefox・Termux の開発環境）は `docs/android.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、注意点は `docs/extra/<手順書名>.md` に分ける。ロールバック（取り消し・全部消す）の手順は書かない。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
@@ -71,7 +71,7 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 
 ### 手順の並び順と完了前の点検
 
-- 手順書の本体（2 冊はすべての項）・更新・extra のロールバックを含むすべての操作手順に、[writing-rules.md の「手順の形」](docs/dev/writing-rules.md#手順の形)を適用する
+- 手順書の本体（2 冊はすべての項）・更新・extra を含むすべての操作手順に、[writing-rules.md の「手順の形」](docs/dev/writing-rules.md#手順の形)を適用する
 - コマンドのある手順は「1 行の説明 → コードブロック → 確認・分岐・注意の箇条書き」の順にする。箇条書きをコードブロックの前や、複数のコードブロックの間に置かない
 - 削除などの実行前に読む必要がある警告は、対象の節のリードに置き、節・項の名前と手順番号を示す。順序を揃えるために警告を危険なコマンドの後ろへ移すだけの修正はしない
 - 節のリードの箇条書きと、コマンドの無い GUI・スマートフォンなどの手順（「1 行の説明 → 箇条書き」）は、この順序違反として扱わない

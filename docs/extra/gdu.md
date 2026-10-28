@@ -1,35 +1,8 @@
-# gdu のロールバックと注意点
+# gdu の注意点
 
 [手順書](../almalinux-setup.md#gdu)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](../reference/gdu.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#gdu)の手順 N、「本書」「この文書」は手順書を指す
-
-## ロールバック
-
-1. brew で gdu を消す。
-
-   ```bash
-   brew uninstall gdu
-   ```
-
-1. 端末を閉じて開き直す。
-
-   - 削除したツールの設定は、次のシェルでは共通設定から読み込まれない
-   - `~/.bashrc` にツール別の行は書いていないので、削除も不要
-
-1. シンボリックリンクを作っていたときだけ、`~/.local/bin/gdu` を消す。
-
-   ```bash
-   rm -f ~/.local/bin/gdu                    # シンボリックリンクを作っていた場合
-   ```
-
-1. 設定ファイルを作っていたときだけ、`~/.gdu.yaml` を消す。
-
-   ```bash
-   rm -f ~/.gdu.yaml                         # 設定ファイルを作っていた場合
-   ```
-
----
 
 ## 注意点
 

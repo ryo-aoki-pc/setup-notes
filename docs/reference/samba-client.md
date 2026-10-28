@@ -1,6 +1,6 @@
 # Samba クライアントの参考資料
 
-[手順書](../samba.md#samba-クライアント)・[ロールバックと注意点](../extra/samba-client.md)
+[手順書](../samba.md#samba-クライアント)・[注意点](../extra/samba-client.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#補足の実測)
 
@@ -61,17 +61,6 @@
 
 - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
 
-### AlmaLinux 10 のロールバック / 手順 1: 補足: 2 つのユニットを止める理由
-
-- `.automount` と `.mount` を一緒に止めると、`cifs` と `autofs` の両方が外れる
-- `.mount` だけを止めると、`Stopping 'mnt-<SHARE>.mount', but its triggering units are still active: mnt-<SHARE>.automount` と出て、次のアクセスでまたマウントされる
-- `MOUNT_POINT` が空のまま `$(systemd-escape …)` を使うと、ユニットの名前が `-.mount`（ルートのファイルシステム）になる。先頭の `if` はこれを防ぐ
-
-### AlmaLinux 10 のロールバック / 手順 2: 補足: 行の消し方
-
-- 行は awk で、2 列目（マウント先）と 3 列目（`cifs`）を文字列として比べて消す。sed の正規表現だと、IP アドレスのドットなどが特別な意味を持つ
-- `tee` で書き戻すので、`/etc/fstab` のモード（0644）とラベル（`etc_t`）は変わらない
-
 ### Windows 11 の Samba クライアント / 手順 1: 補足: 管理者ではない窓で割り当てる理由
 
 - UAC が有効な Windows では、Administrators の一員がサインインすると、昇格したものとしないものの 2 つのログオン セッションができる。ドライブの割り当ては、作った側のセッションにだけある（Microsoft の文書）
@@ -114,11 +103,6 @@
 ### Windows 11 の更新 / 手順 3: 補足: 置き換わる資格情報
 
 - 登録し直すと、同じ `<SERVER>` の資格情報が置き換わる
-
-### Windows 11 のロールバック / 手順 1: 補足: 外すものと残るもの
-
-- `-UpdateProfile` で、プロファイルに覚えた割り当ても消し、次のサインインでつなぎ直さないようにする（Microsoft の文書）。覚えた割り当ての置き場所の `HKCU:\Network\<ドライブ文字>` が消えたかで確かめる
-- 資格情報は、この節の手順 2 で別に消す。同じサーバーのほかの割り当てが同じ資格情報でつなぐので、消すかどうかを分けた
 
 ### 選択した方針
 

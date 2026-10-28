@@ -1,6 +1,6 @@
 # AlmaLinux 10 のセットアップ
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[ロールバックと注意点](extra/almalinux-setup.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[注意点](extra/almalinux-setup.md)
 
 > [!IMPORTANT]
 > - 前提: AlmaLinux 10 Workstation を入れた PC と、インターネット接続。オフラインの Homebrew は[別手順](#homebrew-のオフライン導入)を使う
@@ -22,7 +22,7 @@
 
 > [!WARNING]
 > - [ログインと sudo](#ログインと-sudo)の手順 3 の後は、**このユーザーのプログラムがパスワード無しで root 権限を使える**。人が触れる場所の PC や信用できないプログラムを使うユーザーでは行わない
-> - sudo のパスワード入力は「ログインと sudo」の手順 3 だけ。元に戻すときは[ロールバック](extra/almalinux-setup.md#ロールバック)の最後の手順
+> - sudo のパスワード入力は「ログインと sudo」の手順 3 だけ
 
 ## 基本の設定
 
@@ -164,9 +164,9 @@
    fi
    ```
 
-   - `変える前:` の名前を控える（[ロールバックの「システムの設定を戻す」](extra/almalinux-setup.md#システムの設定を戻す)の手順 4 で使う）
    - `変えた後:` に、この項の手順 1 の名前が出ればよい
    - 開いている端末のプロンプトは、開き直すまで前の名前のまま
+   - `変える前:` の名前を控える
 
 1. SSH の待ち受けとファイアウォールを確かめ、この PC の IP アドレスを見る。
 
@@ -409,9 +409,6 @@
 | `flatpak list --app` | 入っているアプリ |
 | `flatpak info --show-permissions <ID>` | アプリに与えられている権限（ファイル・デバイス・ネットワーク） |
 | `sudo flatpak override <ID> --filesystem=<パス>` | 権限を足す（GUI でやるなら Flatseal） |
-| `sudo flatpak override --reset <ID>` | 足した権限を元に戻す |
-| `sudo flatpak uninstall <ID>` | 消す |
-| `sudo flatpak uninstall --unused` | もう誰も使っていない runtime を消す |
 
 - `flatpak` の読み取り系（`search` / `list` / `info` / `remote-ls`）は `sudo` 無しで動く
 - Flathub を登録した直後に `flatpak search flatseal` が `No matches found` を返す場合は、`sudo flatpak update --appstream` で検索用のメタデータを取得してから検索し直す。`sudo flatpak update` を 1 度実行したあとも、同じように検索できるようになる
@@ -480,13 +477,11 @@
 | コマンド | 用途 |
 |---|---|
 | `brew install <formula>` | 入れる。ビルド済みのボトルがあれば `Pouring ...` と出て、ソースビルドは走らない |
-| `brew uninstall <formula>` | 消す。Homebrew 7.0.7 では、不要になった依存も既定で自動削除する（[注意点](extra/almalinux-setup.md#注意点)） |
 | `brew list --versions` | 入っているものと版の一覧 |
 | `brew leaves` | ほかの導入済み formula や cask から依存されていない formula の一覧。明示的に入れたものの履歴ではない |
 | `brew info <formula>` | 版・依存・caveat（[gdu](#gdu) のような名前の注意書き） |
 | `brew deps --tree <formula>` | 依存の木。単独で入れたときに何が付いてくるか |
 | `brew outdated` | 更新できるものの一覧。何も無ければ無出力 |
-| `brew autoremove` | 依存として入って、もう誰も使っていないものを消す（`--dry-run` で確認できる） |
 
 - `brew install`・`brew upgrade` などの管理操作は、導入した一般ユーザーで行う
 - [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通しても、管理操作は一般ユーザーで行う
@@ -511,10 +506,6 @@
 
    - `/home/linuxbrew/.linuxbrew/bin/brew` が出ればよい。`/root/.bashrc` に PATH の行は追記しない
    - `brew install` などは一般ユーザーで行う
-
-1. root の共通設定も外す場合だけ、bash のロールバックを行う。
-
-   - [root の導入手順](shell-terminal.md#共通の-bash-設定を-root-に入れる)のロールバックを参照する
 
 #### Homebrew を sudo でも使う
 
@@ -558,19 +549,6 @@
      - `既定と違う` なら、`secure_path` がほかで変えてある（`sudo grep -rn secure_path /etc/sudoers /etc/sudoers.d` で探す）。そのホストでは、この項は使わない
    - 開いたままの root のシェル（`sudo -s` など）には効かない。開き直す
 
-1. 元に戻すときは、この項の手順 1 で置いたファイルを消す。
-
-   ```bash
-   {
-     sudo rm -f /etc/sudoers.d/homebrew
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo printenv PATH   # /sbin:/bin:/usr/sbin:/usr/bin
-   }
-   ```
-
-   - 最後に `/sbin:/bin:/usr/sbin:/usr/bin` と出ればよい
-   - 開いたままの root のシェル（`sudo -s` など）の PATH には残る。開き直すと消える
-
 ---
 
 ### Homebrew のオフライン導入
@@ -578,7 +556,7 @@
 - インターネットに出られないホスト（以下、オフラインのホスト）に、SSH の SOCKS トンネル越しに Homebrew を入れる。トンネルの出口は、インターネットに出られるホスト（以下、オンラインのホスト）
 - 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を、接続元をオンラインのホスト、接続先をオフラインのホストとして通してある。オフラインのホストには、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を、そのトンネルのシェルで通してある
 - 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル。Homebrew の通信にもトンネルを使う）。この項の手順 5 には、オンラインのホストで行う操作がある
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[ロールバックと注意点](extra/homebrew-offline.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[注意点](extra/homebrew-offline.md)
 - この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜4（同じ項の手順 4 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
 - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
 - **この項の手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
@@ -665,7 +643,6 @@
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 - GNOME Software の自動の更新（裏でダウンロードし、再起動のときに入れる）は、この項の手順 3 で止める（二重にしない）
-- 戻すときは、この項の手順 5・6
 
 1. dnf-automatic を入れる。
 
@@ -712,28 +689,6 @@
    - `Active: inactive (dead)` と、`… Finished dnf-automatic-install.service …` の行が出ればよい（更新が無ければすぐに終わる）
    - 更新があれば、入れ終わるまでプロンプトに戻らない
 
-1. 元に戻すときは、タイマーを止め、GNOME Software の自動の更新を戻す。
-
-   ```bash
-   {
-     sudo systemctl disable --now dnf-automatic-install.timer
-     /usr/bin/gsettings reset org.gnome.software download-updates
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl list-timers 'dnf-automatic*' --no-pager
-     /usr/bin/gsettings get org.gnome.software download-updates
-   }
-   ```
-
-   - タイマーの一覧が `0 timers listed.` になり、最後に `true` が出ればよい
-
-1. 元に戻すときは、続けて dnf-automatic を外す。
-
-   ```bash
-   sudo dnf remove dnf-automatic
-   ```
-
-   - `削除中:` が `dnf-automatic` の 1 つだけになる。`これでよろしいですか? [y/N]:` に `y`
-
 ---
 
 ### Secure Boot の署名鍵
@@ -741,7 +696,7 @@
 - Secure Boot が有効な PC（または VM）で、自分でビルドしたカーネルモジュールを読み込めるように、署名用の鍵を作って MOK に登録する
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある（bootc のシステムでは、`sudo` できるユーザーでログインしてある）
 - 実行場所: Secure Boot を使う PC（または VM）の、自分のユーザーの端末（bash）か SSH
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](reference/secure-boot-mok.md)・[ロールバックと注意点](extra/secure-boot-mok.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](reference/secure-boot-mok.md)・[注意点](extra/secure-boot-mok.md)
 - **カーネルモジュールをビルドする項より先に通す**。この項の手順 3 で Secure Boot が無効と分かったら、この項はそこで終わり
 - bootc のシステム（AlmaLinux Atomic Desktop など）でも同じ手順になる
 - **この項の手順 4 で一時パスワードを 2 回聞かれ、この項の手順 5 で再起動する**。答えてから次の手順を貼る
@@ -834,7 +789,7 @@
 - 自分のユーザーの linger を有効にして、ログアウトしている間も、そのユーザーのサービスが動くようにする
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: 常駐させるユーザー自身のシェル（デスクトップの端末か SSH の bash）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[ロールバックと注意点](extra/linger.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[注意点](extra/linger.md)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Syncthing](syncthing.md#syncthing)・[Dropbox 公式](dropbox.md#dropbox)・[rclone](dropbox.md#dropbox-と-rclone)
   - [Caddy](#caddy)・[Forgejo](forgejo.md#forgejo)・[Codeg](ai-agents.md#codeg-almalinux-10-で使う)
@@ -912,11 +867,11 @@
    fi
    ```
 
-   - 最初の `get` は変える前の値（最初のログインの後は、今の配列だけの `[('xkb', 'us')]` など）。戻すときのために控えておく
    - 2 つ目の `get` が `[('xkb', 'jp'), ('ibus', 'anthy')]`（US 配列なら `'us'`）になればよい
    - **ほかの入力ソースは消える**。残すものは `set` の値に足す
    - **注意**: `/usr/bin/` を外さない（[GNOME の表示と入力](#gnome-の表示と入力)の手順 1〜14 も同じ）
    - [Neovim](neovim.md#neovim)の手順 3 では、JIS 配列でも入力ソースが「英語 (US)」と Anthy に変わる
+   - 最初の `get` は変える前の値（最初のログインの後は、今の配列だけの `[('xkb', 'us')]` など）。この値を控える
 
 ---
 
@@ -1142,8 +1097,40 @@
    fi
    ```
 
-   - 最初の `get` の並びを、元に戻すときのために控える
    - 2 つ目の `get` がこの項の手順 1 の値になればよい。すぐに効く
+   - 最初の `get` の並びを控える
+
+#### GNOME の表示と入力が動かなくなったとき
+
+- 拡大率の実験的な機能やトレイアイコンの拡張が動かないときに、該当する設定だけを無効にする
+- 前提: [GNOME の表示と入力](#gnome-の表示と入力)で、該当する機能を有効にしてある
+- 実行場所: GNOME にログインしているユーザー本人の端末（bash）
+
+1. 拡大率がうまく動かないときは、mutter の実験的な機能を外す（効くのは再起動の後）。
+
+   ```bash
+   f=$(/usr/bin/gsettings get org.gnome.mutter experimental-features)
+   echo "変える前: ${f}"
+   for x in scale-monitor-framebuffer xwayland-native-scaling; do
+     f=$(printf '%s' "${f}" | sed -e "s/, '${x}'//" -e "s/'${x}', //" -e "s/\['${x}'\]/@as []/")
+   done
+   /usr/bin/gsettings set org.gnome.mutter experimental-features "${f}"
+   printf '\n\033[7m 確認 \033[0m\n'
+   /usr/bin/gsettings get org.gnome.mutter experimental-features
+   ```
+
+   - 最後に `@as []`（ほかの機能を足していれば、その一覧）が出ればよい
+
+1. トレイアイコンの拡張が動かなくなったときは、その拡張を無効にする。
+
+   ```bash
+   e=$(/usr/bin/gsettings get org.gnome.shell enabled-extensions)
+   /usr/bin/gsettings set org.gnome.shell enabled-extensions "$(printf '%s' "${e}" | sed -e "s/, 'appindicatorsupport@rgcjonas.gmail.com'//" -e "s/'appindicatorsupport@rgcjonas.gmail.com', //" -e "s/\['appindicatorsupport@rgcjonas.gmail.com'\]/@as []/")"
+   printf '\n\033[7m 確認 \033[0m\n'
+   /usr/bin/gsettings get org.gnome.shell enabled-extensions
+   ```
+
+   - `['background-logo@fedorahosted.org']` が出ればよい（`'appindicatorsupport@rgcjonas.gmail.com'` が無い）
 
 ---
 
@@ -1157,7 +1144,6 @@
 - 実行場所: GNOME にログインするユーザー本人の端末（bash）。この項の手順 1 で変数を設定したシェルに貼る
 - **人が触れる場所にある PC では行わない**（画面をロックしないので、前にいる人がそのまま使える）
 - GNOME を入れていない（デスクトップの無い）機械では、この項の手順 4・5 だけを行う
-- 戻すときは、この項の手順 6〜9。変える前の値ではなく**既定値**に戻る（Server with GUI で入れた PC は、既定でも電源につないでいる間は眠らない）
 
 1. 変数を設定する。
 
@@ -1245,61 +1231,6 @@
 
    - `s "ignore"` と出ればよい
 
-1. 元に戻すときは、自分のセッションの値を既定値に戻す。
-
-   ```bash
-   /usr/bin/gsettings reset org.gnome.desktop.session idle-delay
-   /usr/bin/gsettings reset org.gnome.desktop.screensaver lock-enabled
-   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power idle-dim
-   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type
-   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type
-   /usr/bin/gsettings reset org.gnome.settings-daemon.plugins.power power-button-action
-   printf '\n\033[7m 確認 \033[0m\n'
-   /usr/bin/gsettings get org.gnome.desktop.session idle-delay
-   /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
-   /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
-   ```
-
-   - `uint32 300`、`true`、続いて `idle-dim true`・`power-button-action 'suspend'`・`sleep-inactive-ac-type 'suspend'`・`sleep-inactive-battery-type 'suspend'` の 4 行が出ればよい
-
-1. 元に戻すときは、続けてログイン画面用の設定ファイルを消し、dconf を作り直して、ログイン画面から見える値が戻ったか確かめる。
-
-   ```bash
-   {
-     sudo rm -f /etc/dconf/db/gdm.d/90-power
-     sudo dconf update
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo -u gdm env DCONF_PROFILE=gdm /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'sleep-inactive-(ac|battery)-type|power-button-action'
-   }
-   ```
-
-   - 3 行とも `'suspend'` になればよい
-
-1. 元に戻すときは、続けてサスペンドとハイバネートの mask を外す。
-
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-     systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-   }
-   ```
-
-   - `Removed '/etc/systemd/system/sleep.target'.` のような行が 5 つ出て、`static` が 5 行出ればよい
-
-1. 元に戻すときは、続けて蓋のドロップインを消し、logind に読み直させる。
-
-   ```bash
-   {
-     sudo rm -f /etc/systemd/logind.conf.d/90-lid.conf
-     sudo systemctl reload systemd-logind
-     printf '\n\033[7m 確認 \033[0m\n'
-     busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
-   }
-   ```
-
-   - `s "suspend"` と出ればよい
-
 ---
 
 ## Git と開発の道具
@@ -1343,9 +1274,9 @@
 
    - AlmaLinux 10.2 では `git version 2.52.0` と出る（git は[Homebrew](#homebrew)の手順 1 で入っている）
    - 2 つ目は、設定を `<場所>	file:<ファイル>	<キー>=<値>` の形で 1 行ずつ出す。何も設定していなければ、何も出ない
-   - **この項の手順 3〜5 のキーと `pull.ff` の元の値・スコープ・ファイルを控える**。`global` に無ければ「global は未設定」と控える（[ロールバック](extra/almalinux-setup.md#git-の道具を消す)で使う）
    - 実際に追加・変更したキーも控える。既存の値が同じなら「変更なし」、この項の手順 7 を飛ばしたら「`pull.ff` は変更なし」とする
    - Windows では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
+   - **この項の手順 3〜5 のキーと `pull.ff` の元の値・スコープ・ファイルを控える**。`global` に無ければ「global は未設定」と控える
 
 1. 名前とメールアドレスを設定する。
 
@@ -1656,7 +1587,7 @@
    ```
 
    - 対話で GitHub.com / HTTPS / ブラウザ認証を選ぶ
-   - `Authenticate Git with your GitHub credentials?` は `Y`。外すときは[ロールバックの「Git の道具を消す」](extra/almalinux-setup.md#git-の道具を消す)の手順 6
+   - `Authenticate Git with your GitHub credentials?` は `Y`
    - ワンタイムコードが表示されたら、この項の手順 4 のブラウザで使う
    - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
 
@@ -1851,7 +1782,6 @@
   - 部分ステージと lazygit での取り込みには、lazygit 0.66.0 以上・delta 0.20.1 以上も要る
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う
 - 更新時は `git -C ~/excel-diff status` で既存の変更を確かめてから進む
-- 戻すときは、excel-diff の[AlmaLinux 10 のロールバック](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#almalinux-10-のロールバック)を行う
 - スクリプトの更新後の再導入の補足は[参考資料](reference/almalinux-setup.md#excel-diff-を導入更新する--手順-2-補足-スクリプトを更新した後に導入し直す理由)
 
 1. Python の版を確かめる。
@@ -2325,7 +2255,6 @@
 - `mdtable` を `~/md-table-excel` に clone し、専用の仮想環境に入れて確かめる。更新も、この項の手順 1 で行う
 - 前提: Python 3.9 以上と git が入っている（git は[Homebrew](#homebrew)の手順 1 で入る）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。`sudo` は、ensurepip で止まったときの `python3-pip` の導入だけで使う。更新では、`~/md-table-excel` の手元の変更の確認を省かない
-- 戻すときは、md-table-excel の[mdtable のロールバック](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/extra/readme.md#ロールバック)を行う
 
 1. リポジトリを clone し、導入して確かめる。
 
@@ -2484,7 +2413,7 @@
 - 前提: [Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある。`command -v brew` で何も出なければ、先に通す
   - この項の手順 5 の JSON の集計には `jq` が要る。`command -v jq` で何も出なければ、[導入元一覧の jq](tool-catalog.md#cli-定番の置き換え) を先に入れる
 - 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[ロールバックと注意点](extra/shellcheck.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[注意点](extra/shellcheck.md)
 
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
@@ -2687,7 +2616,7 @@
 - Microsoft の dnf のリポジトリから VS Code（rpm 版）を入れ、起動を確かめる
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[ロールバックと注意点](extra/vscode.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[注意点](extra/vscode.md)
 
 > [!IMPORTANT]
 > - **すべて対象ホスト上で実行する**。デスクトップが要るのは、この項の手順 6（GUI の起動）だけ
@@ -2801,7 +2730,6 @@
    ```
 
    - 入れるときは `code --install-extension <publisher.name>` の形で ID を渡す。たとえば [ShellCheck](#shellcheck-と-shfmt) をエディタから使うなら `timonwong.shellcheck`
-   - 消すときは `code --uninstall-extension <publisher.name>`
 
 #### VS Code: 更新
 
@@ -2828,7 +2756,7 @@
   - 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入)と[Neovim](neovim.md#neovim)の手順 1・2 を通してある
   - この項の手順 1・2 で経路を設定してから、[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 10 の初回起動を含む導入を行い、この項の手順 3 へ進む。Mason の npm パッケージは未導入でよい
 - 実行場所: オフラインのホストの、`sudo` できる自分のユーザーのシェル（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 のシェル）。この項の手順 4 でトンネルを閉じてログインし直し（オンラインのホストでも操作する）、この項の手順 5 はログインし直したシェルに貼る
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[ロールバックと注意点](extra/npm-offline.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[注意点](extra/npm-offline.md)
 
 > [!WARNING]
 >
@@ -3087,7 +3015,7 @@
 - 前提: [Homebrew](#homebrew)の手順 1〜3 と[Podman](containers.md#podman)の手順 7（API ソケット）までを通してある
   - `command -v brew podman` が 2 行を返さない、または `systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインしたシェル（端末の bash か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](reference/image-tools.md)・[ロールバックと注意点](extra/image-tools.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](reference/image-tools.md)・[注意点](extra/image-tools.md)
 - **この項の手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
 - **この項の手順 10 で dive の画面（TUI）が開く**。`q` で終了する
 
@@ -3263,7 +3191,7 @@
 - CPU・メモリ・ディスク・ネットワーク・プロセスを端末の画面で見る btop を、EPEL から入れる
 - 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で EPEL を有効にしてある（`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す）
 - 実行場所: btop を入れるホストの、自分のユーザーの端末（bash）。**すべて、その対象ホスト上で実行する**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[ロールバックと注意点](extra/btop.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[注意点](extra/btop.md)
 - **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
 - **この項の手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
 
@@ -3341,7 +3269,7 @@
 - ディスクの使用量を端末の画面で調べる gdu を、Homebrew で入れる
 - 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある（`command -v brew` で何も出なければ、先に通す）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[ロールバックと注意点](extra/gdu.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[注意点](extra/gdu.md)
 - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
@@ -3472,20 +3400,6 @@
    - `ssh -o PubkeyAuthentication=no <USER>@<IP>` が、パスワードを聞かずに `Permission denied (publickey,gssapi-keyex,gssapi-with-mic).` で断られればよい
    - 鍵（`ssh <USER>@<IP>`）では、そのまま入れる
 
-1. 元に戻すときは、この項の手順 3 のファイルを消し、パスワードでもログインできるようにする。
-
-   ```bash
-   {
-     sudo rm -f /etc/ssh/sshd_config.d/40-pubkey-only.conf
-     sudo sshd -t && sudo systemctl reload sshd
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo sshd -T | grep -Ei '^(passwordauthentication|kbdinteractiveauthentication) '
-   }
-   ```
-
-   - `passwordauthentication yes` と `kbdinteractiveauthentication no` が出ればよい
-   - 足した公開鍵は `~/.ssh/authorized_keys` に残る。要らなければ、その行を手で消す
-
 ---
 
 ### Wake on LAN を使う
@@ -3566,19 +3480,6 @@
    - AlmaLinux など Python のある PC では、`python3 -c "import socket; m = bytes.fromhex('<MAC>'.replace(':', '').replace('-', '')); s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1); s.sendto(b'\xff' * 6 + m * 16, ('255.255.255.255', 9))"` で送れる（`<MAC>` はこの項の手順 2 の値）
    - 起動しなければ、UEFI の設定（この項の手順 4）と、LAN のアダプターのランプ（電源が切れていても点いているか）を見る
 
-1. 元に戻すときは、マジック パケットでの起動を切る。
-
-   ```bash
-   if [ -z "${LAN_CON}" ]; then echo '中断: この項の手順 1 の LAN_CON が空のまま' >&2; else
-     sudo nmcli connection modify "${LAN_CON}" 802-3-ethernet.wake-on-lan default
-     sudo nmcli device reapply "${LAN_IF}"
-     printf '\n\033[7m 確認 \033[0m\n'
-     nmcli -g 802-3-ethernet.wake-on-lan connection show "${LAN_CON}"
-   fi
-   ```
-
-   - `default` が出ればよい。UEFI の設定は、この項の手順 4 の画面で戻す
-
 ---
 
 ### SSH の SOCKS トンネル
@@ -3586,7 +3487,7 @@
 - インターネットに出られないホストから、ssh の SOCKS の転送で、インターネットに出られるホストを通して外へ出る
 - 前提: オンラインのホストからオフラインのホストへ ssh でログインできる（LAN・VPN・VirtualBox のホストオンリーのネットワークなど）。オンラインのホストの OpenSSH は 7.6 以上
 - 実行場所: この項の手順 1・2 は、インターネットに出られるホスト（以下、オンラインのホスト）のシェル（bash）。手順 3 は、手順 2 でログインしたインターネットに出られないホスト（以下、オフラインのホスト）のシェル
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](reference/ssh-socks-tunnel.md)・[ロールバックと注意点](extra/ssh-socks-tunnel.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](reference/ssh-socks-tunnel.md)・[注意点](extra/ssh-socks-tunnel.md)
 
 > [!IMPORTANT]
 > - **2 台のホストで行う**。この項の手順 1・2 はオンラインのホストで、手順 3 は、手順 2 でログインしたオフラインのホストのシェルで貼る
@@ -3656,7 +3557,6 @@
 - 前提: オフラインのホストで[ログインと sudo](#ログインと-sudo)を通してある。[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 で、トンネルを張ってある
 - 実行場所: オフラインのホストの、[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 を貼ったシェル（bash）
 - 社内のミラーなど、dnf がトンネル無しで届くリポジトリを使うホストでは行わない（その通信もトンネルに向かってしまう）
-- 足した行は、[ロールバック](extra/ssh-socks-tunnel.md#ロールバック)で消すまで残る
 
 1. dnf にプロキシを設定する。
 
@@ -3735,7 +3635,7 @@
 - 前提: [ユーザーサービスの常駐](#ユーザーサービスの常駐)を通してあり、`curl`・`tar`・`sha512sum`・`openssl` が使える
 - 実行場所: Caddy を置く一般ユーザー自身の bash（デスクトップの端末か SSH）。`sudo` は使わない
 - 使う側: [Forgejo](forgejo.md#forgejo)・[複数のエージェントをブラウザから動かす Codeg](ai-agents.md#codeg-almalinux-10-で使う)。アプリと Caddy は同じ一般ユーザーで動かす
-- [参考資料](reference/caddy.md)・[ロールバックと注意点](extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
+- [参考資料](reference/caddy.md)・[注意点](extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
 
 #### Caddy: 入れて起動する
 

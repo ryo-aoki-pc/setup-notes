@@ -1,6 +1,6 @@
 # Windows 11 のセットアップ
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](reference/windows-setup.md)・[ロールバックと注意点](extra/windows-setup.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](reference/windows-setup.md)・[注意点](extra/windows-setup.md)
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
@@ -11,7 +11,7 @@
 - どの項も単独で通せる。リードの前提を先に満たす
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
-- 設定を更新するときは[更新](#更新)、戻すときは[ロールバック](extra/windows-setup.md#ロールバック)を使う
+- 設定を更新するときは[更新](#更新)を使う
 - AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップの「Windows 11 で使う」](ai-agents.md#windows-11-で使う)で入れる
 - 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で入れる
 - フォント（HackGen Console NF）・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイル・PowerShell の開発の設定は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で入れる
@@ -38,13 +38,13 @@
   - **「⚠サイレント⚠ ディスクの削除とインストール:」はオフにしてある**こと（オンだと、最初に見つかったディスクを確かめずに消して入れる）
   - ビルド 26200 以降の ISO で出る「Windows CA 2023署名のブートローダーを使用する」「インストール時にSkuSiPolicy.p7bを適応する」もオフのまま（既定でオフ）
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[ロールバックと注意点](extra/windows-dual-boot.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[注意点](extra/windows-dual-boot.md)
 
 - この項の手順 1〜3・6〜8 は、PC の画面と機器で行う。**この項の手順 4・5 は、セットアップのコマンド プロンプトに手で 1 行ずつ打つ**（貼り付けられない）
 - この項の手順 9〜13 は、入れた Windows の管理者の Windows PowerShell 5.1 に **Ctrl+V で貼る**。[貼り付けの設定](#貼り付けの設定)より前に右クリックで貼ると、行が逆順になる
 
 - この項の手順 10・12・13 は、条件に当たるときだけ行う
-- やり直すときは、この項の手順 3 から始める（ロールバックの節は無い）。この項の手順 5 のパーティションが残っていれば、この項の手順 4・5 は飛ばしてよい
+- やり直すときは、この項の手順 3 から始める。この項の手順 5 のパーティションが残っていれば、この項の手順 4・5 は飛ばしてよい
 
 - 両方の OS を入れた後、Windows から次回だけ AlmaLinux を起動したいときは、[QEFI Entry Manager を使う節](#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)へ進む
 
@@ -415,8 +415,8 @@
    ```
 
    - `PSWindowsUpdate` の版と場所が出ればよい
-   - この項の手順 2 で入っていなかった場合は、そのことを控える（[ロールバックの「再起動と PSWindowsUpdate」](extra/windows-setup.md#再起動と-pswindowsupdate)の手順 4 で使う）
    - ダウンロードや読み込みのエラーが出たら進まない
+   - この項の手順 2 で入っていなかった場合は、そのことを控える
    - **次の手順は、モジュールの読み込みが終わってから貼る**
 
 1. 再起動待ちでないことを確かめ、通常の Windows Update を検索する。
@@ -693,8 +693,8 @@
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じてこの項の手順 1 から
    - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 でアプリ インストーラーの登録と更新を確かめてから
    - `ScancodeMap` が空でなければ控える。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 は、別の割り当てがあれば止まる
-   - `CurrentUser` の値（未設定なら `Undefined`）を控え、[ロールバック](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 7 で使う
    - `Scoop` に場所が出たら、scoop はもう入っている
+   - `CurrentUser` の値（未設定なら `Undefined`）を控える
 
 1. スクリプトの実行ポリシーを RemoteSigned にする。
 
@@ -750,7 +750,7 @@
    - 最後に `Scoop was installed successfully!` が出ればよい
    - `Running the installer as administrator is disabled by default` が出たら、管理者の PowerShell に貼っている。閉じてこの項の手順 1 から
    - `Scoop is already installed` が出たら、もう入っている（何も変えずに終わる）。この項の手順 3 へ進む
-   - `'C:\Users\<WIN_USER>\scoop' exists and is not empty` が出たら、前に入れた scoop の残り（`persist` など）がある。要らなければ[ロールバックの「アプリと貼り付けの設定を外す」](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 5 で消してから貼り直す
+   - `'C:\Users\<WIN_USER>\scoop' exists and is not empty` が出たら中断する。既存の scoop の状態と保存したデータを確かめる
 
 1. scoop が入ったことを確かめる。
 
@@ -824,7 +824,7 @@
    ```
 
    - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
-   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。それを外してから始める
+   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。中断し、既存の導入元と設定を確かめる
    - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
    - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 3）
@@ -897,11 +897,11 @@
    - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
    - `Admin` が `False` なら、管理者ではない窓に貼っている。この項の手順 1 から
    - `CtrlEnter : InsertLineAbove` なら、[貼り付けの設定](#貼り付けの設定)の手順 2・4・5 をこの順で貼り直し、窓を開き直してこの項の手順 2 から
-   - 次の値を控える（[ロールバック](extra/windows-setup.md#ロールバック)で、元に戻すかを決めるのに使う）
-     - `ComputerName`（PC の名前。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 9）と `LanCategory`（LAN の種類。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 5）
-     - `RemoteDesktop`（1 なら無効、0 ならもう有効。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 4）と `RemoteAssistance`（1 なら有効、0 なら無効。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 3）
-     - `HelloOnly`（2 ならオン、0 ならオフ。ロールバックの「サインイン・検索・キーボードを戻す」の手順 5）と `Keyboard`（`kbd106.dll` なら JIS 配列。ロールバックの「サインイン・検索・キーボードを戻す」の手順 9）
-     - 最後の行の配信の最適化のモード（`Lan` が Windows の既定。ロールバックの「ネットワークと PC 全体の設定を戻す」の手順 1）
+   - 次の値を控える
+     - `ComputerName`（PC の名前）と `LanCategory`（LAN の種類）
+     - `RemoteDesktop`（1 なら無効、0 ならもう有効）と `RemoteAssistance`（1 なら有効、0 なら無効）
+     - `HelloOnly`（2 ならオン、0 ならオフ）と `Keyboard`（`kbd106.dll` なら JIS 配列）
+     - 最後の行の配信の最適化のモード（`Lan` が Windows の既定）
    - `Edition` が `Core` で始まる（Home）なら、[ネットワークとリモート](#ネットワークとリモート)の手順 4 は飛ばす
 
 1. 複数行のブロックをコピーボタンでコピーして右クリックで貼り、元の順に動くことを確かめる。
@@ -1219,10 +1219,9 @@
 - 前提: 無し
 - 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
-- **この項の手順 3 でサインアウトしてサインインし直し、この項の手順 4・6 は設定の画面で行う**
+- **この項の手順 3 でサインアウトしてサインインし直し、この項の手順 4 は設定の画面で行う**
 - **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
 - 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
-- 戻すときは、この項の手順 5・6（行った手順のものだけ）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -1263,7 +1262,7 @@
    ```
 
    - `控えた:` か `控えはもうある` の行と、`AdvertisingInfo\Enabled: 1 -> 0` の形の 11 行が出て、`->` の右がすべて `0`（`HttpAcceptLanguageOptOut` だけ `1`）ならよい
-   - `->` の左は元の値（空なら値が無かった）。初めて貼ったときに `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控え、2 回目からは書き換えない（この項の手順 5 で使う）
+   - `->` の左は元の値（空なら値が無かった）。初めて貼ったときに `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控え、2 回目からは書き換えない
    - `IsDeviceSearchHistoryEnabled` は、0 と 1 のどちらがオフかで資料が食い違う。この項の手順 4 の画面で確かめる
    - 多くは、この項の手順 3 でサインインし直した後に効く
 
@@ -1285,37 +1284,6 @@
    - 新しいビルドでは、「カスタマイズされたエクスペリエンス」は「パーソナライズされたオファー」の名前で別のページにある
    - 「検索のアクセス許可」で、「クラウドのコンテンツ検索」の 2 つと「このデバイスの検索履歴」がオフ。「検索のハイライトを表示する」は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の値で灰色になっている
    - この項の手順 2 で書いた項目がオンのまま出ていたら、その画面でオフにする
-   - **次の手順は、設定を閉じてから貼る**
-
-1. 元に戻すときは（この項の手順 2 を行ったとき）、控えた元の値に戻す。
-
-   ```powershell
-   & {
-     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not (Test-Path -LiteralPath $rec)) { Write-Error "中断: 控えが無い: $rec"; return }
-     foreach ($r in Import-Csv -LiteralPath $rec) {
-       if ($r.Value -match '^-?[0-9]+$') { Set-ItemProperty -LiteralPath $r.Path -Name $r.Name -Type $(if ($r.Kind -eq 'QWord') { 'QWord' } else { 'DWord' }) -Value ([long]$r.Value) } else { Remove-ItemProperty -LiteralPath $r.Path -Name $r.Name -ErrorAction SilentlyContinue }
-       '{0}\{1}: {2}' -f (Split-Path -Path $r.Path -Leaf), $r.Name, (Get-ItemProperty -LiteralPath $r.Path -ErrorAction SilentlyContinue).($r.Name)
-     }
-   }
-   ```
-
-   - 11 行が出て、`:` の右が控えた元の値（元が空なら空）ならよい。元の値が無かったものは消す
-   - `中断: 控えが無い` が出たら、この項の手順 6 の画面で戻す
-   - 控えのファイルは残る。要らなければ手で消す
-   - 効くのは、サインインし直した後
-
-1. 元に戻すときは（この項の手順 4 で切ったものを使うときか、この項の手順 5 で控えが無かったとき）、設定の画面でオンに戻す。
-
-   ```powershell
-   Start-Process 'ms-settings:privacy'
-   ```
-
-   - この項の手順 4 でオフにした「設定アプリで通知を表示する」・「カスタム手書き入力と入力の辞書」・「オプションの診断データを送信する」のうち、使うものをオンにする
-   - この項の手順 5 で `中断: 控えが無い` が出たときは、この項の手順 2 で切った項目（「全般」の広告 ID と言語リスト・「オンライン音声認識」・「手書き入力と入力の改善」・「カスタマイズされたエクスペリエンス」・「フィードバックの頻度」・「検索のアクセス許可」の 3 つ）も、使うものを戻す
-   - 同じときに、エクスプローラーの同期プロバイダーの通知も使うなら、フォルダー オプションの「表示」で戻す
-   - 消えた辞書（覚えた単語の一覧）は戻らない
 
 ---
 
@@ -1328,7 +1296,6 @@
 - **この項の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この項の手順 2 の代わりにこの項の手順 3（画面だけで切る）を行う
 - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
 - **この項の手順 3・4 は Edge の画面で行う**
-- 戻すときは、この項の手順 5・6（行った手順のものだけ）
 
 1. 管理者の Windows PowerShell（5.1）を開く。
 
@@ -1347,7 +1314,7 @@
 
    - `StartupBoostEnabled : 0` と `BackgroundModeEnabled : 0` が出ればよい
    - 開いている Edge には、開き直すか、`edge://policy` の「ポリシーの再読み込み」で効く
-   - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（同じ項の手順 2 と[ロールバックの「表示と入力を戻す」](extra/windows-setup.md#表示と入力を戻す)の手順 8 は、無いものを飛ばす）
+   - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（同じ項の手順 2 は、無いものを飛ばす）
 
 1. （この項の手順 2 の代わりに）管理の表示を出したくないときは、Edge の設定の画面で 2 つを切る。
 
@@ -1361,22 +1328,6 @@
    - この項の手順 2 を行ったなら、`edge://policy` に `StartupBoostEnabled` と `BackgroundModeEnabled` が、値 `false`・状態 `OK` で出る
    - Edge の窓をすべて閉じると、通知領域に Edge のアイコンが残らない
    - サインインし直した後も `msedge.exe` が見えることがある
-
-1. 元に戻すときは（この項の手順 2 を行ったとき）、管理者の PowerShell で、2 つのポリシーを消す。
-
-   ```powershell
-   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-   foreach ($n in 'StartupBoostEnabled', 'BackgroundModeEnabled') { Remove-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $k -ErrorAction SilentlyContinue | Format-List StartupBoostEnabled, BackgroundModeEnabled
-   ```
-
-   - 2 つが空ならよい
-   - Edge を開き直すと、2 つの切り替えをまた変えられる
-
-1. 元に戻すときは（この項の手順 3 を行ったとき）、Edge の設定の画面で 2 つをオンに戻す。
-
-   - `edge://settings/system` で、この項の手順 3 でオフにした 2 つをオンにする
 
 ---
 
@@ -1513,7 +1464,6 @@
 - **ストレージ センサーは、一時ファイルとごみ箱に 30 日を超えて置いたファイルを毎月消す（取り戻せない）**
   - ごみ箱を置き場に使うなら、[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 11・12 を飛ばすか、同じ項の手順 12 でごみ箱を「許可しない」にする
 - 入力言語の切り替えのキーを切っても、Win+Space で切り替えられる
-- 戻すときは、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 1〜10（行った手順のものだけ）。[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 2 で控えた値を使う
 
 #### 表示・入力・音・ストレージを控えて変える
 
@@ -1561,7 +1511,7 @@
    ```
 
    - `控えた:` か `控えはもうある` の行と、13 行の表（`Name` と `Value`）が出ればよい。値が無いものは空
-   - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない（[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 3〜6 で使う）
+   - 控えは `%LOCALAPPDATA%\setup-notes\display-before.csv`。初めて貼ったときだけ作り、2 回目からは書き換えない
 
 1. 固定キー・フィルター キー・切り替えキーのショートカットを切る。
 
@@ -1692,7 +1642,7 @@
    ```
 
    - 控えを作った成功の 1 行（2 回目からは `控えはもうある`）と、`Scheme : .None` と、空にしたイベントの数（1 以上）が出ればよい
-   - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない（[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 8 で戻す）
+   - 控えは `%LOCALAPPDATA%\setup-notes\appevents.reg`。初めて貼ったときだけ作り、2 回目からは書き換えない
    - 次に鳴る音から効く
    - 後から入れたアプリが足したイベントには、音が入る。気になれば、この手順を貼り直す
 
@@ -1724,7 +1674,7 @@
    ```
 
    - 7 行が出て、`->` の右が `01`・`04`・`08` は `1`、`256` と `2048` は `30`、`32` と `512` は `0` ならよい
-   - `->` の左（元の値）を控える。空なら値が無かった。数があったなら、[表示・入力・音・ストレージを元に戻す](#表示入力音ストレージを元に戻す)の手順 10 で戻した後に、画面で同じにし直す
+   - `->` の左（元の値）を控える。空なら値が無かった
    - 毎月、一時ファイルと、ごみ箱に 30 日を超えて置いたファイルを消す。ダウンロード フォルダーは消さない
    - **注意**: OneDrive にサインインしているなら、30 日開かないファイルがオンラインだけになりうる。この項の手順 12 で外す
 
@@ -1759,178 +1709,6 @@
    - タスクバーのアプリを右クリックすると「タスクの終了」がある
    - エラーや通知の効果音が鳴らない
    - 行わなかった手順のものは、元のまま
-   - **次の手順は、設定を閉じてから貼る**
-
-#### 表示・入力・音・ストレージを元に戻す
-
-- 変更した表示・入力・音・ストレージの設定を元に戻す
-- 前提: [表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)で戻す設定を変更済み。控えのファイルを同じユーザーのまま残してある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 3 を行ったとき）、固定キーなどのショートカットを有効に戻す。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   foreach ($k in 'StickyKeys', 'Keyboard Response', 'ToggleKeys') {
-     $p = "HKCU:\Control Panel\Accessibility\$k"
-     $v = (Get-ItemProperty -LiteralPath $p -ErrorAction SilentlyContinue).Flags
-     if ($null -eq $v -or $v -notmatch '^[0-9]+$') { "無い: $k" } else {
-       Set-ItemProperty -LiteralPath $p -Name Flags -Type String -Value ([string]([int]$v -bor 4))
-       '{0}: {1} -> {2}' -f $k, $v, (Get-ItemProperty -LiteralPath $p).Flags
-     }
-   }
-   ```
-
-   - `StickyKeys: 506 -> 510` の形で出ればよい
-   - 効くのは、サインインし直した後
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 4 を行ったとき）、切り替えのキーを控えた値に戻す。
-
-   ```powershell
-   & {
-     $t = 'HKCU:\Keyboard Layout\Toggle'
-     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
-     $before = @{}
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（既定の値にする）: $rec" }
-     $def = [ordered]@{ 'Hotkey' = '1'; 'Language Hotkey' = '1'; 'Layout Hotkey' = '2' }
-     if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
-     foreach ($n in $def.Keys) {
-       $v = if ($before[$n] -match '^[1-4]$') { $before[$n] } else { $def[$n] }
-       Set-ItemProperty -LiteralPath $t -Name $n -Type String -Value $v
-       '{0}: {1}' -f $n, (Get-ItemProperty -LiteralPath $t).$n
-     }
-   }
-   ```
-
-   - 3 行に、[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 2 で控えた値が出ればよい（控えが無いか空なら、既定とされる `1`・`1`・`2`）
-   - 効くのは、サインインし直した後
-   - 画面で戻すなら、設定の「時刻と言語」→「入力」→「キーボードの詳細設定」の「入力言語のホットキー」
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 5 を行ったとき）、Alt+Tab とシェイクの値を控えた値に戻す。
-
-   ```powershell
-   & {
-     $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
-     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
-     $before = @{}
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
-     foreach ($n in 'MultiTaskingAltTabFilter', 'DisallowShaking') {
-       if ($before[$n] -match '^[0-9]+$') { Set-ItemProperty -Path $adv -Name $n -Type DWord -Value ([int]$before[$n]) } else { Remove-ItemProperty -Path $adv -Name $n -ErrorAction SilentlyContinue }
-     }
-     Get-ItemProperty -Path $adv | Format-List MultiTaskingAltTabFilter, DisallowShaking
-   }
-   ```
-
-   - 2 つに控えた値が出るか、控えで空だったものが空（既定）になればよい
-   - 効くのは、サインインし直した後
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 6 を行ったとき）、ギャラリーとホームを戻す。
-
-   ```powershell
-   & {
-     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
-     $before = @{}
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値だけ消す）: $rec" }
-     foreach ($g in '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}', '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}') {
-       if ($before[$g] -eq 'False') { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /f } else { reg.exe delete "HKCU\Software\Classes\CLSID\$g" /v System.IsPinnedToNameSpaceTree /f }
-       '残っている {0}: {1}' -f $g, (Test-Path -LiteralPath "HKCU:\Software\Classes\CLSID\$g")
-     }
-   }
-   ```
-
-   - キーごとに、成功の 1 行と `残っている` の行が出ればよい
-   - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 7 を行ったとき）、「タスクの終了」の値を控えた値に戻す。
-
-   ```powershell
-   & {
-     $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
-     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
-     $before = @{}
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (Test-Path -LiteralPath $rec) { Import-Csv -LiteralPath $rec | ForEach-Object { $before[$_.Name] = $_.Value } } else { "控えが無い（値を消す）: $rec" }
-     if ($before['TaskbarEndTask'] -match '^[0-9]+$') { Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value ([int]$before['TaskbarEndTask']) } else { Remove-ItemProperty -LiteralPath $k -Name TaskbarEndTask -ErrorAction SilentlyContinue }
-     Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List TaskbarEndTask
-   }
-   ```
-
-   - 控えた値が出るか、控えで空なら何も出なければよい（値が無いとオフ）
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 8 を行ったとき）、アニメーション効果を戻す。
-
-   ```powershell
-   & {
-     Add-Type -Namespace SetupNotes -Name Spi -MemberDefinition @'
-   [StructLayout(LayoutKind.Sequential)] public struct ANIMATIONINFO { public uint cbSize; public int iMinAnimate; }
-   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
-   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref int pvParam, uint fWinIni);
-   [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref ANIMATIONINFO pvParam, uint fWinIni);
-   '@
-     $f = 3   # SPIF_UPDATEINIFILE (1) + SPIF_SENDCHANGE (2)
-     [void][SetupNotes.Spi]::SystemParametersInfo(0x1043, 0, [IntPtr]1, $f)   # SPI_SETCLIENTAREAANIMATION: TRUE
-     $ai = New-Object 'SetupNotes.Spi+ANIMATIONINFO'
-     $ai.cbSize = 8
-     $ai.iMinAnimate = 1
-     [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
-     $on = 0
-     [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     'ClientAreaAnimation : {0}' -f $on
-     'MinAnimate          : {0}' -f (Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop\WindowMetrics').MinAnimate
-   }
-   ```
-
-   - `ClientAreaAnimation : 1` と `MinAnimate : 1` が出ればよい（すぐに効く）
-   - 設定の「アクセシビリティ」→「視覚効果」の「アニメーション効果」をオンにしてもよい
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 9 を行ったとき）、控えた効果音の設定を書き戻す。
-
-   ```powershell
-   & {
-     $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
-     reg.exe import $bak
-     'Scheme : {0}' -f (Get-ItemProperty -Path 'HKCU:\AppEvents\Schemes').'(default)'
-   }
-   ```
-
-   - 成功の 1 行と、控えたときのスキーム（ふつうは `.Default`）が出ればよい
-   - `中断: 控えが無い` が出たら、サウンドの画面（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 10 と同じ）の「サウンド設定」を「Windows 標準」にする
-   - 控えのファイルは残る。要らなければ手で消す
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 10 を行ったとき）、サウンドの画面で起動音を戻す。
-
-   ```powershell
-   control.exe 'mmsys.cpl,,2'
-   ```
-
-   - 「Windows スタートアップのサウンドを再生する」にチェックを入れ、「OK」を押す
-   - **次の手順は、サウンドの画面を閉じてから貼る**
-
-1. 元に戻すときは（[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 11 を行ったとき）、ストレージ センサーの値を消す。
-
-   ```powershell
-   $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
-   foreach ($n in '01', '04', '08', '256', '32', '512', '2048') { Remove-ItemProperty -LiteralPath $k -Name $n -ErrorAction SilentlyContinue }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -LiteralPath $k -ErrorAction SilentlyContinue | Format-List '01', '04', '08', '256', '32', '512', '2048'
-   ```
-
-   - 7 つが空ならよい。ストレージ センサーはオフに戻る
-   - [表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 11 の `->` の左に数があったなら、設定の「ストレージ センサー」で同じにし直す
-   - [表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 12 で OneDrive やごみ箱を変えたなら、同じ画面で戻す
-
----
 
 ### 自動起動と標準アプリ
 
@@ -2003,7 +1781,6 @@
 - **この項の手順 3 で CopyQ を起動し、この項の手順 5・6 は画面で行う**
 - CopyQ は窓を持つアプリなので、`copyq.exe` のコマンドの結果は、`| Write-Output` を付けないと出ない
 - **CopyQ の履歴は、暗号化されずにディスクに残る**。パスワードなどをコピーするときは、[注意点](extra/windows-setup.md#注意点)を読む
-- 戻すときは、この項の手順 8〜10（行った手順のものだけ）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -2027,7 +1804,7 @@
    ```
 
    - 窓を待たずに PowerShell に戻り、通知領域（「^」の中のことがある）に CopyQ のアイコンが出る
-   - 見つからない旨のエラーが出たら、前に別の場所へ入れた CopyQ がある。この項の手順 9・10 で外してから始め直す
+   - 見つからない旨のエラーが出たら、前に別の場所へ入れた CopyQ があるので中断し、既存の導入元と設定を確かめる
    - **次の手順は、アイコンが出てから貼る**（起動の前に貼ると、サーバーにつながらない旨が出る）
 
 1. サインインのときに CopyQ が起動するようにし、Windows の履歴（Win+V）がオフかを確かめる。
@@ -2079,44 +1856,6 @@
    - 「ファイル」→「設定...」→「全般」の「スクリーンショットや録画に写らない」のチェックを外して「OK」を押すのと同じ
    - **注意**: 切ると、PC の画面のスクリーンショット・録画・画面共有に、CopyQ の窓（クリップボードの履歴）が写る
 
-1. 元に戻すときは（この項の手順 7 を行ったとき）、スクリーンショットや録画に写らない設定をオンに戻す。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe" config prevent_screen_capture true | Write-Output
-   ```
-
-   - `true` が出ればよい
-   - サーバーにつながらない旨が出たら、この項の手順 3 で CopyQ を起動してから貼り直す
-
-1. 元に戻すときは、サインインのときの起動を外し、CopyQ を止める。
-
-   ```powershell
-   & {
-     $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
-     $lnk = Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     & $copyq config autostart false | Write-Output
-     Remove-Item -LiteralPath $lnk -ErrorAction SilentlyContinue
-     & $copyq exit | Write-Output
-     Test-Path -LiteralPath $lnk
-   }
-   ```
-
-   - `false` と、最後に `False` が出て、通知領域から CopyQ のアイコンが消えればよい
-   - CopyQ が動いていなければ、サーバーにつながらない旨が出る。それでも `copyq.lnk` は消える
-
-1. 元に戻すときは、CopyQ を外す。
-
-   ```powershell
-   winget uninstall --exact --id hluk.CopyQ --source winget
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget list --exact --id hluk.CopyQ
-   ```
-
-   - 最後に、入っているパッケージが見つからない旨が出ればよい
-   - 設定と履歴は残る（`%APPDATA%\copyq`。17.0.0 からは `%LOCALAPPDATA%\copyq` も）。要らなければ手で消す（取り戻せない）
-   - この項の手順 5 で Windows の履歴を切ったなら、使うときは設定の「システム」→「クリップボード」でオンに戻す
-
 ---
 
 ### PowerToys のユーティリティを絞る
@@ -2125,12 +1864,11 @@
 - 前提: [アプリを入れる](#アプリを入れる)で PowerToys を入れてある
 - 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
-- **この項の手順 4・7 は通知領域で PowerToys を終了し、この項の手順 6 は PowerToys の設定の画面で行う**
+- **この項の手順 4 は通知領域で PowerToys を終了し、この項の手順 6 は PowerToys の設定の画面で行う**
 - PowerToys は起動のときにだけ設定ファイルを読むので、終了してから書き、起動し直す
 - 切るユーティリティは好みで選ぶ。この項の手順 2 の `$PT_OFF` は案で、Always On Top・コマンド パレット・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer は残す（[参考資料](reference/windows-setup.md)）
 - 「起動時に実行」はオン、「常に管理者として実行」はオフのまま変えない。自動の更新の取得も変えない
 - Keyboard Manager は使わない（既定でオフ。Caps Lock は[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で変える）
-- 戻すときは、この項の手順 7・8
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -2199,7 +1937,7 @@
    ```
 
    - `控えた:`（2 回目からは `控えはもうある`）の行と、`FindMyMouse: False` の形の行が `$PT_OFF` の数だけ出て、通知領域に PowerToys のアイコンが戻ればよい
-   - 控えは `%LOCALAPPDATA%\Microsoft\PowerToys\settings.json.windows-setup.bak`。控えが無いときだけ作る（この項の手順 8 で使い、書き戻すと消える）
+   - 控えは `%LOCALAPPDATA%\Microsoft\PowerToys\settings.json.windows-setup.bak`。控えが無いときだけ作る
    - `中断: PowerToys が動いている` が出たら、この項の手順 4 に戻る（設定の窓が残っていても止まる）
 
 1. PowerToys の設定の画面で、切ったユーティリティがオフになっていることを確かめる。
@@ -2212,35 +1950,6 @@
    - Command Not Found の「インストール」を押すと、PowerShell 7 のプロファイルに行が足される（[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)の印は付かない）
    - 見終わったら、設定の窓を閉じる
 
-1. 元に戻すときは、通知領域の PowerToys を右クリックし、「終了」で閉じる。
-
-   - PowerToys の設定の窓も閉じる
-   - **次の手順は、アイコンが消えてから貼る**
-
-1. 元に戻すときは、控えた設定ファイルを書き戻し、PowerToys を起動する。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
-     $bak = "$path.windows-setup.bak"
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この項の手順 7 で終了してから貼り直す'; return }
-     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
-     if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この項の手順 2 を貼り直してから、この項の手順 7 に戻る'; return }
-     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
-     Remove-Item -LiteralPath $bak
-     $r = [IO.File]::ReadAllText($path) | ConvertFrom-Json
-     foreach ($n in $PT_OFF) { '{0}: {1}' -f $n, $r.enabled.$n }
-     Start-Process -FilePath $PT_EXE
-   }
-   ```
-
-   - `FindMyMouse: True` の形の行（控えたときの値）が出て、通知領域に PowerToys のアイコンが戻ればよい
-   - 新しい窓では、先にこの項の手順 2 を貼る
-   - 控えた後に画面で変えた PowerToys の設定も、控えたときの値に戻る
-   - `中断: 控えが無い` が出たら、スタートメニューから PowerToys を起動し、設定の画面で、切ったユーティリティのスイッチをオンにする
-   - 控えのファイルは消える（もう一度この項を通すと、そのときの設定を控え直す）
-
 ---
 
 ### Windows のホットキー競合
@@ -2249,7 +1958,7 @@
 - 前提: [初回準備](#windows-のホットキー競合-初回準備)で Hotkey Screener を展開してある
 - 実行場所: 問題が起きるユーザー・ログインセッションのデスクトップ（Hotkey Screener）
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[参考資料](reference/windows-hotkey-conflict.md)・[ロールバックと注意点](extra/windows-hotkey-conflict.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[参考資料](reference/windows-hotkey-conflict.md)
 
 - 問題が起きる Windows 11 のユーザー・ログインセッションで実施する
 - 検出時には対象キーが実際に入力され、対応する操作が実行されることもある。先に作業を保存する
@@ -2675,7 +2384,6 @@
   - Docker のポートの公開と、一部の VPN には、既知の問題がある（[参考資料](reference/windows-setup.md)）
 - 書くのは `networkingMode` だけ。DNS・ファイアウォール・プロキシ・メモリの値は既定のまま。LAN から WSL の中のサーバーに入るための Hyper-V のファイアウォールの規則は、この項では作らない
 - 画面で変えるなら、スタートメニューの「Linux 用 Windows サブシステム設定」→「ネットワーク」→「ネットワーク モード」（同じファイルに書く）
-- 戻すときは、この項の手順 6・7
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -2756,7 +2464,7 @@
    - WSL から Windows に ssh でつなぐときは、`ssh <WIN_USER>@127.0.0.1` にする（[注意点](extra/windows-setup.md#注意点)の OpenSSH サーバー）
    - `Connection refused` が出たら、Windows の sshd が動いていない（[OpenSSH サーバー](#openssh-サーバー)の手順で確かめる）
 
-1. 元に戻すときは、`.wslconfig` を元に戻す。
+1. この PC でミラーを使えなかったときだけ、`.wslconfig` を元に戻す。
 
    ```powershell
    & {
@@ -2782,7 +2490,7 @@
    - `中断:` が出たら、`.wslconfig` をメモ帳で開き、`networkingMode=mirrored` の行を消して保存する
    - 効くのは、この項の手順 7 で WSL を止めた後
 
-1. 元に戻すときは、WSL を止めて、NAT に戻ったことを確かめる。
+1. この PC でミラーを使えなかったときだけ、WSL を止めて、NAT に戻ったことを確かめる。
 
    ```powershell
    wsl.exe --shutdown
@@ -2858,22 +2566,6 @@
 
    - AlmaLinux 10 などの Python があるマシンでは、`python3 -c "import socket; m = bytes.fromhex('<MAC>'.replace('-', '').replace(':', '')); s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1); s.sendto(b'\xff' * 6 + m * 16, ('255.255.255.255', 9))"` で送れる（`<MAC>` はこの項の手順 3 の値）
    - 起動しなければ、この項の手順 3 の表の項目と、UEFI の設定を見直す
-   - 元に戻すときは、この項の手順 8
-
-1. 元に戻すときは、管理者の PowerShell で、マジック パケットでの起動を切る。
-
-   ```powershell
-   if (-not $LAN_IF) {
-     Write-Error 'この項の手順 2 の $LAN_IF が空'
-   } else {
-     Set-NetAdapterAdvancedProperty -Name $LAN_IF -RegistryKeyword '*WakeOnMagicPacket' -RegistryValue 0 -NoRestart
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetAdapterAdvancedProperty -Name $LAN_IF -RegistryKeyword '*WakeOnMagicPacket' | Format-Table DisplayName, DisplayValue
-   }
-   ```
-
-   - 新しい PowerShell なら、先にこの項の手順 2 を貼る
-   - UEFI の Wake on LAN も、この項の手順 4・5 と同じように入って切る
 
 ---
 
@@ -2883,7 +2575,7 @@
 - 前提: [ネットワークとリモート](#ネットワークとリモート)で LAN をプライベートにし、[PC 全体の設定](#pc-全体の設定)で電源・LAN の省電力を設定済み。自動サインインを使うなら[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)、Remote Control の自動起動を使うなら[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)を通してある
 - 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。トリガーのコマンドは別の PC で実行する
 
-- 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この項の手順 2〜7・撤去の手順は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
+- 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この項の手順 2〜7 は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
 - **別の PC で動かすトリガーのコマンドは、その PC で実行する**（AlmaLinux のシェルか、別の Windows の PowerShell）
 
 - リモートの操作ができなくなったときに備えて、再起動の経路を増やす。1 つが死んでも別の経路で立ち直せるようにする
@@ -2892,7 +2584,6 @@
   - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[ネットワークとリモート](#ネットワークとリモート)の手順 4 で有効。再起動の後はロック画面に戻るが、また入れる）
   - [Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの項の手順 7
 - この項で足す手段: クラッシュ時の自動再起動（この項の手順 3）・別の PC からのネットワーク再起動（この項の手順 4・5）・ネットワークが切れたときの自動再起動（この項の手順 6）
-- 戻すときは、この項の手順 8〜12（入れた手段のものだけ）
 
 > [!WARNING]
 > - この項の手順 4・5 は、LAN の別の PC から管理者の資格情報で再起動できる口を開ける
@@ -2962,7 +2653,6 @@
    - 別の Windows から送る前に、送る側の管理者の PowerShell で、この PC を `TrustedHosts` に足す。ドメイン外で未登録ならエラーで止まる
      - `WSMan:\localhost` は WinRM のサービスが動いていないと使えないので、止まっていれば先に `Start-Service WinRM` を行う
      - 足す前の値を `(Get-Item WSMan:\localhost\Client\TrustedHosts).Value` で控えてから、`Set-Item WSMan:\localhost\Client\TrustedHosts -Value <WIN_HOST> -Concatenate -Force` を行う
-     - 戻し方は、この項の手順 9 の箇条書き
    - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`
      - 管理者ではない PowerShell でよい
      - `<WIN_USER>` には、コンピューター名を付けなくてよい
@@ -3032,67 +2722,6 @@
 
    - ログオンのトリガーが 1 つ表示されればよい。次にそのユーザーでサインインしたときから、タスクが自動で始まる
 
-1. 元に戻すときは（この項の手順 4 を行ったとき）、SMB のリモートシャットダウンを閉じる。
-
-   ```powershell
-   Set-NetFirewallRule -Name FPS-SMB-In-TCP -Enabled False
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Name FPS-SMB-In-TCP | Format-Table Name, Enabled, Profile
-   ```
-
-   - `FPS-SMB-In-TCP … False` になればよい
-   - `LocalAccountTokenFilterPolicy` は、この項の手順 5 の WinRM と共有している。戻すのはこの項の手順 10
-
-1. 元に戻すときは（この項の手順 5 を行ったとき）、WinRM を無効にする。
-
-   ```powershell
-   Disable-PSRemoting -Force
-   Stop-Service -Name WinRM -ErrorAction SilentlyContinue
-   Set-Service -Name WinRM -StartupType Manual
-   Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Disable-NetFirewallRule
-   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile
-   ```
-
-   - 最後の表の規則が、すべて `False` になればよい（WinRM のサービスも止まる）
-   - `WINRM-HTTP-In-TCP` の `Profile` が、既定の `Public` に戻ればよい
-   - `Disable-PSRemoting` はセッションの構成を無効にするだけなので、サービスの停止・規則の無効化はこの手順で行う
-   - `Enable-PSRemoting` が作ったリスナーの設定は残る。サービスが止まり、規則も無効なので、待ち受けない
-   - この項の手順 5 の注意で、送る側の `TrustedHosts` に足したときは、送る側の管理者の PowerShell で控えた値に戻す
-     - 送る側の WinRM のサービスが止まっていれば（送る側を再起動した後など）、先に `Start-Service WinRM` を行う
-     - `Set-Item WSMan:\localhost\Client\TrustedHosts -Value '<控えた値>' -Force` を行う（空だったなら `-Value ''`）
-     - 足す前にサービスが止まっていたなら、続けて `Stop-Service WinRM` を行う
-   - `LocalAccountTokenFilterPolicy` はこの手順では戻さない（この項の手順 10）
-
-1. 元に戻すときは（この項の手順 4 もこの項の手順 5 も使わないとき）、UAC のリモート制限を元に戻す。
-
-   ```powershell
-   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name LocalAccountTokenFilterPolicy -Type DWord -Value 0
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' | Format-List LocalAccountTokenFilterPolicy
-   ```
-
-   - `LocalAccountTokenFilterPolicy : 0` になればよい（管理者のリモートログオンが、既定の制限に戻る）
-   - この項の手順 4・5 のどちらかを使い続けるなら、この手順は行わない
-
-1. 元に戻すときは（この項の手順 6 を行ったとき）、見張りのタスクと記録を消す。
-
-   ```powershell
-   Unregister-ScheduledTask -TaskName 'net-watchdog' -Confirm:$false
-   Remove-Item -Path 'HKLM:\SOFTWARE\setup-notes\net-watchdog' -Recurse -ErrorAction SilentlyContinue
-   Remove-Item -LiteralPath 'C:\ProgramData\setup-notes\net-watchdog.ps1' -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ScheduledTask -TaskName 'net-watchdog' -ErrorAction SilentlyContinue
-   ```
-
-   - 何も出なければよい（タスクが消えた）
-   - 空になったキー `HKLM:\SOFTWARE\setup-notes` とフォルダー `C:\ProgramData\setup-notes` は残る。ほかに使っていなければ、手で消してよい
-
-1. 元に戻すときは（この項の手順 7 を行ったとき）、Remote Control のタスクのトリガーを外す。
-
-   - [Claude Code の Remote Control（Windows）](extra/windows-claude-remote-control.md#ロールバック)のロールバックでタスクごと消す。トリガーの無い形で使い続けるなら、AI エージェントの手順書の[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 5 で入れ直す
-
 ---
 
 ### RDP をロックせずに切断
@@ -3101,7 +2730,7 @@
 - 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。切断後に SSH で確かめるなら[OpenSSH サーバー](#openssh-サーバー)と[SSH でログインを確かめる](#ssh-でログインを確かめる)を通してある
 - 実行場所: RDP 接続先の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。切断後はクライアントの PC の SSH または接続先の画面で確かめる
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[ロールバックと注意点](extra/windows-rdp-disconnect.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[注意点](extra/windows-rdp-disconnect.md)
 
 - この項の手順 1〜3 は RDP のセッションの中で行う。この項の手順 3 を貼ると、その場で RDP が切れる
 - この項の手順 4・5 は、クライアントの PC から SSH で行う。SSH が無ければ、PC の前で画面を見る
@@ -3481,7 +3110,6 @@
 - 前提: [OpenSSH サーバーに公開鍵でもログインする](#openssh-サーバーに公開鍵でもログインする)を通し、使うクライアントが鍵で入れる。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
 - 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
 - 切った後は、鍵を登録していないクライアント（スマートフォンのアプリなど）からは入れない
-- パスワード認証に戻すときは、[OpenSSH サーバー](#openssh-サーバー)の手順 6 を貼り直す
 
 1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
 
@@ -3541,7 +3169,7 @@
 
 - SSH でログインしたときとコマンドを実行するときのシェルを、cmd.exe から Git Bash に変える
 - 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
-- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3・5 は Windows
+- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
 
 1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
 
@@ -3596,15 +3224,6 @@
    - 2 つ目は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` のプロンプトになる。`exit` で戻る
    - **注意**: コマンドを実行するときも、Windows 側の `~/.bashrc` が読まれる
    - `Shim: Could not create process …` が出るなら、[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)を行う
-   - **次の手順は、`exit` でクライアントの bash に戻ってから Windows の管理者の PowerShell に貼る**（続けて貼ると SSH 先への入力として食われる）
-
-1. 元に戻すときは、`DefaultShell` を消す。
-
-   ```powershell
-   Remove-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell
-   ```
-
-   - 何も出ずに終わればよい
 
 ---
 
@@ -3683,7 +3302,7 @@
 - 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
 - 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 6 も通してあること
 - **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)・[専用の実行ファイルを外す](extra/windows-setup.md#ssh-の降格用の実行ファイルを外す)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)
 
 > [!WARNING]
 > **この項の手順 11 で子を閉じると、管理者の親 PowerShell へ戻る**。この項の手順 12 で権限を確認してから操作する。
@@ -3877,7 +3496,7 @@
 - Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
 - 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[ロールバックと注意点](extra/windows-ssh-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[注意点](extra/windows-ssh-client.md)
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows と Git の両方の ssh で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる
@@ -4140,7 +3759,7 @@
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
    - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
-   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。外してから始める
+   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。中断し、既存の導入元と設定を確かめる
 
 1. scoop で delta を入れ、版と場所を確かめる。
 
@@ -4203,7 +3822,7 @@
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
    - `GitCred` が `credential.helper manager` ならよい
    - `GitCred` が空なら、この項の手順 4 の Git の認証には `Y` と答えてよい
-   - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。外してから始める
+   - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。中断し、既存の導入元と設定を確かめる
 
 1. scoop で gh を入れ、版と場所を確かめる。
 
@@ -4287,7 +3906,7 @@
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
-   - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、外してから始める
+   - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、中断し、既存の導入元と設定を確かめる
    - `Extras : True` なら、extras のバケットはもうある（[Neovim](neovim.md#windows-11-で-neovim-を入れる)の手順 4 で足した）。この項の手順 3 は飛ばす
 
 1. extras のバケットが無いときだけ、scoop に足す。
@@ -4379,7 +3998,6 @@
    - `.bak` が既にあるときは退避・clone をせず中断する
    - `custom` と `%LOCALAPPDATA%\lazygit` が出ればよい
    - 状態ファイルも同じ場所に置くが Git の追跡対象からは除外する
-   - 戻すときは [lazygit のロールバック](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/extra/readme.md)を行う
 
 #### lazygit の設定を更新する
 
@@ -4475,7 +4093,6 @@
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - WinMerge での取り込みには WinMerge が要る。[WinMerge で 2 つの Excel のセルの変更を取り込む](#winmerge-で-2-つの-excel-のセルの変更を取り込む)の手順 2 か、[WinMerge で 2 つの Word の変更を取り込む](#winmerge-で-2-つの-word-の変更を取り込む)の手順 3 で、無ければ入れる
 - 更新時は `git -C "$env:USERPROFILE\excel-diff" status` で既存の変更を確かめてから進む
-- 戻すときは、excel-diff の[Windows 11 のロールバック](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#windows-11-のロールバック)を行う
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -5012,8 +4629,8 @@
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
    - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
-   - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、外してから始める
-   - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きし、ロールバックで戻す
+   - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、中断し、既存の導入元と設定を確かめる
+   - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きする
 
 1. scoop で yazi と、プレビュー・検索に使うツールを入れる。
 
@@ -5259,7 +4876,6 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
-- 戻すときは、md-table-excel の[mdtable のロールバック](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/extra/readme.md#windows-11-のロールバック)を行う
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -5751,7 +5367,7 @@
 
    - どちらも何も出なければ、入っていない
    - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` にあれば、この項の手順 3 をそのまま貼ってよい
-   - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、設定 →「アプリ」→「インストールされているアプリ」で外してから始める（プロファイルは残る）
+   - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、中断し、既存の導入元と設定を確かめる
 
 1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
 
@@ -5816,7 +5432,7 @@
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
-- 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。戻っていれば、その節の「元に戻すときは、」より前を貼り直す（控えは書き換えない）
+- 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。設定が変わっていれば、その項の手順を貼り直す（控えは書き換えない）
 - VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)、WireGuard は[WireGuard のセットアップの「WireGuard: Windows 11 の更新」](wireguard.md#wireguard-windows-11-の更新)、Syncthing は[Syncthing のセットアップの「Syncthing: Windows 11 の更新」](syncthing.md#syncthing-windows-11-の更新)
   - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba.md#samba-クライアント-windows-11-の更新)は Samba のセットアップの「Samba クライアント: Windows 11 の更新」（どちらも、上げるものは無い）
 

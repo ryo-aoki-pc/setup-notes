@@ -1,28 +1,8 @@
-# btop のロールバックと注意点
+# btop の注意点
 
 [手順書](../almalinux-setup.md#btop)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](../reference/btop.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#btop)の手順 N、「本書」「この文書」は手順書を指す
-
-## ロールバック
-
-1. btop を消す。
-
-   ```bash
-   sudo dnf remove btop
-   ```
-
-   - 依存で入った `hicolor-icon-theme` は他のパッケージも使うので、残しておいてよい（不要なものだけ消すなら `sudo dnf autoremove`）
-   - **EPEL 自体は消さない**（他のパッケージが依存している可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバックの「Flatpak・RPM Fusion・EPEL を消す」](almalinux-setup.md#flatpakrpm-fusionepel-を消す)の手順 7・8
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. 設定とユーザーテーマも消すときだけ、`~/.config/btop` を消す。
-
-   ```bash
-   rm -rf ~/.config/btop        # 設定とユーザーテーマも消す場合
-   ```
-
----
 
 ## 注意点
 

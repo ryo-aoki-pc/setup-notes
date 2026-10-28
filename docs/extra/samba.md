@@ -1,54 +1,8 @@
-# Samba サーバーのロールバックと注意点
+# Samba サーバーの注意点
 
 [手順書](../samba.md#samba-サーバー)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](../reference/samba.md)
 
 - 「手順 N」は[手順書](../samba.md#samba-サーバー)の手順 N、「本書」「この文書」は手順書を指す
-
-## ロールバック
-
-- 上から順に実行する
-- 接続元を絞る節を使った場合は 445/tcp ではなく rich rule が入っているので、先に[接続元を絞る](../samba.md#samba-サーバー-接続元を絞る)の手順 2 を貼る
-
-> [!CAUTION]
-> `passdb.tdb` は Samba のパスワード DB（`smbpasswd` で登録したパスワードの保存先。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](../reference/samba.md)）。**この節の**手順 3 の「完全に消すなら」で消すと、中の登録は取り戻せない。
-
-1. サービスを止め、ファイアウォール・Samba ユーザー・SELinux・smb.conf を元に戻す。
-
-   ```bash
-   {
-     sudo umount /mnt/smbtest 2>/dev/null; sudo rmdir /mnt/smbtest 2>/dev/null   # 検証のマウントが残っていれば
-     sudo systemctl disable --now smb.service
-     sudo firewall-cmd --permanent --remove-port=445/tcp && sudo firewall-cmd --reload
-     sudo smbpasswd -x "${USER}"
-     sudo setsebool -P samba_enable_home_dirs off
-     sudo cp -a /etc/samba/smb.conf.orig /etc/samba/smb.conf
-   }
-   ```
-
-   - 公開したユーザー自身のシェルで貼る（`sudo -i` した root のシェルでは `${USER}` が `root` になる）
-   - 並びは、`smbpasswd`（`samba-common-tools`）が消える前に Samba ユーザーを消すため
-   - [root のホームも公開した](../samba.md#samba-サーバー-root-のホームも公開する)ときの `[root]` の節と、[/home も公開した](../samba.md#samba-サーバー-home-も公開する)ときの `[home]` の節も、最後の `smb.conf` の復元で消える
-
-1. root のホームも公開していたときだけ、SELinux のモジュールを外す。
-
-   ```bash
-   sudo semodule -r samba_root_home
-   ```
-
-   - `libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` の 1 行が出て終わればよい
-
-1. パッケージも消すときだけ、samba・samba-client・cifs-utils を消す。
-
-   ```bash
-   sudo dnf remove -y samba samba-client cifs-utils
-   ```
-
-   - `samba-common` は実施前から入っていたので残す
-   - Workstation などで `cifs-utils` も実施前から入っていたなら、上のコマンドから `cifs-utils` を外す（ほかの共有のマウントにも使うため）
-   - `dnf remove` 後も、`/var/lib/samba/private/passdb.tdb`（Samba のパスワード DB）と `/var/log/samba/` は残る
-   - 完全に消すなら `sudo rm -rf /var/lib/samba/private/passdb.tdb /var/log/samba`（取り戻せない）
-
----
 
 ## 注意点
 

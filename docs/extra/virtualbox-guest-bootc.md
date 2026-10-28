@@ -1,60 +1,9 @@
-# VirtualBox の bootc ゲストのロールバックと注意点
+# VirtualBox の bootc ゲストの注意点
 
 [手順書](../virtual-machines.md#virtualbox-の-bootc-ゲスト)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](../reference/virtualbox-guest-bootc.md)
 
 - 「手順 N」は[手順書](../virtual-machines.md#virtualbox-の-bootc-ゲスト)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- ホストオンリーアダプターだけの VM では、この節の手順 1 の代わりに、[ホストオンリーアダプターだけの VM でビルドする](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 11 を行う（VM はレジストリから元のイメージを取り込めないので、ホストから運んだものに切り替える）。ホストは、同じ項の手順 12 で片付ける
-- `sudo bootc rollback` の後に再起動すると、1 つ前のデプロイメントに戻る
-  - 更新を重ねた後は、1 つ前の派生イメージに戻る
-  - 切り替えた直後なら元のイメージに戻る。もう一度 `sudo bootc rollback` すると派生イメージに戻る
-- この節の手順では消えないもの:
-  - **Secure Boot の MOK**（前提の [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵)、または[ホストオンリーアダプターだけの VM でビルドする](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5 で登録した場合）: 要らなければ、この節の後に [Secure Boot の署名鍵 のロールバック](secure-boot-mok.md#ロールバック)で消す
-    - ホストオンリーアダプターだけの VM でビルドする項で鍵をホストで作ったときは、VM の MOK を消した後に、ホストの端末で `rm -rf ~/vbox-ga-mok`（秘密鍵。取り戻せない。同じ鍵を使うほかの VM が無いときだけ）
-
-1. 元のイメージに切り替えて、再起動する。
-
-   ```bash
-   sudo bootc switch --apply "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
-   ```
-
-   - 元のイメージをレジストリから取り込み、署名を確かめてから再起動する
-     - 自作の kernel-rt のイメージなど、`policy.json` に載っていないレジストリのイメージは、署名を確かめない（手順 6 と同じ）
-   - **次の手順は、起動したらログインし、新しい端末で手順 1 を貼ってから貼る**
-
-1. ビルド用のディレクトリと、podman に取り込んだイメージを消す。
-
-   ```bash
-   rm -rf ~/vbox-ga-image
-   printf '\n\033[7m 確認 \033[0m\n'
-   sudo podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
-   ```
-
-   - `Untagged:` と `Deleted:` の行が並ぶ
-   - bootc は自分の置き場所にイメージを持っているので、podman のイメージを消しても起動には影響しない
-   - ビルドの最初の段（`<none>`、6.43 MB）が残る。`sudo podman image prune` で消せる
-     - [更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)でビルドし直していれば、前の派生イメージ（5.07 GB。kernel-rt のイメージでは 5.51 GB）も `<none>` で残る。同じく `sudo podman image prune` で消える
-     - [ホストオンリーアダプターだけの VM でビルドする](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)でホストでビルドした VM では、`Deleted:` は 2 行で、`<none>` は VM にできない（ホストに残る。その項の手順 12）
-   - **次の手順は、`Deleted:` の行が出てから貼る**（消し終わる前に貼ると、`sudo` が読んで捨てる）
-
-1. Guest Additions のユーザー・グループ・リンク・ログを消す。
-
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo userdel vboxadd
-     sudo groupdel vboxsf
-     sudo groupdel vboxdrmipc
-     sudo rm -f /var/lib/VBoxGuestAdditions /var/log/vboxadd-setup.log*
-   }
-   ```
-
-   - 何も出ずに終われば消えている
-
----
 
 ## 注意点
 
@@ -74,13 +23,11 @@
   - ビルド中はホストから VM への SSH 接続を維持する
 - **ホストオンリーアダプターだけの VM では、ホストでビルドして運ぶ**: ホストの rootless の podman でビルドし、`podman save -m` のファイルを ssh で VM に送って `podman load` する（[ホストオンリーアダプターだけの VM でビルドする](../virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)）
   - ベースの署名は、VM の `policy.json` と公開鍵をホストの `~/.config/containers` に写して確かめる。写さないと、AlmaLinux 10 の既定の設定では確かめずに取り込む（その項の手順 7 の補足）
-  - OS を上げるときも、元のイメージに戻すときも、ホストから運ぶ。`podman save` はファイルがすでにあると書かないので、消してから書く（その項の手順 9 の補足）
+  - OS を上げるときは、ホストから運ぶ。`podman save` はファイルがすでにあると書かないので、消してから書く（その項の手順 9 の補足）
 - **インストールに使った ISO が残っていると、Guest Additions の CD を入れられない**: VM の中で `eject /dev/sr0` してから入れる（[手順 4](../virtual-machines.md#virtualbox-の-bootc-ゲスト)）
 - **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[手順 3](../virtual-machines.md#virtualbox-の-bootc-ゲスト) の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
 - **カーネルが変わったら、VM の上ではモジュールを作り直せない**: ビルドの道具をイメージから消しているため。イメージごとビルドし直す
 - **Secure Boot では鍵の登録が要る**: 前提の [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) で登録する（MokManager の最初の画面は 10 秒で消え、逃すと登録されない）。鍵を作り直したら `--no-cache` でビルドし直す（[更新](../virtual-machines.md#virtualbox-の-bootc-ゲスト-更新)）
 - **CD を入れても、GNOME は何も表示しない**: 自動実行の確認も、デスクトップのアイコンも出ない。10 秒ほど待ってから手順 5 を貼る（[手順 4](../virtual-machines.md#virtualbox-の-bootc-ゲスト)）
-- **元のイメージに戻すときは、`--enforce-container-sigpolicy` を付けない**: Atomic Desktop の `policy.json` の既定では断られる。付けなくても署名は確かめられる（[ロールバック](#ロールバック)の手順 1 の補足）
-- **アンインストーラは使えない**: 戻すときはイメージを切り替える（[ロールバック](#ロールバック)）
 - **ホスト側の手順書は別**: VirtualBox 本体は [VirtualBox](../virtual-machines.md#virtualbox)。ホスト側でモジュールを署名する鍵（同じ `/var/lib/shim-signed/mok/` の置き場所。どちらも [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) で作る）は、ホストの PC のもので、VM の鍵とは別物

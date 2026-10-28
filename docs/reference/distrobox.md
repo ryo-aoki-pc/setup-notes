@@ -1,6 +1,6 @@
 # Distrobox の参考資料
 
-[手順書](../containers.md#distrobox)・[ロールバックと注意点](../extra/distrobox.md)
+[手順書](../containers.md#distrobox)・[注意点](../extra/distrobox.md)
 
 ## 補足
 
@@ -15,7 +15,6 @@
 
 `rpm -q --requires distrobox` の中身は `(podman or /usr/bin/docker)` と `hicolor-icon-theme` など。
 
-- podman を消すと distrobox も消える（[Podman のロールバック](../extra/podman.md#ロールバック)の手順 6 に当たる）
 - distrobox の本体はシェルスクリプトで、`/usr/bin/distrobox-create`・`distrobox-enter` などのコマンドの集まり
 
 ### Distrobox / 手順 4: 補足: ボックスは隔離されていない

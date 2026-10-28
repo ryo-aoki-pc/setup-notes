@@ -5,7 +5,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 ## AlmaLinux 10 で使う
 
 - 対象: AlmaLinux 10。Windows 11 は[Windows 11 で使う](#windows-11-で使う)から始める
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[注意点](extra/ai-agents.md)
 
 > [!IMPORTANT]
 >
@@ -95,7 +95,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    - 前提: Codex を利用できる ChatGPT アカウント。API キーを使う場合は API 側の従量課金
    - 新規の PC なら何も出ず、終了コードは 1 になる
    - パスが出たら、元の導入方法を確認してから進める。npm・Homebrew・standalone を重ねて入れない
-   - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない。導入と撤去は既定の場所を使う
+   - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない。導入は既定の場所を使う
    - 入れるのは端末で使う Codex CLI。デスクトップアプリとエディタの拡張機能は別に入れる
 1. インストーラーが使う道具を入れる。
    ```bash
@@ -237,7 +237,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    agy --version
    ```
    - 自分のホームの `.local/bin/agy` と、`1.3.5` のような版が出る
-   - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#almalinux-10-で使う--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）。[Antigravity CLI を消す](extra/ai-agents.md#antigravity-cli-を消す)で消す
+   - `MmapAligned() failed` と出て止まったら、進まない（[補足](reference/ai-agents.md#almalinux-10-で使う--antigravity-cli--手順-3-補足-仮想アドレスが-39-ビットの-arm64)）
    - `command -v agy` が何も出さなければ、`~/.local/bin` が PATH に無い。この項の手順 4・5 は飛ばし、新しく開いた端末で `agy --version` を確かめる。この項の手順 6 からは、その端末に貼る
 1. この項の手順 3 で `agy` が見つかったときだけ、インストーラーが足した PATH の行をエディタで消す。
    - `~/.bashrc` と `~/.bash_profile` の末尾の、`# Added by Antigravity CLI installer` の行と、次の `export PATH="/home/<USER>/.local/bin:$PATH"` の行を消す
@@ -318,7 +318,6 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 - 前提: [Claude Code](#claude-code)を通してある。Python 3.9 以上（`python3`）がある
 - 実行場所: Claude Code を使うホストの、自分のユーザーの bash。このリポジトリのルートで行う
 - このリポジトリを更新してスクリプトが変わったら、この項を通し直す
-- 外すときは、[Claude Code のフックを外す](extra/ai-agents.md#claude-code-のフックを外す)を通す
 
 1. Claude Code のフックを導入する。
    ```bash
@@ -350,7 +349,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 ## Windows 11 で使う
 
 - 対象: Windows 11。AlmaLinux 10 は[AlmaLinux 10 で使う](#almalinux-10-で使う)から始める
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[ロールバックと注意点](extra/ai-agents.md#windows-11-のロールバック)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md)・[参考資料](reference/ai-agents.md)・[注意点](extra/ai-agents.md#注意点)
 
 > [!IMPORTANT]
 >
@@ -438,7 +437,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    ```
    - `claude` の場所は `C:\Users\<WIN_USER>\.local\bin\claude.exe` の 1 行だけ
    - `2.1.288 (Claude Code)` のように版が出る（`stable` を選んだら、`latest` より古い版）
-   - 署名の行が `Valid  CN="Anthropic, PBC", O="Anthropic, PBC", ...` で始まればよい。`Valid` でなければ使わずに、ロールバックの Claude Code の手順で消す
+   - 署名の行が `Valid  CN="Anthropic, PBC", O="Anthropic, PBC", ...` で始まればよい。`Valid` でなければ使わずに中断する
    - `claude doctor` に `Running: native (...)`・`Auto-updates: enabled`・`Auto-update channel: latest`（`stable` を選んだら `stable`）・`No installation issues found.` が出ればよい
 1. `claude` を起動し、最初の設定とブラウザでのログインを行う。
    ```powershell
@@ -469,7 +468,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    ```
    - 新規の PC なら何も出ない
    - パスが出たら、元の導入方法を確認してから進める
-   - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない。導入・ロールバックは既定の場所を使う
+   - `CODEX_HOME`・`CODEX_INSTALL_DIR`・`CODEX_RELEASE` は変えない。導入は既定の場所を使う
 1. 公式の standalone インストーラーで Codex CLI を入れる。
    ```powershell
    & ([scriptblock]::Create((Invoke-RestMethod -Uri 'https://chatgpt.com/codex/install.ps1')))
@@ -672,7 +671,6 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 - 前提: [Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)を通してある。scoop の Python 3.9 以上を使う。無ければ、この項の手順 1 で入れる
 - 実行場所: この PC のデスクトップの、管理者ではない Windows PowerShell（5.1）。このリポジトリのルートで行う
 - このリポジトリを更新してスクリプトが変わったら、この項を通し直す
-- 外すときは、[Windows 11 で Claude Code のフックを外す](extra/ai-agents.md#windows-11-で-claude-code-のフックを外す)を通す
 
 1. Python が無ければ scoop で入れ、版を確かめる。
    ```powershell
@@ -904,7 +902,6 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 - `latest` で不具合に当たったときに、1 週間ほど遅れて大きな不具合のある版を飛ばす `stable` へ移る
 - `stable` の版は `latest` より古いので、`dnf upgrade` では下がらない（`Nothing to do.`）。この節の手順 2 の `distro-sync` で下げる
 - repo ファイルの `baseurl` の末尾を書き換えるだけで、`dnf clean` は要らない
-- [Claude Code](#claude-code)の手順 1 で `stable` を選んで入れた後に `latest` へ移るときは、この節の手順 4 だけを行う
 - この節は AlmaLinux 10 の dnf のもの。Windows 11 でチャンネルを変えるときは、[Windows 11 で Claude Code を入れる](#windows-11-で-claude-code-を入れる)の手順 1 の補足
 
 1. repo ファイルの `baseurl` を `stable` に書き換える。
@@ -930,19 +927,6 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    claude --version
    ```
    - 1 行目と 2 行目が同じ版なら、`stable` の最新版に揃っている
-1. 元に戻すときは、`baseurl` を `latest` に戻して最新版へ上げる。
-   ```bash
-   {
-     sudo sed -i 's|/rpm/stable$|/rpm/latest|' /etc/yum.repos.d/claude-code.repo
-     printf '\n\033[7m 確認 \033[0m\n'
-     grep '^baseurl=' /etc/yum.repos.d/claude-code.repo
-     sudo dnf upgrade claude-code
-   }
-   ```
-   - `baseurl` の末尾が `latest` に戻ったことを確認する
-   - トランザクション表が `Upgrading:` になっていることを確かめて `y` と答える
-   - 答えた後、[Claude Code](#claude-code)の手順 4 のコマンドで版を確かめる
-
 ---
 
 ## AlmaLinux 10 で Claude Code を tmux の中で動かす（任意）
@@ -1019,13 +1003,13 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 - 対象: Windows 11
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-claude-remote-control.md)・[参考資料](reference/windows-claude-remote-control.md)
-- [ロールバックと注意点](extra/windows-claude-remote-control.md)
+- [注意点](extra/windows-claude-remote-control.md)
 
 ### Claude Code の Remote Control: Windows 11 で使う
 
 > [!IMPORTANT]
 >
-> - **すべて、SSH でログインした Windows で行う**。この項の手順 1 で起動する Windows PowerShell 5.1 に貼る。停止・ロールバックも同じ窓を使い、デスクトップの PowerShell には貼らない
+> - **すべて、SSH でログインした Windows で行う**。この項の手順 1 で起動する Windows PowerShell 5.1 に貼る。停止も同じ窓を使い、デスクトップの PowerShell には貼らない
 > - **Administrators のユーザーでログインする**。タスク登録に管理者の権限が要る。SSH のセッションは UAC 無しで管理者の権限を持つ
 > - 前提: [OpenSSH サーバー](windows-setup.md#openssh-サーバー)で SSH ログインでき、[Claude Code](#windows-11-で-claude-code-を入れる)を公式の native installer で入れてある
 > - `claude` の `/login` で claude.ai（Pro / Max / Team / Enterprise）にログイン済み。API キーでは Remote Control を使えない
@@ -1167,7 +1151,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 - 前提: x64 の PC。個人の Google アカウント。[Git for Windows](windows-setup.md#git-for-windows)（試験用のリポジトリを作るのに使う）
 - 実行場所: PC のデスクトップの、自分のユーザーの管理者ではない Windows PowerShell 5.1。アプリとブラウザの画面の操作がある
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ai-agents.md#付録-windows-11-の-antigravity-アプリの-remote-control2026-10-15-jst)・[参考資料](reference/ai-agents.md#windows-11-の-antigravity-アプリの-remote-control)
-- [ロールバック](extra/ai-agents.md#windows-11-で-antigravity-アプリを消す)・[注意点](extra/ai-agents.md#注意点)
+- [注意点](extra/ai-agents.md#注意点)
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる。折りたたまれたブロックは、開いてからコピーボタンで写す
 
 > [!WARNING]
@@ -1380,15 +1364,6 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
    ```
    - 窓が開き、ブラウザの一覧が同じ名前で `Online` に戻ることを確かめる
    - スタートメニューの `Antigravity` からの起動は確かめていない
-1. ログオン時の自動起動をやめるときは、ショートカットを消す。
-   ```powershell
-   Remove-Item -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk') -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'Antigravity.lnk')
-   ```
-   - `False` が出ればよい
-   - 自動起動を戻すときは、[Antigravity アプリの Remote Control: Windows 11 で使う](#antigravity-アプリの-remote-control-windows-11-で使う)の手順 8 を通す
-
 ---
 
 ### Antigravity アプリの Remote Control: 設定ファイル
@@ -1526,7 +1501,7 @@ Android の Termux で使う Codex CLI と Claude Code は、Android のセッ�
 - 対象: AlmaLinux 10
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[ロールバックと注意点](extra/claude-code-gui.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/claude-code-gui.md)・[参考資料](reference/claude-code-gui.md)・[注意点](extra/claude-code-gui.md)
 
 ### Claude Code の GNOME 操作: AlmaLinux 10 で使う
 
@@ -1734,12 +1709,12 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 対象: 両 OS。AlmaLinux 10 は[AlmaLinux 10 で使う](#コーディングエージェントの共同作業-almalinux-10-で使う)、Windows 11 は[Windows 11 で使う](#コーディングエージェントの共同作業-windows-11-で使う)から始める
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[注意点](extra/coding-agents.md)
 
 ### コーディングエージェントの共同作業: AlmaLinux 10 で使う
 
 - 対象: AlmaLinux 10
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[ロールバックと注意点](extra/coding-agents.md)（方法の比較と、この形を選んだ理由）
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)・[参考資料](reference/coding-agents.md)・[注意点](extra/coding-agents.md)（方法の比較と、この形を選んだ理由）
 
 > [!IMPORTANT]
 >
@@ -1902,7 +1877,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - `Preparing worktree (new branch 'agent/<名前>')` が 4 回出る
    - 一覧は `[main]` と、`[agent/antigravity]`・`[agent/claude]`・`[agent/codex]`・`[agent/grok]` の 5 行
-   - `already exists` と出たら、前に作ったブランチか worktree が残っている。[AlmaLinux 10 のロールバック](extra/coding-agents.md#almalinux-10-のロールバック)の手順 2・3 で片付けてから貼り直す
+   - `already exists` と出たら中断する。既存のブランチ・worktree を確かめ、使うものと名前が重ならないようにしてから、この項の手順 1 からやり直す
 
 1. 4 つが規則を読むことを確かめる。
 
@@ -2540,7 +2515,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - Claude Code が 3 つに頼む形（コマンド・変更の移し方・後片付け）と、方針と役割の理由は[参考資料の「既定の分担」](reference/coding-agents.md#既定の分担)
 - AlmaLinux 10 でも、AGENTS.md の節は同じ文にする。この項の手順は Windows 11 用。AlmaLinux 10 で節を足す手順と、Codex・Grok への頼み方は、確かめるまでこの項に書かない
 - AlmaLinux 10 で Antigravity に頼むときは、[AlmaLinux 10 で Antigravity に読み取り専用で頼む](#コーディングエージェントの共同作業-almalinux-10-で-antigravity-に読み取り専用で頼む)
-- 既定の分担をやめるとき・文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)
 - この項の手順 6 は、AGENTS.md に同じ節がある setup-notes の clone で、headless の Claude Code（`claude -p --permission-mode auto`）に分担を言わずに頼み、4 つで分担する流れを確かめた
 - デスクトップアプリ（Code タブ）と端末の対話の Claude Code の画面での流れは未確認
 
@@ -2607,7 +2581,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - AGENTS.md の中身が出て、最後に「## 既定の分担」の節がある
    - `中断:` が出たら、何も書いていない。この項の手順 3 へ進まず、変数・ブランチ・既にある節を確かめる
-   - 既にある節の文を替えるときは、[Windows 11 で既定の分担をやめる](extra/coding-agents.md#windows-11-で既定の分担をやめる)で外してから、この項の手順 1 からやり直す
+   - 既にある節の文を替えるときは、既存の `## 既定の分担` をエディタで編集する。節を重ねて追加しない
 
 1. AGENTS.md を `main` にコミットする。
 
@@ -2796,7 +2770,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 折りたたまれたコードブロックは、「貼るコマンド」を開いてからコピーボタンで写す
 - 画面の画像は、Windows 11 の実機の Codeg v0.35.1 と、AlmaLinux 10（aarch64）の実機の Codeg v0.35.2 で撮った。フォルダー（`codeg-demo`）と会話は試験用
 - この節だけを実施するときは、各項の前提・実行場所・権限を先に確認する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)・[参考資料](reference/codeg.md)・[ロールバックと注意点](extra/codeg.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)・[参考資料](reference/codeg.md)・[注意点](extra/codeg.md)
 - サーバーの導入後は、使うエージェントの項へ進む。[Grok Build](#codeg-grok-build-を使う)、Claude Code と Codex CLI（[AlmaLinux 10](#codeg-almalinux-10-で-claude-code-と-codex-cli-を使う)・[Windows 11](#codeg-windows-11-で-claude-code-と-codex-cli-を使う)）、Antigravity（[AlmaLinux 10](#codeg-almalinux-10-で-antigravity-を使う)・[Windows 11](#codeg-windows-11-で-antigravity-を使う)）を選ぶ
 
 ### Codeg: AlmaLinux 10 で使う
@@ -2916,7 +2890,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - `ss` は見出しの 1 行だけ、`ls` は 4 つとも `No such file or directory` になればよい
    - `caddy.service` が `active` でなければ、先に [Caddy: 入れて起動する](almalinux-setup.md#caddy-入れて起動する)を通す
    - `Linger=no` なら、先に [linger](almalinux-setup.md#ユーザーサービスの常駐) を通す
-   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、[AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)で消してからやり直す
+   - 3080 番か 3443 番に待ち受けがあるか、`ls` が何かを出したら中断する。既存の構築を使うか、導入先とポートが空いている別の PC で始める
    - `--get-active-zones` で待ち受ける NIC の zone が `FW_ZONE` と異なっていたら、この項の手順 1 の値を直す
 
 1. 配布物を取得して、SHA-256 を照合する。
@@ -3161,7 +3135,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - 送信元ごとに `success` が 2 回ずつ出た後、runtime と permanent に、送信元ごとの 3443/tcp の規則があればよい
    - 3080 番は開けない。Codeg へは、Caddy を通してだけ届く
    - **送信元を制限する場合**、既存の zone が `trusted`・`ACCEPT`、または同じポートへの広い許可があると、この規則だけでは絞れない
-   - 追加できた規則を外す場合は[AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)の手順 2 を使う
 1. LAN の別の端末で、HTTPS で届くことを確かめる。
    - `ALLOW_FROM` に入っている端末で `curl -sk -o /dev/null -w '%{http_code}\n' https://<SERVER_IP>:3443/` を実行し、`200` が出ればよい（`-k` は、ルート証明書を入れる前なので付ける）
    - `ALLOW_FROM` に入っていない端末があれば、同じコマンドに `-m 6` を足して実行し、6 秒待って `000` が出ることも確かめる
@@ -3354,7 +3327,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
    - その後は、待ち受けの表が出ず、`False` が 3 行出て、タスクの表も出なければよい
    - 最初の `False` が `True` なら、管理者の窓で開いている。この項の手順 1 からやり直す
    - `Public` なら、[Windows 11 の初期設定の「ネットワークとリモート」の手順 3](windows-setup.md#ネットワークとリモート)を通す
-   - 待ち受け・`True`・タスクのどれかが出たら、既存の構築がある。[Windows 11 のロールバック](extra/codeg.md#windows-11-のロールバック)で消してからやり直す
+   - 待ち受け・`True`・タスクのどれかが出たら中断する。既存の構築を使うか、導入先とポートが空いている別の PC で始める
 
 1. 配布物を取得して SHA-256 を照合し、自分のユーザーの場所に置く。
 
@@ -4495,7 +4468,7 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 - 任意。HTTPS の Codeg を構築した本人の bash で行う。[サーバー起動](#codeg-サーバーを入れて-localhost-で起動する)の手順 1 の `SERVER_IP`・`ALLOW_FROM`・`FW_ZONE` を同じシェルで設定しておく
 - `ALLOW_FROM` は現在許可している送信元の帯に合わせる。ここで指定した既存の規則だけを外し、ほかの用途の規則は変更しない
 - この節の手順 2 から、`SERVER_IP` の 3443/tcp に届くすべての送信元を許可する。LAN・VPN の端末だけに限定されたとは扱わない
-- 元に戻せる既存の規則が分からない場合は始めない。途中で失敗した場合も、追加した規則を保持して止め、[接続元の制限を戻す](extra/codeg.md#接続元の制限を戻す)の条件を確かめる
+- 既存の送信元付き規則が分からない場合は始めない。途中で失敗した場合も、追加した規則を保持して止め、現在の規則と接続できる端末を確かめる
 
 1. 制限を外す対象の、現在の規則を確かめる。
 
@@ -4585,7 +4558,6 @@ Claude Code は、リポジトリの直下で `scripts/gnome-gui.py` を呼び�
 
    - runtime と permanent に宛先 `SERVER_IP` の 3443/tcp の送信元を指定しない規則が残り、この節で指定した元の規則だけが無ければよい
    - `中断:`・エラーや、片方だけの削除なら止める。分からない規則を消さず、変更前と残った規則を照合する
-   - 公開を止めるときは、送信元を指定しない規則も [AlmaLinux 10 のロールバック](extra/codeg.md#almalinux-10-のロールバック)で外す
 
 ---
 

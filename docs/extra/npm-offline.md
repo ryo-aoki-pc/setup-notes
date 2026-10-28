@@ -1,40 +1,9 @@
-# npm のオフライン導入のロールバックと注意点
+# npm のオフライン導入の注意点
 
 [手順書](../almalinux-setup.md#npm-のオフライン導入)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](../reference/npm-offline.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#npm-のオフライン導入)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- オフラインのホストで貼る。トンネルは要らない
-- `https_proxy` はどこにも書いていないので、戻すものは無い
-- dnf のプロキシの行は、[SSH の SOCKS トンネル のロールバック](ssh-socks-tunnel.md#ロールバック)の手順 1 で消す
-- Mason で入れたものは、`:MasonUninstall <名前>` で消せる（設定にあるものは、次にトンネルのあるシェルで開いたときに入り直す）
-
-> [!WARNING]
-> **この節の手順 1 で Node.js を消すと、Mason で入れた npm のパッケージは動かなくなる**（どれも `#!/usr/bin/env node` で始まる）。Mason を使い続けるなら、この節は行わない。
-
-1. [手順 1](../almalinux-setup.md#npm-のオフライン導入) で入れた Node.js と npm を、ほかに使わないときだけ消す。
-
-   ```bash
-   sudo dnf remove -y nodejs nodejs-npm
-   ```
-
-   - [手順 1](../almalinux-setup.md#npm-のオフライン導入) で一緒に入った依存（`libuv`・`openssl` など）も消え、合わせて 9 パッケージが消える
-
-1. npm のキャッシュとログを消す。
-
-   ```bash
-   rm -rf ~/.npm
-   printf '\n\033[7m 確認 \033[0m\n'
-   command -v node npm || echo '無い（期待どおり）'
-   ```
-
-   - `無い（期待どおり）` が出ればよい
-   - Mason のパッケージ（`~/.local/share/nvim/mason/packages`）は残る
-
----
 
 ## 注意点
 

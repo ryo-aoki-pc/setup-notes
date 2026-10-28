@@ -1,6 +1,6 @@
 # Dropbox と rclone の参考資料
 
-[手順書](../dropbox.md#dropbox-と-rclone)・[ロールバックと注意点](../extra/dropbox-rclone.md)
+[手順書](../dropbox.md#dropbox-と-rclone)・[注意点](../extra/dropbox-rclone.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md#補足の実測)
 

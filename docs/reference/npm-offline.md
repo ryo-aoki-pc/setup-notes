@@ -1,6 +1,6 @@
 # npm のオフライン導入の参考資料
 
-[手順書](../almalinux-setup.md#npm-のオフライン導入)・[ロールバックと注意点](../extra/npm-offline.md)
+[手順書](../almalinux-setup.md#npm-のオフライン導入)・[注意点](../extra/npm-offline.md)
 
 ## 補足
 

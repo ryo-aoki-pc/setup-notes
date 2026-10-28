@@ -1,6 +1,6 @@
 # 画像の道具の参考資料
 
-[手順書](../almalinux-setup.md#画像の道具)・[ロールバックと注意点](../extra/image-tools.md)
+[手順書](../almalinux-setup.md#画像の道具)・[注意点](../extra/image-tools.md)
 
 ## 補足
 

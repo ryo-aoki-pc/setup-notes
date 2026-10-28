@@ -1,9 +1,8 @@
 # コーディングエージェントの共同作業の参考資料
 
-[手順書](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う)・[ロールバックと注意点](../extra/coding-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)
+[手順書](../ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う)・[注意点](../extra/coding-agents.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/coding-agents.md)
 
 ## 補足
-
 
 ### AlmaLinux 10 で使う / 手順 2: 補足: 版と並べる順
 
@@ -252,7 +251,6 @@ Claude Code が 3 つに頼む形は次のとおり。Codex・Grok の行は、W
   - 「AlmaLinux 10 で使う」の手順 3（`## main` の確かめ）・手順 7（`worktree add … main`）
   - 使い方の基本・相互にレビューするの `--base main`・`main...HEAD`
   - main に取り込むの `main..agent/…`・`git merge --ff-only main`
-  - 「AlmaLinux 10 のロールバック」の手順 2 の `main..agent/…`
 
 ### AlmaLinux 10 で使う / 手順 9〜11: 公式のプラグイン
 

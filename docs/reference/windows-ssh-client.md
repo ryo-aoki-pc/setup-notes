@@ -1,6 +1,6 @@
 # Windows の OpenSSH クライアントの参考資料
 
-[手順書](../windows-setup.md#windows-の-openssh-クライアント)・[ロールバックと注意点](../extra/windows-ssh-client.md)
+[手順書](../windows-setup.md#windows-の-openssh-クライアント)・[注意点](../extra/windows-ssh-client.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)
 
@@ -60,7 +60,7 @@
 
 ### Windows の OpenSSH クライアント / 手順 7: 補足: config の書き方と文字コード
 
-- 足すのは `Host`・`HostName`・`User`・`IdentityFile`・`IdentitiesOnly` の 5 行と、前後の印の 2 行。印（`#` で始まる行）は ssh が読み飛ばす。[ロールバック](../extra/windows-ssh-client.md#ロールバック)の手順 2 は、この印の間だけを消す
+- 足すのは `Host`・`HostName`・`User`・`IdentityFile`・`IdentitiesOnly` の 5 行と、前後の印の 2 行。印（`#` で始まる行）は ssh が読み飛ばす
 - `IdentitiesOnly yes` で、この接続先には `IdentityFile` の鍵だけを使う（ほかの鍵を順に試さない）。`IdentityFile` は `~/.ssh/…` と `/` で書く。どちらの ssh も `~` を展開する
 - 書く文字コードは `-Encoding ascii`（BOM の無い ASCII。値は ASCII の英数字と記号だけに限っている）。Windows PowerShell 5.1 の `-Encoding UTF8` は BOM を付け、`>`・`>>`・`Out-File` は UTF-16 で書く
   - Windows の ssh は UTF-8 の BOM を読み飛ばすが（Win32-OpenSSH のソース）、Git の ssh は読み飛ばさず、`Bad configuration option` で止まる。そのため、BOM のある config には足さずに止める
@@ -90,7 +90,7 @@
 - `-o PubkeyAuthentication=no` は、鍵を試さず（パスフレーズも聞かず）にパスワードへ進むため（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 5](../windows-setup.md#ssh-でログインを確かめる)と同じ）
 - Windows の ssh は、ホスト鍵の問いへの答えとパスワードを、標準入力ではなくコンソールから読む（Win32-OpenSSH のソース）。そのため、標準入力で渡す公開鍵は、問いに食われない（Windows では確かめていない）
 - AlmaLinux 10 の既定では、一般のユーザーはパスワードで SSH に入れ、root はパスワードでは入れない（`PermitRootLogin prohibit-password`）。ホストを固くして `PasswordAuthentication no` にしているときは、この手順は使えない（[注意点](../extra/windows-ssh-client.md#注意点)）
-- 貼り直すと、同じ行がもう 1 行足される（害は無い。[ロールバック](../extra/windows-ssh-client.md#ロールバック)の手順 1 は両方消す）
+- 貼り直すと、同じ行がもう 1 行足される（害は無い）
 
 ### Windows の OpenSSH クライアント / 手順 10: 補足: 鍵でのログインの確かめ方
 
@@ -104,18 +104,6 @@
 - WezTerm の設定の読み直し（Ctrl+Shift+R）で、config に足した `Host` が並ぶ
 - config の読み取りに失敗しても、設定の全体は落ちず、ssh の項目だけが出ない。WezTerm が BOM 付きの config を読めるかは確かめていない
 - 起動メニューの ssh は、`PATH` で最初に見つかる `ssh.exe` で動く。新しい PowerShell で `(Get-Command ssh.exe).Source` が `C:\Windows\System32\OpenSSH\ssh.exe` なら、Windows のもの
-
-### ロールバック / 手順 1: 補足: 行の消し方
-
-- 公開鍵の 2 つ目の欄（`AAAA…` の base64）が形に合うときだけ動かす。空のまま `grep -vF --` に渡すと、`authorized_keys` のパスがパターンになって標準入力を読み、`authorized_keys` を空にしうる（[検証記録の模擬](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md#模擬)）
-- `grep -vF` の終了コードが 1（残る行が無い）でも書き戻し、2（読めない）のときは書き戻さない
-- `grep -cF` は、消した後に残っている行の数（`0` ならよい）
-
-### ロールバック / 手順 2: 補足: バイトのまま書き戻す
-
-- config を Latin-1（コードページ `28591`）として読み、同じ符号化で書き戻す。Latin-1 は 256 のバイトを 1 つずつ別の文字に当てるので、印の間の外のバイトは、文字コードによらず変わらない
-- 印と別名は ASCII なので、Latin-1 として読んでも正規表現はそのまま効く
-- UTF-8 として読み書きすると、UTF-8 として正しくないバイト（CP932 で保存した日本語のコメントなど）が U+FFFD に置き換わる（[検証記録の模擬](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md#模擬)）。手順 7 は BOM の無い CP932 の config を止めない
 
 ### 選択した方針
 

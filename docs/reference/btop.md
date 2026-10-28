@@ -1,6 +1,6 @@
 # btop の参考資料
 
-[手順書](../almalinux-setup.md#btop)・[ロールバックと注意点](../extra/btop.md)
+[手順書](../almalinux-setup.md#btop)・[注意点](../extra/btop.md)
 
 ## 補足
 

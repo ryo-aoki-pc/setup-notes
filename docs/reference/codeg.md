@@ -1,6 +1,6 @@
 # Codeg の参考資料
 
-[AlmaLinux 10 の手順](../ai-agents.md#codeg-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#codeg-windows-11-で使う)・[ロールバックと注意点](../extra/codeg.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)
+[AlmaLinux 10 の手順](../ai-agents.md#codeg-almalinux-10-で使う)・[Windows 11 の手順](../ai-agents.md#codeg-windows-11-で使う)・[注意点](../extra/codeg.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/codeg.md)
 
 ## 補足
 
@@ -130,7 +130,7 @@
 - Caddy は `start-caddy-hidden.ps1` から始め、Codeg と同じランチャーを使う。`exit $LASTEXITCODE` とランチャーを通して、Caddy の終了コードをタスクへ返す
 - タスク スケジューラの「失敗時の再起動」（`-RestartCount`・`-RestartInterval`）は使わない。終了コード 1 で終わる使い捨てのタスクで試すと、再起動されなかった（検証記録）
 - 待ち受ける IP を決めないので、サインインの時点で LAN につながっていなくても、Caddy は起動する
-- Windows の停止・更新・ロールバックは、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントのエージェントを巻き込まない
+- Windows の停止・更新は、配置先が一致する Codeg の PID に `taskkill /T /F` を使う。タスクを止めるより先に子プロセスごと終了し、ほかの ACP クライアントのエージェントを巻き込まない
 
 ### Codeg / AlmaLinux 10 で共通パスワードを設定・変更する / 手順 1〜3: 補足: 標準認証
 

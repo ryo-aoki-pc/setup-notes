@@ -1,6 +1,6 @@
 # VMware Workstation Pro の参考資料
 
-[手順書](../virtual-machines.md#vmware-workstation-pro)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[ロールバックと注意点](../extra/vmware.md)
+[手順書](../virtual-machines.md#vmware-workstation-pro)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[注意点](../extra/vmware.md)
 
 ## 補足
 

@@ -111,14 +111,14 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 | 置くもの | 場所 |
 | --- | --- |
 | 理由・比較・資料 | `docs/reference/<手順書名>.md` |
-| ロールバックと注意点 | `docs/extra/<手順書名>.md` |
+| 注意点 | `docs/extra/<手順書名>.md` |
 | 実施日・環境・結果 | 非公開の `setup-notes-verification` の `docs/verification/<手順書名>.md` |
 | 手順書を動かすスクリプト | [scripts/](scripts/) |
 | 書き方の規則 | [AGENTS.md](AGENTS.md) と [docs/dev/writing-rules.md](docs/dev/writing-rules.md) |
 
 ## 記法
 
-- 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。ロールバックと注意点は `docs/extra/` で確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
+- 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。注意点は `docs/extra/` で確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にする（[AlmaLinux 10 の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo)で設定する）
 - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）

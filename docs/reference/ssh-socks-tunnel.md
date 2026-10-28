@@ -1,6 +1,6 @@
 # SSH の SOCKS トンネルの参考資料
 
-[手順書](../almalinux-setup.md#ssh-の-socks-トンネル)・[ロールバックと注意点](../extra/ssh-socks-tunnel.md)
+[手順書](../almalinux-setup.md#ssh-の-socks-トンネル)・[注意点](../extra/ssh-socks-tunnel.md)
 
 ## 補足
 

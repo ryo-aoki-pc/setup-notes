@@ -1,6 +1,6 @@
 # Windows のホットキー競合の参考資料
 
-[手順書](../windows-setup.md#windows-のホットキー競合)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[ロールバック](../extra/windows-hotkey-conflict.md)
+[手順書](../windows-setup.md#windows-のホットキー競合)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)
 
 ## 補足
 
@@ -95,13 +95,6 @@
 - 登録失敗のエラーはその直後に取得する。成功時の古いエラー値を今回の結果として使わない
 - 解除するのは、試験自身が登録に成功した場合だけ。競合で登録に失敗したときに、既存アプリの登録を解除しようとしない
 - 解除の成否も確認する。解除失敗を登録可能の正常結果に含めず、診断用 PowerShell を閉じてから対象アプリの確認へ進む
-
-### ロールバック / 手順 1・2: 補足: 調査と対処の戻し方
-
-- 操作は[ロールバック](../extra/windows-hotkey-conflict.md#ロールバック)に分ける
-- 調査前に有効状態とキー設定を控え、その調査で変えた設定だけを戻せるようにする
-- 改善しなかった設定を戻す操作と、解消した競合の対処を取り消す操作は区別する。後者は競合が再び起きる可能性を含む
-- アプリの通常の設定画面で戻せる対処を優先し、診断目的でサービス停止やアプリのアンインストールを行う構成にはしない
 
 ### 選択した方針
 

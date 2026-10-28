@@ -1,29 +1,9 @@
-# RDP をロックせずに切断のロールバックと注意点
+# RDP をロックせずに切断の注意点
 
 [手順書](../windows-setup.md#rdp-をロックせずに切断)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](../reference/windows-rdp-disconnect.md)
 
 - 「手順 N」は[手順書](../windows-setup.md#rdp-をロックせずに切断)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- `tscon` は設定を変えないので、戻すものは無い。この節は、[ショートカットで切断する](../windows-setup.md#rdp-をロックせずに切断-ショートカットで切断する)のショートカットを消すだけ
-- この節は、このユーザーの Windows PowerShell に貼る（管理者でなくてよい）
-
-1. ショートカットを作ったときは、消す。
-
-   ```powershell
-   & {
-     $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'RDP をロックせずに切断.lnk'
-     Remove-Item -LiteralPath $lnk
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Test-Path -LiteralPath $lnk
-   }
-   ```
-
-   - `False` が出ればよい
-
----
 
 ## 注意点
 
