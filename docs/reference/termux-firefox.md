@@ -89,7 +89,7 @@
 
 - `ui.systemUsesDarkTheme` は、Firefox にシステムのテーマの明暗を指定する設定。`1` で暗い表示、`0` で明るい表示にする
 - Firefox のテーマは既定の `default-theme@mozilla.org`（システムに合わせる）。Termux:X11 の中には GTK の暗いテーマが無く、そのままでは明るい表示になる
-- `ui.systemUsesDarkTheme` は `prefs.js` にも残る。`user.js` の値が起動のたびに `prefs.js` を上書きするので、明るい表示に戻すときは `user.js` の値を `0` にする
+- `ui.systemUsesDarkTheme` は `prefs.js` にも残る。`user.js` の値が起動のたびに `prefs.js` を上書きする
 
 ### Termux の Firefox: ダークテーマにする / 手順 3: 補足: サイトの表示と確認の範囲
 

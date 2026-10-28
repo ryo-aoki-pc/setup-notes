@@ -1,7 +1,7 @@
 # GNOME のリモート操作のセットアップ（AlmaLinux 10）
 
 - AlmaLinux 10 の GNOME のデスクトップに、別の PC から RDP でつなぐ。今の画面を共有する（デスクトップ共有）、モニターの無い PC に自分のデスクトップを常駐させる（ヘッドレスセッション）、GDM のログイン画面からログインする（リモートログイン）の 3 つ
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - **前提と実行場所（ユーザー・端末・別のマシン）は、各項のリードに従う**。`sudo -i`・`su -` のシェルでは行わない
@@ -18,7 +18,7 @@
 
 ### GNOME のデスクトップ共有
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[ロールバックと注意点](extra/gnome-desktop-sharing.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[注意点](extra/gnome-desktop-sharing.md)
 
 > [!IMPORTANT]
 > - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 4 で RDP のクライアントから確かめる
@@ -656,6 +656,62 @@
 
    - `success` が 3 行出て、`--list-ports` に `<RDP_PORT>/tcp` が無く、rich rule に `<LAN_SUBNET>` と `<RDP_PORT>` が入っていればよい
 
+#### GNOME のデスクトップ共有: リモートログインと併用する
+
+- デスクトップ共有を使っている PC で後からリモートログインを有効にしたとき、共有の待ち受けを 3389 から 3390 へ移す
+- 前提: [GNOME のデスクトップ共有](#gnome-のデスクトップ共有)と[GNOME のリモートログイン](#gnome-のリモートログイン)を通してある
+- 実行場所: デスクトップ共有を使うユーザー本人で SSH でログインしたシェル（bash）
+- リモートログインが使う `rdp` のサービスは残す
+
+1. 変数を設定する（接続元を LAN に絞ってあるときは、`LAN_SUBNET` に必ず同じ値を入れる）。
+
+   ```bash
+   LAN_SUBNET=   # ← 接続元を LAN に絞ったときの値。絞っていなければ空のままでよい。<LAN_SUBNET>
+   ```
+
+   ```bash
+   RDP_PORT=3389
+   printf '\n\033[7m 確認 \033[0m\n'
+   printf 'RDP_PORT = %s\nLAN_SUBNET = %s\n' "${RDP_PORT}" "${LAN_SUBNET}"
+   ```
+
+   - 共有のポートが `3389` であることを確かめる。既に `3390` なら、この項は行わない
+   - 接続元を LAN に絞ってあるときは、この項の手順 2 を飛ばして手順 3 へ進む
+
+1. 接続元を LAN に絞っていないときだけ、デスクトップ共有で開けた 3389/tcp を閉じる。
+
+   ```bash
+   if [ -z "${RDP_PORT}" ]; then echo '中断: この項の手順 1 の RDP_PORT が空のまま。この項の手順 1 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
+   sudo firewall-cmd --reload
+   sudo firewall-cmd --list-ports
+   fi
+   ```
+
+   - `success` が 2 行出て、`--list-ports` に `<RDP_PORT>/tcp` が無ければよい
+
+1. 接続元を LAN に絞ってあるときだけ、デスクトップ共有で開けた rich rule を消す（この項の手順 2 の代わりに）。
+
+   ```bash
+   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、この項の手順 1 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
+   sudo firewall-cmd --reload
+   sudo firewall-cmd --list-rich-rules
+   fi
+   ```
+
+   - `LAN_SUBNET` は、[接続元を LAN に絞る](#gnome-のデスクトップ共有-接続元を-lan-に絞る)の手順 2 の 1 つ目のブロックを貼り直して入れる
+   - `success` が 2 行出て、その rich rule が消えていればよい
+
+1. 共有の待ち受けを 3390 へ変え、つながることを確かめる。
+
+   - [前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 1 を貼り直し、`RDP_PORT` が `3390` になったのを確かめる
+   - ほかのユーザーのヘッドレスのセッションが `3390` を使っていれば、同じ項の手順 1 の `RDP_PORT` に空いている別のポートを入れる
+   - [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3・7 を通す。接続元を LAN に絞っていたなら、同じ項の手順 7 の後に[接続元を LAN に絞る](#gnome-のデスクトップ共有-接続元を-lan-に絞る)も通す
+   - [再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 1〜4 を通す
+
 #### GNOME のデスクトップ共有: つながらなくなったとき
 
 - デスクトップ共有でつながらなくなったときに、**PC の画面を触らずに、SSH から直す**
@@ -711,7 +767,7 @@
 - モニターの無い PC でも、自分の GNOME のデスクトップをヘッドレスのセッションで常駐させ、RDP でつなぐ
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)と、[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)の手順 1・2 を通してある。サスペンドできる PC は、同じ項の手順 3・4 も通してある
 - 実行場所: セッションを使うユーザー本人のシェル（bash。SSH でよい）。この項の手順 10 は、LAN 内の別のマシンで行う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)・[ロールバックと注意点](extra/gnome-headless-session.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)・[注意点](extra/gnome-headless-session.md)
 - **この項の手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
 - [リモートログイン](#gnome-のリモートログイン)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、この項の手順 1 で自動で 3390 になる
 - この項の手順 1 で変数を設定したシェルに貼る
@@ -820,7 +876,7 @@
    - 最後に `TLS の退避と証明書の準備が完了` と出れば、この項の手順 4 へ進む
    - 新規生成した場合は `rdp-tls.crt`（`-rw-r--r--`）と `rdp-tls.key`（`-rw-------`）が出る
    - 既存の鍵も、この手順で生成するものと同じく、パスフレーズなしで読める必要がある
-   - `中断:` が出たら、この項の手順 4 以降へ進まない。[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 3・4 で戻す
+   - `中断:` が出たら、この項の手順 4 以降へ進まない。[証明書の準備に失敗したとき](#gnome-のヘッドレスセッション-証明書の準備に失敗したとき)を通す
 
 1. `grdctl --headless` で、証明書と鍵・ポートを設定する。
 
@@ -940,6 +996,96 @@
    - 問題があれば、PC の端末で `journalctl -b _SYSTEMD_USER_UNIT=gnome-remote-desktop-headless.service` を見る
      - この項の手順 9 を貼った時刻の `client authentication failure` と `Network or intentional disconnect, stopping session` などの行は、そのプローブが残したもの。害は無い
 
+#### GNOME のヘッドレスセッション: 証明書の準備に失敗したとき
+
+- 証明書の準備に失敗したときに、共用 TLS 設定を復旧し、今回生成したファイルだけを片付ける。[リモートログインだけにする](#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)の手順 5 からも使う
+- 前提: [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 3 で失敗した、または[リモートログインだけにする](#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)の手順 4 までを通した
+- 実行場所: セッションを使うユーザー本人で SSH でログインしたシェル（bash）
+- 退避後にデスクトップ共有の TLS 設定を別に変えた場合は、先にその設定を控える
+- 退避が無い場合は、共用 TLS 設定と証明書を保持する
+
+> [!CAUTION]
+> **この項の手順 2 で消す証明書の秘密鍵は取り戻せない**。今回生成したものと照合できた場合だけ消し、既存の証明書と鍵は残す。
+
+1. RDP とヘッドレス用の資格情報・設定を解除し、共用 TLS 設定を戻す。
+
+   ```bash
+   (
+     set -e
+     trap 'echo "中断: 復元が失敗した。この項の手順 2 へ進まない" >&2' ERR
+     if { [ -e ~/.local/state/gnome-headless-session-setup ] || [ -L ~/.local/state/gnome-headless-session-setup ]; } &&
+        { [ -L ~/.local/state/gnome-headless-session-setup ] ||
+          [ ! -f ~/.local/state/gnome-headless-session-setup/backup-complete ] ||
+          [ ! -f ~/.local/state/gnome-headless-session-setup/tls-cert ] ||
+          [ ! -f ~/.local/state/gnome-headless-session-setup/tls-key ]; }; then
+       echo '中断: TLS 設定の退避が不完全。設定とファイルは変更しない' >&2
+       exit 1
+     fi
+     rm -f ~/.local/state/gnome-headless-session-setup/restored
+     grdctl --headless rdp disable
+     grdctl --headless rdp clear-credentials
+     dconf reset -f /org/gnome/desktop/remote-desktop/rdp/headless/
+     if [ -f ~/.local/state/gnome-headless-session-setup/backup-complete ]; then
+       for key in tls-cert tls-key; do
+         if [ -s ~/.local/state/gnome-headless-session-setup/"${key}" ]; then
+           dconf write "/org/gnome/desktop/remote-desktop/rdp/${key}" "$(cat ~/.local/state/gnome-headless-session-setup/"${key}")"
+         else
+           dconf reset "/org/gnome/desktop/remote-desktop/rdp/${key}"
+         fi
+       done
+       touch ~/.local/state/gnome-headless-session-setup/restored
+     else
+       echo '退避なし: 共用 TLS 設定と証明書は保持する'
+     fi
+     printf '\n\033[7m 確認 \033[0m\n'
+     systemctl --user is-enabled gnome-remote-desktop-headless.service || true
+   )
+   ```
+
+   - コマンドごとの TPM のメッセージの後に、`disabled` と出ればよい
+   - `中断:` やエラーが出たら、この項の手順 2 へ進まない。共用 TLS 設定が戻る前は、証明書を削除できない
+
+1. [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 3 で生成した証明書と鍵と、TLS 設定の退避を消す（取り戻せない）。
+
+   ```bash
+   if [ -L ~/.local/state/gnome-headless-session-setup ]; then
+     echo '中断: TLS 設定の退避先がリンクになっている。ファイルは削除しない' >&2
+   elif [ ! -e ~/.local/state/gnome-headless-session-setup ]; then
+     echo '退避なし: 証明書と鍵は削除しない'
+   elif [ ! -f ~/.local/state/gnome-headless-session-setup/restored ]; then
+     echo '中断: 共用 TLS 設定を戻していない。この項の手順 1 を先に完了する' >&2
+   else
+     (
+       set -e
+       if [ -f ~/.local/state/gnome-headless-session-setup/created-certificate ]; then
+         if [ ! -f ~/.local/state/gnome-headless-session-setup/created.sha256 ] ||
+            [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
+            [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
+           echo '中断: 生成物を照合できないか、リンクへ置き換わっている。証明書と退避は削除しない' >&2
+           exit 1
+         fi
+         if ! sha256sum --check ~/.local/state/gnome-headless-session-setup/created.sha256; then
+           echo '中断: 生成後に証明書か鍵が変わっている。証明書と退避は削除しない' >&2
+           exit 1
+         fi
+         rm -f ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+         rmdir --ignore-fail-on-non-empty ~/.local/share/gnome-remote-desktop/certificates
+       fi
+       rm -f ~/.local/state/gnome-headless-session-setup/tls-cert ~/.local/state/gnome-headless-session-setup/tls-key \
+         ~/.local/state/gnome-headless-session-setup/backup-complete ~/.local/state/gnome-headless-session-setup/ready \
+         ~/.local/state/gnome-headless-session-setup/restored ~/.local/state/gnome-headless-session-setup/created-certificate \
+         ~/.local/state/gnome-headless-session-setup/created.sha256
+       rmdir --ignore-fail-on-non-empty ~/.local/state/gnome-headless-session-setup
+       rm -f ~/rdp_tls_probe.py
+     )
+   fi
+   ```
+
+   - 今回生成し、生成時の中身のままの証明書だけが消える。既存の証明書・ほかのファイルは残る
+   - `中断:` のときは、生成途中のファイルや後から差し替えたものを手で確認する。照合できないものは自動削除しない
+   - `credentials.ini` 自体も残す。ヘッドレス用の資格情報は、この項の手順 1 の `clear-credentials` で解除済み
+   - 退避の無い既存導入では何も削除しない。`~/rdp_tls_probe.py` が要らなければ手で消す
+
 #### GNOME のヘッドレスセッション: 接続元を LAN に絞る
 
 - ヘッドレスのセッションの RDP のポートを、LAN の送信元サブネットからだけ受け付けるようにする
@@ -983,17 +1129,16 @@
 
 - [リモートログイン](#gnome-のリモートログイン)と[ヘッドレスのセッション](#gnome-のヘッドレスセッション)を併用している PC で、ヘッドレスのセッションをやめ、リモートログインだけにする
 - 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)と[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)を通して、併用している。ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
-- 実行場所: セッションを使うユーザー本人で SSH でログインしたシェル（bash）。この項の手順 6 は、クライアントの PC で行う
+- 実行場所: セッションを使うユーザー本人で SSH でログインしたシェル（bash）。この項の手順 9 は、クライアントの PC で行う
 - リモートログインの設定（システムのデーモン・証明書・資格情報・3389/tcp）は変えない
 - ヘッドレスのセッションで動いていたアプリは閉じる
 - [Claude Code の GNOME 操作](ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う) の仮想モニターのドロップインも外す。この PC では、Claude Code から GUI を撮って確かめられなくなる
 - やめた後は、リモートログインで入ると新しいセッションができる。切断してもセッションは残り、次のログインでそこへ戻る
 - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 の変数は、この項の手順 2 を行うときだけ要る
-- 元に戻すときは、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 2（ヘッドレスのセッションの RDP も使うなら、同じ項の手順 3〜10）と、[Claude Code の GNOME 操作 手順 1〜3](ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)
 
 > [!IMPORTANT]
-> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない（この項の手順 5 で、そのセッションを終わらせるため）
-> - この項の手順 6（クライアントからの接続）だけ、クライアントの PC で行う
+> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない（この項の手順 8 で、そのセッションを終わらせるため）
+> - この項の手順 9（クライアントからの接続）だけ、クライアントの PC で行う
 
 1. 今の状態を確かめる。
 
@@ -1013,14 +1158,45 @@
    ```
 
    - `grdctl --headless status` では確かめない
-   - 2 つ目の `systemctl` が `enabled`、`--list-ports` に `3390/tcp`、rich rule に `port="3390"` のどれかがあれば、ヘッドレスのセッションの RDP を設定してある。どれも無ければ、この項の手順 2 は飛ばす
-   - `ls` が `virtual-monitor.conf` を出せば、Claude Code の GNOME 操作のドロップインがある。`No such file or directory` なら、この項の手順 3 は飛ばす
-   - `gdm-password` の行があり、gnome-shell の行に `--virtual-monitor` が付いていれば、この項の手順 5 を行う。そうでなければ、この項の手順 5 は飛ばす
+   - 2 つ目の `systemctl` が `enabled`、`--list-ports` に `3390/tcp`、rich rule に `port="3390"` のどれかがあれば、ヘッドレスのセッションの RDP を設定してある。どれも無ければ、この項の手順 2〜5 は飛ばす
+   - `ls` が `virtual-monitor.conf` を出せば、Claude Code の GNOME 操作のドロップインがある。`No such file or directory` なら、この項の手順 6 は飛ばす
+   - `gdm-password` の行があり、gnome-shell の行に `--virtual-monitor` が付いていれば、この項の手順 8 を行う。そうでなければ、この項の手順 8 は飛ばす
 
-1. ヘッドレスのセッションの RDP を設定してあるときだけ、その設定を外す。
+1. ヘッドレスのセッションの RDP を設定してあるときだけ、変数を設定する。
 
-   - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 の 2 つのブロックを貼ってから、[ロールバック](extra/gnome-headless-session.md#ロールバック)の手順 1（LAN に絞ったときは手順 2）・手順 3・手順 4 を順に貼る
-   - ロールバックの手順 5 は貼らない（この項の手順 4 で行う）
+   - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 の 2 つのブロックを貼り、`RDP_PORT` が `3390` であることを確かめる
+   - 接続元を LAN に絞ってあるときは、[接続元を LAN に絞る](#gnome-のヘッドレスセッション-接続元を-lan-に絞る)の手順 2 の 1 つ目のブロックを貼り、絞ったときと同じ `LAN_SUBNET` を入れる。その場合は、この項の手順 3 を飛ばして手順 4 へ進む
+
+1. ヘッドレスのセッションの RDP を設定し、LAN に絞っていないときだけ、開けたポートを閉じる。
+
+   ```bash
+   if [ -z "${RDP_PORT}" ]; then echo '中断: この項の手順 2 の RDP_PORT が空のまま。この項の手順 2 を貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo firewall-cmd --permanent --remove-port="${RDP_PORT}/tcp"
+   sudo firewall-cmd --reload
+   sudo firewall-cmd --list-ports
+   fi
+   ```
+
+   - `success` が 2 行出て、`--list-ports` に `<RDP_PORT>/tcp` が無ければよい
+
+1. ヘッドレスのセッションの RDP の接続元を LAN に絞ったときだけ、rich rule を消す（この項の手順 3 の代わりに）。
+
+   ```bash
+   if [ -z "${LAN_SUBNET}" ] || [ -z "${RDP_PORT}" ]; then echo '中断: LAN_SUBNET か、この項の手順 2 の RDP_PORT が空のまま。値を入れて貼り直す' >&2; else
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=${RDP_PORT} protocol=tcp accept"
+   sudo firewall-cmd --reload
+   sudo firewall-cmd --list-rich-rules
+   fi
+   ```
+
+   - `LAN_SUBNET` は、[接続元を LAN に絞る](#gnome-のヘッドレスセッション-接続元を-lan-に絞る)の手順 2 の 1 つ目のブロックを貼り直して入れる
+   - `success` が 2 行出て、その rich rule が消えていればよい
+
+1. ヘッドレスのセッションの RDP を設定してあるときだけ、共用 TLS 設定を復旧して証明書を片付ける。
+
+   - [証明書の準備に失敗したとき](#gnome-のヘッドレスセッション-証明書の準備に失敗したとき)の手順 1・2 を通す
 
 1. Claude Code の GNOME 操作のドロップインがあるときだけ、外す。
 
@@ -1033,7 +1209,6 @@
    ```
 
    - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
-   - Claude Code の GNOME 操作の[ロールバック](extra/claude-code-gui.md#ロールバック)の手順 2 は行わない
 
 1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
 
@@ -1104,7 +1279,7 @@
 - RDP のクライアントに GDM のログイン画面を出し、OS のアカウントでログインできるようにする（システムのデーモンで待ち受ける）
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 11 は、LAN 内の別のマシンで行う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[ロールバックと注意点](extra/gnome-remote-desktop.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[注意点](extra/gnome-remote-desktop.md)
 - **この項の手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)。この項と同じ PC で併用できる（ポートは 3390）

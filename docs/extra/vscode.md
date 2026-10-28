@@ -1,39 +1,8 @@
-# VS Code のロールバックと注意点
+# VS Code の注意点
 
 [手順書](../almalinux-setup.md#vs-code)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](../reference/vscode.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#vs-code)の手順 N、「本書」「この文書」は手順書を指す
-
-## ロールバック
-
-> [!CAUTION]
-> **この節の**手順 3 の `rm -rf ~/.config/Code ~/.vscode` は、**VS Code の設定・履歴・拡張機能を消す**。残すなら、この節の手順 3 は貼らない。
-
-1. VS Code を消す。
-
-   ```bash
-   sudo dnf remove code
-   ```
-
-   - `socat` がほかから使われていなければ、dnf の自動掃除で一緒に消える（クリーンインストールの VM では `code` と `socat` の 2 パッケージだけが消えた）
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. リポジトリのファイルを消す。
-
-   ```bash
-   sudo rm -f /etc/yum.repos.d/vscode.repo
-   ```
-
-   - Microsoft の署名鍵は `gpg-pubkey-be1229cf-5631588c` として残る（`rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n'` で確認できる）
-   - 消すなら `sudo rpm -e gpg-pubkey-be1229cf-5631588c`。**ほかに Microsoft のリポジトリを使っていないことを確かめてから**にする
-
-1. 設定・履歴・拡張機能も消すときだけ、`~/.config/Code` と `~/.vscode` を消す（取り戻せない）。
-
-   ```bash
-   rm -rf ~/.config/Code ~/.vscode      # 設定・履歴・拡張機能も消す場合
-   ```
-
----
 
 ## 注意点
 

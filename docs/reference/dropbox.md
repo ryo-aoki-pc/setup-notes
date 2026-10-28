@@ -1,6 +1,6 @@
 # Dropbox の参考資料
 
-[手順書](../dropbox.md#dropbox)・[ロールバックと注意点](../extra/dropbox.md)
+[手順書](../dropbox.md#dropbox)・[注意点](../extra/dropbox.md)
 
 ## 補足
 

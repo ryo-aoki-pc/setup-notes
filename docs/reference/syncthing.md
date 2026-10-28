@@ -1,6 +1,6 @@
 # Syncthing の参考資料
 
-[手順書](../syncthing.md#syncthing)・[ロールバックと注意点](../extra/syncthing.md)
+[手順書](../syncthing.md#syncthing)・[注意点](../extra/syncthing.md)
 
 ## 補足
 
@@ -123,11 +123,6 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 - こちらで 100 個を超えて消した古いアーカイブは、相手でも消えるため
 
-### 設定を自動でバックアップする / 手順 7: 補足: パスで探す理由と、残るもの
-
-- フォルダは ID ではなくパスで探す（バックアップから戻したホストでは、ID に元のホスト名が入っている）
-- 登録を消すと、Syncthing が `~/syncthing-backup/.stfolder` も消す。アーカイブは残る
-
 ### バックアップから戻す / 手順 4: 補足: ST_BACKUP の既定値
 
 - `ST_BACKUP` には名前順で最後（＝最新）のアーカイブが入る
@@ -160,7 +155,7 @@ API キーを付ければ通る。キーは `syncthing cli config gui apikey get
 
 ### Windows 11 の Syncthing / 手順 3: 補足: 入れ直したときのデバイス ID
 
-- ロールバックの手順 1〜4 の後に入れ直すとき、デバイス ID が前と同じになるのは、同じ項の手順 6 が前の鍵を使うため
+- 入れ直すとき、デバイス ID が前と同じになるのは、同じ項の手順 6 が前の鍵を使うため
 
 ### Windows 11 の Syncthing / 手順 4: 補足: 版・フォルダーの権限・中断したとき
 

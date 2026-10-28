@@ -83,8 +83,6 @@
 - ローカルアカウントの名前の既定は、Rufus を動かした Windows のユーザー名
 - 「スタート」の後に「警告: デバイス “<デバイス>” のデータは消去されます。」の確認が出る
 
-
-
 ### 参照
 
 - [UEFI/GPT-based hard drive partitions](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions)（ESP・MSR・回復の大きさと並び、サンプルの `CreatePartitions-UEFI.txt`）

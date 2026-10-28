@@ -1,7 +1,7 @@
 # 仮想マシンのセットアップ（AlmaLinux 10・Windows 11）
 
 - AlmaLinux 10 は VirtualBox・VirtualBox の bootc ゲスト・kvm-container、Windows 11 は Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
@@ -20,7 +20,7 @@
 
 ### VirtualBox
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
 > - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-virtualbox-を入れる)を管理者の Windows PowerShell 5.1 で通す
@@ -347,15 +347,18 @@
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
-1. 系列を変えるときは（この項の手順 2 の代わりに）、[AlmaLinux 10 のロールバック](extra/virtualbox.md#almalinux-10-のロールバック)の手順 2 だけを行う。
+1. 系列を変えるときは（この項の手順 2 の代わりに）、今の系列のパッケージを消す。
 
-   - [AlmaLinux 10 のロールバック](extra/virtualbox.md#almalinux-10-のロールバック)の手順 2 は `sudo dnf remove VirtualBox-7.2`
-   - `[y/N]` に答えてから、この項の手順 4 に進む
+   ```bash
+   sudo dnf remove VirtualBox-7.2
+   ```
+
+   - **次の手順は、`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
 
 1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 1 の下見と同じ項の手順 4 からやり直す。
 
    - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 1・4 の `VirtualBox-7.2` を、新しい系列の名前（`VirtualBox-7.3` など）に置き換えて貼る
-   - 以後は、この項の手順 2 と[AlmaLinux 10 のロールバック](extra/virtualbox.md#almalinux-10-のロールバック)の手順 2 も同じく置き換える
+   - 以後は、この項の手順 2・3 も同じく置き換える
 
 ---
 
@@ -373,7 +376,7 @@
 - 実行場所:
   - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。手順 1〜3・5〜8・10。`sudo -i` した root のシェルでは行わない
   - ホスト: ホストのデスクトップの、VM のウィンドウ（メニューの操作）。手順 4・9（手順 4 の CD の挿入は、ホスト側の操作）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[ロールバックと注意点](extra/virtualbox-guest-bootc.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[注意点](extra/virtualbox-guest-bootc.md)
 - この項の手順 1 で変数を設定したシェルに貼る。新しい端末を開いたら、この項の手順 1 を貼り直す
 - **手順 7 で再起動する**。手順 6 はビルドが終わるのを待ってから次を貼る
 - **インターネットに出られないホストオンリーだけの VM は、手順 6 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)を通す**
@@ -398,7 +401,7 @@
    - 自作の kernel-rt のイメージ（レジストリにあるもの）なら、手順 2 の `Booted image:` に合わせて、そのイメージの名前にする
      - 手順 3 の Containerfile がカーネルを見分けて、`kernel-rt-devel` でビルドする
      - `kernel-rt-devel` は `rt` のリポジトリにしか無いので、そのイメージで `rt` を有効にしておく（参考資料を参照）
-   - 手順 6、[更新](#virtualbox-の-bootc-ゲスト-更新)、[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)で使う
+   - 手順 6 と[更新](#virtualbox-の-bootc-ゲスト-更新)で使う
 
 1. VirtualBox の VM で bootc のシステムが動いているかと、空き容量を確かめる。
 
@@ -602,14 +605,14 @@
     - Windows ホストでは WSL の AlmaLinux 10 の端末で行う。既定の NAT でホストオンリーの VM に届くことを確認済み
     - [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする)での接続は未確認
 - 実行場所:
-  - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。この項の手順 1・2・5・10・11
-  - ホスト: VirtualBox を動かしている PC の、自分のユーザーの端末（bash）。Windows のホストでは WSL の AlmaLinux 10 の端末。この項の手順 3・4・6〜9・12
+  - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。この項の手順 1・2・5・10
+  - ホスト: VirtualBox を動かしている PC の、自分のユーザーの端末（bash）。Windows のホストでは WSL の AlmaLinux 10 の端末。この項の手順 3・4・6〜9・11・12
 - Secure Boot なら[署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 4 も、この項の手順 4・5 で代える
 - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 と違うところ:
   - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（この項の手順 7）
   - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（この項の手順 4・5。登録は [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5〜7）
   - OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
-- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 3 の代わりに、この項の手順 6・8〜10。元のイメージに戻すときは、この項の手順 11・12
+- ホストオンリーアダプターだけの VM で OS を上げるときは、[更新](#virtualbox-の-bootc-ゲスト-更新)の手順 3 の代わりに、この項の手順 6・8〜10
 
 1. VM の端末で、変数を設定する（既定のままでよい）。
 
@@ -620,7 +623,6 @@
    ```
 
    - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 と同じ値を入れる
-   - この項の手順 11 で使う
    - 新しい端末を開いたら、この手順を貼り直す
 
 1. VM の端末で、ホストオンリーアダプターの IP を見る。
@@ -688,7 +690,7 @@
    ```
 
    - `MOK.der` だけが並ぶ（秘密鍵は VM に置かない）
-   - 置き場所は [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 4 と同じなので、同じ項の手順 7 と[ロールバック](extra/secure-boot-mok.md#ロールバック)はそのまま使える
+   - 置き場所は [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 4 と同じなので、同じ項の手順 7 はそのまま使える
    - `MOK.priv` も並ぶなら、[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 4 で VM に作った鍵が残っている。この項ではホストの鍵で署名するので、使われない
    - **一時パスワードを 2 回聞かれる**（[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 6 の MokManager で 1 回だけ使う。本書には残さない）
    - 続けて、VM で [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5〜7 を行い、再起動して MokManager で登録し、`--test-key` で確かめる。ホストの端末は、開いたままにしておく
@@ -739,9 +741,9 @@
    ```
 
    - `quay.io/almalinuxorg/atomic-desktop-gnome` の行が `sigstoreSigned` ならよい
-   - 自分のユーザーの podman のすべてに効く（`/etc/containers` の設定の代わりに読まれる）。消すのは、この項の手順 12
+   - 自分のユーザーの podman のすべてに効く（`/etc/containers` の設定の代わりに読まれる）
    - 「すでにある」と出たときは何も変えずに止まる。[既存の署名設定への追加](#virtualbox-の-bootc-ゲスト-既存のコンテナ署名設定に追加する)を行ってから、この項の手順 8 へ進む
-   - 新規に置く設定の控えは `~/vbox-ga-host/containers-config-created` に残す。この項の手順 12 で、内容が変わっていないことを確かめてから消すため
+   - 新規に置く設定の控えは `~/vbox-ga-host/containers-config-created` に残す
    - コピーや `podman image trust show` が失敗したときは、次の手順に進まない
 
 1. ホストの端末で、派生イメージをビルドする（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 の代わりに）。
@@ -795,21 +797,12 @@
    - 続けて[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 から先を行う
    - **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 は、`Loaded image:` が出てから貼る**
 
-1. 元に戻すときは、VM の端末で、[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 1 の代わりにこれを貼る。
+1. 署名設定のコピーやビルドに失敗して復旧するときは、ホストの端末で変数を設定し直す。
 
-   ```bash
-   sudo bootc switch --apply --transport containers-storage "${BASE_IMAGE:?この項の手順 1 の BASE_IMAGE が空のまま。値を入れて貼り直す}"
-   ```
+   - この項の手順 3 の 2 つのブロックを貼り直し、`BASE_IMAGE` を確かめる
+   - 続けて、この項の手順 12 を行う
 
-   - この項の手順 10 で運んだベースイメージへ切り替えて再起動する
-   - `Fetching layers` が `0/0`、`Queued for next boot: ostree-unverified-image:containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` が出る
-   - 起動した後の `sudo bootc status` の `● Booted image:` は `containers-storage:quay.io/almalinuxorg/atomic-desktop-gnome:latest` になる
-     - `Digest:` も、レジストリのものとは違う値になる
-     - 中身は元のイメージと同じ版（`Version:`）で、Guest Additions のモジュールと `/opt/VBoxGuestAdditions-*` は無くなる
-   - 続けて[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 から先を行う
-   - **[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)の手順 2 は、起動したらログインし、新しい端末で[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 を貼ってから貼る**
-
-1. 元に戻すときは、ホストの端末で、ビルドに使ったものと、署名を確かめる設定を消す。
+1. 署名設定のコピーやビルドに失敗したときは、ホストの端末で、ビルドに使ったものと署名を確かめる設定を片付ける。
 
    ```bash
    if [ -z "${BASE_IMAGE}" ]; then
@@ -842,7 +835,7 @@
    - **注意**: 控えが無い・不完全なときや、設定の内容が変わったときは、`policy.json`・`registries.d`・`pki` をまとめて消さない。退避と控えを見て、今回追加・変更したファイルや項目だけを手で戻す
      - 手動で戻した後に、ビルドの材料を `rm -rf ~/vbox-ga-host` で消し、イメージを `podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?この項の手順 3 を貼り直す}"` で消す
      - コピーの途中で失敗した場合も、残ったファイルを確かめてから戻す。比較自体が失敗した場合は原因を直すか、同じく手で確認する
-   - Secure Boot の鍵（`~/vbox-ga-mok`）は残る。消すときは、[ロールバック](extra/virtualbox-guest-bootc.md#ロールバック)のリード
+   - Secure Boot の鍵（`~/vbox-ga-mok`）は残る
 
 #### VirtualBox の bootc ゲスト: 共有フォルダーを使う
 
@@ -948,8 +941,6 @@
 1. `policy.json` があるなら、その `transports` の `docker` に、VM の `quay.io/almalinuxorg/atomic-desktop-gnome` の項目を足す。無いなら VM のファイルを写す。どちらも鍵のパスを `~/.config/containers/pki/` に合わせる。
 
 1. `registries.d` があるなら、VM の `almalinuxorg-atomic-desktop-gnome.yaml` を、同名が無いことを確かめて足す。無いなら VM の `registries.d` をまるごと写す（1 つでも置くと、`/etc/containers/registries.d` が読まれなくなるため）。
-
-1. 元に戻すときは、[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 12 の自動削除は使わず、控えたファイル・項目だけを戻す。
 
 ---
 
@@ -1373,7 +1364,6 @@
 - この項の手順 4 は NIC の接続をブリッジに切り替えるので、その NIC 越しの ssh は切れる
 - NIC の元の接続名 (この項の手順 1 の `NIC_CON`) を控えてから、接続を変える (この項の手順 3・4)
 - この項の手順 9 だけは、[VM を作る](#kvm-container-で-vm-を作る)の手順 4 で VM を作った後に貼る
-- 元に戻すのは[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1〜5
 
 1. 変数を設定する (`NIC` は必ず値を入れる)。
 
@@ -1401,7 +1391,7 @@
    - 値を読み戻して確かめる
    - 最後の行でリポジトリ直下に移る
    - `NIC_CON` が空なら、ここで止める。`NIC` の名前が違うか、その NIC に active な接続が無い (`nmcli connection show --active` で確かめる)
-   - **`NIC_CON` の値を控えておく**。[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 5 で NIC の元の接続を上げるのに使う
+   - **`NIC_CON` の値を控えておく**
    - 新しいシェルを開いたら (SSH を張り直したあとも)、この手順の 2 つのブロックを貼り直してから先へ進む。**この項の手順 4 の後に貼り直すと `NIC_CON` の値が変わる**
 
 
@@ -1504,7 +1494,6 @@
 - VM の定義・UEFI 変数・ディスクを消す。ISO は、消すときだけこの項の手順 7 で消す
 - 前提: [kvm-container を導入する](#kvm-container-を導入する)を通してある。コンテナが止まっていれば、先に[VM を使う](#kvm-container-の-vm-を使う)の手順 1・2 で起動する
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
-- コンテナ停止・`data/` の削除は[ロールバック](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/extra/setup.md#ロールバック)の手順 1・6〜8
 - `down` は `data/` を残す。**`clean` は削除する**
 - 共有 ISO を消さないため、`--remove-all-storage` は使わず、消すディスクを `--storage` で指定する
 - UEFI の VM は `--nvram` を付ける。BIOS の VM に付けてもよい
@@ -1635,7 +1624,7 @@
 ### Hyper-V
 
 - Hyper-V で VM を作って使う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](reference/hyper-v.md)・[ロールバックと注意点](extra/hyper-v.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](reference/hyper-v.md)・[注意点](extra/hyper-v.md)
 
 #### Hyper-V: この PC で使えるかを確かめる
 
@@ -2111,7 +2100,7 @@
 - Windows 11 の x64 が対象
 - Android の Windows App から VM に打つなら、[Android の RDP 設定](#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)を通す
 - Atomic Desktop のゲストに Guest Additions を入れるなら、[bootc ゲスト](#virtualbox-の-bootc-ゲスト)を通す
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
 > - **SSH やリモート デスクトップのセッションからは行わない**。この項の手順 3 の途中でネットワークがいったん切れ、手順 7 は画面で行う
@@ -2253,14 +2242,10 @@
    - メニュー バーが無いときは、VM のウィンドウがスケール モード（メニュー バーを出さない形）になっている
    - スケール モードは、PC で `& "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" setextradata <VM 名> GUI/Scale` を実行すると、VM を動かしたまま元の形に戻る
 
-1. 元に戻すときは、この項の手順 1 の項目をオフにする。
-
-   - Windows App は、打った文字を Unicode で送る既定に戻る
-
 #### VirtualBox: Windows 11 で VM を作って使う
 
 - AlmaLinux 10 の x86_64 の ISO から VM を作って使う。インストーラーの画面は人が操作する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[ロールバックと注意点](extra/virtualbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 - ふだんの操作は[使い方の基本](#virtualbox-使い方の基本)、状態を残す・複製するなら[スナップショットとクローン](#virtualbox-スナップショットとクローン)、要らなくなったら[VM を消す](#virtualbox-vm-を消す)
 
 ##### VirtualBox: VM を作る
@@ -2642,7 +2627,7 @@
 ### VMware Workstation Pro
 
 - VMware Workstation Pro を入れて VM を作る
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[ロールバックと注意点](extra/vmware.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[注意点](extra/vmware.md)
 
 #### VMware Workstation Pro: インストーラーを取得して確かめる
 
@@ -3087,7 +3072,7 @@
 - 前提: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）。UEFI / BIOS で仮想化を有効にし、RAM 4 GB 以上・ディスクの空き 1 GB 以上・CPU 2 コア以上を用意してある。Windows の VM の中では、入れ子の仮想化も有効にしてある
 - 実行場所: この PC のデスクトップ。状態確認・有効化・再起動は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）。起動・試験・窓を閉じた後の確認は、通常のデスクトップと Sandbox の画面
 - **この項の手順 4 は、再起動が必要な場合だけ行う**。先に開いているファイルを保存し、実行中の作業を終える
-- [参考資料](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境)・[無効にする手順](extra/windows-sandbox.md#windows-sandbox-を無効にする)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)
+- [参考資料](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)
 
 > [!CAUTION]
 > **この項の手順 8 で Sandbox 内のファイルとアプリの状態が消える**。残す結果をホストへコピーしてから閉じる。
@@ -3106,7 +3091,7 @@
    Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
    ```
 
-   - `FeatureName` が `Containers-DisposableClientVM` であることを確かめ、`State` を控える（[無効にする手順](extra/windows-sandbox.md#windows-sandbox-を無効にする)で使う）
+   - `FeatureName` が `Containers-DisposableClientVM` であることを確かめ、`State` を控える
    - `Disabled` または `DisabledWithPayloadRemoved` なら、この項の手順 3 に進む
    - `Enabled` なら、この項の手順 3・4 は飛ばす
    - `EnablePending` または `DisablePending` なら、この項の手順 3 は飛ばし、手順 4 で再起動する。再起動したらこの項の手順 2 に戻り、変更前の状態を控え直す

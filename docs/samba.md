@@ -1,7 +1,7 @@
 # Samba のセットアップ（AlmaLinux 10・Windows 11）
 
 - AlmaLinux 10 の PC のホームを Samba で共有し（サーバー）、AlmaLinux 10・Windows 11 の PC からつなぐ（クライアント）
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - **前提と実行場所（サーバーかクライアントか・どの窓か）は、各項のリードに従う**。AlmaLinux 10 の項は自分のユーザーの bash で行い、`sudo -i`・`su -` のシェルでは行わない
@@ -24,7 +24,7 @@
 - クライアントの PC で、Samba の共有を cifs でマウントし、アクセスしたときに自動でマウントされるようにする（fstab と systemd の automount）
 - 前提: サーバーで[Samba サーバー](#samba-サーバー)を通してある（Windows や NAS の共有でもよい）
 - 実行場所: クライアントの PC の、自分のユーザーの bash（デスクトップの端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
 - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-samba-クライアントを使う)を、管理者ではない Windows PowerShell 5.1 で通す
 - **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
@@ -252,7 +252,7 @@
 - サーバーで、自分のユーザーのホームを Samba（SMB3）で公開する
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: サーバーの、公開するユーザー自身の bash（デスクトップの端末か SSH）。手順 9 だけは、つなぐ側の別のマシン
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[ロールバックと注意点](extra/samba.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[注意点](extra/samba.md)
 - **手順 6 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
 - この項の後に行う項:
@@ -260,7 +260,6 @@
   - `/home` の下のすべてのホーム（ほかのユーザーのホームも）を 1 つの共有で開くなら、[/home も公開する](#samba-サーバー-home-も公開する)を行う
   - サーバーの上で読み書きを確かめるとき（クライアントでつなげないときの切り分けにも）は、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)を行う
   - 接続元を絞る場合は、最後に[接続元を絞る](#samba-サーバー-接続元を絞る)を行う
-  - 戻すときは[ロールバック](extra/samba.md#ロールバック)
 
 > [!IMPORTANT]
 > - **設定済みのサーバーで手順 3 を貼り直さない**。smb.conf 全体が置き換わり、`[root]`・`[home]` も消える
@@ -459,21 +458,6 @@
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`
    - AlmaLinux 10 の PC なら、[Samba クライアント](#samba-クライアント)の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
 
-1. 元に戻すときは、`[root]` の節とモジュールを消し、smb.service を再起動する。
-
-   ```bash
-   {
-     sudo sed -i '/^\[root\]$/,/^\[/{/^\[root\]$/d;/^\[/!d}' /etc/samba/smb.conf
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo semodule -r samba_root_home
-     sudo systemctl restart smb.service
-     testparm -s 2>/dev/null | grep -c '^\[root\]'   # 0
-   }
-   ```
-
-   - 最後に `0` と出ればよい
-   - `semodule -r` は約 50 秒（VM）かかり、`libsemanage.semanage_direct_remove_key: Removing last samba_root_home module …` と出る。エラーではない
-
 #### Samba サーバー: /home も公開する
 
 - サーバーで、`\\<SERVER_IP>\home` で `/home` を開き、その下のすべてのユーザーのホームを読み書きできるようにする。つなぐのは[Samba サーバー](#samba-サーバー)の手順 6 で登録した自分の Samba ユーザーのままで、ほかのユーザーは Samba に登録しなくてよい
@@ -531,19 +515,6 @@
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\home`。ユーザーごとのフォルダーが並ぶ。フォルダーの外（`/home` の直下）には作れない
    - AlmaLinux 10 は[Samba クライアント](#samba-クライアント)の手順 1 で `SHARE=home` にし、`SMB_USER` は自分のままにする
    - [Samba クライアント](#samba-クライアント)の手順 5・7 の共有直下への書き込みは `Permission denied` になる
-
-1. 元に戻すときは、`[home]` の節を消し、smb.service を再起動する。
-
-   ```bash
-   {
-     sudo sed -i '/^\[home\]$/,/^\[/{/^\[home\]$/d;/^\[/!d}' /etc/samba/smb.conf
-     sudo systemctl restart smb.service
-     printf '\n\033[7m 確認 \033[0m\n'
-     testparm -s 2>/dev/null | grep -c '^\[home\]'   # 0
-   }
-   ```
-
-   - 最後に `0` と出ればよい
 
 #### Samba サーバー: サーバーの上で動作を確かめる
 
@@ -706,17 +677,6 @@
    fi
    ```
 
-1. 元に戻すときは、絞ったときと同じ `ALLOW_FROM` を入れてから、public ゾーン全体の 445/tcp に戻す。
-
-   ```bash
-   if [ -z "${ALLOW_FROM}" ]; then echo '中断: ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
-   for src in ${ALLOW_FROM}; do
-     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
-   done
-   sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
-   fi
-   ```
-
 ---
 
 ## Windows 11 で使う
@@ -730,7 +690,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。手順 7 はサーバーの bash、手順 8 はこの PC のデスクトップ
 - パスワードは Windows の資格情報マネージャーに置く
 - Samba サーバーの `[root]`・`[home]` も割り当てるなら、この項を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[ロールバックと注意点](extra/samba-client.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
 
 > [!IMPORTANT]
 > **管理者の窓で割り当てたドライブは、エクスプローラーに出ない**。管理者ではない窓で行う。
@@ -788,7 +748,7 @@
    ```
 
    - `<SERVER> の 445/tcp に届く。<DRIVE> は空いている` と、`<SERVER>` の資格情報の一覧が出ればよい
-   - 一覧にある `<SERVER>` の保存済み資格情報は、この項の手順 4 で置き換わり、[ロールバック](extra/samba-client.md#windows-11-のロールバック)の手順 2 で消える
+   - 一覧にある `<SERVER>` の保存済み資格情報は、この項の手順 4 で置き換わる
    - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー)）を確かめる。外出先なら、先に WireGuard のトンネルを張る
    - `もう使われている` ときは、`DRIVE` を別の文字にして、この項の手順 2 の 3 つ目のブロックを貼り直す。前にこの項で同じ共有を割り当てたなら、この項は済んでいる
 

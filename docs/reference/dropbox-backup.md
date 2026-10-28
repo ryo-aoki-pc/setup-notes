@@ -1,6 +1,6 @@
 # Dropbox へのバックアップの参考資料
 
-[手順書](../dropbox.md#dropbox-へのバックアップ)・[ロールバックと注意点](../extra/dropbox-backup.md)
+[手順書](../dropbox.md#dropbox-へのバックアップ)・[注意点](../extra/dropbox-backup.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-backup.md)
 

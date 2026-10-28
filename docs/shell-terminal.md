@@ -2,7 +2,7 @@
 
 - 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal・PowerShell 7 のプロファイル・PowerShell の開発の設定も整える
 - Android の Termux のシェルは、Android のセットアップの「[Termux のシェル](android.md#termux-のシェル)」で設定する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)。ロールバックは、ほかの道具と一緒に、2 冊のロールバック（[AlmaLinux 10](extra/almalinux-setup.md#ロールバック)・[Windows 11](extra/windows-setup.md#ロールバック)）で行う。Windows Terminal・PowerShell 7 と 5.1 のプロファイル・PowerShell の開発の設定・任意の項の設定は、この文書のそれぞれの項の「元に戻すときは」で戻す
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
@@ -138,7 +138,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 最初が `1`、最後が `0` ならよい
    - システムの `podman.socket` があれば `DOCKER_HOST=unix:///run/podman/podman.sock`、無ければ空
-   - 確認後は `exit` で抜ける。戻すときは[共通 bash のロールバック](https://github.com/ryo-aoki-pc/bash/blob/main/docs/extra/quick-start.md)を root のシェルで行う
+   - 確認後は `exit` で抜ける
 
 #### 共通の bash 設定を更新する
 
@@ -463,7 +463,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
 - `**<Tab>` の候補は変わらない（`find` のまま）
 - fd は[Neovim](neovim.md#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](almalinux-setup.md#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
-- 戻すときは、この項の手順 5
 
 1. brew で fd を入れる。
 
@@ -493,15 +492,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - `.git` の中のファイルと、`.gitignore` に書かれたファイルは一覧に出ない
    - 一覧の右側に、選んでいるファイルの中身が行番号と色付きで出る。Esc で閉じる
-
-1. 元に戻すときは、fd を消す。
-
-   ```bash
-   brew uninstall fd
-   ```
-
-   - `Uninstalling /home/linuxbrew/.linuxbrew/Cellar/fd/…` と出ればよい
-   - [Neovim](neovim.md#neovim)の手順 3 か[yazi](almalinux-setup.md#yazi)の手順 2 で fd を入れてあれば、消さない（自分用の Neovim の設定のファイルピッカーと yazi も使う）
 
 #### eza の表示を調整する
 
@@ -894,7 +884,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 最後の `ls` が 2 行とも `No such file or directory` ならよい
    - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 2 を貼り直す
    - `中断:` や `mv` のエラーが出たら、手順 3 へ進まない。原因を直して手順 2 を貼り直す
-   - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
 
 1. この設定を `~/.config/wezterm` に clone する。
 
@@ -1203,13 +1192,41 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    (Invoke-RestMethod -Uri https://api.github.com/repos/yuru7/HackGen/releases/latest).tag_name
    ```
 
-   - `v2.10.0` なら、新しい版は無い。この項の手順 3 は行わない
+   - `v2.10.0` なら、新しい版は無い。この項の手順 3〜6 は行わない
    - 違う版なら、[HackGen Console NF](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 の `$ver` と `$sha256` を、その版の zip と、その zip から計算して確認したハッシュ値に合わせて直してから貼る
 
-1. 新しい版にするときだけ、今の版を外してから入れ直す。
+1. 新しい版にするときだけ、HackGen の登録を消す。
 
-   - [ロールバックの「HackGen Console NF を消す」](extra/windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3（登録を消し、サインインし直してから、ファイルを消す）を行う
-   - 続けて、直した[HackGen Console NF](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 を貼り、サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 5 で確かめる
+   ```powershell
+   $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
+   (Get-Item -LiteralPath $key).Property -like 'HackGen*ConsoleNF-* (TrueType)' | ForEach-Object { Remove-ItemProperty -LiteralPath $key -Name $_ }
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   (Get-Item -LiteralPath $key).Property -like 'HackGen*'
+   ```
+
+   - 最後のコマンドが何も出さなければよい
+   - フォントのファイルは読み込まれている間は消せないので、登録を消してからサインインし直し、その後でファイルを消す
+
+1. 新しい版にするときだけ、この PC でサインアウトし、サインインし直す。
+
+   - 再起動でもよい
+   - **次の手順は、サインインし直して Windows PowerShell（5.1）を開いてから貼る**
+
+1. 新しい版にするときだけ、フォントのファイルを消す。
+
+   ```powershell
+   Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts\HackGen*ConsoleNF-*.ttf"
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts" -Filter 'HackGen*'
+   ```
+
+   - 最後のコマンドが何も出さなければよい
+   - [HackGen Console NF](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 の `icacls` で足した読み取りの許可は残す（ほかのフォントにも要る）
+
+1. 新しい版にするときだけ、直した導入の手順で入れ直し、版を確かめる。
+
+   - 直した[HackGen Console NF](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 を貼る
+   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 5 で確かめる
 
 ---
 
@@ -1223,12 +1240,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
 - 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
 - この項の手順 2〜5 は `settings.json` だけを読み書きし、既定のプロファイル（Windows PowerShell）と `copyOnSelect` は変えない
-- 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す。この項の手順 6 は、その設定も含めて控えを書き戻す
-- 戻すときは、この項の手順 6
+- 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す
 
 > [!WARNING]
 > - この項の手順 4 で警告を切ると、信用できない複数行の文字も、確かめずにそのまま貼られて動く
-> - この項の手順 6 は、控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻す。残すなら手順 6 は貼らず、この項の手順 5 の画面でフォント スタイルと警告を戻す
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -1259,7 +1274,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `控えた:`（2 回目からは `控えはもうある`）の行と、`Version : 1.25.…` の形の 5 行が出ればよい。`DefaultsFontFace` が空なら、既定のフォント（Cascadia Mono）
-   - 控えは `…\LocalState\settings.json.windows-setup.bak`。控えが無いときだけ作る（この項の手順 6 で使い、書き戻すと消える）
+   - 控えは `…\LocalState\settings.json.windows-setup.bak`。控えが無いときだけ作る
    - 最後に表が出たら、そのプロファイルは自分のフォントを持つので、この項の手順 3 の値は効かない（この項の手順 5 の画面で、そのプロファイルを変える）
    - `中断:` が出たら、何も書いていない。この項の手順 5 の画面で変える
    - `Version` が 1.24 より前なら、この項の手順 4 は飛ばす
@@ -1314,27 +1329,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - Windows Terminal の窓で Ctrl+, を押し、「既定値」→「外観」の「フォント スタイル」が `HackGen Console NF` で、「見つからないフォント:」が出ていない
    - 新しいタブを開くと、文字が HackGen になっている
    - この項の手順 2〜4 が `中断:` で止まったときは、この画面でフォント スタイルを選んで「保存」を押す（一覧に無ければ「すべてのフォントの表示」をオン）。警告は「操作」の「改行を貼り付ける際に警告する」を「なし」にする
-   - **次の手順は、設定の画面を閉じてから貼る**
-
-1. 元に戻すときは、控えた設定ファイルを書き戻す。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-     $bak = "$path.windows-setup.bak"
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えが無い: $bak"; return }
-     Copy-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
-     Remove-Item -LiteralPath $bak
-     $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
-     'face: {0} / warning.multiLinePaste: {1}' -f $s.profiles.defaults.font.face, $s.'warning.multiLinePaste'
-   }
-   ```
-
-   - 控えたときの値（ふつうは 2 つとも空）が出ればよい。開いているタブにもすぐ効く
-   - 控えた後に画面で変えた Windows Terminal の設定も、控えたときに戻る。残すなら、このブロックは貼らず、この項の手順 5 の画面でフォント スタイルと警告を戻す
-   - `中断: 控えが無い` が出たら、この項の手順 5 の画面で戻す
-   - 控えのファイルは消える（もう一度この項を通すと、そのときの設定を控え直す）
 
 #### Windows Terminal で選択した文字をコピーする
 
@@ -1372,28 +1366,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `copyOnSelect: True` が出ればよい。開いている Windows Terminal にも効くはず（文書とソースからの推測で、実機では確かめていない）
    - `中断:` が出たら、何も書いていない。コメントや末尾のカンマを残すときは、Windows Terminal の設定の「操作」で「選択範囲をクリップボードに自動的にコピー」をオンにして保存する
 
-1. 元に戻すときは、`copyOnSelect` だけを `false` に戻す。
-
-   ```powershell
-   & {
-     $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
-     if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
-     if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。shell-terminal.md の「Windows Terminal のフォントと貼り付けの警告を変える」の手順 2 を先に通す'; return }
-     $text = [IO.File]::ReadAllText($path)
-     if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
-     try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
-     if (-not $text.TrimStart().StartsWith('{')) { Write-Error '中断: 最上位がオブジェクトではない'; return }
-     $s | Add-Member -NotePropertyName copyOnSelect -NotePropertyValue $false -Force
-     [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     'copyOnSelect: {0}' -f ([IO.File]::ReadAllText($path) | ConvertFrom-Json).copyOnSelect
-   }
-   ```
-
-   - `copyOnSelect: False` が出ればよい。ほかのキーの値は残る
-   - コメントや末尾のカンマで止まったら、この項の手順 2 の設定画面で「選択範囲をクリップボードに自動的にコピー」をオフにして保存する
-   - [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 で後から控えを書き戻すと、この設定も控えたときの値に戻る
-
 ---
 
 ### Windows 11 で WezTerm を入れる
@@ -1425,8 +1397,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `Admin : True` であること（`False` なら、この項の手順 1 で管理者の窓を開き直してから、このブロックを貼る）
    - 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
    - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 4 で今の nightly に上書きする
-     - `Location` は `C:\Program Files\WezTerm\` のはず。違う場所なら、インストーラはそこに上書きするので、先に[ロールバックの「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](extra/windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8 で外す
-   - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。外してから始める
+     - `Location` が `C:\Program Files\WezTerm\` と違う場所なら中断し、既存の導入元と設定を確かめる
+   - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。中断し、既存の導入元と設定を確かめる
    - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
    - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
 
@@ -1547,7 +1519,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 同書の「Git」の手順 2 では、インストーラが書いた `system` の行（`core.autocrlf=true` など）も出る
    - **この手順は、この項の手順 6・7 の clone より前に行う**（`global` の `core.autocrlf=false` が無いと、clone したファイルの改行が `system` の `core.autocrlf=true` で CRLF になる）
    - Git Bash・PowerShell・cmd の git は、同じ `~/.gitconfig` を読む
-   - 戻すときは、[Git Bash の設定を戻す](extra/windows-setup.md#git-bash-の設定を戻す)で行う。共通設定に加え、この項の手順 5 で変更した Windows 専用 `core.longpaths` も記録に合わせて戻す
 
 1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
 
@@ -1567,7 +1538,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 「確認」の後に `true` と、`global` の `true` の行が出ればよい。違う値やエラーが出たら、ここで止めて設定を確かめる
    - 対象のリポジトリで `git config --show-scope --show-origin --get core.longpaths` を確かめ、`local` の `false` が出たら、そのリポジトリの設定を見直す
    - **注意**: エクスプローラー・IDE・スクリプトなどで長いパスを扱えない場合は、リポジトリを短いパスに置く
-   - 戻すときは、[ロールバックの「Git Bash の設定を戻す」](extra/windows-setup.md#git-bash-の設定を戻す)の手順 2・5・6 で行う
 
 1. 同じ Git Bash で、共通の bash 設定を入れる。
 
@@ -1662,7 +1632,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
    - 最後の `ls` が 2 行とも `No such file or directory` ならよい
    - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。この項の手順 4 へ進まず、中身を確かめて片付けてからこの項の手順 3 を貼り直す
-   - 退避したものは、[WezTerm 設定のロールバック](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#ロールバック)の手順 4 で戻せる
 
 1. この設定を `~/.config/wezterm` に clone する。
 
@@ -1846,19 +1815,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 足したのが `~/.profile` なら、その行は sh のログインシェルにも読まれる（共通の bash 設定は bash 向け）。Git Bash のほかに sh でログインしないなら問題にならない
    - 新しい Git Bash のタブを開き、[WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)の手順 7 で読み込みを確かめる
 
-1. 元に戻すときは、この項の手順 3 で足した印の行だけを消す。
-
-   ```bash
-   for f in ~/.bash_profile ~/.bash_login ~/.profile; do
-     if [ -f "$f" ]; then sed -i '/^test -f ~\/\.bashrc && \. ~\/\.bashrc  # shell-terminal\.md$/d' "$f"; fi
-   done
-   printf '\n\033[7m 確認 \033[0m\n'
-   grep -n '  # shell-terminal\.md$' ~/.bash_profile ~/.bash_login ~/.profile 2>/dev/null
-   ```
-
-   - 「確認」の後に何も出なければよい。Git for Windows や共通の bash 設定が作った、印の無い行は残る
-   - 次に開く Git Bash のタブから、残した行だけを読む
-
 ---
 
 ### シェルのツールを入れる
@@ -1893,7 +1849,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 を通す
    - `VCRuntime : False` なら、[WezTerm](#windows-11-で-wezterm-を入れる)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 4 は、入っているものを飛ばす）
-   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。その方法で外してから始める
+   - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。中断し、既存の導入元と設定を確かめる
    - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 3 は飛ばす
 
 1. scoop の zoxide が 0.9.9 でないときだけ、外す。
@@ -1987,7 +1943,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
    - 「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
    - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
-   - [fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd`・`brew uninstall fd` は、通常の PowerShell で `scoop install fd`・`scoop uninstall fd` にする。導入済みなら省く
+   - [fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd` は、通常の PowerShell で `scoop install fd` にする。導入済みなら省く
    - bat の設定にはこの項の手順 6を使う
 
 #### Windows 11 で starship の表示を変える
@@ -2064,32 +2020,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - PowerShell 7 のプロファイルを設定済みなら、新しい PowerShell 7 を開くと同じ表示設定になる
    - PowerShell 7 だけ違う表示なら、`STARSHIP_CONFIG` の環境変数などで別の設定ファイルを指定していないか確かめる
 
-1. 元に戻すときは、控えを書き戻すか、この項で新しく作った設定ファイルを消す。
-
-   ```bash
-   (
-     if [ -L ~/.config/starship.toml ] || [ -L ~/.config/starship.toml.shell-terminal.bak ] || [ -L ~/.config/starship.toml.shell-terminal.new ]; then echo '中断: シンボリックリンクがある' >&2; exit 1; fi
-     if [ -e ~/.config/starship.toml.shell-terminal.bak ] && [ -e ~/.config/starship.toml.shell-terminal.new ]; then echo '中断: 控えと新規作成の印が両方ある' >&2; exit 1; fi
-     if [ -f ~/.config/starship.toml.shell-terminal.bak ]; then
-       cp -p ~/.config/starship.toml.shell-terminal.bak ~/.config/starship.toml &&
-         rm ~/.config/starship.toml.shell-terminal.bak || exit 1
-       printf '\n\033[7m 確認 \033[0m\n'
-       echo '控えを書き戻した'
-     elif [ -f ~/.config/starship.toml.shell-terminal.new ]; then
-       rm -f ~/.config/starship.toml && rm ~/.config/starship.toml.shell-terminal.new || exit 1
-       printf '\n\033[7m 確認 \033[0m\n'
-       echo '作った設定ファイルを消した'
-     else
-       echo '中断: 控えも新規作成の印も無い。推測で戻さない' >&2
-       exit 1
-     fi
-   )
-   ```
-
-   - `控えを書き戻した` か `作った設定ファイルを消した` が出ればよい
-   - この項の手順 2 の後で変えた設定も戻る。残す変更があれば、書き戻す前に別に控える
-   - Git Bash の新しいタブを開き直す。PowerShell 7 でも、次の窓から戻した設定を読む
-
 ---
 
 ### PowerShell 7 のプロファイルを設定する
@@ -2101,7 +2031,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
 - zoxide と starship は、入れていなければ読まない。入れた後に PowerShell 7 を開き直せば読む
 - Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない
-- 戻すときは、この項の手順 7・8（行った手順のものだけ）
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -2189,33 +2118,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）。[開発の設定](#powershell-7-のプロファイルに開発の設定を足す)を通してあれば一覧で出る
    - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
    - Ctrl+Alt+? で、キーの割り当ての一覧が出る
-   - **次の手順は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る**
-
-1. 元に戻すときは、PowerShell 7 のプロファイルから、この項・Emacs モード・開発の設定の項の印の行を消す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
-     $bytes = [System.IO.File]::ReadAllBytes($p)
-     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.Encoding]::GetEncoding(28591) }
-     $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # (windows-setup\.md|shell-terminal\.md(?::dev)?)\r?(\n|$)', '$1')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [System.IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
-   }
-   ```
-
-   - プロファイルにほかの行が無ければ `消した:`、あれば `その行だけ消した:` が出る
-   - 開いている PowerShell 7 の窓には、閉じるまで設定が残る
-
-1. 元に戻すときは（この項の手順 5 を行ったとき）、PowerShell 7 の CurrentUser の実行ポリシーを戻す。
-
-   ```powershell
-   pwsh.exe -NoLogo -NoProfile -Command { Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser -Force; Get-ExecutionPolicy -List }
-   ```
-
-   - 表の `CurrentUser` が `Undefined` ならよい
 
 #### PowerShell 7 で Emacs モードを使う
 
@@ -2312,27 +2214,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - `Emacs` と、`Ctrl+v` の `Paste`・`Ctrl+Enter` の `AddLine`・`UpArrow` の `HistorySearchBackward` が出ればよい
    - 出なければ、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 4・5 と、この項の手順 2 を確かめる
-   - 元に戻すときのこの項の手順 5 は、この項の手順 1 で開いた Windows PowerShell（5.1）に貼る
-
-1. 元に戻すときは、PowerShell 7 のプロファイルから、この項の印の行だけを消す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
-     $bytes = [IO.File]::ReadAllBytes($p)
-     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
-     $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
-   }
-   ```
-
-   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
-   - 印の無い行・`# windows-setup.md`・開発の設定の `# shell-terminal.md:dev` の行は残る。モードを変える印の無い行があれば、その設定も残る
-   - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
-   - [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 7 は、この項の行も含めて消す
 
 ---
 
@@ -2438,27 +2319,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `Emacs` と、`Ctrl+v` の `Paste`・`Ctrl+Enter` の `AddLine`・`UpArrow` の `HistorySearchBackward`・`DownArrow` の `HistorySearchForward` が出ればよい
    - 5.1 の PSReadLine（2.0.0）の `Get-PSReadLineKeyHandler` には `-Chord` が無いので、割り当ての一覧から絞る
    - 出なければ、この項の手順 2 と[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 3〜5 を確かめる
-   - 元に戻すときのこの項の手順 5 は、この項の手順 1 で開いた Windows PowerShell（5.1）に貼る
-
-1. 元に戻すときは、Windows PowerShell（5.1） のプロファイルから、この項の印の行だけを消す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
-     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
-     $bytes = [IO.File]::ReadAllBytes($p)
-     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
-     $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
-   }
-   ```
-
-   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
-   - 印の無い行・`# windows-setup.md`・開発の設定の `# shell-terminal.md:dev` の行は残る。モードを変える印の無い行があれば、その設定も残る
-   - 開いている窓には閉じるまで設定が残る。次に開いた窓で、残したプロファイルの設定を読む
-   - [アプリと貼り付けの設定を外す](extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 は、この項の行も含めて消す
 
 ---
 
@@ -2471,8 +2331,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 無い外部コマンドの補完と関数は飛ばす。rg・fd は、[Windows 11 で LazyVim の設定を導入する](neovim.md#windows-11-で-lazyvim-の設定を導入する)で入れてあれば対象にする
 - エディターは [Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で設定する
 - [モジュールの補足](reference/shell-terminal.md#powershell-を開発に使う--手順-3-補足-モジュールの導入元)・[選択した方針](reference/shell-terminal.md#powershell-を開発に使う)・[注意点](extra/shell-terminal.md#注意点)
-- プロファイルは子の項で設定する。元に戻すときは、子の項の行を消してから、この項の手順 10・11（行ったものだけ）を通す
-- この項の手順 10 は、値が `1`・`Off` の変数を消す。この項の手順 2 の前から同じ値だった変数も消えるので、残すときは手順 10 を行わない
+- プロファイルは子の項で設定する
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -2496,7 +2355,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 5.1 と 7 の版、`pwsh.exe` の場所、PSResourceGet の 3 つのコマンドが出ればよい。`pwsh.exe` が無いときは、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を確かめる
-   - モジュールの名前・版・`ModuleBase` と、2 つの環境変数の値を控える。元からあった版は、元に戻すときも消さない
+   - モジュールの名前・版・`ModuleBase` と、2 つの環境変数の値を控える
    - 補完の控えがあれば、名前と大きさが出る。[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 2 は、同じ名前の控えを作り直す（上書きする）
    - モジュールや控えが無いときは、その一覧には何も出ない
 
@@ -2511,7 +2370,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 4 つの名前と版・保存先が出ればよい。`already installed` の警告だけなら、その版を使う
-   - この項の手順 2 に無かった版と保存先を控える。元に戻すときは、この項で追加した版だけを消す
+   - この項の手順 2 に無かった版と保存先を控える
    - エラーが出たら、この項の手順 4 へ進まない
 
 1. PowerShell 7 から、5.1 用の検査・テストのモジュールを保存する。
@@ -2584,33 +2443,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - この項の手順 4 で保存した版と 2 つのコマンド、`PSAvoidUsingCmdletAliases`・`PSUseDeclaredVarsMoreThanAssignments` が出ればよい
    - これでモジュールの導入は終わり。プロファイルは子の項を選んで通す
-   - 元に戻すときのこの項の手順 10 は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓（閉じた場合は、新しく開いた管理者ではない 5.1 の窓）に貼る
-
-1. 元に戻すときは、値が `1`・`Off` のままの 2 つの環境変数を消す。
-
-   ```powershell
-   & {
-     $wanted = [ordered]@{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
-     foreach ($n in $wanted.Keys) {
-       if ([Environment]::GetEnvironmentVariable($n,'User') -ceq $wanted[$n]) { [Environment]::SetEnvironmentVariable($n,$null,'User') }
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($n in $wanted.Keys) { '{0} = {1}' -f $n,[Environment]::GetEnvironmentVariable($n,'User') }
-   }
-   ```
-
-   - 2 つの値が空ならよい。`1`・`Off` 以外に変えた値は消さない
-   - この項の手順 2 の前から同じ値だった変数も消える。残すときは、この手順は行わない
-   - 開いている窓は閉じ、新しい窓で確かめる
-
-1. 元に戻すときは、この項で追加したモジュールの版のフォルダーだけを消す。
-
-   - 7 と 5.1 の窓・SSH のセッションをすべて閉じ（WezTerm・Windows Terminal・VS Code の中の PowerShell も）、エクスプローラーで、この項の手順 3・4 で控えた保存先を開く
-   - 使用中で消せないファイルがあると出たら、そのモジュールを読んだ窓がまだある。その窓を閉じてから、残ったファイルを消す
-   - `Documents\PowerShell\Modules` の `PSScriptAnalyzer`・`Pester`・`CompletionPredictor`・`PSFzf` と、`Documents\WindowsPowerShell\Modules` の `PSScriptAnalyzer`・`Pester` の下で、この項で追加した版のフォルダーだけを消す
-   - 更新で追加した版も消すなら、[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)で控えた版と保存先も使う
-   - この項の手順 2 で既にあった版、同梱のモジュール、`PSWindowsUpdate` などほかのモジュールは残す
-   - 新しい窓で `Get-Module -ListAvailable` を使い、消した版が一覧に無く、残す版があることを確かめる
 
 #### PowerShell 7 のプロファイルに開発の設定を足す
 
@@ -2719,42 +2551,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - rg・fd・delta・bat・starship の補完も、入っているものだけ Tab で確かめる
    - fzf があれば、Ctrl+T でファイルの一覧が開き、Enter で選んだパスが行に入る。Ctrl+C で行を取り消し、Ctrl+R で履歴の一覧が開くことも確かめ、Esc で閉じる
    - eza があれば `ll` で長い一覧が出る。`Write-Error 'PowerShell dev check'` の後に `err` を打ち、そのエラーの中身が出ることを確かめる
-   - 元に戻すときのこの項の手順 6・7 は、PowerShell 7 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る
-
-1. 元に戻すときは、PowerShell 7 のプロファイルから開発の設定の印の行だけを消す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
-     $bytes = [IO.File]::ReadAllBytes($p)
-     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
-     $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md:dev\r?(\n|$)', '$1')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
-   }
-   ```
-
-   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
-   - `# windows-setup.md`・`# shell-terminal.md` と印の無い行は残る。開いている 7 の窓は閉じ、新しい窓で確かめる
-
-1. 元に戻すときは、この項で生成した補完の控えだけを消す。
-
-   ```powershell
-   & {
-     $dir = Join-Path $env:LOCALAPPDATA 'PowerShell\completions'
-     if (-not (Test-Path -LiteralPath $dir)) { "控えのフォルダーは無い: $dir"; return }
-     foreach ($n in 'gh','rg','fd','delta','bat','starship') {
-       $p = Join-Path $dir "$n.ps1"
-       if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -ErrorAction Stop }
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (@(Get-ChildItem -LiteralPath $dir -Force).Count -eq 0) { Remove-Item -LiteralPath $dir; "空のフォルダーを消した: $dir" } else { Get-ChildItem -LiteralPath $dir -Force | Select-Object Name }
-   }
-   ```
-
-   - 6 つの名前の控えが無く、ほかのファイルがあれば残っていればよい。`PowerShell` の親フォルダーは消さない
 
 #### Windows PowerShell 5.1 のプロファイルに開発の設定を足す
 
@@ -2820,26 +2616,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 4 つのコード ページが `932` で、`$s` の日本語が化けていなければよい。日本語の件名が無ければ、そのコミットを含む範囲で確かめる
    - winget があれば、`winget ins` と打って Tab を押すと `install` になる。Ctrl+C で取り消した後、`[Console]::InputEncoding.CodePage`・`[Console]::OutputEncoding.CodePage` が `932` のままであることを確かめる
    - eza があれば `ll` で長い一覧が出る。`ipconfig` の表示も日本語のままならよい
-   - 元に戻すときのこの項の手順 5 は、新しく開いた 5.1 の窓を `exit` で閉じてから、この項の手順 1 の窓に貼る
-
-1. 元に戻すときは、Windows PowerShell（5.1）のプロファイルから開発の設定の印の行だけを消す。
-
-   ```powershell
-   & {
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
-     if (-not (Test-Path -LiteralPath $p)) { "プロファイルが無い: $p"; return }
-     $bytes = [IO.File]::ReadAllBytes($p)
-     $enc = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
-     $text = $enc.GetString($bytes)
-     $rest = [regex]::Replace($text, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md:dev\r?(\n|$)', '$1')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($rest -eq $text) { "その行は無い: $p" } elseif ($rest -match '^(\uFEFF|\u00EF\u00BB\u00BF)?\s*$') { Remove-Item -LiteralPath $p; "消した: $p" } else { [IO.File]::WriteAllBytes($p, $enc.GetBytes($rest)); "その行だけ消した: $p" }
-   }
-   ```
-
-   - `その行だけ消した:`（ほかの行が無ければ `消した:`、すでに消してあれば `その行は無い:`）が出ればよい
-   - 貼り付けとキー操作の `# windows-setup.md`・`# shell-terminal.md`、印の無い行は残る
-   - 開いている 5.1 の窓は閉じ、新しい窓で確かめる
 
 #### Windows PowerShell 5.1 の PSReadLine を上げる
 
@@ -2912,15 +2688,14 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `1 行目`・`2 行目`・`3 行目`・`入れ子の行` の順に出て、版が `2.4.5`、`Ctrl+Enter` が `AddLine`、予測の元が `History` ならよい
    - [Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)を通してあれば、`Ctrl+v` が `Paste`、↑/↓ が `HistorySearchBackward`・`HistorySearchForward` のままであることも確かめる
    - 手順書を貼る管理者の窓と SSH を使う場合は、それぞれ新しい窓・セッションでも版と貼り付けを確かめる。うまく貼れなければ、この項の手順 6・7 で戻す
-   - 元に戻すときは、この項の手順 6・7 を通す（5.1 の窓をすべて閉じ、PowerShell 7 の窓で消す）
 
-1. 元に戻すときは、Windows PowerShell（5.1）の窓をすべて閉じ、新しい PowerShell 7 を開く。
+1. この項の手順 5 でうまく貼れなかったときだけ、Windows PowerShell（5.1）の窓をすべて閉じ、新しい PowerShell 7 を開く。
 
    - この項の手順 1 の窓、管理者の窓、5.1 の SSH のセッションも閉じる。5.1 の窓は、開いている間 2.4.5 の DLL を使い続けるので、その版のフォルダーを消せない
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
-1. 新しい PowerShell 7 で、この項で保存した PSReadLine 2.4.5 の版のフォルダーだけを、名前を変えてから消す。
+1. この項の手順 6 を行ったときだけ、新しい PowerShell 7 で、この項で保存した PSReadLine 2.4.5 の版のフォルダーだけを、名前を変えてから消す。
 
    ```powershell
    & {

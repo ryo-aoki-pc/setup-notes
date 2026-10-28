@@ -1,6 +1,6 @@
 # GNOME のヘッドレスセッションの参考資料
 
-[AlmaLinux 10 の「GNOME のヘッドレスセッション」](../gnome-remote.md#gnome-のヘッドレスセッション)・[ロールバックと注意点](../extra/gnome-headless-session.md)
+[AlmaLinux 10 の「GNOME のヘッドレスセッション」](../gnome-remote.md#gnome-のヘッドレスセッション)・[注意点](../extra/gnome-headless-session.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#補足の実測)
 
@@ -35,13 +35,13 @@
 
 - 中身は [AlmaLinux 10 の「GNOME のリモートログイン」の手順 2](../gnome-remote.md#gnome-のリモートログイン) と同じ（SAN に IP を `DNS:` でも入れる理由も同書の補足）。違うのは、自分のホームに自分の所有で作ること
 - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る
-- TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
+- TLS のパスはデスクトップ共有と共用なので、最初に dconf の元値を `~/.local/state/gnome-headless-session-setup` に退避する。未設定だったキーは空ファイルになる
 - 貼り直しても退避は上書きしない。`backup-complete` は退避完了、`ready` は証明書の準備完了、`created-certificate` はこの手順が新規生成したことの目印
-- 新規生成したファイルの SHA-256 も `created.sha256` に保存する。ロールバックでは、中身が変わっていたりリンクへ置き換わっていたりすれば削除しない
+- 新規生成したファイルの SHA-256 も `created.sha256` に保存する。[リモートログインだけにする（併用をやめる）](../gnome-remote.md#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)では、中身が変わっていたりリンクへ置き換わっていたりすれば削除しない
 - 既存の証明書を更新する手順ではない
 - `set -e` は丸括弧の中だけに効かせ、退避・生成・読み取りのどれかが失敗したら、そのブロックを止める
 - 既存の証明書と鍵は上書きしない
-- `中断:` のとき、生成途中で照合用の記録も作れなかった場合は、ロールバックはファイルを自動削除せず残す
+- `中断:` のとき、生成途中で照合用の記録も作れなかった場合は、ファイルは自動削除されず残る
 - 置き場所は、RHEL 10 の文書の 1.4 と同じ
 
 ### GNOME のヘッドレスセッション / 手順 4: 補足: grdctl --headless
@@ -88,17 +88,16 @@
 
 - rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[AlmaLinux 10 の「GNOME のリモートログイン: 接続元を LAN に絞る」](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)）
 
-### リモートログインだけにする（併用をやめる） / 手順 1・3〜5: 補足: セッションの見分け方と、ドロップインを外す理由
+### リモートログインだけにする（併用をやめる） / 手順 1・6〜8: 補足: セッションの見分け方と、ドロップインを外す理由
 
 - **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
 - **ドロップインを外す**: [AI エージェントの手順書の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[Claude Code の GNOME 操作 の注意点](../extra/claude-code-gui.md#注意点)）
 - **ドロップインを外す前に入ったセッションを終わらせる**: ドロップインは gnome-shell が起動するときにだけ読まれる。リモートログインのセッションは切断しても残り、次のログインでそこへ引き渡されるので、終わらせないと仮想モニターが付いたままになる
-- **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 5 の補足](#gnome-のヘッドレスセッション--手順-5-補足-資格情報の置き場所)）
+- **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 8 の補足](#gnome-のヘッドレスセッション--手順-5-補足-資格情報の置き場所)）
 - 同じ項の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す
-- 同じ項の手順 3 のドロップインの変更は、動いている gnome-shell には効かない。同じ項の手順 4・5 でセッションを終わらせ、手順 6 で入り直したときに効く
-- 同じ項の手順 3 で claude-code-gui.md のロールバックの手順 2 を行わないのは、それがヘッドレスのセッションを起動し直すため
-- 同じ項の手順 4 の最後の数は、このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない。`for` の行で、セッションが終わるまで、30 秒まで待つ
-- 同じ項の手順 5 に `sudo` は要らない（自分のセッションは自分で終わらせられる）。終わらせると、ユーザーの D-Bus が起動し直される（[注意点](../extra/gnome-headless-session.md#注意点)）
+- 同じ項の手順 6 のドロップインの変更は、動いている gnome-shell には効かない。同じ項の手順 7・8 でセッションを終わらせ、手順 9 で入り直したときに効く
+- 同じ項の手順 7 の最後の数は、このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない。`for` の行で、セッションが終わるまで、30 秒まで待つ
+- 同じ項の手順 8 に `sudo` は要らない（自分のセッションは自分で終わらせられる）。終わらせると、ユーザーの D-Bus が起動し直される（[注意点](../extra/gnome-headless-session.md#注意点)）
 
 ### 選択した方針
 

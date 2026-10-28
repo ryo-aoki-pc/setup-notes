@@ -1,7 +1,7 @@
 # Syncthing のセットアップ（AlmaLinux 10・Windows 11）
 
 - Syncthing を AlmaLinux 10・Windows 11 の PC に入れて常駐させ、PC どうしでフォルダーを同期する
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - **前提と実行場所は、各項のリードに従う**。AlmaLinux 10 の項は、同期するファイルの持ち主の自分のユーザーの bash で行い、`sudo -i`・`su -` のシェルでは行わない
@@ -26,7 +26,7 @@
   - `command -v brew` で何も出なければ、先に[Homebrew](almalinux-setup.md#homebrew)を通す
   - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に[ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐)を通す
 - 実行場所: 同期するファイルの持ち主の、自分のユーザーの bash（デスクトップの端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[注意点](extra/syncthing.md)
 - AlmaLinux 10 の手順。Windows 11 の PC は、[Windows 11 で使う](#windows-11-で-syncthing-を使う)から通す（管理者の Windows PowerShell 5.1 に貼る）
 - **手順 2・3 には対話入力がある**（手順 2 は Homebrew が依存の確認を出した場合、手順 3 はパスワード）。完了してから次の手順を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
@@ -261,18 +261,6 @@
    - `ST_ALLOW_FROM` には、送信元を空白区切りで入れる
    - rich rule は**二重引用符**で囲む。単一引用符だと `${src}` が展開されないまま `success` で受理される（[Samba サーバー](samba.md#samba-サーバー) と同じ落とし穴）
 
-1. 元に戻すときは、絞ったときと同じ `ST_ALLOW_FROM` を入れてから、`syncthing-gui` の開放に戻す。
-
-   ```bash
-   if [ -z "${ST_ALLOW_FROM}" ]; then echo '中断: ST_ALLOW_FROM が空のまま。絞ったときと同じ値を入れて貼り直す' >&2; else
-   for src in ${ST_ALLOW_FROM}; do
-     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${src} service name=syncthing-gui accept"
-   done
-   sudo firewall-cmd --permanent --add-service=syncthing-gui
-   sudo firewall-cmd --reload
-   fi
-   ```
-
 #### Syncthing: 設定を自動でバックアップする
 
 - Syncthing の鍵（`cert.pem`・`key.pem`）、`config.xml`、GUI の証明書（`https-cert.pem`・`https-key.pem`）を、自動で控える。DB（`index-v2`）は除く
@@ -419,24 +407,6 @@
    - ファイルのバージョン管理（File Versioning）を**ゴミ箱**（Trash Can）にする
    - このフォルダを、相手自身の Syncthing の設定ディレクトリにしない
 
-1. 元に戻すときは、ユニットとスクリプトを外し、送信専用フォルダの登録を消す。
-
-   ```bash
-   systemctl --user disable --now syncthing-backup.path syncthing-backup.timer
-   rm -f ~/.config/systemd/user/syncthing-backup.{service,path,timer} ~/.local/bin/syncthing-backup
-   systemctl --user daemon-reload
-   printf '\n\033[7m 確認 \033[0m\n'
-   for id in $(syncthing cli config folders list); do
-     if [ "$(syncthing cli config folders "${id}" path get)" = "${HOME}/syncthing-backup" ]; then
-       syncthing cli config folders "${id}" delete && echo "登録を消した: ${id}"
-     fi
-   done
-   syncthing cli config folders list
-   ```
-
-   - `登録を消した: syncthing-backup-<HOSTNAME>` が出て、`folders list` から消える
-   - 相手の端末のコピーも残る。要らなければ、相手の GUI でフォルダを削除する
-
 #### Syncthing: バックアップから戻す
 
 - [設定を自動でバックアップする](#syncthing-設定を自動でバックアップする)で取ったアーカイブから、Syncthing の鍵と設定を戻す
@@ -564,7 +534,7 @@
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。手順 12 は LAN の別の端末のブラウザ、手順 13 はこの PC のデスクトップ
 - フォルダー追加は[同期フォルダとデバイスを追加する](#syncthing-同期フォルダとデバイスを追加する)を通す
 - この PC は、[AlmaLinux 10 の Syncthing](#syncthing)の相手にもなる
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[ロールバックと注意点](extra/syncthing.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/syncthing.md)・[参考資料](reference/syncthing.md)・[注意点](extra/syncthing.md)
 
 > [!IMPORTANT]
 > - **ホーム全体は同期しない**。同期するフォルダーだけを追加する
@@ -601,8 +571,8 @@
    ```
 
    - 最初の 3 つは何も出さず、最後に `False` が 2 行出ればよい
-   - 何か出たら、ほかの方法で入れた Syncthing（SyncTrayzor、Syncthing Windows Setup など）がある。それを止めて外してから始める
-   - [Windows 11 のロールバック](extra/syncthing.md#windows-11-のロールバック)の手順 1〜4 の後に入れ直すときは、1 行目の `True`（`config.xml`。前の鍵と設定）はそのままでよい
+   - 何か出たら、ほかの方法で入れた Syncthing（SyncTrayzor、Syncthing Windows Setup など）がある。中断し、既存の導入元と設定を確かめる
+   - 前の鍵と設定を残して入れ直すときは、1 行目の `True`（`config.xml`）はそのままでよい
 
 1. 公式の zip を取って sha256 と署名を確かめ、`syncthing.exe` を置く。
 
@@ -779,7 +749,7 @@
 
    - 8384/tcp・22000/tcp・22000/udp・21027/udp が、どれも `syncthing` で出ればよい
    - 規則はこの項の手順 7 の 3 つだけが `Allow` で出る（規則の一覧は数秒かかる）
-   - **`Block` の行があれば**、警告の窓でキャンセルを押した跡。[Windows 11 のロールバック](extra/syncthing.md#windows-11-のロールバック)の手順 2 で規則をすべて消し、この項の手順 7 を貼り直す
+   - **`Block` の行があれば**、警告の窓でキャンセルを押した跡。[Windows 11 の受信規則を復旧する](#syncthing-windows-11-の受信規則を復旧する)を通す
    - 最後の行の URL を、この項の手順 12 で使う
 
 1. LAN の別の端末のブラウザで GUI に入り、デバイス ID を確かめる。
@@ -806,6 +776,32 @@
 
    - `Running` と、`syncthing.exe` が 2 つ、8384 が `127.0.0.1` 以外で出ればよい
    - この項の手順 2 の変数は要らない
+
+#### Syncthing: Windows 11 の受信規則を復旧する
+
+- Windows の警告の窓でキャンセルした後、拒否の規則が残ってつながらないときに行う
+- 前提: [Windows 11 で Syncthing を使う](#windows-11-で-syncthing-を使う)の手順 11 で `Block` の行を確認した
+- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+
+1. 管理者の Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+
+1. 受信の規則を消す（警告の窓が作った規則も）。
+
+   ```powershell
+   Remove-NetFirewallRule -Group 'Syncthing (setup-notes)' -ErrorAction SilentlyContinue
+   Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe' | Get-NetFirewallRule | Remove-NetFirewallRule
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   Get-NetFirewallApplicationFilter | Where-Object Program -like '*\Programs\Syncthing\syncthing.exe'
+   ```
+
+   - 最後のコマンドが何も出さなければよい（数秒かかる）
+
+1. 許可の規則を作り直し、接続を確かめる。
+
+   - [Windows 11 で Syncthing を使う](#windows-11-で-syncthing-を使う)の手順 2 で変数を設定してから、同じ項の手順 7 を貼り直す
+   - 同じ項の手順 11 の規則と接続を確かめ、`Block` の行が無ければよい
 
 #### Syncthing: Windows 11 で止める・もう一度始める
 

@@ -1,75 +1,9 @@
-# Podman のロールバックと注意点
+# Podman の注意点
 
 [手順書](../containers.md#podman)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](../reference/podman.md)
 
 - 「手順 N」は[手順書](../containers.md#podman)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- 上から順に、通した節の分だけ実行する
-- この節の手順 5 の前に、ほかの手順書（distrobox・podman-compose・[Forgejo](forgejo.md#ロールバック)）で作ったものが要らないか確かめる。Forgejo が動いているときは先に止め、Quadlet の定義も外す
-- Quadlet の節を通し、linger も切るときは、この節の後に [ユーザーサービスの常駐 のロールバック](linger.md#ロールバック)を行う（[Syncthing](../syncthing.md#syncthing)・[Dropbox](../dropbox.md#dropbox)・[Forgejo](../forgejo.md#forgejo) など、ほかに linger を使うものが無いかは、そこで確かめる）
-
-> [!CAUTION]
-> **この節の**手順 5 の `podman system reset` で、自分のコンテナ・イメージ・ボリュームがすべて消える。[distrobox](../containers.md#distrobox) のボックスや [podman-compose](../containers.md#podman-compose)・[Forgejo](../forgejo.md#forgejo) のコンテナも含む。Forgejo の bind mount 先の `~/.local/share/forgejo` と Quadlet の定義は残るので、[Forgejo のロールバック](forgejo.md#ロールバック)で扱う。
-
-1. Quadlet の節を通したときだけ、確認用のサービスと定義とページを消す。
-
-   ```bash
-   systemctl --user stop hello-web.service
-   rm ~/.config/containers/systemd/hello-web.container
-   systemctl --user daemon-reload
-   rm -rf ~/hello-web
-   ```
-
-1. Docker 向けのツールを閉じ、今のシェルの接続先を外す。
-
-   ```bash
-   unset DOCKER_HOST
-   ```
-
-   - `~/.bashrc` の行の削除は不要。この節の手順 3 で API ソケットを止める
-   - ソケットのファイルが残る間は、新しいシェルでも共通設定が `DOCKER_HOST` を入れる。再起動後にソケットが無ければ入れない
-
-1. API ソケットを止める。
-
-   ```bash
-   systemctl --user disable --now podman.socket
-   ```
-
-1. 消す前に、残っているものを見る。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   podman ps -a
-   podman images
-   podman volume ls
-   podman system df
-   ```
-
-   - **次の手順は、消してよいか確かめてから貼る**
-
-1. 自分のコンテナ・イメージ・ボリュームをすべて消す（取り戻せない）。
-
-   ```bash
-   podman system reset
-   ```
-
-   - `Are you sure you want to continue? [y/N]` に `y` と答える
-   - **次の手順は、答えて完了してから貼る**（続けて貼ると答えとして食われる）
-
-1. 手順 2 で podman を入れたときだけ、podman を消す。
-
-   ```bash
-   sudo dnf remove podman
-   ```
-
-   - `[y/N]` で聞かれる。distrobox や podman-compose を入れていれば、それらも一緒に消える
-   - podman-tui は podman に依存しないので残る（[podman-tui のロールバック](podman-tui.md#ロールバック)で消す）
-   - 依存で入ったもの（`crun` など）も一緒に消える
-
----
 
 ## 注意点
 

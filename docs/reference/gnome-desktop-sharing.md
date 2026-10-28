@@ -1,6 +1,6 @@
 # GNOME のデスクトップ共有の参考資料
 
-[AlmaLinux 10 の「GNOME のデスクトップ共有」](../gnome-remote.md#gnome-のデスクトップ共有)・[ロールバックと注意点](../extra/gnome-desktop-sharing.md)
+[AlmaLinux 10 の「GNOME のデスクトップ共有」](../gnome-remote.md#gnome-のデスクトップ共有)・[注意点](../extra/gnome-desktop-sharing.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)
 
@@ -39,7 +39,7 @@
   - 遠隔の PC は、眠ると起こす手段が無いので、サスペンドの mask（同書の手順 4）も前提にし、`suspend.target` が `masked` かを見る
 - **ヘッドレスのセッション**: ヘッドレスのユーザーの unit（`gnome-remote-desktop-headless.service`）には `Conflicts=gnome-remote-desktop.service` がある。同じユーザーでは、片方を起動するともう片方が止まる
   - `disabled` でも、手動で起動した unit は `active` になり得るので、`is-active` も見る
-- **設定アプリで有効にしてあったとき**: 4 行目が `true` のときは、この手順の設定で上書きし、[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)では無効になる
+- **設定アプリで有効にしてあったとき**: 4 行目が `true` のときは、この手順の設定で上書きする
 - **残っている資格情報の出どころ**: `aoao 0 0` 以外のときの資格情報は、設定アプリ・この手順書の「RDP を設定する」の手順 4 で入れたもの
 
 ### 前提を確かめる / 手順 4: 補足: 残っている資格情報を消す理由
@@ -61,7 +61,7 @@
 
 - 中身は [AlmaLinux 10 の「GNOME のヘッドレスセッション」の手順 3](../gnome-remote.md#gnome-のヘッドレスセッション) と同じ形。違うのは、退避先（`~/.local/state/gnome-desktop-sharing-setup`）と、退避するキーの数（5 つ）
 - `証明書と秘密鍵の公開鍵: 一致` は、既存の証明書と鍵も、組み合わせが正しいことを確かめたもの。既存の証明書と鍵は上書きしない
-- 退避するのは、「RDP を設定する」の手順 3 で変える dconf のキー（`/org/gnome/desktop/remote-desktop/rdp/` の `port`・`negotiate-port`・`view-only`・`tls-cert`・`tls-key`）。未設定だったキーは空ファイルになり、ロールバックでは `reset` で戻す
+- 退避するのは、「RDP を設定する」の手順 3 で変える dconf のキー（`/org/gnome/desktop/remote-desktop/rdp/` の `port`・`negotiate-port`・`view-only`・`tls-cert`・`tls-key`）。未設定だったキーは空ファイルになる
 - `tls-cert` と `tls-key` は、デスクトップ共有とヘッドレスのモードで共用する（ヘッドレスの専用のキーは `rdp/headless/` の下の `port`・`negotiate-port`・`enable` だけ）。`rdp/` を `dconf reset -f` すると `rdp/headless/` も消えるので、キーごとに戻す
 - 証明書のパス（`~/.local/share/gnome-remote-desktop/certificates/rdp-tls.{crt,key}`）は、ヘッドレスの手順書・RHEL 10 の文書の 1.4・設定アプリ 47.7 が自分で作るときと同じ。ヘッドレスの手順書で作ってあれば、それを使う
 - RHEL の文書は `winpr-makecert` で作るが、ここでは SAN を付けるために openssl で作る（[GNOME のリモートログイン の参考資料](gnome-remote-desktop.md)）
@@ -99,7 +99,6 @@
   - `open('/dev/tty', 'r+')` は、テキストの読み書きのモードでは `io.UnsupportedOperation: File or stream is not seekable.` で失敗した（検証で直した）
 - パスワードの無いキーリングも、gnome-keyring を起こした直後は閉じている。開くように頼まれると、パスワードを聞かずに開く（コンテナでの模擬と、VM の再起動の後の最初の RDP の認証）
 - 作ったコレクションの実際の D-Bus パスは `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録する。名前が `rdp` でも、記録と一致しない既存コレクションは再利用しない
-- 元に戻す[ロールバック](../extra/gnome-desktop-sharing.md#ロールバック)の手順 4 は、この記録のコレクションだけを開き、RDP の schema に一致する項目だけを消す。コレクションと記録を消すのは、ほかの項目が無く、削除が完了したときだけ
 
 ### RDP を設定する / 手順 6: 補足: grdctl rdp enable
 
@@ -192,15 +191,14 @@
   - 共有のデーモンが待ち受けをいったん止める仕組みは確かめていない
 - firewalld は、ポート（`--add-port`）とサービス（`--add-service`）を別々に持つ。この手順書が「RDP を設定する」の手順 7 で開けた `3389/tcp` は、リモートログインが開けた `rdp` のサービスとは別に残る
   - リモートログインの「接続元を LAN に絞る」は、`rdp` のサービスを外して、LAN だけを通す rich rule にする。ゾーンに `3389/tcp` が残っていると、LAN の外からも 3389 に届く
-  - リモートログインのロールバックは `rdp` のサービスと rich rule だけを消す。この手順書のロールバックの手順 1 は、移した後の `RDP_PORT`（3390）だけを閉じる。どちらも `3389/tcp` を消さない
-- そのため、注意点では、`RDP_PORT=3389` でこの手順書のロールバックの手順 1（LAN に絞ったなら手順 2）を貼って閉じてから、3390 へ移す。閉じても、リモートログインは `rdp` のサービスか、同書の rich rule で届く
+- そのため、[リモートログインと併用する](../gnome-remote.md#gnome-のデスクトップ共有-リモートログインと併用する)では、古いポートの開放を閉じてから、3390 へ移す。閉じても、リモートログインは `rdp` のサービスか、同書の rich rule で届く
 
 ### 選択した方針
 
 - **デスクトップ共有にする**（RHEL 10 の文書の 1.1 の方式）
   - PC の画面に出ているデスクトップを、そのまま共有する。PC の前にいる人と、同じ画面を見て操作できる
   - モニターの無い PC なら[ヘッドレスのセッション](../gnome-remote.md#gnome-のヘッドレスセッション)、ログイン画面から入るなら[リモートログイン](../gnome-remote.md#gnome-のリモートログイン)
-- **PC の画面を触らない前提にする**（利用者の依頼）— 遠隔の PC で、PC の画面・キーボード・マウスを使えなくても、SSH のシェルと RDP のクライアントだけで、設定・確認・復旧・ロールバックができるようにした
+- **PC の画面を触らない前提にする**（利用者の依頼）— 遠隔の PC で、PC の画面・キーボード・マウスを使えなくても、SSH のシェルと RDP のクライアントだけで、設定・確認・復旧ができるようにした
 - **自動ログインでデスクトップを作る** — SSH から GDM のログイン画面でログインする手段は無いので、PC の画面のセッションは自動ログインで作る。PC の前にいる人がこのデスクトップを使える危険は、手順書のリードの `[!WARNING]` に書いた
 - **資格情報は、パスワードの無いキーリングに直接入れる** — 自動ログインではログインのキーリングが開かないので、`grdctl rdp set-credentials` は PC の画面に窓を出して止まる。ログインのキーリングのほかの秘密は、暗号化したまま残す
   - SSH から毎回ログインのキーリングを OS のパスワードで開く案は、停電などで再起動したときに、SSH で入り直すまで RDP が使えないので、利用者の選択で採らなかった
@@ -212,7 +210,6 @@
 - **クライアントからの操作を許す**（`disable-view-only`）— 既定の見るだけは、「見るだけにする」の項で戻せる
 - **起動画面（plymouth）を止める** — 止めないと、GDM が自動ログインの 20 秒後に plymouth を終わらせ、そのときに VT1 にログイン画面を作って前に出すので、共有するデスクトップが裏に回る。起動ごとに `loginctl activate` で戻す方法より、起動の引数で止める方を採った（PC の前にいなくても、再起動の後にそのままつながる）
 - **再起動は `sudo` 無しの `systemctl reboot -i` にする** — PC の画面のアプリが終了を止めていると、その抑止を無視するのに polkit の認証が要り、`sudo` では聞かれずに断られるため。`sudo` 無しの形は、止められていてもいなくても通る
-- **ロールバックの最後に、PC の画面のセッションを終わらせる** — 自動ログインをやめても、今のセッションはロックされずに残るので、`loginctl terminate-session` でログイン画面に戻す
 
 ### 参照
 

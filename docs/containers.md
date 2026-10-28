@@ -1,7 +1,7 @@
 # コンテナのセットアップ（AlmaLinux 10）
 
 - AlmaLinux 10 で、Podman とその周りの道具（podman-compose・podman-tui・lazydocker）と Distrobox を入れて使う
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - **前提と実行場所（ユーザー・端末・別のマシン）は、各項のリードに従う**。`sudo -i`・`su -` のシェルでは行わない
@@ -21,7 +21,7 @@
 - AppStream の podman を入れ、自分のユーザー（rootless）でコンテナを動かせるようにする
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](reference/podman.md)・[ロールバックと注意点](extra/podman.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](reference/podman.md)・[注意点](extra/podman.md)
 - 導入後は、必要な[コンテナ用ツール](tool-catalog.md#cli-コンテナ)を追加する
 
 > [!IMPORTANT]
@@ -266,7 +266,7 @@
 - 前提: [Podman](#podman)と[EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)の手順 1 を通してある
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[ロールバックと注意点](extra/podman-compose.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[注意点](extra/podman-compose.md)
 - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 - **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 - PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する) で動かす（[注意点](extra/podman-compose.md#注意点)）
@@ -408,7 +408,7 @@
 - 前提: [Podman](#podman)の手順 7（API ソケット）までと、[EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)の手順 1 を通してある
   - `systemctl --user is-active podman.socket` が `active` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[ロールバックと注意点](extra/podman-tui.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[注意点](extra/podman-tui.md)
 - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
 - **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
 - Docker の API でつなぐ TUI なら [lazydocker](#lazydocker)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#選択した方針)）
@@ -516,7 +516,7 @@
   - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
   - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[ロールバックと注意点](extra/lazydocker.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[注意点](extra/lazydocker.md)
 - **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
 - pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#選択した方針)）
 
@@ -703,7 +703,6 @@
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
-   - `Created symlink …` が出なければ、前から有効だった。元に戻すときは、この項の手順 8 を飛ばす
 
 1. root の共通設定が接続先を設定したことを確かめる。
 
@@ -752,40 +751,6 @@
    - `lazydocker-root-web Exited (0) ...` と出ればよい
    - `config.yml`（0 バイト）は root の設定ファイル
 
-1. 元に戻すときは、root の確認用コンテナと lazydocker の設定を消す。
-
-   ```bash
-   {
-     sudo podman rm -f lazydocker-root-web
-     sudo rm -rf /root/.config/lazydocker
-   }
-   ```
-
-   - root の設定ファイルに手で足したものも消える
-   - 共通設定と `~/.bashrc` は変更しない。ソケットはこの項の手順 8 で止める
-
-1. 元に戻すときは、root でほかに使っていないときだけ、root のイメージを消す。
-
-   ```bash
-   sudo podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - `Untagged:` と `Deleted:` が出る
-   - 同じイメージの root のコンテナが残っていると、消せずにエラーになる
-
-1. 元に戻すときは、この項の手順 1 で有効にしたときだけ、システムの API ソケットを止める。
-
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo systemctl disable --now podman.socket
-     systemctl is-active podman.socket
-   }
-   ```
-
-   - `Removed …` と `inactive` が出ればよい
-   - Cockpit の podman の画面など、ほかのものも、このソケットを使うことがある
-
 #### lazydocker: 使い方の基本
 
 | キー | 動作 |
@@ -828,7 +793,7 @@
 - 前提: [Podman](#podman)と[EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)の手順 1 を通してある
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](reference/distrobox.md)・[ロールバックと注意点](extra/distrobox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](reference/distrobox.md)・[注意点](extra/distrobox.md)
 - この項の手順 1 で変数を設定したシェルに貼る
 - **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 3 を貼る
 - **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る

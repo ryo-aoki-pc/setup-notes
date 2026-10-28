@@ -1,51 +1,9 @@
-# podman-compose のロールバックと注意点
+# podman-compose の注意点
 
 [手順書](../containers.md#podman-compose)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](../reference/podman-compose.md)
 
 - 「手順 N」は[手順書](../containers.md#podman-compose)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- 上から順に実行する
-- compose で動かしていたデータを残したいときは、この節の手順 2 の前に `~/compose-sample` から取り出しておく
-
-1. コンテナ・pod・ネットワークを消す。
-
-   ```bash
-   cd ~/compose-sample
-   podman-compose down
-   printf '\n\033[7m 確認 \033[0m\n'
-   podman pod ps
-   ```
-
-   - `podman pod ps` が見出しの行だけになればよい
-
-1. 確認用の compose ファイルとページを消す。
-
-   ```bash
-   cd ~
-   rm -rf ~/compose-sample
-   ```
-
-1. [Podman: Quadlet で自動起動する](../containers.md#podman-quadlet-で自動起動する)で同じイメージを使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. podman-compose を消す。
-
-   ```bash
-   sudo dnf remove podman-compose
-   ```
-
-   - `[y/N]` で聞かれる。依存で入った Python のライブラリも、ほかに使うものが無ければ一緒に消える
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバックの「Flatpak・RPM Fusion・EPEL を消す」](almalinux-setup.md#flatpakrpm-fusionepel-を消す)の手順 7・8
-
----
 
 ## 注意点
 

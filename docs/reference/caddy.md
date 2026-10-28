@@ -1,6 +1,6 @@
 # Caddy（AlmaLinux 10 / ホストで共通に使う HTTPS）の参考資料
 
-[AlmaLinux 10 の「Caddy」](../almalinux-setup.md#caddy)・[ロールバックと注意点](../extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
+[AlmaLinux 10 の「Caddy」](../almalinux-setup.md#caddy)・[注意点](../extra/caddy.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/caddy.md)
 
 ## 選択した方針
 

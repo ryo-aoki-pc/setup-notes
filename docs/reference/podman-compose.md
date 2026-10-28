@@ -1,6 +1,6 @@
 # podman-compose の参考資料
 
-[手順書](../containers.md#podman-compose)・[ロールバックと注意点](../extra/podman-compose.md)
+[手順書](../containers.md#podman-compose)・[注意点](../extra/podman-compose.md)
 
 ## 補足
 

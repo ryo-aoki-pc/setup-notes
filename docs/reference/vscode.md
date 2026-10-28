@@ -1,6 +1,6 @@
 # VS Code の参考資料
 
-[手順書](../almalinux-setup.md#vs-code)・[ロールバックと注意点](../extra/vscode.md)
+[手順書](../almalinux-setup.md#vs-code)・[注意点](../extra/vscode.md)
 
 ## 補足
 

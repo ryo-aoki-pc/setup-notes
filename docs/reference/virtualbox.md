@@ -1,6 +1,6 @@
 # VirtualBox の参考資料
 
-手順: [AlmaLinux 10](../virtual-machines.md#virtualbox)・[Windows 11](../virtual-machines.md#windows-11-で-virtualbox-を入れる)。[ロールバックと注意点](../extra/virtualbox.md)
+手順: [AlmaLinux 10](../virtual-machines.md#virtualbox)・[Windows 11](../virtual-machines.md#windows-11-で-virtualbox-を入れる)。[注意点](../extra/virtualbox.md)
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#補足の実測)
 
@@ -197,4 +197,3 @@ Android からリモート デスクトップでつないで、PC の上の VM �
 - [UIKeyboardHandler.cpp（VirtualBox 7.2.20）— GitHub](https://github.com/VirtualBox/virtualbox/blob/v7.2.20/src/VBox/Frontends/VirtualBox/src/runtime/UIKeyboardHandler.cpp) — 951〜957・1405〜1416・1574・1657 行
 - [android rdp client keyboard not passing to hyper v — Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/838239/android-rdp-client-keyboard-not-passing-to-hyper-v) — Android の RDP から Windows の上の VirtualBox で `1` が `n`、`2` が `m`
 - [Keyboard not working when connecting via rdp to run guest os's in virtualbox on win7 — Dell Community](https://www.dell.com/community/en/conversations/wyse-pocketcloud-for-android/keyboard-not-working-when-connecting-via-rdp-to-run-guest-oss-in-virtualbox-on-win7/647f5784f4ccf8a8de18b4a3) — `.` が `c`、`,` が `z`
-

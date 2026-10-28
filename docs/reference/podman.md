@@ -1,6 +1,6 @@
 # Podman の参考資料
 
-[手順書](../containers.md#podman)・[ロールバックと注意点](../extra/podman.md)
+[手順書](../containers.md#podman)・[注意点](../extra/podman.md)
 
 ## 補足
 

@@ -1,6 +1,6 @@
 # ユーザーサービスの常駐の参考資料
 
-[手順書](../almalinux-setup.md#ユーザーサービスの常駐)・[ロールバックと注意点](../extra/linger.md)
+[手順書](../almalinux-setup.md#ユーザーサービスの常駐)・[注意点](../extra/linger.md)
 
 ## 補足
 

@@ -3,10 +3,6 @@
 [手順書](../shell-terminal.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](../reference/shell-terminal.md)
 
 - 手順書の手順は、番号付きリストを持つ見出し（項）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順を指す
-- ロールバックは、ほかの道具と一緒に「上から順に戻す」並びに入っているので、2 冊のロールバックにある
-  - AlmaLinux 10: シェルのツール・`~/.inputrc`・共通の bash 設定は[AlmaLinux 10 のセットアップのロールバックの「シェルのツールと bash の設定を戻す」](almalinux-setup.md#シェルのツールと-bash-の設定を戻す)、デスクトップの等幅のフォントと Ctrl+Alt+T・WezTerm・HackGen Console NF は[「端末とエディタを消す」](almalinux-setup.md#端末とエディタを消す)の手順 6〜10、bash-completion は[「Homebrew と bash-completion を消す」](almalinux-setup.md#homebrew-と-bash-completion-を消す)の手順 4
-  - Windows 11: 自分用の WezTerm の設定と共通の bash 設定は[Windows 11 のセットアップのロールバックの「Git Bash の設定を戻す」](windows-setup.md#git-bash-の設定を戻す)の手順 7・8、starship・zoxide・fzf・eza・bat は[「エディタとシェルのツールを消す」](windows-setup.md#エディタとシェルのツールを消す)の手順 7〜9、WezTerm は[「OpenSSH・Git for Windows・Firefox・WezTerm を外す」](windows-setup.md#opensshgit-for-windowsfirefoxwezterm-を外す)の手順 8、HackGen Console NF は[「HackGen Console NF を消す」](windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3
-  - PowerShell のプロファイルと開発の設定、Windows Terminal の設定は、手順書のそれぞれの項の戻す手順で戻す
 
 ## 注意点
 
@@ -71,7 +67,6 @@
   - 無効化は `WEZTERM_SHELL_SKIP_ALL=1`。自分用の WezTerm の設定（「WezTerm」の手順 5）を使うなら、止めない（その docs/install.md の注意点）
 - **WezTerm: 既存の `_copr:...yazi.repo` など EL10 向け COPR と混在させても問題ない。** repo ごとに `baseurl` の chroot が違うだけ
 - **PSReadLine の Emacs モードは、それより前に付けたキーを既定に戻す**: EditMode の行を、キーの割り当てより前に置く。Ctrl+V は `Paste` を割り当て直す。開いている窓では切り替えず、新しい窓で確かめる
-  - [PowerShell 7 で Emacs モードを使う](../shell-terminal.md#powershell-7-で-emacs-モードを使う)を戻しても、印の無い EditMode の行は残る。その行が Emacs なら Windows モードへは戻らない
 - **Windows PowerShell 5.1 のキーは、手順書を貼る管理者の conhost の窓にも効く**: 任意の[キー操作の設定](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で変える。先に全ユーザーのプロファイルが付けたキーも EditMode で既定に戻る
   - Ctrl+V は `Paste`、Ctrl+Enter は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の `AddLine` を使う
   - conhost の右クリックの貼り付けは、LF を Ctrl+Enter として送る。貼り付けの設定の `AddLine` の行が、EditMode の行より後に残っている必要がある（任意の項の手順 2 は、その順に入れる）。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
@@ -83,13 +78,12 @@
 - **PowerShell の開発の設定は起動の時間にも影響する**: 7 の追加の行は合わせて約 0.1 秒、5.1 の PSReadLine 2.4.5 は約 0.2 秒の目安。PSFzf は最初に Ctrl+T・Ctrl+R を押したときに読み、モジュールの読み込みには約 0.23 秒掛かる
 - **Windows Terminal の copyOnSelect は、選んだだけでクリップボードを置き換える**: 手順書からコピーしたブロックも消え、右クリックが貼り付けになる。任意の[選択のコピー](../shell-terminal.md#windows-terminal-で選択した文字をコピーする)で true にできる
   - 複数行の警告を切っていると、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある
-  - キー単位で false に戻しても、親の[設定の戻し](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 を後で行うと、控えの値が戻る
 - **Windows の starship.toml は Git Bash と PowerShell 7 で共有する**: 任意の[表示の設定](../shell-terminal.md#windows-11-で-starship-の表示を変える)は、既存の配色・プリセットも置き換える。控えを書き戻すと、両方のシェルに効く
   - PowerShell 7 では、[プロファイルの設定](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 2 の starship の行が必要。`STARSHIP_CONFIG` を別の場所に向けている場合、このファイルは読まれない
 - **Windows Terminal に複数行を貼ると「警告」が出ることがある**: 管理者ではない窓（Windows Terminal）に複数行のブロックを貼ると出るはず（コードからの推測。確かめていない）。出たら「強制的に貼り付け」を押す
   - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4
 - **HackGen Console NF: Windows 11 では、自分のユーザーのフォントが見えないアプリがある**: ユーザーごとのフォントは Windows 10 1809 からで、古いアプリには見えないことがある。そのアプリだけ、PC 全体に入れ直す（本書では扱わない）
-- **HackGen Console NF: Windows 11 では、読み込まれているフォントのファイルを置き換えられない**: 入れ替え（更新）と削除は、登録を消してサインインし直してから行う（[HackGen Console NF を消す](windows-setup.md#hackgen-console-nf-を消す)）
+- **HackGen Console NF: Windows 11 では、読み込まれているフォントのファイルを置き換えられない**: [更新](../shell-terminal.md#hackgen-console-nf-を上げる)では、登録を消してサインインし直してから入れ替える
 - **WezTerm: Windows 11 のインストーラと実行ファイルには署名が無い**: 本物かどうかは確かめられず、`.sha256` で分かるのは壊れていないことまで（[選択した方針](../reference/shell-terminal.md#windows-11-で-wezterm-を入れる)）
   - ブラウザで取得したファイルでは SmartScreen が警告することがある。本書では `curl.exe` で取得する
 - **WezTerm: Windows 11 の WezTerm には `VCRUNTIME140.dll` が要る**: インストーラは入れない（[「WezTerm」の手順 3](../shell-terminal.md#windows-11-で-wezterm-を入れる)）

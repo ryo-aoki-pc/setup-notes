@@ -1,7 +1,7 @@
 # Dropbox のセットアップ（AlmaLinux 10）
 
 - AlmaLinux 10 で、Dropbox の公式クライアントか rclone を使い、Dropbox との同期や、Dropbox へのバックアップを行う
-- 検証記録・参考資料・ロールバックと注意点は、各項のリードから開く
+- 検証記録・参考資料・注意点は、各項のリードから開く
 
 > [!IMPORTANT]
 > - **前提と実行場所（ユーザー・端末・別のマシン）は、各項のリードに従う**。`sudo -i`・`su -` のシェルでは行わない
@@ -23,7 +23,7 @@
   - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` を返さなければ、先に[ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐)を通す
   - **ログアウト中も同期するなら、PC を眠らせない**（[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)を通す。Workstation で入れた PC は、ログイン画面のまま 15 分で眠る）
 - 実行場所: x86_64 の PC の、自分のユーザーの bash（デスクトップの端末か SSH）。**手順 8 はブラウザでリンクする**。この PC でなくても、ブラウザがあればどこでもよい
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](reference/dropbox.md)・[ロールバックと注意点](extra/dropbox.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox.md)・[参考資料](reference/dropbox.md)・[注意点](extra/dropbox.md)
 - **手順 2 で止まる**（fingerprint の目視）
 
 > [!IMPORTANT]
@@ -211,7 +211,7 @@
   - `loginctl show-user "$(id -u)" -p Linger` が `Linger=yes` でなければ、先に[ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐)を通す
   - **ログアウト中も同期するなら、Raspberry Pi 5 を眠らせない**（[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)を通す）
 - 実行場所: Raspberry Pi 5（aarch64）などの、自分のユーザーの bash（デスクトップの端末か SSH）。**手順 3 はブラウザで認証する**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)・[ロールバックと注意点](extra/dropbox-rclone.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-rclone.md)・[参考資料](reference/dropbox-rclone.md)・[注意点](extra/dropbox-rclone.md)
 - **手順 3・6・7・8 で止まる**（ブラウザでの許可・エディタ・`--dry-run` の結果の確認・最初の同期の完了）
 - 手順 1 の導入で `[y/n]` が出たら、答えてプロンプトが戻ってから手順 2 を貼る
 - x86_64 の PC では、公式クライアントの [Dropbox](#dropbox) を勧める（この手順も同じように動く）
@@ -462,7 +462,7 @@
 - 選んだファイルを暗号化し、毎日 Dropbox の `Backup/<ホスト名>` へ片方向で上げる。前の版は 30 日残す。Forgejo を動かしていれば、止めて取ったアーカイブも上げる（毎日数秒止まる）
 - 前提: [Dropbox と rclone](#dropbox-と-rclone)の手順 1〜4 と、[ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐)を通してある。Forgejo のアーカイブも上げるなら、[Forgejo](forgejo.md#forgejo)を導入してある
 - 実行場所: バックアップする PC の、自分のユーザーの bash（デスクトップの端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-backup.md)・[参考資料](reference/dropbox-backup.md)・[ロールバックと注意点](extra/dropbox-backup.md)
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/dropbox-backup.md)・[参考資料](reference/dropbox-backup.md)・[注意点](extra/dropbox-backup.md)
 - **この項の手順 1・4・7・9・10 で止まる**（パスワードの入力・エディタ・`--dry-run` と復号の結果の確認）
 - **暗号化のパスワードを失うと戻せない**。この項の手順 1 で入れるパスワードは、パスワードの管理（KeePassXC など）に保存し、この項の手順 9・10 で確かめる
 

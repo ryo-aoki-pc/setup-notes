@@ -124,11 +124,6 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 - コマンドの中で同じプレビューを使うなら、`fzf --preview 'bat --color=always --style=numbers {}'`
 
-### fzf で fd と bat を候補とプレビューに使う / 手順 5: 補足: 消した後
-
-- 開き直した端末から、共通の bash 設定は候補の 3 つの変数を入れず、候補は fzf の既定の一覧に戻る
-- [yazi](../almalinux-setup.md#yazi)の `YAZI_EXTRAS` で入れた fd を消さないのは、yazi の検索が使うため
-
 ### bat の設定ファイル / 手順 1: 補足: テーマと言語とキャッシュ
 
 - テーマの一覧は `bat --list-themes`、認識する言語の一覧は `bat --list-languages`
@@ -262,9 +257,9 @@ Importing GPG key 0xCEA2757D:
 
 - `$ver` と `$sha256` を直さなければ、固定した旧版を再び入れるだけで更新にはならない
 
-### HackGen Console NF を上げる / 手順 3: 補足: 外してから入れ直す理由
+### HackGen Console NF を上げる / 手順 3〜5: 補足: 外してから入れ直す理由
 
-- [Windows 11 のロールバック](../extra/windows-setup.md#hackgen-console-nf-を消す)の手順 1〜3 を先に行うのは、読み込まれているファイルは置き換えられないため
+- 更新で登録を消してサインインし直してからファイルを消すのは、読み込まれているファイルは置き換えられないため
 
 ### Windows Terminal のフォントと貼り付けの警告を変える / 手順 2: 補足: 設定ファイルの読み書き
 
@@ -275,8 +270,7 @@ Importing GPG key 0xCEA2757D:
 - `profiles` が配列なのは古い形式で、この節のブロックは扱わない
 - 保存すると、Windows Terminal がファイルの変化を見て読み直し、開いているタブにも効く
 - fragment（`%LOCALAPPDATA%\Microsoft\Windows Terminal\Fragments`）に書けるのは、プロファイル・配色・アクション（キーを除く）だけで、全体の設定と `profiles.defaults` は読まれない（`_parseFragment`）
-- 控えは、控えが無いときだけ作る（2 回目に貼っても、元の設定が残る）。この節の手順 6 で書き戻すと消すので、次にこの節を通すときは、そのときの設定を控え直す
-- 書き戻しは `Move-Item` にせず、`Copy-Item` の後に控えを消す。Windows Terminal が見張る `settings.json` が、途中で無くならないようにするため
+- 控えは、控えが無いときだけ作る（2 回目に貼っても、元の設定が残る）
 
 ### Windows Terminal のフォントと貼り付けの警告を変える / 手順 3: 補足: フォント
 
@@ -301,10 +295,6 @@ Importing GPG key 0xCEA2757D:
 - 読み書きは親の項と同じく、コメントと末尾のカンマがあれば止め、BOM の無い UTF-8 で書く。控えの `settings.json.windows-setup.bak` は、あれば上書きしない
 - 選択で、手順書からコピーしたブロックも置き換わる。親の[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4 で複数行の警告を切っていれば、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある
 - ソースと文書での確認で、実機では確かめていない
-
-### Windows Terminal で選択した文字をコピーする / 手順 3: 補足: キー単位で戻す
-
-- この項では `copyOnSelect` を false に戻す。親の[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 6 で控えを書き戻すと、この設定も控えを取ったときの状態へ戻る
 
 ### Windows 11 で WezTerm を入れる / 手順 1: 補足: WezTerm の中の PowerShell を使わない理由
 
@@ -349,7 +339,6 @@ Importing GPG key 0xCEA2757D:
 ### Windows 11 で bash のログイン時の読み込みを確かめる / 手順 3: 補足: 既存のファイルを残す
 
 - ファイル全体は置き換えない。`~/.profile` を読む行など、Git for Windows が作った内容や利用者が足した内容を残す
-- 戻すときも、この項で付けた印のある行だけを消し、印の無い `~/.bashrc` の読み込みは残す
 
 ### シェルのツールを入れる / 手順 2: 補足: 確かめる値
 
@@ -384,7 +373,6 @@ Importing GPG key 0xCEA2757D:
   - 版を指定しない名前を並べたとき（この項の手順 4 の `scoop install fzf starship eza bat`）は、もう入っているものを `prune_installed` で飛ばす。`'<名前>' (<版>) is already installed. Skipping.` の警告は出ない（`Get-Dependency` が名前を `main/<名前>` の形に変えるので、警告を出す前の、指定した名前との突き合わせに当たらない）
   - 名前を 1 つだけ渡したときは、もう入っていれば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる（`$apps.length -eq 1` の分かれ）
   - [scoop・winget・WSL を上げる](../windows-setup.md#scoopwingetwsl-を上げる)の手順 8 で、先に main のバケットの `bucket\zoxide.json` の版を見るのは、`scoop update zoxide --force` が Releases ではなく、main のバケットの今の定義を入れるため（`update` の `$pin_broken` から `Find-AppBucket`）。バケットの定義は、Releases に出てから自動の更新で上がるまで遅れる。0.10.0 のまま上げると、止めるのをやめた 0.10.0 になる
-  - `scoop uninstall` は、止めてあっても消す（`hold` を見ない）。そのため、[ロールバックの「エディタとシェルのツールを消す」](../extra/windows-setup.md#エディタとシェルのツールを消す)の手順 7 に `scoop unhold` は要らない
 - **VC++ ランタイム**: 5 つの Windows の実行ファイル（x64）の DLL の読み込みの表（PE のインポート表）で、`VCRUNTIME140.dll` を使うのは bat だけだった
   - fzf（Go）は `kernel32.dll` だけ。zoxide と starship は MSVC のビルドだが、C のランタイムを静的にリンクする（zoxide の `.cargo/config.toml`、starship の `release.yml` の `+crt-static`）。eza は MinGW のビルドで、Windows に付いている `msvcrt.dll` を使う
   - bat の定義の `suggest` は、extras の `vcredist2022` と `less` を勧める表示だけで、入れはしない。本書では [WezTerm](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（winget の `Microsoft.VCRedist.2015+.x64`、PC 全体）を前提にした。starship の定義の `suggest`（`vcredist2022`）は、入れなくてよい
@@ -402,7 +390,6 @@ Importing GPG key 0xCEA2757D:
   - Windows PowerShell 5.1 の `-Encoding UTF8` は BOM を付ける。bat は設定の各行の前後の空白を削ってから読むが、BOM は削らず、1 行目をファイルの名前として読んで失敗する（Linux の bat 0.26.1 で確かめた。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）
   - テーマの名前と 3 行の中身は ASCII だけ。改行は CRLF になるが、bat は行末の `\r` も削る（同じ記録）
 - `current\config` に書いた中身は、ハードリンクのもう一方の控え（`persist`）にも入るはず（Linux のハードリンクと PowerShell 7.5.3 では、同じ中身になった。Windows の NTFS と 5.1 では確かめていない）
-- 戻す（[ロールバックの「エディタとシェルのツールを消す」](../extra/windows-setup.md#エディタとシェルのツールを消す)の手順 8）のは控えのファイルで、この節で書いた形（1 行目がテーマ、後の 2 行が同じ）のときだけ、空にする。ハードリンクのもう一方（`current\config`）も空になるので、bat を残していても組み込みの既定値に戻る。scoop の最初の導入と同じ空のファイルなので、入れ直しても困らない
 
 ### シェルのツールを入れる / 手順 7・8: 補足: Git Bash での確かめ方
 
@@ -429,11 +416,6 @@ Importing GPG key 0xCEA2757D:
 - 既存のファイルは `~/.config/starship.toml.shell-terminal.bak` に控える。元が無い場合は `~/.config/starship.toml.shell-terminal.new` で記録する
 - 既存の控えは上書きしない
 - Windows の Git Bash と PowerShell 7 で共有される見た目は、実機では確かめていない
-
-### Windows 11 で starship の表示を変える / 手順 5: 補足: 書く前の状態に戻す
-
-- 控えがあればその内容を書き戻し、元が無い記録があればこの項で作った `starship.toml` を消す。控えか記録を残すことで、再実行でも最初の状態へ戻せる
-- Git Bash と PowerShell 7 の両方に効く。控えを取った後に加えた設定は、書き戻すと残らない
 
 ### PowerShell 7 のプロファイルを設定する / 手順 2: 補足: 足す行
 
@@ -480,13 +462,6 @@ Importing GPG key 0xCEA2757D:
 - `Set-ExecutionPolicy` に `-Force` を付けるのは、確認の問いで止まらないようにするため
 - UniGet UI は scoop を `-NoProfile -ExecutionPolicy Bypass` で動かすので、このプロファイルと実行ポリシーに依らない
 
-### PowerShell 7 のプロファイルを設定する / 手順 7: 補足: 印の行だけを消す
-
-- [ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 と同じく、ファイルをバイトのまま読み、消す行のほかのバイトを変えずに書き戻す（[ロールバックの「アプリと貼り付けの設定を外す」の手順 6 の補足](windows-setup.md#ロールバック--アプリと貼り付けの設定を外す--手順-6-補足-文字コードを変えずに消す)）
-- 消すのは、行末が `  # windows-setup.md`・`  # shell-terminal.md`・`  # shell-terminal.md:dev` の行。印が行の途中にある行は消さない
-- PowerToys の Command Not Found が足した行は、印が無いので残る
-- `Documents\PowerShell` のフォルダーは消さない（モジュールや `powershell.config.json` が入ることがある）
-
 ### PowerShell 7 で Emacs モードを使う / 手順 2: 補足: 設定する行と挿入位置
 
 - [Set-PSReadLineOption の `EditMode`](https://learn.microsoft.com/en-us/powershell/module/psreadline/set-psreadlineoption?view=powershell-7.6#-editmode)は、それより前に付けたキーを既定に戻す。任意の行は、最初の `Set-PSReadLineKeyHandler` を含む文より前、`using`・`param`・`#Requires` などの先頭の宣言より後に入れる
@@ -495,12 +470,6 @@ Importing GPG key 0xCEA2757D:
 - 複合文の中の EditMode が挿入位置より後になる場合も、書かずに止める。モードとキーの設定を別の行へ分け、モードを先に置いてからやり直す
 - バイトを保つための文字列と、構文解析する文字列を分ける。解析時だけ先頭の BOM を除き、挿入位置にはその長さを足して書き戻す
 - 開いている窓では EditMode を変えない。貼り付けに使うキーの割り当てまで変わるため、プロファイルに書くだけにして、新しい窓で確かめる。実機では確かめていない
-
-### PowerShell 7 で Emacs モードを使う / 手順 5: 補足: この項だけを戻す
-
-- 行末が `  # shell-terminal.md` の行だけを消す。開発の設定の `  # shell-terminal.md:dev` は残す
-- 親の[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 7 は、`  # windows-setup.md`・`  # shell-terminal.md:dev` の行も含めて消す
-- 印の無い EditMode の行は残る。利用者が先に Emacs にしていたときは、任意の行を消しても Windows モードへは戻らない
 
 ### Windows PowerShell 5.1 のキー操作を変える / 手順 2: 補足: 適用範囲と貼り付け
 
@@ -514,12 +483,6 @@ Importing GPG key 0xCEA2757D:
   - キーとして届くので、Ctrl+Enter の割り当てには依る。コピーボタンの中身の LF は Ctrl+Enter として届き、Windows モードの既定の `InsertLineAbove` では行が逆順になる（[貼り付けの設定の手順 2 の補足](windows-setup.md#貼り付けの設定--手順-2-補足-行を足す理由)）。EditMode を変えると、それより前に付けた `AddLine` は消えるので、この項の行は、貼り付けの設定の Ctrl+Enter の行より前に入れる
   - Emacs モードの管理者の conhost で、右クリックと複数行の貼り付けは実機では確かめていない
 
-### Windows PowerShell 5.1 のキー操作を変える / 手順 5: 補足: この項と貼り付けの設定を戻す
-
-- この項では、行末が `  # shell-terminal.md` の行だけを消す。印の無い行と、貼り付けの設定の `  # windows-setup.md`、開発の設定の `  # shell-terminal.md:dev` は残す
-- [ロールバックの「アプリと貼り付けの設定を外す」](../extra/windows-setup.md#アプリと貼り付けの設定を外す)の手順 6 は、両方の印の行を消す。どちらも、既存の文字コードとほかのバイトを変えずに書き戻す
-- プロファイルの変更は、新しく開く窓で効く。開いている窓へ読み直して EditMode を変える確かめ方はしない。実機では確かめていない
-
 ### PowerShell を開発に使う / 手順 3: 補足: モジュールの導入元
 
 - PSScriptAnalyzer は PowerShell の静的検査、Pester はテストに使う。7 には PSResourceGet の `Install-PSResource -Scope CurrentUser` で入れる
@@ -531,12 +494,12 @@ Importing GPG key 0xCEA2757D:
 - 7 の `Save-PSResource -IncludeXml` で、ドキュメントの既知のフォルダーの下の `WindowsPowerShell\Modules` に保存する。5.1 の古い PowerShellGet や NuGet の提供者を上げずに済む
 - 保存先は名前・版ごとのフォルダーになる。`Get-PSResource -Path` で版と場所を見る。5.1 の `Get-InstalledModule` には出ない
 - 同じ版の `Save-PSResource` は上書きする。新しい版を保存しても古い版は残る。5.1 に同梱の Pester は消さず、追加した版を先に読む形にする
-- 戻すため、導入前後の名前・版・保存先を控える。ほかの手順で入れた PSWindowsUpdate や、元からあった版は削除の対象にしない
+- 導入前後の名前・版・保存先を控える
 
 ### PowerShell を開発に使う / 手順 5: 補足: 起動前に読む環境変数
 
 - `POWERSHELL_TELEMETRY_OPTOUT=1` と `POWERSHELL_UPDATECHECK=Off` は、ユーザーの環境変数に置く。PowerShell の起動時に使うので、プロファイルには書かない
-- ほかの値があれば止める形は、[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)と同じ。戻す手順では、この項で指定した値のときだけ消す
+- ほかの値があれば止める形は、[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)と同じ
 - 設定アプリの「詳細設定」→「PowerShell」のスイッチは実行ポリシーを RemoteSigned にするもの。[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 と、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 5 で扱う
 
 ### PowerShell 7 のプロファイルに開発の設定を足す / 手順 2: 補足: 補完の控え
@@ -568,29 +531,18 @@ Importing GPG key 0xCEA2757D:
 - `ll` は eza があるときだけ定義し、`--long --group-directories-first` と引数を渡す。`err` は 7 の `Get-Error -Newest 1` を呼ぶ。既存の `ls`・`cat` は置き換えない
 - 追加する行は合わせて約 0.1 秒の目安。負荷で起動の時間がばらつくので、個々の行の内訳と計り方は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
 
-### PowerShell 7 のプロファイルに開発の設定を足す / 手順 6: 補足: 開発の印だけを消す
-
-- 行末が `  # shell-terminal.md:dev` の行だけを消す。ファイルをバイトのまま読み、それ以外の文字コード・改行・BOM は変えない
-- Emacs モードの `  # shell-terminal.md` と、元のプロファイルの `  # windows-setup.md` は残す
-
-### PowerShell 7 のプロファイルに開発の設定を足す / 手順 7: 補足: 補完の控えだけを消す
-
-- 補完の控えは、gh・rg・fd・delta・bat・starship の 6 ファイルだけを削除する
-- `completions` のフォルダーは、空になったときだけ消す。親の `PowerShell` のフォルダーは残す。モジュールと環境変数は、[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)の戻す手順で扱う
-
 ### Windows PowerShell 5.1 のプロファイルに開発の設定を足す / 手順 2: 補足: 必要なときだけ UTF-8 にする
 
 - 5.1 のコンソールの文字コードは変えず、`Invoke-Utf8Native`・winget の補完・`ll` の 3 行だけを足す。管理者の窓に貼る手順の出力を変えないため
 - `Invoke-Utf8Native` の UTF-8 は `New-Object Text.UTF8Encoding($false)` で作る。winget の補完からもこの関数を呼び、補完した後に元の文字コードへ戻す
 - 5.1 を常に UTF-8 にすると、`ipconfig`・`whoami` などが英語になる。UTF-8 の外部コマンドの出力を取り込むときだけ、関数へスクリプト ブロックを渡す
-- 戻すときは `  # shell-terminal.md:dev` の行だけを消す。貼り付けの設定と、任意の Emacs モードの行は残る
 
 ### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 3: 補足: 版を指定して保存する理由
 
 - 7 の `Save-PSResource -Version 2.4.5` で、5.1 のユーザーのモジュールの場所へ保存する。プロファイルへ `Import-Module PSReadLine` の行は足さない
 - 次に開く 5.1 は、ユーザーのモジュールの場所にある新しい版を先に読む。同じユーザーの管理者の窓と、PSReadLine を読む SSH のセッションも対象になる
 - 5.1 の予測の元は `History` だけで、候補は同じ行に出る。7 の CompletionPredictor と `ListView` の設定は 5.1 に足さない
-- 同梱の 2.0.0 は残す。戻す手順では、この項で保存した 2.4.5 の版のフォルダーだけを消す
+- 同梱の 2.0.0 は残す。うまく貼れなかった場合の復旧では、この項で保存した 2.4.5 の版のフォルダーだけを消す
 - 5.1 の起動は約 0.2 秒延びる目安。計り方と貼り付けの確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
 
 ### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 7: 補足: 名前を変えてから消す理由
@@ -623,14 +575,6 @@ Importing GPG key 0xCEA2757D:
 ### Git for Windows・Firefox・WezTerm を上げる / 手順 6: 補足: 窓を閉じる理由
 
 - WezTerm が動いていると、同じ項の手順 7（[Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 4 のブロック）が止まる
-
-### ロールバック / OpenSSH・Git for Windows・Firefox・WezTerm を外す / 手順 8: 補足: アンインストーラの動き
-
-- アンインストーラは `C:\Program Files\WezTerm\unins000.exe`（Inno Setup）。場所は登録の `UninstallString` から読む
-- 引数の `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` は、Inno Setup のアンインストーラの標準の引数（確認の窓も完了の窓も出さない）
-- アンインストーラは自分の写しを `%TEMP%` に作り、写しの方が消す。終了コードが返った時点では片付けがまだ続いていることがある（Inno Setup の文書）ので、登録とフォルダーが消えるまで 60 秒まで待つ
-- 消えるもの: インストーラが置いたファイルとフォルダー、スタートメニューの「WezTerm」、右クリックの「Open WezTerm here」、PC 全体の `PATH` の `C:\Program Files\WezTerm`、アンインストールの登録
-- 残るもの: 設定ファイルと、WezTerm が作る作業用のフォルダー（ソースでは `%USERPROFILE%\.local\share\wezterm`・`%APPDATA%\wezterm`・`%LOCALAPPDATA%\wezterm`。作られていれば）
 
 ### 選択した方針
 
@@ -721,7 +665,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | `copyOnSelect` | 既定（false）のまま。任意の手順で true にできる | true: 選ぶとクリップボードが置き換わり、右クリックが貼り付けになる。複数行の警告を切っている窓では、意図しない貼り付け（実行）になりやすい |
 | 起動の大きさ | 既定（120×30）のまま | 好みなので扱わない |
 | 管理者の窓（conhost）のフォント | 扱わない | 別の設定（`HKCU\Console`・ショートカットごと） |
-| 戻し方 | 控えのファイルを書き戻す | 足した値だけを消す: 控えのほうが、書く前の状態に確実に戻る（その後に画面で変えたものは消える） |
 
 #### Windows 11 で WezTerm を入れる
 
@@ -880,7 +823,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - [matthewjberger/scoop-nerd-fonts](https://github.com/matthewjberger/scoop-nerd-fonts) — Windows で自分のユーザーにフォントを入れる定義（issue #198 のアクセス権）
 - [mo-san/scoop-bucket](https://github.com/mo-san/scoop-bucket) — 採らなかった scoop の個人のバケット
 - [Windows 11 の初期設定](../windows-setup.md) — Windows のインストール直後にまとめて行う設定（scoop・UniGet UI・Caps Lock・表示・電源・リモート デスクトップなど）。この節は、そのリードから案内される
-
 
 #### シェルのツールを入れる
 

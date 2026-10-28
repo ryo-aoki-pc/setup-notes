@@ -1,6 +1,6 @@
 # gdu の参考資料
 
-[手順書](../almalinux-setup.md#gdu)・[ロールバックと注意点](../extra/gdu.md)
+[手順書](../almalinux-setup.md#gdu)・[注意点](../extra/gdu.md)
 
 ## 補足
 

@@ -1,6 +1,6 @@
 # lazydocker の参考資料
 
-[手順書](../containers.md#lazydocker)・[ロールバックと注意点](../extra/lazydocker.md)
+[手順書](../containers.md#lazydocker)・[注意点](../extra/lazydocker.md)
 
 ## 補足
 
@@ -94,10 +94,6 @@ Retry count: 3
 ### root でも使う / 手順 5: 補足: root の設定ファイル
 
 - 自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
-
-### root でも使う / 手順 6: 補足: ソケットのファイルが残る間
-
-- ソケットのファイルが再起動まで残る間は、共通設定が `DOCKER_HOST` を入れる
 
 ### root で使うときの補足
 

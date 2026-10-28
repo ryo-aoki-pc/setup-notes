@@ -1,31 +1,9 @@
-# Hyper-V のロールバックと注意点
+# Hyper-V の注意点
 
 [手順書](../virtual-machines.md#hyper-v)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](../reference/hyper-v.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- 管理者ではない Windows PowerShell（5.1）に貼る
-- VM は、先に本書の[VM を消す](../virtual-machines.md#hyper-v-vm-を消す)で消す
-- **Hyper-V の機能を無効に戻す手順と、ユーザーを Hyper-V Administrators から外す手順は、まだ検証していないので載せていない**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)）
-
-1. [VM どうしだけがつながるスイッチを作る](../virtual-machines.md#hyper-v-vm-どうしだけがつながるスイッチを作る)で作ったスイッチを消す。
-
-   ```powershell
-   $HV_SWITCH = 'lab-lan'
-   if (Get-VMNetworkAdapter -VMName * | Where-Object SwitchName -eq $HV_SWITCH) { Write-Error "中断: まだ VM がつながっている: $HV_SWITCH" } else {
-     Remove-VMSwitch -Name $HV_SWITCH -Force
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-VMSwitch | Format-Table Name, SwitchType
-   }
-   ```
-
-   - 一覧から、消したスイッチが無くなればよい
-   - `中断: まだ VM がつながっている` と出たら、その VM を消すか、VM から NIC を外してから貼り直す
-
----
 
 ## 注意点
 

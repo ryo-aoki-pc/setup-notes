@@ -1,73 +1,9 @@
-# GNOME のリモートログインのロールバックと注意点
+# GNOME のリモートログインの注意点
 
 [手順書](../gnome-remote.md#gnome-のリモートログイン)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](../reference/gnome-remote-desktop.md)
 
 - 「手順 N」は[手順書](../gnome-remote.md#gnome-のリモートログイン)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
-
-## ロールバック
-
-- 利用を止めるときは、この節の手順 1 と、LAN に絞っていた場合は手順 2 を行う
-- 証明書だけを戻すときは、この節の手順 1・2 を飛ばし、手順 3・4 を行う
-
-> [!WARNING]
-> **この節の**手順 3 で証明書を差し替え前に戻すには、旧ファイルが要る。差し替えのときに旧ファイルを消していると、証明書は戻せない。[手順 2](../gnome-remote.md#gnome-のリモートログイン) は同じ名前で上書きするので、残すなら先にコピーしておく。
-
-1. サービスと RDP を止め、資格情報とファイアウォールの開放と、手順 5 のドロップインを消す。
-
-   ```bash
-   {
-     sudo systemctl disable --now gnome-remote-desktop.service
-     sudo grdctl --system rdp disable
-     sudo grdctl --system rdp clear-credentials
-     sudo firewall-cmd --permanent --remove-service=rdp && sudo firewall-cmd --reload
-     sudo rm -f /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf
-     sudo rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-remote-desktop.service.d
-     sudo systemctl daemon-reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo firewall-cmd --list-services
-     sudo firewall-cmd --permanent --list-services
-   }
-   ```
-
-   - runtime・permanent のどちらのサービス一覧にも `rdp` が無ければよい
-
-1. [接続元を LAN に絞る](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)を行ったときは、追加した rich rule も消す。
-
-   ```bash
-   if [ -z "${LAN_SUBNET}" ]; then echo '中断: LAN_SUBNET が空のまま。LAN に絞る節の変数ブロックを貼り直す' >&2; else
-     sudo firewall-cmd --permanent --remove-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
-     sudo firewall-cmd --reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo firewall-cmd --list-rich-rules
-     sudo firewall-cmd --permanent --list-rich-rules
-   fi
-   ```
-
-   - `LAN_SUBNET` は、[接続元を LAN に絞る](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)の手順 1 の変数ブロックで、設定時と同じ値を入れる
-   - runtime・permanent のどちらにも、その送信元と 3389/tcp の rich rule が無ければよい
-
-1. 証明書だけを差し替え前に戻すときは（この節の手順 1・2 の代わりに）、旧ファイル名を入れてパスを戻す。
-
-   ```bash
-   OLD_BASENAME=                        # ← 差し替え前の証明書・鍵のファイル名（拡張子なし）
-   ```
-
-   ```bash
-   if [ -z "${OLD_BASENAME}" ]; then echo '中断: OLD_BASENAME を設定してから貼り直す' >&2; else
-   sudo grdctl --system rdp set-tls-key  "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.key"
-   sudo grdctl --system rdp set-tls-cert "/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/${OLD_BASENAME}.crt"
-   fi
-   ```
-
-   - `OLD_BASENAME` には、差し替え前の証明書・鍵のファイル名（拡張子なし）を入れる
-   - `OLD_BASENAME` が空のまま貼ると、先頭の `if` で中断し、`grdctl` は実行されない
-
-1. この節の手順 3 で証明書を戻したときは、デーモンを起動し直して反映する。
-
-   - [デーモンを起動し直す](../gnome-remote.md#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 と、ヘッドレスのセッションがある場合は手順 2 を行う
-
----
 
 ## 注意点
 

@@ -3,7 +3,6 @@
 [手順書](../neovim.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](../reference/neovim.md)
 
 - 手順書の手順は、番号付きリストを持つ見出し（項）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順を指す
-- ロールバックは、ほかの道具と同じ項にある。AlmaLinux 10 は[AlmaLinux 10 のセットアップのロールバックの「端末とエディタを消す」](almalinux-setup.md#端末とエディタを消す)の手順 2〜5、Windows 11 は[Windows 11 のセットアップのロールバックの「エディタとシェルのツールを消す」](windows-setup.md#エディタとシェルのツールを消す)の手順 4〜6 で行う（Node.js を外す最後の手順は、ほかに使うものが無いときだけ）
 
 ## 注意点
 

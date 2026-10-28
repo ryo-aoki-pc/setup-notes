@@ -1,21 +1,8 @@
-# ShellCheck と shfmt のロールバックと注意点
+# ShellCheck と shfmt の注意点
 
 [手順書](../almalinux-setup.md#shellcheck-と-shfmt)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](../reference/shellcheck.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#shellcheck-と-shfmt)の手順 N、「本書」「この文書」は手順書を指す
-
-## ロールバック
-
-1. ShellCheck と shfmt を消す。
-
-   ```bash
-   brew uninstall shellcheck shfmt
-   ```
-
-   - 他の formula が使う依存は残る。不要になった `gmp` / `libffi` などは Homebrew が自動で削除する場合がある（[Homebrew の注意点](almalinux-setup.md#注意点)）。残った不要な依存を整理する操作は `brew autoremove`
-   - 設定ファイルは作っていないので、消すものは無い（`.shellcheckrc` や `.editorconfig` を自分で置いた場合はそれを消す）
-
----
 
 ## 注意点
 

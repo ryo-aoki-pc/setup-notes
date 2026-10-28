@@ -1,41 +1,8 @@
-# podman-tui のロールバックと注意点
+# podman-tui の注意点
 
 [手順書](../containers.md#podman-tui)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](../reference/podman-tui.md)
 
 - 「手順 N」は[手順書](../containers.md#podman-tui)の手順 N、「本書」「この文書」は手順書を指す
-
-## ロールバック
-
-- 上から順に実行する
-- API ソケットは止めない。ほかの手順書も使う（止めるなら [Podman のロールバック](podman.md#ロールバック)の手順 3）
-
-1. 確認用のコンテナを消す。
-
-   ```bash
-   podman rm -f podman-tui-web
-   ```
-
-   - `podman-tui-web` と出る
-
-1. 同じイメージをほかで使っていないときだけ、イメージを消す。
-
-   ```bash
-   podman rmi registry.access.redhat.com/ubi10/httpd-24:latest
-   ```
-
-   - 同じイメージを使うもの: [Podman: Quadlet で自動起動する](../containers.md#podman-quadlet-で自動起動する)、[podman-compose](../containers.md#podman-compose)、[lazydocker](../containers.md#lazydocker)
-   - 使っているコンテナが残っていると、消せずにエラーになる
-
-1. podman-tui を消す。
-
-   ```bash
-   sudo dnf remove podman-tui
-   ```
-
-   - `[y/N]` で聞かれる。消えるのは `podman-tui` の 1 パッケージだけ
-   - **EPEL 自体は消さない**（ほかのパッケージが使っている可能性がある）。消すなら [AlmaLinux 10 の初期設定のロールバックの「Flatpak・RPM Fusion・EPEL を消す」](almalinux-setup.md#flatpakrpm-fusionepel-を消す)の手順 7・8
-
----
 
 ## 注意点
 
