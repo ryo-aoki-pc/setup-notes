@@ -119,6 +119,25 @@
   - フック本体を `hooks/no-color-guard.py` に写し、`settings.json` に登録する
   - AlmaLinux 10 のフックの実行コマンドは `python3` を使う
 - `--check` は、写した本体が同じ中身で、設定に今の形の項目が 1 つだけあることを確かめる。Claude Code が設定を読み直したことは、新しいセッションで別に確かめる
+  - 2 本のフック（`no-color-guard.py` と `codex-reaper.py`）の両方を、同じように確かめる
+
+### AlmaLinux 10 で使う / Claude Code のフックを入れる / 手順 4: 補足: 残った Codex の broker の片付け
+
+- Codex のプラグイン（`codex@openai-codex`）は、使ったワークスペースごとに `app-server-broker.mjs serve` を detached で起動する。その下に `codex app-server` と、6〜16 個の sandbox のプロセスがぶら下がる
+- 片付けはプラグインの `SessionEnd` のフックが行う。セッションが落ちたり、アプリでアーカイブしたりすると走らないので、broker が残る。2026-10-28 の Windows 11 の PC では、1 日で broker が 11 個、その下の `codex.exe` が約 100 個、`node`・`node_repl` が約 200 個残った
+- [フック本体](../../scripts/claude-code/codex-reaper.py)は、セッションを始めるたび（`SessionStart`）に動く。次の 2 つを両方満たす broker だけを止める
+  - 起動から 2 時間以上たっている（`--min-age-hours` で変えられる）
+  - 同じワークスペースの `codex-companion.mjs` が動いていない。前景の `task` も、バックグラウンドの `task-worker` も数える。broker と companion の `--cwd` を `/` 区切りにそろえ（Windows では大文字と小文字も区別しない）、どちらかがもう片方と同じか、その下にあれば同じワークスペースとみなす
+- broker の親プロセスが生きているかは見ない。detached で起動するので、使っている間でも親は終わっている
+- 使っていない broker を止めても、次に Codex を呼んだときにプラグインが endpoint につながらないことを見て作り直す（プラグインの `lib/broker-lifecycle.mjs` の `ensureBrokerSession`）。そのため、2 時間は「作業の合間に止めて作り直させない」ための長さで、安全のための長さではない
+- `--cwd` の無い broker や companion があるときは、どのワークスペースのものか分からないので止めない
+- 止めたら、broker の `--pid-file` のディレクトリ（`cxc-` で始まるもの）の `broker.pid`・`broker.log` を消し、空になったディレクトリも消す。プラグインの `teardownBrokerSession` と同じ後始末
+- Codex のデスクトップアプリ（ChatGPT.exe）とその下のプロセス、`codex-windows-sandbox-service.exe`、broker の外で動く `codex` は対象にしない。見るのは、コマンド ラインに `app-server-broker.mjs` と `serve` がある node だけ
+- `SessionStart` のフックの標準出力は Claude の文脈に入るので、何も出さない。止めた broker は、設定のディレクトリの `hooks/codex-reaper.log` に 1 行ずつ書く（1 MiB を超えたら `codex-reaper.log.1` に回す）。失敗してもセッションの開始は止めず、終了コードは 0 にする
+- 設定には `"async": true` で登録し、セッションの開始を待たせない（Windows ではプロセスの一覧に 2〜3 秒かかった）。`async` のフックには `timeout` が効かないので書かない
+- AlmaLinux 10 では、`/proc` の `cmdline` と `stat` の開始時刻で一覧を作り、broker のプロセス グループに SIGTERM を送る（detached で起動した broker は自分のグループを持ち、`codex app-server` もそこに入る）。この経路は、WSL の AlmaLinux 10 で偽の broker（子を持つ `sh`）を止めて確かめただけで、実機の Codex の broker では流していない
+- 止めたかどうかは、`taskkill` の終了コードではなく、broker の PID が残っていないかで決める。`taskkill /T` は、ツリーの一部が先に終わっていると全部止めても 0 以外を返した
+- 手順 4 の `--dry-run` は、止める broker と残す broker を理由付きで出すだけで、何も変えない
 
 ### Windows 11 で使う / Windows 11 で Claude Code のフックを入れる / 手順 2: 補足: Python と Git Bash
 
@@ -128,6 +147,13 @@
 - シェルを通さない `args` の形は、この PC の Claude Code では効かなかったため使わない
 - フックに渡される JSON は UTF-8。Windows の Python は標準入力のパイプを ANSI のコードページで読むため、`json.load(sys.stdin)` では日本語を含むコマンドで読み取りに失敗し、判定せずに通ってしまう
 - フックは `sys.stdin.buffer` からバイト列を読み、UTF-8 として復号してから JSON を読む。止めた理由の JSON も、UTF-8 のバイト列で標準出力に書く
+
+### Windows 11 で使う / Windows 11 で Claude Code のフックを入れる / 手順 5: 補足: プロセスの一覧と止め方
+
+- Codex の片付けのフックの目的と判定は、[AlmaLinux 10 の補足](#almalinux-10-で使う--claude-code-のフックを入れる--手順-4-補足-残った-codex-の-broker-の片付け)と同じ
+- Windows では、`powershell.exe -NoProfile` の `Get-CimInstance Win32_Process` で node のプロセスだけを取り、出力を UTF-8 の JSON にして読む。コマンド ラインに日本語のパスがあっても読める
+- 止めるのは `taskkill /PID <PID> /T /F`。プラグイン自身の `terminateProcessTree` と同じで、broker の下の `cmd.exe`・`codex.exe app-server`・`node_repl.exe`・sandbox の `codex.exe` もまとめて止まる
+- 子のプロセスは窓を開かない（`CREATE_NO_WINDOW`）
 
 ### Windows 11 で使う / Windows 11 で Antigravity CLI を入れる / 手順 2: 補足: 公式インストーラーの照合
 
