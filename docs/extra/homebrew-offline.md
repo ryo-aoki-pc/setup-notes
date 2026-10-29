@@ -14,4 +14,4 @@
   - トンネル無しの `brew install hello` は、`curl: (6) Could not resolve host: ghcr.io` と `Error: Failed to download resource "hello"` で失敗した
 - **brew は、依存が付くときに `[y/n]` を聞く**: ほかの Homebrew 系の手順書の `brew install` でも、端末から実行すると同じように聞かれる（[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)）
 - **ssh が切れると、トンネルも消える**: 途中の `brew install` や dnf は、取得の途中なら失敗するはず。そのときは [SSH の SOCKS トンネルの手順 2](../almalinux-setup.md#ssh-の-socks-トンネル) から張り直して、同じコマンドを貼り直す
-- **入れた後もネットワークを使うツールは、オフラインのホストではその部分が動かない**: たとえば [Dropbox と rclone](../dropbox.md#dropbox-と-rclone) の同期（Dropbox の API）や、[Syncthing](../syncthing.md#syncthing) の LAN の外の端末との同期
+- **入れた後もネットワークを使うツールは、オフラインのホストではその部分が動かない**: たとえば外部の API を呼ぶ処理や、LAN の外の端末との同期

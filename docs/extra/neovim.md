@@ -17,7 +17,6 @@
 - **Neovim: 設定とプラグインは更新に追従しない**: `brew upgrade neovim` でメジャー版が上がると、古い API を使うプラグインが壊れることがある
 - **Neovim: `vi` は RPM の `vim-minimal`**: 別物が `/usr/bin/vi` として残っている。エイリアスを張らない限り `vi` は Neovim にならない
 - **Neovim: Windows 11 では、winget などで入れた Neovim と両方入れない**: winget の `Neovim.Neovim` は PC 全体（`C:\Program Files\Neovim`）に入り、PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、そちらが使われる。どちらか一方にする
-- **Neovim: Windows 11 の SSH のセッションでは、そのままでは scoop の nvim が起動しないことがある**: [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
 - **Neovim: Windows 11 で自分用の設定（LazyVimStarter）を使うと、`:!` や `:terminal` のシェルは PowerShell になる**: `pwsh` を実行ファイルとして見つけられれば PowerShell 7、見つけられなければ Windows PowerShell 5.1。素の Neovim の既定は `cmd.exe`
   - [「アプリを入れる」の手順 6](../windows-setup.md#アプリを入れる) の PowerShell 7（MSIX）は、pwsh の中から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
 - **Neovim: treesitter のパーサーが入らない**: `Lock file '…' appears stale` が出たら、次の順で鍵を消す

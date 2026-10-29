@@ -20,7 +20,7 @@
   - Windows の ssh は、ホームをユーザーのプロファイルのパスから取る（`HOME` を見ない）
   - git は、`HOME` が無ければ `%HOMEDRIVE%%HOMEPATH%`（または `%USERPROFILE%`）を `HOME` にして、Git の ssh を動かす
 - そのため、`HOME` を別の場所にしていると、Git の ssh だけが別の `.ssh` を使う。git が使う ssh は、`GIT_SSH_COMMAND` → `core.sshCommand` → `GIT_SSH` → `PATH` の `ssh` の順に決まるので、手順 3 でこの 3 つも空なことを確かめる
-- ブロックの中では、どちらの ssh もフルパスで呼ぶ。ユーザーの `PATH` の先頭側に Git の `usr\bin` があると、`ssh`・`ssh-keygen` が Git のものになる（[OpenSSH サーバーでフルパスで呼ぶ理由の実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-実施手順--手順-7-補足-フルパスで呼ぶ理由)）
+- ブロックの中では、どちらの ssh もフルパスで呼ぶ。ユーザーの `PATH` の先頭側に Git の `usr\bin` があると、`ssh`・`ssh-keygen` が Git のものになる
 - 手順 3 の `Get-Command` の一覧の先頭が `C:\Windows\System32\OpenSSH\…` でなく Git の `usr\bin` なら、PowerShell と WezTerm の起動メニューの `ssh` は Git のものになる（[注意点](../extra/windows-ssh-client.md#注意点)）
 - 手順 3 の最後の行が `GIT_SSH= GIT_SSH_COMMAND= HOME=` なら、git は Git の ssh を使い、Windows の ssh と同じ `%USERPROFILE%\.ssh` を読む
 
@@ -56,7 +56,7 @@
 
 - `icacls <鍵> /reset` で明示の許可をすべて外して受け継ぐ形に戻し、`/inheritance:r` で受け継いだ許可も外してから、`/grant:r` で本人・SYSTEM（`S-1-5-18`）・Administrators（`S-1-5-32-544`）だけにフル コントロールを付ける
 - `/inheritance:r` と `/grant:r` だけでは、`Everyone` などの明示の許可が残る（`/grant:r` は、名指しした主体の許可だけを置き換える）。そのため先に `/reset` を行う
-- 主体は SID で渡す（表示の言語に左右されないため。[Windows 11 のセットアップの「OpenSSH サーバーに公開鍵でもログインする」](../windows-setup.md#openssh-サーバーに公開鍵でもログインする)と同じ）。本人の SID は `[Security.Principal.WindowsIdentity]::GetCurrent().User.Value`。`"*${sid}:F"` と波かっこで書くのは、`$sid:F` がスコープ付きの変数として読まれないため
+- 主体は SID で渡す（表示の言語に左右されないため）。本人の SID は `[Security.Principal.WindowsIdentity]::GetCurrent().User.Value`。`"*${sid}:F"` と波かっこで書くのは、`$sid:F` がスコープ付きの変数として読まれないため
 
 ### Windows の OpenSSH クライアント / 手順 7: 補足: config の書き方と文字コード
 
@@ -87,7 +87,7 @@
     - BOM の付いた行は、`ssh-keygen -lf` が公開鍵と認めなかった（[検証記録の模擬](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md#模擬)）。sshd もその行の鍵を使わないはず（sshd では確かめていない）
   - `restorecon` は、あるときだけ動かし、無くても `added` の判定に入れない（`ssh-copy-id` と同じ）。ラベルは `ssh_home_t` になる
 - ホストに渡すコマンドの中に二重引用符を使わない。Windows PowerShell 5.1 は、ネイティブのコマンドの引数の中の二重引用符を逃がさない。単一引用符は、PowerShell の単一引用符の文字列の中で `''` と重ねて書く
-- `-o PubkeyAuthentication=no` は、鍵を試さず（パスフレーズも聞かず）にパスワードへ進むため（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 5](../windows-setup.md#ssh-でログインを確かめる)と同じ）
+- `-o PubkeyAuthentication=no` は、鍵を試さず（パスフレーズも聞かず）にパスワードへ進むため
 - Windows の ssh は、ホスト鍵の問いへの答えとパスワードを、標準入力ではなくコンソールから読む（Win32-OpenSSH のソース）。そのため、標準入力で渡す公開鍵は、問いに食われない（Windows では確かめていない）
 - AlmaLinux 10 の既定では、一般のユーザーはパスワードで SSH に入れ、root はパスワードでは入れない（`PermitRootLogin prohibit-password`）。ホストを固くして `PasswordAuthentication no` にしているときは、この手順は使えない（[注意点](../extra/windows-ssh-client.md#注意点)）
 - 貼り直すと、同じ行がもう 1 行足される（害は無い）
@@ -128,4 +128,3 @@
 - [Using secure communications between two systems with OpenSSH — Securing networks (RHEL 10)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/securing_networks/using-secure-communications-between-two-systems-with-openssh)（`PermitRootLogin` の既定の `prohibit-password`、FIPS モードと Ed25519）
 - `man ssh_config`（`Host`、`IdentitiesOnly`、`-G`）/ `man ssh-keygen`（`-l`、`-R`、`-p`）/ `contrib/ssh-copy-id`（OpenSSH）
 - [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)（`lua/shells.lua` の `ssh_entries()` と README の「SSH ホスト」）
-- [Windows 11 の初期設定の「OpenSSH サーバー」](../windows-setup.md#openssh-サーバー)（逆向き）

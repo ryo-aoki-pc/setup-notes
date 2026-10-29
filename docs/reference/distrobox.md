@@ -11,8 +11,6 @@
 
 ### Distrobox / 手順 3: 補足: distrobox の依存
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md#実施手順--手順-3-補足-distrobox-の依存)
-
 `rpm -q --requires distrobox` の中身は `(podman or /usr/bin/docker)` と `hicolor-icon-theme` など。
 
 - distrobox の本体はシェルスクリプトで、`/usr/bin/distrobox-create`・`distrobox-enter` などのコマンドの集まり

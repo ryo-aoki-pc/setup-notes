@@ -12,9 +12,7 @@
   - 接続に失敗すると、`systemctl --failed` に `mnt-<SHARE>.mount` が出て、`systemctl is-system-running` が `degraded` になる。サーバーに届くようになってからアクセスし直す
   - **マウントしている間に届かなくなると、ファイルを開くコマンドが長時間止まることがある**。サーバーへの接続を確認してからアクセスし直す
   - 使っていなければ、届かなくても 1 分の idle-timeout で外れた
-- **外出先から WireGuard 越しに使うとき**: トンネルを張ってからアクセスする
-  - `SERVER` を LAN 側の IP にしておくと、fstab の 1 行を LAN の中でも外でも使える。[WireGuard: AlmaLinux 10 の PC からつなぐ](../wireguard.md#wireguard-almalinux-10-の-pc-からつなぐ)で取り込む conf の `AllowedIPs` に、拠点の LAN が入っているため
-- **サーバーで直接変えたもの**（サーバーのシェルや Syncthing などで、Samba を通さずに）
+- **サーバーで直接変えたもの**（サーバーのシェルや同期の道具などで、Samba を通さずに）
   - samba.md の今のサーバー（`smb3 directory leases = no`）なら、`ls` にすぐ出る。消したファイルを `stat` で引くと、約 1 秒はまだあるように見える（`actimeo=1`）
   - サーバーを変えられないときは、マウントのオプションに `nohandlecache` を足す
 - **GNOME Files（`smb://`）は、サーバーで変えたものを自動では出さない**: F5 ですぐ出る。gvfs はディレクトリのリースを使わないので、サーバーの設定によらない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)）
@@ -39,7 +37,6 @@
     - その接続を閉じるか、サインアウトしてサインインし直してから、[Windows 11 で使う](../samba.md#windows-11-で-samba-クライアントを使う)の手順 5 を貼り直す
     - samba.md の `[root]`・`[home]` は同じユーザーでつなぐので、`[homes]` と並べて割り当てられる
   - **サインインのときにサーバーに届かないと、ドライブに赤い × が付く**: すべてのネットワーク ドライブを再接続できなかった旨の通知も出る。サーバーに届くようになってから、エクスプローラーでドライブを開き直す
-    - 外出先では、先に WireGuard のトンネルを張る。`SERVER` を LAN 側の IP にしておけば、LAN の中でも外でも同じ割り当てを使える
   - **管理者の窓からは、割り当てたドライブが見えない**: 管理者の PowerShell・Windows Terminal の管理者のタブ・`sudo` では、ドライブ文字ではなく `\\<SERVER>\<SHARE>` を使う
   - **SMB の NTLM のブロックを入れると、割り当てられなくなる**
     - 24H2 から選べる設定（`Set-SmbClientConfiguration -BlockNTLM $true` か、グループ ポリシーの「Block NTLM (LM, NTLM, NTLMv2)」）で、既定では入っていない

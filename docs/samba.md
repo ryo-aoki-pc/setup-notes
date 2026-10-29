@@ -73,7 +73,6 @@
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
    - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー](#samba-サーバー)の手順 5・8）を確かめる
-   - 外出先から使うなら、先に WireGuard のトンネルを張る（[注意点](extra/samba-client.md#注意点)）
 
 1. 資格情報ファイルを作るため、共有のパスワードを入力する。
 
@@ -379,10 +378,9 @@
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\<USER>`。資格情報は `<USER>` と手順 6 のパスワード
      - ドライブ文字に割り当てて、サインインのたびにつなぐなら、[Samba クライアントの Windows 11 で使う](#windows-11-で-samba-クライアントを使う)
    - macOS: Finder の「サーバへ接続」に `smb://<SERVER_IP>/<USER>`
-   - Android / iOS: ファイルアプリの SMB 接続先に `<SERVER_IP>`、共有名 `<USER>`
    - Linux: AlmaLinux 10 なら[Samba クライアント](#samba-クライアント)を通す（自動マウント・GNOME Files）
    - ほかは `smbclient "//<SERVER_IP>/<USER>" -U <USER>` または `mount -t cifs "//<SERVER_IP>/<USER>" <mountpoint> -o username=<USER>`
-   - WireGuard 越しに接続するときは `<SERVER_IP>` を `<WG_IP>` に読み替える（クライアント側の `AllowedIPs` にトンネル網が入っていることが前提。[WireGuard の手順書](wireguard.md#wireguard)）
+   - 共有のファイルが見えればよい
    - つなげないときは、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)で、サーバーの上から読み書きを確かめる
 
 #### Samba サーバー: root のホームも公開する
@@ -686,7 +684,7 @@
 ### Windows 11 で Samba クライアントを使う
 
 - Samba の共有をドライブ文字に割り当て、サインインのたびにつなぎ直す
-- 前提: サーバーで [Samba サーバー](#samba-サーバー)を通してある。外出先では、[WireGuard: Windows 11 でトンネルを確かめる](wireguard.md#wireguard-windows-11-でトンネルを確かめる)に従ってトンネルを張り、サーバーにつながる状態にしてある
+- 前提: サーバーで [Samba サーバー](#samba-サーバー)を通し、サーバーにつながる LAN に接続してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。手順 7 はサーバーの bash、手順 8 はこの PC のデスクトップ
 - パスワードは Windows の資格情報マネージャーに置く
 - Samba サーバーの `[root]`・`[home]` も割り当てるなら、この項を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
@@ -749,7 +747,7 @@
 
    - `<SERVER> の 445/tcp に届く。<DRIVE> は空いている` と、`<SERVER>` の資格情報の一覧が出ればよい
    - 一覧にある `<SERVER>` の保存済み資格情報は、この項の手順 4 で置き換わる
-   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー)）を確かめる。外出先なら、先に WireGuard のトンネルを張る
+   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー)）を確かめる
    - `もう使われている` ときは、`DRIVE` を別の文字にして、この項の手順 2 の 3 つ目のブロックを貼り直す。前にこの項で同じ共有を割り当てたなら、この項は済んでいる
 
 1. 資格情報マネージャーに、共有のユーザー名とパスワードを登録する。

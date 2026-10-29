@@ -10,7 +10,7 @@
 - **Windows Sandbox の窓を閉じると、内部の状態が消える**: Sandbox の内部だけに置いたファイルと、インストールしたアプリは破棄される。Windows 11 22H2 以降では、Sandbox の中で Windows を再起動しただけなら状態は残る
 - **Sandbox から共有したホストのファイルは残る**: ホストへコピーした結果や、`.wsb` の `MappedFolders` で共有したホスト側のファイルは、Sandbox の窓を閉じても消えない。書き込みを許可した共有フォルダーへの変更もホスト側に残る
 
-- **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7）・自動サインイン（[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5）は、PC の前にいる人をこのユーザー（Administrators の一員）として通す。インラインの sudo（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6）・リモート デスクトップ（[ネットワークとリモート](../windows-setup.md#ネットワークとリモート)の手順 4）・Windows Hello 以外のサインイン（[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 2）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](../windows-setup.md#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
+- **重ねると、触れる人がそのまま使える PC になる**: 放置でロックしない（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7）と、PC の前にいる人がこのユーザー（Administrators の一員）として操作できる。インラインの sudo（[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 6）・リモート デスクトップ（[ネットワークとリモート](../windows-setup.md#ネットワークとリモート)の手順 4）・Windows Hello 以外のサインイン（[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 2）は、このユーザーのパスワードを知る人の入口を増やす。人が触れる場所にある PC では、[PC 全体の設定](../windows-setup.md#pc-全体の設定)の手順 7 は行わない
 - **Caps Lock の働きは無くなる**: Caps Lock を左 Ctrl にするだけで、Caps Lock をほかのキーに割り当てない。大文字を続けて打つときは Shift を押す
 - **Scancode Map は、すべてのユーザー・すべてのキーボードにかかる**: PC 全体の設定。この PC にサインインするほかのユーザーと、つないだ外付けのキーボードにもかかる
 - **JIS 配列では「英数」のキーが Ctrl になる**: 日本語の配列のキーボードの Caps Lock は「英数」のキー（スキャン コード `0x3A`）なので、そのキーの IME の働き（英数への切り替え）も無くなるはず
@@ -20,10 +20,6 @@
 - **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](../windows-setup.md#表示と入力)の手順 7）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5 のプロファイルの設定による
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 3・4）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。[表示と入力](../windows-setup.md#表示と入力)の手順 4 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](../windows-setup.md#表示と入力)の手順 3）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 3 の `ClassicMenu` と[表示と入力](../windows-setup.md#表示と入力)の手順 3 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](../windows-setup.md#表示と入力)の手順 2・4 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 2 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
-- **SSH のセッションで scoop のツールを使うとき**: sshd の緩和策（RedirectionGuard）で、一般ユーザーの scoop が作るジャンクションをたどれない。[scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を、`scoop install`・`scoop update` の後に貼る
-  - 非管理者の SSH の PowerShell は、[SSH で管理者・非管理者の PowerShell を使う](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)の `drop` で開く。デスクトップでの導入や GUI 操作を検証した手順を、SSH でも通したとは扱わない
-- **SSH の PowerShell の貼り付けを取り消すとき**: 正しいヘッダーの受信前は、Ctrl+C を押しても開始から 5 秒の期限を延ばさない。本文受信の開始後は、Ctrl+C で本文を挿入せず末尾まで読み捨てる。その後に配送が止まると受信待ちが続くことがあるので、そこでコマンドを貼り足さず SSH を接続し直す
-  - 本文の上限は UTF-8 で 64 KiB（65,536 バイト）。大きなブロックは分け、受信中は次のコマンドを貼り足さない
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
 - **PowerShell 7 のプロファイルは別**: [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 5 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 6）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
   - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)
@@ -34,62 +30,28 @@
 - **ほかの項にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 6）は、[表示と入力](../windows-setup.md#表示と入力)の手順 3 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの
 - **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める](../windows-setup.md#edge-の常駐をポリシーで止める)の手順 2 のポリシーで出る。[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 4 の `EdgeUpdate` だけで出るかは、確かめていない
 - **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 12 で外さないと、オンラインだけにされうる
-- **CopyQ の履歴は暗号化されない**: [CopyQ を使う](../windows-setup.md#copyq-を使う)の CopyQ は、コピーしたものを平文でディスク（`%APPDATA%\copyq` など）に残す。除外の印を付けないアプリでコピーしたパスワードも残る。要らない項目は CopyQ の窓で消す
-- **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の後は、WSL から Windows の sshd などに LAN の IP あてではつながらないはず
-  - Windows が使っているポート（sshd の 22 番など）は、WSL の中のサーバーで使えない
+- **WSL をミラーにすると、WSL から Windows には `127.0.0.1` でつなぐ**: [WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)の後は、WSL から Windows のサービスに LAN の IP あてではつながらないはず
+  - Windows が使っているポートは、WSL の中のサーバーで使えない
 - **ツールの OS に依らない注意は、[AlmaLinux 10 の初期設定の注意点](almalinux-setup.md#注意点)**: Git・Firefox・git-delta・lazygit・GitHub CLI・yazi のもの。Neovim の注意は、両 OS とも [Neovim のセットアップの注意点](neovim.md#注意点) に、HackGen Console NF・WezTerm・Windows Terminal・シェルのツールの注意は、両 OS とも [シェルと端末のセットアップの注意点](shell-terminal.md#注意点) にある。ここには Windows 11 だけの注意を書く
-- **OpenSSH サーバー: SSH のセッションは管理者の権限を持つ**
-  - Administrators の一員でログインすると、`whoami /groups` で `Mandatory Label\High Mandatory Level` と、有効な `BUILTIN\Administrators` を確認する
-  - このユーザーのパスワードを知る人と、登録した鍵を持つ人は、この PC の管理者として操作できる。パスワードと秘密鍵の扱いは、管理者のパスワードと同じにする
-- **OpenSSH サーバー: パスワードでのログイン**
-  - ユーザー名は、Microsoft アカウントでもメールアドレスではなく、`C:\Users\` の下のフォルダーの名前（[「OpenSSH サーバー」の手順 7](../windows-setup.md#openssh-サーバー)）。パスワードは、そのアカウントのパスワード（PIN ではない）
-  - Microsoft アカウントのパスワードが sshd のログにエラー 1326 を残して拒否される場合は、Windows Hello 限定の設定をオフにして sshd を再起動する
-  - [「サインイン・検索・キーボード」の手順 2](../windows-setup.md#サインイン検索キーボード) で、この設定はオフになっている
-- **OpenSSH サーバー: パスワードを続けて間違えたとき**
-  - SSH のパスワードの失敗もロックアウトの対象になる。`net accounts` でポリシーを確認し、パスワードを続けて試さない
-  - ロック中は、正しいパスワードでも入れない。ロックアウトのポリシーで決まる時間を待ってから再接続する
-- **OpenSSH サーバー: 鍵で入ったセッションは、ユーザーの資格情報を持たない**（Microsoft の文書）。セッションの中から、そのユーザーとしてほかのサーバーの共有などへ認証できない
-- **OpenSSH サーバー: 標準ユーザーでログインするとき**
-  - パスワードの認証を有効にすると、Administrators の一員でないユーザーも、パスワードがあれば SSH で入れる
-  - 標準ユーザーのセッションは `Medium Mandatory Level` で、管理者の権限を持たない
-  - 標準ユーザーの鍵は `C:\Users\<ユーザー>\.ssh\authorized_keys` に置く（Microsoft の文書）。[OpenSSH サーバーに公開鍵でもログインする](../windows-setup.md#openssh-サーバーに公開鍵でもログインする)の手順 6 は、Administrators の一員でなければ止まる
-- **OpenSSH サーバー: LAN の外のサブネットからの接続**
-  - 規則の接続元は `Any` で、プロファイルは接続を受けた LAN で決まる。LAN を通って届く接続なら、送信元が別のサブネットでも受け付ける
-- **OpenSSH サーバー: WSL から、この PC につなぐとき**
-  - WSL のネットワークが既定（NAT）なら、この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ
-  - ミラーにした PC（[WSL のネットワークをミラーにする](../windows-setup.md#wsl-のネットワークをミラーにする)）では、`127.0.0.1` あてにつなぐ。LAN の IP あてはつながらず、sshd のログの送信元も `127.0.0.1` になるはず（`127.0.0.1` で届くことも含め、確かめていない）
-- **OpenSSH サーバー: Git の ssh が先に見つかる PC**: `PATH` の順で、Windows の `ssh`・`ssh-keygen` ではなく Git のものが動く。Windows の OpenSSH のものは `C:\Windows\System32\OpenSSH\` から呼ぶ（[「OpenSSH サーバー」の手順 7](../windows-setup.md#openssh-サーバー)）
-- **OpenSSH サーバー: SSH のセッションでは、一般ユーザーが作ったジャンクションをたどれない**
-  - sshd に掛けてある RedirectionGuard を、セッションのプロセスが引き継ぐため。開こうとすると、エラー 448（`ERROR_UNTRUSTED_MOUNT_POINT`）になる
-  - ローカルのシェルは、昇格していても RedirectionGuard が掛かっておらず、影響を受けない
-  - scoop のジャンクションは、[scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)で、管理者で作り直す
-- **OpenSSH サーバー: 設定を変えたとき**: `sshd_config` を変えたら `Restart-Service sshd`（[「OpenSSH サーバー」の手順 6](../windows-setup.md#openssh-サーバー)）。レジストリの `DefaultShell` は、次のログインから使われる
-- **OpenSSH サーバー: 機能を外したとき**
-  - Microsoft の文書は、使っている間に外したなら Windows を再起動するよう書いている
-- **OpenSSH サーバー: ログ**: イベント ビューアーの「OpenSSH」→「Operational」
 - **Git: Windows の PowerShell や cmd から呼ぶ git** も、同じ `global`（`C:/Users/<WIN_USER>/.gitconfig`）を読む
   - Windows 11 の PC で、Git Bash・PowerShell・cmd の `git config --global --list --show-origin` が同じファイルを示した
 - **Git: Git for Windows を上げるときは、Git の bash を使うものを閉じる**
-  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）、既定のシェルを Git Bash にした SSH のセッション、Claude Code の Bash のツール（Remote Control のタスクも）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-の記録)・[参考資料](../reference/almalinux-setup.md#git--手順-1-補足-変数について)）
+  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-の記録)・[参考資料](../reference/almalinux-setup.md#git--手順-1-補足-変数について)）
 - **Git: Git for Windows 2.56.0 から、内部のパスが `mingw64` から `ucrt64` に変わった**（上流のリリースノート）
   - `C:\Program Files\Git\mingw64\bin\git.exe` を直接指す設定は、上げた後に見直す
 - **git-delta: Windows 11 の PowerShell と cmd で打つ git も、delta を通る**: `~/.gitconfig` は Git Bash と同じファイル
   - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。[参考資料](../reference/windows-setup.md#git-delta--手順-5-補足-ページャの-less-と-powershell-の-git)）
   - そのため、scoop の less は入れていない。PowerShell で delta を直に動かす（`git diff | delta` など）ときは、PATH に less が無いので、ページャを使わずに出る
-- **git-delta: Windows 11 の SSH のセッションでは、そのままでは scoop の delta が起動しないことがある**: sshd は、一般ユーザーが作った scoop の `current` のジャンクションをたどらせない（scoop の shim が `Could not create process with command …` で失敗する）
-  - SSH で git を使うなら、[scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
 - **GitHub CLI: Windows 11 のトークンの置き場所**: 資格情報マネージャー（Windows 資格情報の汎用資格情報）を優先し、使えない場合は `%APPDATA%\GitHub CLI\hosts.yml` に平文で保存する
 - **GitHub CLI: Windows 11 では、gh と git が別々に GitHub にログインする**: git の HTTPS は、Git for Windows の Git Credential Manager が自分のサインインで行う
   - [「GitHub CLI」の手順 4](../windows-setup.md#github-cli)で、Git の認証に `n` と答えるため
   - `gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことは、git の HTTPS の認証に影響しない
 - **lazygit: Windows 11 では、winget の lazygit（`JesseDuffield.lazygit`）と両方入れない**: どちらが使われるかが `PATH` の順で決まり、分かりにくくなる。どちらか一方にする
-- **lazygit: Windows 11 の SSH のセッションでは、そのままでは scoop の lazygit が起動しないことがある**: [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
 - **yazi: Windows 11 では、`file` を `YAZI_FILE_ONE` で渡す**: 無いと PowerShell から起動した yazi はファイルの種類が分からず、開く・プレビューの規則が効かない（[「yazi」の手順 5](../windows-setup.md#yazi)）。Git for Windows を外すと、同じことになる
   - PowerShell の `PATH` には `file` が無い（Git Bash には `/usr/bin/file` がある）
 - **yazi: Windows 11 の画像プレビューは、端末と ConPTY に依存する**: WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）で出る。ConPTY の制約で、Linux と同じには出ないことがある
-- **yazi: Windows 11 の SSH のセッションでは、そのままでは scoop の yazi が起動しないことがある**: [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)を通す（`scoop install`・`scoop update` の後は貼り直す）
 - **Firefox: AAC と H.264 のために足すものは無い**: Windows の Media Foundation で復号する（[「Firefox」の手順 4](../windows-setup.md#firefox)の補足）。N エディションの Windows では、Media Feature Pack が要るはず
 - **Firefox: 管理者の PowerShell から Firefox を起動しない**: Firefox が管理者の権限で動き、プロファイルに管理者の持ち物のファイルができうる。起動はスタートメニューから
 - **Firefox: 言語パックを足さない**: 閉じている間の更新（Background Update）が止まる。別の言語にしたいなら、その言語の `Mozilla.Firefox.<言語>` を入れ直す
-- **Firefox: Firefox を開いたまま `winget upgrade` しない**: 入れ替えが途中で終わることがある（[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の手順 5 の補足）
+- **Firefox: Firefox を開いたまま `winget upgrade` しない**: 入れ替えが途中で終わることがある（[Git for Windows・Firefox・WezTerm を上げる](../windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の手順 4 の補足）
 - **Firefox: 英語版の `Mozilla.Firefox` と同じ `ProductCode`**: winget の定義では、`Mozilla.Firefox` と言語ごとの `Mozilla.Firefox.<言語>` の `ProductCode` が同じ。言語を指定して更新する

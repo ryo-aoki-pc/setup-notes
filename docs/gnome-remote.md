@@ -623,7 +623,7 @@
 - 実行場所: 共有するユーザーで SSH でログインしたシェル（bash）
 - **接続元を制限しないなら、この項は不要**
 - [RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 7 は、public ゾーンに属するすべての NIC で `RDP_PORT` の TCP を開く
-- WireGuard などで別の拠点からつなぐなら、`LAN_SUBNET` には、PC に届くときの接続元のサブネットを入れる（この項は 1 つのサブネットだけを通す）
+- 別の拠点からつなぐなら、`LAN_SUBNET` には、PC に届くときの接続元のサブネットを入れる（この項は 1 つのサブネットだけを通す）
 
 1. 変数を設定する。
 
@@ -1128,17 +1128,16 @@
 #### GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）
 
 - [リモートログイン](#gnome-のリモートログイン)と[ヘッドレスのセッション](#gnome-のヘッドレスセッション)を併用している PC で、ヘッドレスのセッションをやめ、リモートログインだけにする
-- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)と[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)を通して、併用している。ログインしていない間もユーザーのサービス（Syncthing など）を動かすなら、先に [ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
-- 実行場所: セッションを使うユーザー本人で SSH でログインしたシェル（bash）。この項の手順 9 は、クライアントの PC で行う
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)と[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)を通して、併用している。ログインしていない間もユーザーのサービスを動かすなら、先に [ユーザーサービスの常駐](almalinux-setup.md#ユーザーサービスの常駐) を通す（linger が無いと、セッションが 1 つも無い間はユーザーの systemd が止まる）
+- 実行場所: セッションを使うユーザー本人で SSH でログインしたシェル（bash）。この項の手順 7 は、クライアントの PC で行う
 - リモートログインの設定（システムのデーモン・証明書・資格情報・3389/tcp）は変えない
 - ヘッドレスのセッションで動いていたアプリは閉じる
-- [Claude Code の GNOME 操作](ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う) の仮想モニターのドロップインも外す。この PC では、Claude Code から GUI を撮って確かめられなくなる
-- やめた後は、リモートログインで入ると新しいセッションができる。切断してもセッションは残り、次のログインでそこへ戻る
+- やめた後は、リモートログインで使う。切断してもセッションは残り、次のログインでそこへ戻る
 - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 1 の変数は、この項の手順 2 を行うときだけ要る
 
 > [!IMPORTANT]
-> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない（この項の手順 8 で、そのセッションを終わらせるため）
-> - この項の手順 9（クライアントからの接続）だけ、クライアントの PC で行う
+> - **セッションを使うユーザー本人のシェルに、SSH で入って貼る**。リモートログインのセッションの中の端末では貼らない
+> - この項の手順 7（クライアントからの接続）だけ、クライアントの PC で行う
 
 1. 今の状態を確かめる。
 
@@ -1150,8 +1149,6 @@
      done
      systemctl is-enabled "gnome-headless-session@${USER}.service"
      systemctl --user is-enabled gnome-remote-desktop-headless.service
-     ls ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
-     pgrep -a -u "${USER}" -x gnome-shell
      sudo firewall-cmd --list-ports
      sudo firewall-cmd --list-rich-rules
    }
@@ -1159,8 +1156,6 @@
 
    - `grdctl --headless status` では確かめない
    - 2 つ目の `systemctl` が `enabled`、`--list-ports` に `3390/tcp`、rich rule に `port="3390"` のどれかがあれば、ヘッドレスのセッションの RDP を設定してある。どれも無ければ、この項の手順 2〜5 は飛ばす
-   - `ls` が `virtual-monitor.conf` を出せば、Claude Code の GNOME 操作のドロップインがある。`No such file or directory` なら、この項の手順 6 は飛ばす
-   - `gdm-password` の行があり、gnome-shell の行に `--virtual-monitor` が付いていれば、この項の手順 8 を行う。そうでなければ、この項の手順 8 は飛ばす
 
 1. ヘッドレスのセッションの RDP を設定してあるときだけ、変数を設定する。
 
@@ -1198,18 +1193,6 @@
 
    - [証明書の準備に失敗したとき](#gnome-のヘッドレスセッション-証明書の準備に失敗したとき)の手順 1・2 を通す
 
-1. Claude Code の GNOME 操作のドロップインがあるときだけ、外す。
-
-   ```bash
-   rm ~/.config/systemd/user/org.gnome.Shell@wayland.service.d/virtual-monitor.conf
-   rmdir --ignore-fail-on-non-empty ~/.config/systemd/user/org.gnome.Shell@wayland.service.d
-   systemctl --user daemon-reload
-   printf '\n\033[7m 確認 \033[0m\n'
-   systemctl --user cat org.gnome.Shell@wayland.service | grep '^ExecStart'
-   ```
-
-   - `ExecStart=/usr/bin/gnome-shell` の 1 行が出ればよい
-
 1. ヘッドレスのセッションを止めて起動時に作らないようにし、終わったかを確かめる。
 
    ```bash
@@ -1231,24 +1214,6 @@
    - セッションで動いていたアプリも閉じる
    - 続いて `0` が出ればよい
 
-1. ドロップインを外す前に入ったリモートログインのセッションが残っていれば、終わらせる。
-
-   ```bash
-   if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。セッションを使うユーザーのシェルで貼り直す' >&2
-   else
-     for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
-       [ "$(loginctl show-session "${s}" -p Service --value 2>/dev/null)" = gdm-password ] && loginctl terminate-session "${s}"
-     done
-     for i in $(seq 1 30); do [ -z "$(pgrep -u "${USER}" -x gnome-shell)" ] && break; sleep 1; done
-     printf '\n\033[7m 確認 \033[0m\n'
-     loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless"' | wc -l
-     pgrep -a -u "${USER}" -x gnome-shell
-   fi
-   ```
-
-   - `0` が出て、gnome-shell の行が出なければよい
-   - そのセッションで開いていたアプリは閉じる。つないでいたクライアントは切れる
-
 1. クライアントの PC から、リモートログインでつなぎ直してログインする。
 
    - Windows なら「リモート デスクトップ接続」で `<SERVER_IP>`（3389/tcp）につなぎ、GDM のログイン画面からログインする（[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 11 と同じ）
@@ -1269,7 +1234,7 @@
    ```
 
    - `<SESSION_ID> gdm-password` の 1 行だけが出て、`gdm-autologin` の行が無ければよい
-   - gnome-shell の行が `<PID> /usr/bin/gnome-shell`（`--virtual-monitor` の無い形）ならよい
+   - gnome-shell の行が出ればよい
    - 続いて `disabled` と、`LISTEN … *:3389 …` の 1 行が出ればよい
 
 ---
@@ -1379,7 +1344,7 @@
    ```
 
    - ユーザー名とパスワードを聞かれる
-   - **対話入力は TTY 必須**。スクリプト・パイプ・Claude Code の `!` では、設定されずに exit 0 で終わる（[記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)）
+   - **対話入力は TTY 必須**。スクリプト・パイプなど、対話用の端末が無い実行では、設定されずに exit 0 で終わる（[記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)）
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて貼ると入力として食われる）
 
 1. 資格情報を反映させるため、デーモンを起動し直す。

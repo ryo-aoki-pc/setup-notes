@@ -88,17 +88,12 @@
 
 - rich rule は**二重引用符**で囲む。単一引用符だと変数が展開されない（[AlmaLinux 10 の「GNOME のリモートログイン: 接続元を LAN に絞る」](../gnome-remote.md#gnome-のリモートログイン-接続元を-lan-に絞る)）
 
-### リモートログインだけにする（併用をやめる） / 手順 1・6〜8: 補足: セッションの見分け方と、ドロップインを外す理由
+### リモートログインだけにする（併用をやめる） / 手順 1・6: 補足: セッションの見分け方
 
 - **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
-- **ドロップインを外す**: [AI エージェントの手順書の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」](../ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う) の `--virtual-monitor` は、このユーザーの GNOME のセッションすべてに効く。リモートログインで作られたセッションでも主のモニター（`Meta-0`）になり、RDP のモニターはその右に足される。上部バーは主のモニターにしか出ない（[Claude Code の GNOME 操作 の注意点](../extra/claude-code-gui.md#注意点)）
-- **ドロップインを外す前に入ったセッションを終わらせる**: ドロップインは gnome-shell が起動するときにだけ読まれる。リモートログインのセッションは切断しても残り、次のログインでそこへ引き渡されるので、終わらせないと仮想モニターが付いたままになる
 - **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 8 の補足](#gnome-のヘッドレスセッション--手順-5-補足-資格情報の置き場所)）
 - 同じ項の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す
-- 同じ項の手順 6 のドロップインの変更は、動いている gnome-shell には効かない。同じ項の手順 7・8 でセッションを終わらせ、手順 9 で入り直したときに効く
-- 同じ項の手順 7 の最後の数は、このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない。`for` の行で、セッションが終わるまで、30 秒まで待つ
-- 同じ項の手順 8 に `sudo` は要らない（自分のセッションは自分で終わらせられる）。終わらせると、ユーザーの D-Bus が起動し直される（[注意点](../extra/gnome-headless-session.md#注意点)）
-
+- 同じ項の手順 6 の最後の数は、このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない。`for` の行で、セッションが終わるまで、30 秒まで待つ
 ### 選択した方針
 
 - **ヘッドレスのセッションにする**（RHEL 10 の文書の 1.4）

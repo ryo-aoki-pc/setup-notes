@@ -37,4 +37,3 @@
   - **VirtualBox は管理者ではない窓で動かす**: 管理者の窓から起動すると、VM も管理者の権限で動く（[Windows 11 で使う](../virtual-machines.md#windows-11-で-virtualbox-を入れる)の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
   - **`VBoxManage` は `PATH` に入らない**: `C:\Program Files\Oracle\VirtualBox\VBoxManage.exe` を場所ごと呼ぶ（インストーラが足す環境変数は `VBOX_MSI_INSTALL_PATH` だけ）
   - **Secure Boot の MOK は要らない**: ドライバーは Microsoft の署名付きで配られる。[Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) は Linux だけのもの
-  - **Android の Windows App からリモート デスクトップでつなぐと、VM に打った文字が別のキーになる**: Windows App の既定の Unicode の入力を、VirtualBox はキーとして読み違える。[Windows 11 の VirtualBox を Android からリモート デスクトップで使う](../virtual-machines.md#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)で、スキャンコードで送る設定にする

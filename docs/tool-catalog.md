@@ -69,15 +69,9 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | Flatpak / Flathub | AppStream + Flathub | [AlmaLinux 10 の初期設定](almalinux-setup.md)（「Flatpak と Flathub」の手順 1〜3） |
 | starship / zoxide / fzf / eza / bat / tmux | Homebrew（初期化は共通の bash 設定） | [シェルと端末のセットアップ](shell-terminal.md#シェルのツール)（「シェルのツール」の手順 1） |
 | yazi / lazygit / Neovim / git-delta / gdu / ShellCheck・shfmt | Homebrew | [yazi](almalinux-setup.md#yazi) / [lazygit](almalinux-setup.md#lazygit) / [Neovim](neovim.md#neovim) / [git-delta](almalinux-setup.md#git-delta) / [gdu](almalinux-setup.md#gdu) / [ShellCheck・shfmt](almalinux-setup.md#shellcheck-と-shfmt) |
-| Syncthing | Homebrew + systemd ユーザーサービス | [Syncthing](syncthing.md#syncthing) |
-| Dropbox（公式クライアント） | Dropbox 公式の tarball + systemd ユーザーサービス（x86_64 のみ。公式 RPM は EL10 に入らない） | [Dropbox](dropbox.md#dropbox) |
-| rclone（Dropbox の同期・バックアップ） | Homebrew + systemd ユーザータイマー | [Dropbox と rclone](dropbox.md#dropbox-と-rclone) / [Dropbox へのバックアップ](dropbox.md#dropbox-へのバックアップ) |
 | btop | EPEL | [btop](almalinux-setup.md#btop) |
 | Firefox | Mozilla 公式 dnf リポジトリ | [初期設定の「Firefox」](almalinux-setup.md#firefox) |
-| Claude Code / GitHub CLI | 公式 dnf リポジトリ | [AI エージェントの「Claude Code」](ai-agents.md#claude-code) / [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
-| Codex CLI | OpenAI 公式 standalone インストーラー（Node.js 不要。起動したときに新しい版を知らせ、Enter で上がる。Windows 11 の手順もある） | [AI エージェントの「Codex CLI」](ai-agents.md#codex-cli) |
-| Grok Build | xAI 公式のインストーラー（Node.js 不要。起動したときに自分で上がる。`~/.bashrc` に PATH のブロックを足す。Windows 11 の手順もある） | [AI エージェントの「Grok Build」](ai-agents.md#grok-build) |
-| Codex・Grok Build の Claude Code 用プラグイン | Claude Code のプラグインのマーケットプレイス（OpenAI と xAI の GitHub の公式のリポジトリ）。プラグインが使う Node.js は AppStream | [コーディングエージェントの共同作業: AlmaLinux 10 で使う](ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う) |
+| GitHub CLI | 公式 dnf リポジトリ | [初期設定の「GitHub CLI」](almalinux-setup.md#github-cli) |
 | VS Code | Microsoft 公式 dnf リポジトリ | [VS Code](almalinux-setup.md#vs-code) |
 | VirtualBox | Oracle 公式 dnf リポジトリ（EPEL が前提。x86_64 のみ） | [VirtualBox](virtual-machines.md#virtualbox) |
 | WezTerm Nightly | COPR（EL9 向けビルドの流用） | [シェルと端末のセットアップの「WezTerm」](shell-terminal.md#wezterm) |
@@ -267,7 +261,6 @@ Raspberry Pi 5（aarch64）で使えないもの。どれも x86_64 には提供
 |---|---|---|
 | Microsoft Edge | 公式 dnf リポジトリ 154.0.4258.37 / Flathub `com.microsoft.Edge` 153.0.4234.48（未検証） | どちらにも無い |
 | VirtualBox | Oracle 公式 dnf リポジトリ 7.2.20（[VirtualBox](virtual-machines.md#virtualbox)） | 無い（リポジトリの `el/10/aarch64/` が 404 で、Linux 向けの配布は x86_64 だけ） |
-| Dropbox（公式クライアント） | Dropbox 公式の tarball（[Dropbox](dropbox.md#dropbox)）/ Flathub `com.dropbox.Client`（未検証） | 無い（`download?plat=lnx.aarch64` が 404 で、公式ヘルプも ARM は非対応）。rclone で同期する（[Dropbox と rclone](dropbox.md#dropbox-と-rclone)） |
 
 ---
 

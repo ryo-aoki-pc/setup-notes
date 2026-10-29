@@ -1,25 +1,22 @@
 # setup-notes
 
-Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる。実施日・環境・結果の記録（検証記録）は、非公開の [ryo-aoki-pc/setup-notes-verification](https://github.com/ryo-aoki-pc/setup-notes-verification) で管理する。
+Windows 11・AlmaLinux 10 の構築・設定の手順をまとめる。実施日・環境・結果の記録（検証記録）は、非公開の [ryo-aoki-pc/setup-notes-verification](https://github.com/ryo-aoki-pc/setup-notes-verification) で管理する。
+
+AI エージェントの手順と、職場で使わない手順は、非公開のリポジトリで管理する。
 
 ## 手順書
 
 | 手順書 | 対象 | 内容 |
 | --- | --- | --- |
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | Windows の導入、基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | 基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
-| [Android のセットアップ](docs/android.md) | Android | Termux、Termux の Firefox（PC 版）、Termux の開発環境 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 のプロファイル、PowerShell の開発の設定 |
 | [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | Neovim の導入と設定 |
-| [AI コーディングエージェントのセットアップ](docs/ai-agents.md) | Windows 11・AlmaLinux 10 | Claude Code・Codex CLI・Grok Build・Antigravity CLI、プラグイン、共同作業、ブラウザ操作、Remote Control、GNOME 操作 |
 | [仮想マシンのセットアップ](docs/virtual-machines.md) | Windows 11・AlmaLinux 10 | VirtualBox、bootc ゲスト、kvm-container、Hyper-V、VMware Workstation Pro、Windows Sandbox |
-| [WireGuard のセットアップ](docs/wireguard.md) | Windows 11・AlmaLinux 10 | 拠点間の VPN と、外出先の PC からの接続 |
 | [Samba のセットアップ](docs/samba.md) | Windows 11・AlmaLinux 10 | Samba サーバーと、両 OS のクライアント |
-| [Syncthing のセットアップ](docs/syncthing.md) | Windows 11・AlmaLinux 10 | フォルダの同期と、設定のバックアップ・復元 |
 | [GNOME のリモート操作のセットアップ](docs/gnome-remote.md) | AlmaLinux 10 | デスクトップ共有、ヘッドレスセッション、リモートログイン |
 | [コンテナのセットアップ](docs/containers.md) | AlmaLinux 10 | Podman、podman-compose、podman-tui、lazydocker、Distrobox |
-| [Dropbox のセットアップ](docs/dropbox.md) | AlmaLinux 10 | Dropbox の公式クライアントと、rclone による同期・バックアップ |
-| [Forgejo のセットアップ](docs/forgejo.md) | AlmaLinux 10 | Git サーバーの導入、公開、使い方、バックアップと更新 |
+| [ツール導入元一覧](docs/tool-catalog.md) | Windows 11・AlmaLinux 10 | 導入元・版・導入コマンドの比較 |
 
 - 新しく入れた PC では、OS の初期設定（[Windows 11](docs/windows-setup.md) / [AlmaLinux 10](docs/almalinux-setup.md)）→ [シェルと端末](docs/shell-terminal.md) → 要る手順書の順に通す
 - どの項も単独で通せる。項のリードの前提と実行場所を先に確かめる
@@ -31,10 +28,6 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 
 - AlmaLinux 10 はシェルと端末の「[共通の bash 設定](docs/shell-terminal.md#共通の-bash-設定)」、Windows 11 は同じ文書の「[Git Bash と WezTerm の設定](docs/shell-terminal.md#git-bash-と-wezterm-の設定)」で入れる
 
-### OS のインストール
-
-- Windows 11 と AlmaLinux 10 を 1 台のディスクに入れるときは、Windows 11 を先に入れる。Windows 11 のセットアップの「[Windows と AlmaLinux のデュアルブート](docs/windows-setup.md#windows-と-almalinux-のデュアルブート)」を通す。入れた後の起動の指定は「[次回だけ AlmaLinux で起動する](docs/windows-setup.md#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)」で行う
-
 ### 導入の基盤
 
 - AlmaLinux 10 は RPM に無いか古いものを、CLI とフォントは [Homebrew](docs/almalinux-setup.md#homebrew)、GUI アプリはベンダーの dnf リポジトリ（[Firefox](docs/almalinux-setup.md#firefox)・[VS Code](docs/almalinux-setup.md#vs-code)）が無ければ [Flathub](docs/almalinux-setup.md#flatpak-と-flathub) で入れる（AppStream / BaseOS に無い RPM は [EPEL、Firefox の FFmpeg だけ RPM Fusion](docs/almalinux-setup.md#epel-と-rpm-fusion)）。インターネットに出られないホストは [Homebrew](docs/almalinux-setup.md#homebrew-のオフライン導入)・[npm](docs/almalinux-setup.md#npm-のオフライン導入) の項を通す
@@ -42,31 +35,25 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 
 ### ほかの手順書が使う仕組み
 
-- ほかの手順書が前提にする設定は、AlmaLinux 10 の [Caddy](docs/almalinux-setup.md#caddy)・[linger（ユーザーサービスの常駐）](docs/almalinux-setup.md#ユーザーサービスの常駐)・[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)・[Secure Boot の MOK](docs/almalinux-setup.md#secure-boot-の署名鍵)、Windows 11 の[貼り付けの設定](docs/windows-setup.md#貼り付けの設定)・[LAN をプライベートにする手順](docs/windows-setup.md#ネットワークとリモート)にまとめてある。使う側の手順書は、その項を名指しする
+- ほかの手順書が前提にする設定は、AlmaLinux 10 の [linger（ユーザーサービスの常駐）](docs/almalinux-setup.md#ユーザーサービスの常駐)・[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)・[Secure Boot の MOK](docs/almalinux-setup.md#secure-boot-の署名鍵)、Windows 11 の[貼り付けの設定](docs/windows-setup.md#貼り付けの設定)・[LAN をプライベートにする手順](docs/windows-setup.md#ネットワークとリモート)にまとめてある。使う側の手順書は、その項を名指しする
 - 設定はユーザーやホストに 1 つなので、別の用途で設定済みなら確認だけでよい
 
 ### デスクトップ
 
 - AlmaLinux 10 は[日本語入力](docs/almalinux-setup.md#日本語入力)・[GNOME の表示と入力](docs/almalinux-setup.md#gnome-の表示と入力)・[画面オフ・画面ロック・自動サスペンド](docs/almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)、Windows 11 は[表示と入力](docs/windows-setup.md#表示と入力)・[表示・入力・音・ストレージ](docs/windows-setup.md#表示入力音ストレージを変える)を設定する
 
-### リモート接続・VPN
+### リモート接続
 
-- VPN は WireGuard の [AlmaLinux 10](docs/wireguard.md#wireguard)・[Windows 11](docs/wireguard.md#windows-11-で-wireguard-を使う)、GNOME は[デスクトップ共有](docs/gnome-remote.md#gnome-のデスクトップ共有)・[ヘッドレスセッション](docs/gnome-remote.md#gnome-のヘッドレスセッション)・[リモートログイン](docs/gnome-remote.md#gnome-のリモートログイン)から選ぶ
-- Windows 11 の [OpenSSH サーバー](docs/windows-setup.md#openssh-サーバー)・[SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)・[RDP](docs/windows-setup.md#ネットワークとリモート)、AI エージェントの [Claude Code の Remote Control](docs/ai-agents.md#claude-code-の-remote-control-windows-11-で使う)・[Windows 11 で Antigravity アプリの Remote Control を使う](docs/ai-agents.md#windows-11-で-antigravity-アプリの-remote-control-を使う任意)・複数のエージェントをブラウザから動かす Codeg（[AlmaLinux 10](docs/ai-agents.md#codeg-almalinux-10-で使う) / [Windows 11](docs/ai-agents.md#codeg-windows-11-で使う)）の手順を通す
+- GNOME は[デスクトップ共有](docs/gnome-remote.md#gnome-のデスクトップ共有)・[ヘッドレスセッション](docs/gnome-remote.md#gnome-のヘッドレスセッション)・[リモートログイン](docs/gnome-remote.md#gnome-のリモートログイン)から選ぶ
+- Windows 11 の [SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)・[RDP](docs/windows-setup.md#ネットワークとリモート)の手順を通す
 
-### ファイル共有・同期
+### ファイル共有
 
-- 共有は Samba の[サーバー](docs/samba.md#samba-サーバー)・クライアント（[AlmaLinux 10](docs/samba.md#samba-クライアント) / [Windows 11](docs/samba.md#windows-11-で-samba-クライアントを使う)）、同期は Syncthing（[AlmaLinux 10](docs/syncthing.md#syncthing) / [Windows 11](docs/syncthing.md#windows-11-で-syncthing-を使う)）の手順を通す
-- Dropbox は AlmaLinux 10 の「[Dropbox](docs/dropbox.md#dropbox)」か「[Dropbox と rclone](docs/dropbox.md#dropbox-と-rclone)」で入れる。毎日の片方向のバックアップは「[Dropbox へのバックアップ](docs/dropbox.md#dropbox-へのバックアップ)」を通す
+- 共有は Samba の[サーバー](docs/samba.md#samba-サーバー)・クライアント（[AlmaLinux 10](docs/samba.md#samba-クライアント) / [Windows 11](docs/samba.md#windows-11-で-samba-クライアントを使う)）の手順を通す
 
 ### 端末とシェル
 
 - シェルと端末の手順書の「[AlmaLinux 10 で使う](docs/shell-terminal.md#almalinux-10-で使う)」・「[Windows 11 で使う](docs/shell-terminal.md#windows-11-で使う)」で、シェルのツール・HackGen Console NF・WezTerm を入れ、Windows Terminal と PowerShell 7 の設定も行う
-
-### Android の Termux の開発環境
-
-- Android のセットアップの「[Termux: 基本の設定](docs/android.md#termux-基本の設定)」で端末を整え、「[Termux のシェル: シェルのツールを入れる](docs/android.md#termux-のシェル-シェルのツールを入れる)」で開発の道具を入れる
-- 編集と AI エージェントは「[Termux の Neovim: LazyVim の設定を導入する](docs/android.md#termux-の-neovim-lazyvim-の設定を導入する)」・「[Termux の AI エージェント: proot の Ubuntu で Claude Code を使う](docs/android.md#termux-の-ai-エージェント-proot-の-ubuntu-で-claude-code-を使う)」を通す
 
 ### ファイル・ディスク・リソースを見る
 
@@ -79,12 +66,10 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 ### git と GitHub
 
 - Git は AlmaLinux 10 の「[Git](docs/almalinux-setup.md#git)」・Windows 11 の「[Git for Windows](docs/windows-setup.md#git-for-windows)」、git-delta・lazygit・GitHub CLI は [AlmaLinux 10](docs/almalinux-setup.md#git-と開発の道具)・[Windows 11](docs/windows-setup.md#git-と開発の道具) の「Git と開発の道具」で入れる
-- 自分の Git サーバーは Forgejo の「[Forgejo](docs/forgejo.md#forgejo)」で入れ、画面の操作は「[使い方の基本](docs/forgejo.md#forgejo-使い方の基本)」で確かめる
 
-### 開発の補助と AI エージェント
+### 開発の補助
 
-- シェルの検査は [ShellCheck と shfmt](docs/almalinux-setup.md#shellcheck-と-shfmt)、Claude Code・Codex CLI・Grok Build・Antigravity CLI の導入は AI エージェントの手順書の [AlmaLinux 10](docs/ai-agents.md#almalinux-10-で使う)・[Windows 11](docs/ai-agents.md#windows-11-で使う) を通す
-- [Claude Code の使い方](docs/ai-agents.md#claude-code-の使い方の基本)・[共同作業](docs/ai-agents.md#コーディングエージェントの共同作業-almalinux-10-で使う)・[既定の分担](docs/ai-agents.md#コーディングエージェントの共同作業-windows-11-で既定で分担する)・[GNOME 操作](docs/ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)も、同じ手順書で設定・確認する
+- シェルの検査は [ShellCheck と shfmt](docs/almalinux-setup.md#shellcheck-と-shfmt) を通す
 
 ### コンテナ
 
@@ -98,7 +83,6 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 ### ブラウザ
 
 - Firefox は [AlmaLinux 10](docs/almalinux-setup.md#firefox)・[Windows 11](docs/windows-setup.md#firefox) の「Firefox」で入れる
-- Android で PC 版を使うときは、Android のセットアップの「[Termux の Firefox](docs/android.md#termux-の-firefox)」を通す
 
 ### Windows の入力の切り分け
 
@@ -113,7 +97,6 @@ Windows 11・AlmaLinux 10・Android の構築・設定の手順をまとめる�
 | 理由・比較・資料 | `docs/reference/<手順書名>.md` |
 | 注意点 | `docs/extra/<手順書名>.md` |
 | 実施日・環境・結果 | 非公開の `setup-notes-verification` の `docs/verification/<手順書名>.md` |
-| 手順書を動かすスクリプト | [scripts/](scripts/) |
 | 書き方の規則 | [AGENTS.md](AGENTS.md) と [docs/dev/writing-rules.md](docs/dev/writing-rules.md) |
 
 ## 記法
