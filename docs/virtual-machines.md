@@ -25,7 +25,7 @@
 > [!IMPORTANT]
 > - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-virtualbox-を入れる)を管理者の Windows PowerShell 5.1 で通す
 > - Windows では EPEL・Secure Boot の前提と KVM の設定は不要
-> - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、Raspberry Pi 5（aarch64）には入らない
+> - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、aarch64 のホストには入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
 
 #### VirtualBox: リポジトリを置く
