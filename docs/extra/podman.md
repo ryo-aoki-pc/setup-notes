@@ -18,7 +18,7 @@
 - **API ソケットにつなげると、自分のコンテナを何でも操作できる**: ソケットのファイルの権限（`srw-rw----`、持ち主は自分）を変えない
 - **容量**: イメージは `~/.local/share/containers/storage` に溜まる。`podman system df` で見て、`podman image prune -a` で掃除する（`ubi10/httpd-24` は 285 MB）
 - **Docker Hub には、認証なしの取得に回数の上限がある**: 本書の例は quay.io と registry.access.redhat.com に寄せた
-- **Raspberry Pi 5 で使うイメージは arm64 があるか見る**: `podman manifest inspect <イメージ>` に `"architecture": "arm64"` があればよい。本書の例のイメージにはどれもある
+- **aarch64 のホストで使うイメージは arm64 があるか見る**: `podman manifest inspect <イメージ>` に `"architecture": "arm64"` があればよい。本書の例のイメージにはどれもある
 - **Homebrew の formula が podman を連れてくることがある**: podman-compose などを Homebrew で入れると、依存の podman が `/usr/bin/podman` を隠す（[ツール一覧](../tool-catalog.md#注意点)）
   - システムの podman との互換性が要るものや、別の podman を依存で入れるものは RPM を選ぶ
   - [画像の道具](../almalinux-setup.md#画像の道具) の hadolint・dive と [lazydocker](../containers.md#lazydocker) は、RPM の提供状況などを比べて Homebrew を選んでいる

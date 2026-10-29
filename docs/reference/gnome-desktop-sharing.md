@@ -20,7 +20,7 @@
 - この手順書は、「自動ログインにして再起動する」の手順 3 で PC を再起動して、自動ログインでデスクトップを作る。PC の画面を触れないので、再起動から戻ってこられないと、遠隔では直せない
 - 確かめるのは、再起動の後に SSH で入り直せること（`sshd.service` が enabled、firewalld の永続の設定に `ssh` がある）と、GNOME が自動で起動すること（既定の target が `graphical.target`、`gdm.service` が enabled）
 - `/sys/class/drm/card*-*/status` の `connected` の数は、PC につながっているモニターの数。デスクトップ共有は PC の主モニターを写す（`screen-share-mode='mirror-primary'`）ので、モニターの無い PC には写すものが無い
-  - aarch64 の実機の検証では、HDMI の無い Raspberry Pi 5 の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../gnome-remote.md#gnome-のヘッドレスセッション)を使う（「選択した方針」）
+  - aarch64 の実機の検証では、HDMI をつないでいない aarch64 の実機の seat0 に、GNOME Shell の仮想モニターを足して写した（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)）。手順書には入れず、モニターの無い PC は[ヘッドレスのセッション](../gnome-remote.md#gnome-のヘッドレスセッション)を使う（「選択した方針」）
 - 既定の target が `graphical.target` でないと、再起動の後に GNOME が起動しない。`gdm.service` が要るのは、この手順書が GDM の自動ログインを使うため
 - `lsblk` の `crypt` は、LUKS などで暗号化したブロックデバイス。起動のときにパスフレーズを PC の画面で入れる構成なら、「自動ログインにして再起動する」の手順 3 の再起動の後に入力を待って止まる。TPM などで自動で開く構成かどうかは、この確認では分からないので、手順書は利用者に確かめさせる
 

@@ -35,7 +35,7 @@
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
 
    ```bash
-   SERVER=192.168.1.10                  # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
+   SERVER=192.0.2.10                    # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
    ```
 
    ```bash
@@ -170,7 +170,7 @@
 1. 変数を設定する（`SERVER` は必ず値を入れる）。
 
    ```bash
-   SERVER=192.168.1.10                  # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
+   SERVER=192.0.2.10                    # ← 自分の値に書き換える。サーバーの IP アドレスか DNS 名（Samba サーバーの SERVER_IP）。<SERVER>
    ```
 
    ```bash
@@ -660,7 +660,7 @@
 1. 送信元サブネットを空白区切りで入れ、445/tcp の開放を rich rule に置き換える。
 
    ```bash
-   ALLOW_FROM="192.168.1.0/24 10.99.0.0/30"     # ← 自分の値に書き換える。<ALLOW_FROM>
+   ALLOW_FROM="192.0.2.0/24 198.51.100.0/24"   # ← 自分の値に書き換える。<ALLOW_FROM>
    ```
 
    ```bash
