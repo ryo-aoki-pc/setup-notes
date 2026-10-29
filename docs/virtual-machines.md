@@ -1870,7 +1870,7 @@
 #### Hyper-V: 動作を確かめる
 
 - 動いている VM の状態と、ゲストへの SSH を確かめる
-- 前提: [Hyper-V: VM を起動して OS を入れる](#hyper-v-vm-を起動して-os-を入れる)を通してある。SSH を確かめるときは、ゲストの OpenSSH サーバーとファイアウォールを設定してある
+- 前提: [Hyper-V: VM を起動して OS を入れる](#hyper-v-vm-を起動して-os-を入れる)を通してある。SSH を確かめるときは、ゲストの SSH サーバーとファイアウォールを設定してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -2098,7 +2098,6 @@
 - 前提: [Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で winget を用意してある
 - 実行場所: この PC のデスクトップ。管理者の Windows PowerShell（5.1）をこの項の手順 1、管理者ではない窓を手順 5 で開く
 - Windows 11 の x64 が対象
-- Android の Windows App から VM に打つなら、[Android の RDP 設定](#virtualbox-windows-11-の-virtualbox-を-android-からリモート-デスクトップで使う)を通す
 - Atomic Desktop のゲストに Guest Additions を入れるなら、[bootc ゲスト](#virtualbox-の-bootc-ゲスト)を通す
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
@@ -2211,36 +2210,6 @@
    ```
 
    - `VirtualBox.xml`・`VBoxSVC.log` などが並べばよい
-
-#### VirtualBox: Windows 11 の VirtualBox を Android からリモート デスクトップで使う
-
-- Android の Windows App から、VM にキーの位置（スキャンコード）を送るようにする
-- 前提: この PC で[ネットワークとリモート](windows-setup.md#ネットワークとリモート)を通してリモート デスクトップを受け付け、[VirtualBox](#windows-11-で-virtualbox-を入れる)を入れてある。[VirtualBox: VM を起動して OS を入れる](#virtualbox-vm-を起動して-os-を入れる)を通し、操作する VM を起動してある
-- 実行場所: Android の Windows App の画面。必要なときだけ、この PC のデスクトップで VirtualBox の画面を操作する
-- 日本語は Android の IME では打てなくなる。PC の IME は、物理キーボードの `` Alt+` `` で切り替える（Ctrl+Space は Android が受け取る）
-- [参考資料](reference/virtualbox.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md#付録-android-の-windows-app-からリモート-デスクトップでつないだときのキー入力2026-10-08)
-
-1. Android の Windows App の設定で、「使用可能な場合にスキャンコード入力を使用する」をオンにする。
-
-   - プロファイルのアイコンをタップして設定を開き、「全般」をタップする
-   - 英語の表示では「Use scancode input when available」
-   - 接続している間に変えても、セッションに戻るとすぐ効いた（つなぎ直さなくてよい）
-
-1. Windows App でこの PC につなぎ、VM のウィンドウで文字を打って確かめる。
-
-   - VM のウィンドウのタイトル バーをタップして前に出してから打つ
-   - 打った英数字がそのまま VM に出ればよい（`1.,2` が `nczm` にならない）
-   - 物理キーボード（US 配列）では、Shift で打つ記号（`@`・`:`）も出る
-   - **画面のキーボード（Gboard）では、Shift で打つ記号に Shift が付かない**（`@` が `2`、`:` が `;`、`!` が `1`。PC のメモ帳でも同じ）
-   - 英字の大文字は、画面のキーボードでも出る
-   - 物理キーボードの右 Ctrl は、VirtualBox のホスト キー。右 Ctrl との組み合わせは、ゲストではなく VirtualBox が受け取る
-
-1. 画面のキーボードで Shift の記号を打つときだけ、VirtualBox のソフトキーボードで打つ。
-
-   - VM のウィンドウのメニューの「入力」→「キーボード」→「Soft Keyboard...」で開く（7.2.20 では、日本語の表示でもこの項目は英語）
-   - 開いたキーボードの Shift をタップしてから `2` をタップすると、`@` が出る
-   - メニュー バーが無いときは、VM のウィンドウがスケール モード（メニュー バーを出さない形）になっている
-   - スケール モードは、PC で `& "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" setextradata <VM 名> GUI/Scale` を実行すると、VM を動かしたまま元の形に戻る
 
 #### VirtualBox: Windows 11 で VM を作って使う
 
@@ -2358,7 +2327,7 @@
 1. VM の画面で AlmaLinux のインストーラーを最後まで進める。
 
    - `Install AlmaLinux` を選び、言語・インストール先・ソフトウェア・ユーザーを設定する
-   - SSH で入るなら、ゲスト側で OpenSSH サーバーを有効にし、ゲストのファイアウォールで SSH を許可する
+   - SSH で入るなら、ゲスト側で SSH サーバーを有効にし、ゲストのファイアウォールで SSH を許可する
    - マウスとキーが VM に入ったら、右 Ctrl（既定のホスト キー）でこの PC に戻る
    - **次の手順は、インストールを終え、ゲストの操作で電源を切ってから貼る**
 
@@ -2377,7 +2346,7 @@
 ##### VirtualBox: Windows のホストで VM の動作を確かめる
 
 - この PC で VM の起動と、ゲストへの SSH を確かめる
-- 前提: [VirtualBox: VM を起動して OS を入れる](#virtualbox-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの OpenSSH サーバーとファイアウォールを設定してある
+- 前提: [VirtualBox: VM を起動して OS を入れる](#virtualbox-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの SSH サーバーとファイアウォールを設定してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -2882,7 +2851,7 @@
 #### VMware Workstation Pro: 動作を確かめる
 
 - この PC で VM の起動と、ゲストの IP・SSH を確かめる
-- 前提: [VMware Workstation Pro: VM を起動して OS を入れる](#vmware-workstation-pro-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの OpenSSH サーバーとファイアウォールを設定してある
+- 前提: [VMware Workstation Pro: VM を起動して OS を入れる](#vmware-workstation-pro-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの SSH サーバーとファイアウォールを設定してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。

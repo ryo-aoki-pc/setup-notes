@@ -138,7 +138,6 @@
 ### Git for Windows / 手順 2: 補足: 確かめていること
 
 - Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
-- `bin\bash.exe` は、[Windows の OpenSSH サーバーの既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)が決め打ちにしている。Claude Code（Windows）の公式の文書も、Git Bash の場所の例にこのパスを挙げる
 - 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
 - `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
@@ -155,7 +154,7 @@
 ### PC 全体の設定 / 手順 2: 補足: 変数について
 
 - `$PC_NAME` は「PC 全体の設定」の手順 5（PC の名前を変える）で使う
-- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）で使う。「ネットワークとリモート」と [OpenSSH サーバー](../windows-setup.md#openssh-サーバー) は、同じ式をそれぞれの項の手順 2 で取り直す
+- `$LAN_IF` は、「PC 全体の設定」の手順 3（今の状態）・同じ項の手順 8（アダプターの省電力）で使う。「ネットワークとリモート」は、同じ式をその項の手順 2 で取り直す
 - 接続の一覧は `Get-NetConnectionProfile` で見られる
 
 ### PC 全体の設定 / 手順 3: 補足: 見ているもの
@@ -173,7 +172,7 @@
 - Windows の PC の名前は 15 文字まで（NetBIOS の名前の長さ）で、使える文字は英字・数字・ハイフン。先頭は英数字で、末尾はハイフンにしない（Microsoft の文書。数字だけの名前はドメインに入れない）
 - `Rename-Computer` は、15 文字を超える名前だと「短くするが続けるか」を聞く（`-Force` で聞かない）。聞かれると、続けて貼った行が答えとして食われるので、ブロックで先に 15 文字までかを確かめて止める
 - 今と同じ名前を渡すと、`Rename-Computer` はエラー（`NewNameIsOldName`）を出すので、先に比べる
-- SSH・リモート デスクトップ・Syncthing は、この名前でこの PC を見分ける。Syncthing のデバイスの名前は最初の起動のときの PC の名前になるので、Syncthing より先に変える
+- SSH・リモート デスクトップは、この名前でこの PC を見分ける
 
 ### PC 全体の設定 / 手順 6: 補足: 3 つの設定
 
@@ -190,7 +189,7 @@
 ### PC 全体の設定 / 手順 7: 補足: どの設定で何が変わるか
 
 - `standby-timeout-ac 0`: 電源につないでいる間、放置しても眠らない（`SUB_SLEEP` の `STANDBYIDLE` を 0 にするのと同じ。Microsoft の文書）
-- `/hibernate off`: 休止状態を切り、`hiberfil.sys` を消す。高速スタートアップもこのファイルを使うので、使えなくなる（ハイブリッド スリープも）。Wake on LAN でシャットダウンから起こす（[Wake on LAN を使う](../windows-setup.md#wake-on-lan-を使う)）には、高速スタートアップを切る必要がある
+- `/hibernate off`: 休止状態を切り、`hiberfil.sys` を消す。高速スタートアップもこのファイルを使うので、使えなくなる（ハイブリッド スリープも）
 - `LIDACTION` を 0: 電源につないでいる間、蓋を閉じても何もしない（1 が眠る、2 が休止状態、3 がシャットダウン）。`/setactive SCHEME_CURRENT` で、今の電源プランに効かせる
 - `CONSOLELOCK` を 0: 電源につないでいる間、眠りから戻ったときにサインインを求めない（既定は 1）。眠らないようにしても、手で眠らせたときのため
 - `DelayLockInterval` を `0xFFFFFFFF`: Modern Standby（S0）の PC で、画面が消えた後のロック（設定の「アカウント」→「サインイン オプション」の「一定時間不在にした場合、もう一度サインインを求めるタイミング」）を「しない」にする。この値は Microsoft の文書に無く、広く使われているもの。S3 の PC では、画面が消えるだけではロックしない（ロックするのは、眠り・パスワード付きのスクリーン セーバー・ポリシー・動的ロック）
@@ -204,14 +203,10 @@
 - この手順は、デバイス マネージャーのアダプターの「電源の管理」タブの、上の項目を外すのと同じ
 - `Set-NetAdapterPowerManagement` の文書にこの項目の引数は無く、`Get-NetAdapterPowerManagement` で取ったものの `AllowComputerToTurnOffDevice` を変えて渡す形は、広く使われているもの（Microsoft の文書には無い）
 - `Set-NetAdapterPowerManagement` は、`-NoRestart` が無いとアダプターを起動し直す（Microsoft の文書）。SSH・リモート デスクトップでつないでいると切れるので、付ける
-- この項目を外すと、Windows がアダプターに「この PC を起こす」を任せる設定（眠りからの Wake on LAN）も使えなくなる（Microsoft の古いサポートの記事）。シャットダウンからの Wake on LAN は UEFI とアダプターが行い、Windows は関わらないので、[Wake on LAN を使う](../windows-setup.md#wake-on-lan-を使う)はこの手順と両立する
-
-### サインイン・検索・キーボード / 手順 2: 補足: この設定と、リモート デスクトップ・SSH・自動サインイン
+### サインイン・検索・キーボード / 手順 2: 補足: この設定と、リモート デスクトップ
 
 - 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
 - オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある
-- オンだと、自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）の設定に要る「ユーザーがこのコンピューターを使うには、ユーザー名とパスワードの入力が必要」の項目が隠れると報告されている
-
 ### サインイン・検索・キーボード / 手順 3: 補足: 管理者の窓で書く理由と、効き目
 
 - 自分のユーザーの設定（`HKCU`）だが、`HKCU\Software\Policies` の下は、管理者の権限が無いと書けない。管理者の窓も同じユーザーなので、自分の `HKCU` に書かれる
@@ -237,11 +232,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 値を 16 進の文字列で比べるのは、もう同じ値があるか（2 回目）と、ほかの割り当てがあるかを分けるため
 - `中断: 別の Scancode Map がある` で止めるのは、ほかのキーの割り当てを消さないため
 
-### サインイン・検索・キーボード / 手順 6: 補足: AlmaLinux のインストーラの時計
-
-- AlmaLinux のインストーラは、Windows を見つけると `LOCAL` にする（[Windows と AlmaLinux のデュアルブートの注意点](../extra/windows-dual-boot.md#注意点)）
-
-### サインイン・検索・キーボード / 手順 7: 補足: キーボードの種類の値
+### サインイン・検索・キーボード / 手順 6: 補足: キーボードの種類の値
 
 - 日本語の Windows は、キーボードの種類（配列のドライバー）を PC 全体で 1 つ持つ。`HKLM\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters` の 4 つの値で決まり、名前は i8042prt（PS/2）だが、USB のキーボードにもかかる
 - US 配列の値は、Microsoft の日本の社員のブログ（Learn に残っている「英語キーボードを快適に使う」）と同じ。設定の「時刻と言語」→「言語と地域」→「日本語」の「言語のオプション」→「キーボード レイアウト」の「英語キーボード (101/102 キー)」も、同じ値を書くと報告されている
@@ -252,21 +243,21 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### WSL と再起動 / 手順 2: 補足: 入るもの
 
 - Windows 11 では、`wsl --install --no-distribution` は Windows の機能「仮想マシン プラットフォーム」（`VirtualMachinePlatform`）を入れ、WSL のパッケージを入れる（WSL のソースの `WslInstall.cpp`）。WSL 1 の機能（`Microsoft-Windows-Subsystem-Linux`）は `--enable-wsl1` を付けたときだけ
-- 機能を入れたときは、再起動が要る。この文書では「WSL と再起動」の手順 3 の再起動で済ませ、AlmaLinux 10 は「WSL の AlmaLinux 10 と自動サインイン」の手順 3 で入れる
+- 機能を入れたときは、再起動が要る。この文書では「WSL と再起動」の手順 3 の再起動で済ませ、AlmaLinux 10 は「WSL の AlmaLinux 10」の手順 3 で入れる
 - VirtualBox は、Hyper-V が動いていると、それを通して VM を動かす（NEM）。仮想マシン プラットフォームを外しても、メモリ整合性などで Hyper-V が動き続けることがある
 
-### WSL の AlmaLinux 10 と自動サインイン / 手順 1: 補足: Windows Terminal の中に開く
+### WSL の AlmaLinux 10 / 手順 1: 補足: Windows Terminal の中に開く
 
 - 「表示と入力」の手順 7 の後なので、Windows Terminal の中に開く
 
-### WSL の AlmaLinux 10 と自動サインイン / 手順 2: 補足: Hypervisor
+### WSL の AlmaLinux 10 / 手順 2: 補足: Hypervisor
 
 - `Hypervisor : True` になるのは、「WSL と再起動」の手順 2 で WSL の機能を入れたため
 
-### WSL の AlmaLinux 10 と自動サインイン / 手順 4: 補足: 版と、冒頭の 2 行
+### WSL の AlmaLinux 10 / 手順 4: 補足: 版と、冒頭の 2 行
 
 - `VERSION="10.2 …"` の版は、入れた日のイメージ
-- 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（「WSL の AlmaLinux 10 と自動サインイン」の手順 3 も同じ）
+- 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（「WSL の AlmaLinux 10」の手順 3 も同じ）
 
 ### プライバシーと広告の表示を切る / 手順 2: 補足: 値と画面の対応
 
@@ -451,50 +442,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - ボタンだけを消す値（`TaskbarDa`）は、PowerShell からは書けない（「表示と入力」の手順 5 の補足）
 - Microsoft が説明している止め方は、管理者のポリシー（「ウィジェットを許可する」）。本書では使わない
 
-### CopyQ を使う / 手順 2: 補足: 入れ方と入る場所
-
-- winget の `hluk.CopyQ`（2026-10-08 の定義は 16.0.0。上流の最新は 17.0.0）は Inno Setup のインストーラ。`--scope user` は `/CURRENTUSER` を渡し、`%LOCALAPPDATA%\Programs\CopyQ` に入る
-- `/CURRENTUSER` は winget の定義。入る場所は、`copyq.iss` の `{autopf}\CopyQ` を、Inno Setup が自分のユーザーの導入で `%LOCALAPPDATA%\Programs` にするため
-- インストーラは `PrivilegesRequiredOverridesAllowed=dialog` なので、管理者の確認を出さずに自分のユーザーに入れられる（`shared/copyq.iss` と Inno Setup の文書）。winget の定義は `elevatesSelf` で、winget は UAC が出るかもしれない旨を出すだけで、自分では昇格しない（winget の文書）
-- デスクトップのショートカットとスタートアップのタスクは既定で外れていて、入れた後の起動は `postinstall skipifsilent` なので、黙って入れると起動しない。PATH には入らない
-- 自分のユーザーにしたのは、「アプリを入れる」の手順 4・5 の UniGet UI・PowerToys と同じく、管理者が要らず、ほかのユーザーにかからないため。更新も、管理者ではない窓の `## 更新` の winget で上がる
-- 17.0.0 は、データを `%LOCALAPPDATA%\copyq` に移し、前の版では読めなくなる（`CHANGES.md`）
-- 前に別の場所へ入れた CopyQ があると、インストーラはその場所に入れる（`UsePreviousAppDir`）。そのときは、この節の手順 3・4・7〜9 の決め打ちのパスが外れる
-- 最後の表の版は、実行した日の最新
-
-### CopyQ を使う / 手順 4: 補足: 自動の起動の仕組み
-
-- `copyq config autostart true` は、スタートアップ フォルダー（`CSIDL_STARTUP`）に `copyq.lnk` を作る（`winplatform.cpp`）。「自動起動と標準アプリ」の手順 2 の `Run` とは別の所なので、同じ項の手順 2 の一覧には出ない
-- CLI の `config` は、値が変わったときだけショートカットを作る（`ConfigurationManager::setOptionValue`）。`copyq.ini` に `autostart=true` が残っていて `copyq.lnk` が無いと、`true` を送っても作られない。先に `false` を送るのはそのため
-- `copyq.exe` は窓を持つアプリ（GUI のサブシステム）なので、PowerShell は結果を出さずに戻る。`| Write-Output` を付けると、終わるまで待って結果を出す（CopyQ の known-issues）。`| Out-Null` は、終わるまで待って結果を捨てる
-- 起動を別の手順（この節の手順 3）にしたのは、`--start-server` に `| Write-Output` を付けると、裏で動き続けるサーバーが標準出力のパイプを持ち続け、窓が戻らないおそれがあるため（Qt の `startDetached` のコード。確かめていない）。クライアントがサーバーを待つのは、既定で 1 秒だけ
-- `EnableClipboardHistory`（`HKCU\Software\Microsoft\Clipboard`）の名前は広く。Windows の履歴が既定でオフなのは文書（サポートの記事）
-
-### CopyQ を使う / 手順 6: 補足: 避けるキーと貼り付け
-
-- CopyQ のグローバル ショートカットは `RegisterHotKey` を使う。Windows キーを含むキーは OS が予約していて、ほかが登録済みのキーと同じく失敗することがある（文書）。失敗はサーバーの記録に出るだけで、画面には出ない（コード）
-- 「アプリを入れる」の手順 5 の PowerToys の高度な貼り付けは、既定で Win+Shift+V と Ctrl+Win+Alt+V を使う（文書）。Ctrl+Shift+V は、Windows 11 の書式なしの貼り付けのキー（サポートの記事）
-- CopyQ は Ctrl+V などのキーを `SendInput` で送って貼る。`SendInput` は、同じか低い整合性のレベルの窓にしか届かないので、管理者の窓には貼れない（文書。UIPI）
-- CopyQ の窓は、既定でスクリーンショット・画面の録画と共有に写らない（12.0.0 から。`prevent_screen_capture`）。RDP での見え方は、[この節の手順 7 の補足](#copyq-を使う--手順-7-補足-rdp-で窓の中身が空になる仕組み)
-- パスワード マネージャーなどが付ける除外の印（`ExcludeClipboardContentFromMonitorProcessing`・`CanIncludeInClipboardHistory` など）があるものは、記録しない（コード）
-- 履歴は暗号化しないで保存する（`encrypt_tabs` の既定は false。項目は既定で 200 まで）。16.0.0 は `%APPDATA%\copyq`、17.0.0 からは `%LOCALAPPDATA%\copyq` の下
-- 画面の日本語は、同梱の訳（約 94%）が、Windows の地域の形式に合わせて出る（推測）
-
-### CopyQ を使う / 手順 7: 補足: RDP で窓の中身が空になる仕組み
-
-- `prevent_screen_capture` の既定は true（`appconfig.h`）。画面では「ファイル」→「設定...」→「全般」の「スクリーンショットや録画に写らない」（`configtabgeneral.ui` と訳のファイル）
-- オンなら、サーバーは窓が出るたび（Qt の `QEvent::Show`）に、`SetWindowDisplayAffinity` で `WDA_EXCLUDEFROMCAPTURE`（0x11）を付ける（`clipboardserver.cpp`・`winplatform.cpp`）
-- `WDA_EXCLUDEFROMCAPTURE` の窓は、モニターにだけ出て、ほかの所には出ない。Windows 10 2004 から（文書）
-- 付ける前に `GetSystemMetrics(SM_REMOTESESSION)` を見て、0 でなければ（RDP のセッションの中なら）付けずに `WDA_NONE` にする（`winplatform.cpp`）。16.0.0 の「Fixed window invisible in remote desktop sessions」はこれ（`CHANGES.md`）
-- `SM_REMOTESESSION` は、PC の画面（コンソールのセッション）では 0（文書）
-- 見るのは窓を出したときだけなので、PC の画面で出した窓は、その後に RDP でつないでも付いたままで、中身が空に見える（コード）。「RDP をロックせずに切断」の `tscon` で PC の画面へ戻して使うと、PC の画面で窓を出すことが多いので起きやすい
-- Chrome リモート デスクトップのように PC の画面（コンソールのセッション）を取り込んで送る遠隔操作では、`SM_REMOTESESSION` が 0 のままなので、付いた窓は写らないはず（文書とコードからの推測。確かめていない）
-- 設定を変えると、サーバーは開いている窓すべてに付け直すか外す（`ClipboardServer::setPreventScreenCapture`）ので、起動し直さなくてよい。値は `copyq.ini`（16.0.0 は `%APPDATA%\copyq\copyq.ini`）の `[Options]` の `prevent_screen_capture` に残る
-- RDP の中でオンのまま初めて窓を出すと、英語の警告（「Screen Capture Prevention Unavailable」。訳は無い）を 1 回だけ出し、出したことを `screen_capture_warning_acknowledged` に残す（`winplatform.cpp`。確かめていない）
-- 上流の報告 [hluk/CopyQ#3621](https://github.com/hluk/CopyQ/issues/3621)（「Blank window if RDP is used」、16.0.0）は、RDP の中で起動しても空の窓が出るというもの。報告者は `prevent_screen_capture=false` で直ったと書いていて、作者が試した開発版では直らなかった。2026-10-24 の時点で開いたまま
-- 17.0.0 でも、窓が出たときの呼び出し・`WinPlatform::setPreventScreenCapture`・既定の true は、16.0.0 と同じ（両方のタグのソース）
-- 切ると、PC の画面のスクリーンショット・録画・画面共有に、CopyQ の窓（クリップボードの履歴）が写る
-
 ### PowerToys のユーティリティを絞る / 手順 2: 補足: 入る場所と、切るユーティリティの案
 
 - 入る場所は、Microsoft の情報どうしで食い違う（[「アプリを入れる」の手順 5 の補足](#アプリを入れる--手順-5-補足-入れ方と入る場所)）。決め打ちせず、動いている PowerToys のプロセスの場所を取り、無ければ `%LOCALAPPDATA%\PowerToys` と `%LOCALAPPDATA%\Programs\PowerToys` のうち、あるものにする
@@ -542,7 +489,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### ネットワークとリモート / 手順 3: 補足: もとからプライベートのときと、前提にする手順
 
 - 既にプライベートなら、何も変わらない
-- [Windows の OpenSSH サーバー](../windows-setup.md#openssh-サーバー)・[Syncthing の Windows 11 で使う](../syncthing.md#windows-11-で-syncthing-を使う)・「ネットワークとリモート」の手順 4〜6 は、この LAN がプライベートであることを前提にする
+- 「ネットワークとリモート」の手順 4〜6 は、この LAN がプライベートであることを前提にする
 
 ### ネットワークとリモート / 手順 4: 補足: つなぐときのユーザーと、前提にする手順書
 
@@ -558,8 +505,8 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### ネットワークとリモート / 手順 6: 補足: 自分で規則を作る理由
 
 - Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
-- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる（[Syncthing の Windows 11 の節](../syncthing.md#windows-11-で-syncthing-を使う)の規則と同じ形）
-- 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネット（WireGuard のクライアントなど）からの ping にも応える
+- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる
+- 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネットからの ping にも応える
 - 何度貼ってもよいのは、規則を消してから作り直すため
 
 ### ネットワークとリモート / 手順 7: 補足: 配信の最適化
@@ -589,156 +536,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - `wslinfo --networking-mode` は、WSL が各ディストリビューションに置くコマンド。AlmaLinux 10 のイメージで使えるかは確かめていない。無ければ、WSL の中の IP と Windows の IP を比べる（ミラーでは同じ IP になる）
 - ミラーを使えないとき、WSL は NAT に戻し、`wsl.exe` が理由の行（`ミラー化されたネットワーク モードはサポートされていません: …`）を出す（`Resources.resw` の `MessageMirroredNetworkingNotSupportedReason`）
   - `wslinfo --networking-mode` は、そのときも `nat` を出す（`wslinfo.cpp`）
-- この節の手順 5: NAT では、WSL の中の `127.0.0.1:22` は WSL 自身を指すので、Windows の sshd には届かない。ミラーでは Windows のループバックに届く（`::1` は使えない）。`/dev/tcp` は bash の機能で、`head -n 1` で sshd の最初の 1 行（バナー。CR LF で終わる）を読む
-- ミラーでは、sshd のログの送信元が、LAN の IP から `127.0.0.1` に変わるはず（確かめていない。`sshd_config` にアドレスでの絞り込みは無いので、動きは変わらない）
-
-### Wake on LAN を使う / 手順 2: 補足: 式
-
-- [「PC 全体の設定」](../windows-setup.md#pc-全体の設定)の手順 2 の 2 つ目のブロックと同じ式
-
-### Wake on LAN を使う / 手順 3: 補足: シャットダウンからの Wake on LAN
-
-- Microsoft の文書では、Windows 10 以降の既定のシャットダウン（高速スタートアップ）では、Windows はアダプターに起動を任せない。シャットダウン（S5）からの起動は、UEFI とアダプターだけが行い、Windows は関わらない
-- そのため、高速スタートアップを切り（「PC 全体の設定」の手順 7）、UEFI の Wake on LAN（機種によって「Power On By PCI-E」など）を有効にし、アダプターの詳細設定でマジック パケットを受けるようにする
-- `*WakeOnMagicPacket` は、Microsoft の文書の標準の詳細設定の名前（1 で有効）。機種独自の項目（シャットダウンからの起動、リンクでの起動など）は、名前がアダプターごとに違う
-- `-NoRestart` で、アダプターを起動し直さない（効くのは次の再起動から）
-- 眠り（S3・Modern Standby）からの起動は、「PC 全体の設定」の手順 7 で眠らないようにしたので扱わない
-
-### Wake on LAN を使う / 手順 4: 補足: 203 のエラー
-
-- `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、ファームウェアがこの指定に対応していないことがある
-
-### リモートから再起動する手段を増やす / 手順 3: 補足: クラッシュ時の自動再起動
-
-- `HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl` の `AutoReboot` は、カーネルが止まった（ストップ エラー）ときに自動で再起動するかを決める。Windows の既定は 1（有効）で、この手順は確認が主
-- `Win32_OSRecoveryConfiguration` の `AutoReboot` と同じ値。設定の「システムの詳細設定 → 起動と回復」の「自動的に再起動する」に当たる
-- OS が応答するが操作できないとき（アプリのハング・ネットワーク断）には効かない。そちらはこの節の手順 6 の見張りタスクが担う
-
-### リモートから再起動する手段を増やす / 手順 4: 補足: SMB のリモートシャットダウンの仕組み
-
-- `shutdown /m \\<host>`（Windows）も `net rpc shutdown`（Samba）も、MS-RSP の InitShutdown インターフェイスを使う。これは名前付きパイプ `\PIPE\InitShutdown` を SMB（TCP 445）の上で呼ぶ（ncacn_np）。WindowsShutdown インターフェイスだけが TCP（ncacn_ip_tcp の動的ポート）で、`shutdown`・`net rpc` はそちらを使わないので、開けるのは 445 だけでよい
-- 組み込みの受信規則「ファイルとプリンターの共有 (SMB 受信)」（`FPS-SMB-In-TCP`、TCP 445）を有効にする。既定では無効。ping の規則（「ネットワークとリモート」の手順 6）と同じく `-Profile Private` に絞る
-- 再起動には 2 つの許可が要る
-  - 「リモート システムからの強制シャットダウン」（`SeRemoteShutdownPrivilege`）。Administrators が既定で持つ。スタンドアロンのクライアントでは Administrators だけ
-  - `LocalAccountTokenFilterPolicy = 1`。これが無いと、ローカル・Microsoft アカウントの管理者がネットワークログオンしたとき、UAC のリモート制限で絞られたトークンになり、再起動の権限を使えない（アクセス拒否になる）。1 にすると完全な管理者のトークンになる（UAC のリモート制限が緩む）
-- ドメインに参加していない PC が対象なので、`-U '<user>%<pass>'` の資格情報はローカル・Microsoft アカウントのもの。Samba の `net` は `samba-common-tools` にある
-- Windows の `shutdown /m` には資格情報を渡す引数が無く、送る側のユーザーの資格情報で相手につなぐ。検証では、相手に無いユーザーからと、Microsoft アカウントでサインインした PC から送ったときに、`アクセスが拒否されました。(5)` で止まった
-  - 先に `net use \\<host>\IPC$ /user:<host>\<user>` で、相手の資格情報で `IPC$` につないでおくと、`shutdown /m \\<host>` はその接続を使う。名前（`<host>`）は 2 つのコマンドでそろえる
-  - `net use` は、パスワードを聞く前に `…のパスワードまたはユーザー名が無効です。` を出す。聞かれたパスワードを入れるとつながる
-  - 相手が再起動すると、送る側の接続は `Disconnected` で残るので、`net use \\<host>\IPC$ /delete` で消す
-
-### リモートから再起動する手段を増やす / 手順 5: 補足: WinRM を選ぶ理由
-
-- `Restart-Computer -ComputerName` は、既定で WMI/DCOM（RPC のエンドポイント マッパー 135 と動的ポート）を使う。開けるポートが多く、絞りにくい
-- 代わりに WinRM（WS-Management、TCP 5985）を有効にして、`Invoke-Command -ComputerName … { Restart-Computer -Force }` で再起動する。開けるのは 5985 の 1 つだけ
-- `Enable-PSRemoting` は、WinRM のサービスの開始・リスナーの作成・受信規則の有効化に加えて、`LocalAccountTokenFilterPolicy` を 1 にする（この節の手順 4 と共有）。`-SkipNetworkProfileCheck` は、ほかにパブリックの接続があっても止まらないようにする（LAN はプライベートにしてある）
-- Windows 11（クライアント版）の「Windows リモート管理」のグループ（`@FirewallAPI.dll,-30267`）の受信規則は 2 つ。`WINRM-HTTP-In-TCP` はパブリック向けで接続元をローカル サブネットに絞り、`WINRM-HTTP-In-TCP-NoScope` はドメイン・プライベート向けで接続元を絞らない。`Enable-PSRemoting` は両方を有効にする
-  - ほかに、別のグループの互換モードの規則（`WINRM-HTTP-Compat-In-TCP`・`WINRM-HTTP-Compat-In-TCP-NoScope`）があり、既定で無効。本書は触らない
-  - 本書は、ローカル サブネットに絞った `WINRM-HTTP-In-TCP` をプライベートにし、`WINRM-HTTP-In-TCP-NoScope` を切る（LAN の外からは届かないようにする）
-  - Windows 11 の VM には `WINRM-HTTP-In-TCP-PUBLIC` の規則が無かった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
-- `WINRM-HTTP-In-TCP` が無効のままプライベートになっていると、`Enable-PSRemoting` は `エラー:1 つ以上の更新手順を終了できませんでした。`（`winrm quickconfig` では「WinRM ファイアウォールの例外を有効にします。」の後に「WinRM のファイアウォールを有効にできません。」）で止まった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）。パブリック向けの例外としてこの規則を探し、パブリックに見つからないためとみている（中の動きは資料・ソースで確かめていない）
-  - 止まる前に、2 つの規則（`WINRM-HTTP-In-TCP` はプライベートのまま）を有効にしてしまう。このエラーは、複数行を貼ったときの後ろの行も止めるので、`-NoScope` を切る行が動かずに残る
-  - 規則が有効でプライベートのとき（手順 5 を貼り直したとき）と、無効でパブリック（既定）のときは止まらない
-  - そこで手順 5 の 1 行目で規則を既定のパブリックに戻す
-- 規則のグループは、表示名（`DisplayGroup`）が Windows の言語で変わる（日本語の Windows では「Windows リモート管理」）ので、言語に依らない `Group`（`@FirewallAPI.dll,-30267`）で選ぶ
-- ドメインに参加していない PC から `Invoke-Command -ComputerName` で送ると、Kerberos を使えないので、送る側の WinRM のクライアントが、相手を `TrustedHosts` に入れるか HTTPS を使うことを求める（about_Remote_Troubleshooting）。本書は送る側で `TrustedHosts` に相手を足す
-  - 送る側の WinRM のサービスが止まっていても、`Invoke-Command` は `TrustedHosts` の検査のエラー（`ServerNotTrusted`）までは進んだ。相手に届いて再起動できたのは、サービスを動かした後（止めたまま送れるかは確かめていない）。サービスが要るのは、`TrustedHosts` を読み書きする `WSMan:\localhost` のドライブ
-  - `TrustedHosts` は `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client` の `trusted_hosts` に入る。検証のホストでは初めは値が無く、`-Value ''` で戻すと空の値で残った
-  - 検証のホスト（送る側）では、WinRM のサービスを動かしている間、TCP 5985 を System が待ち受けた（受信規則 `WINRM-HTTP-In-TCP`・`-NoScope` は無効のままだった）
-
-### リモートから再起動する手段を増やす / 手順 6: 補足: 見張りタスクの作り
-
-- ネットワークが切れても（OS は動いているが外から届かない）自分で再起動する。起動時と 5 分ごとに走るタスクで、`WATCHDOG_HOST`（既定はゲートウェイ）へ ping する
-- SYSTEM・最上位の権限で動かす。SYSTEM は `SeShutdownPrivilege` を持つので、だれもサインインしていなくても再起動でき、ネットワークのサインインにも依らない
-- 歯止め
-  - 稼働 60 分未満なら何もしない。起動の直後に再起動を繰り返す（再起動ループ）のを避け、人が直す余地を残す
-  - 連続して届かない回数を `HKLM:\SOFTWARE\setup-notes\net-watchdog` の `Fails` に記録し、6 回（約 30 分）でだけ再起動する。1 回でも届けば 0 に戻すので、一時的な切断では再起動しない
-- 相手（ルーターなど）がずっと落ちていると、稼働 60 分ごとに再起動を繰り返す。`$limit` を増やすと猶予が延びる。相手は、LAN の中でいつも応答するものにする
-- 起動時トリガーに 5 分ごとの繰り返しを足すため、`-Once` のトリガーの `Repetition` を起動時トリガーに移している（Windows PowerShell 5.1 の `New-ScheduledTaskTrigger` は、起動時トリガーに直接 `-RepetitionInterval` を取らない）
-- 起動時トリガーなので、登録した時点では動かず（`NextRunTime` も空）、次の起動から起動時と 5 分ごとに動く
-
-### リモートから再起動する手段を増やす / 手順 7: 補足: Remote Control を再起動後も使う
-
-- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)のタスクはトリガーが無く、手で `Start-ScheduledTask` したときだけ動く。再起動の後は戻らない
-- ログオンのトリガー（`-AtLogOn -User <自分>`）を足すと、そのユーザーがサインインしたときに自動で始まる。自動サインイン（「WSL の AlmaLinux 10 と自動サインイン」の手順 5）と組み合わせると、無人の再起動の後も戻る
-- タスクのトリガーだけを差し替える（`Set-ScheduledTask -Trigger`）。アクション・実行ユーザー・設定は変えない
-
-### OpenSSH サーバー / 手順 1: 補足: Windows PowerShell 5.1 で開く理由
-
-- PowerShell 7（`pwsh`）では、手順 3 が失敗する
-
-### OpenSSH サーバー / 手順 2: 補足: 変数について
-
-- `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）
-- 変数はその PowerShell の中だけで有効
-
-### OpenSSH サーバー / 手順 3: 補足: 入るものと、PowerShell 7 で失敗すること
-
-- 入るのは Windows のオプション機能「OpenSSH サーバー」（設定アプリの「システム」→「オプション機能」と同じもの）。`C:\Windows\System32\OpenSSH\sshd.exe`と、サービス `sshd`、受信の規則 `OpenSSH-Server-In-TCP` ができる
-- クライアント（`ssh.exe` など）は Windows 11 に最初から入っていて、この手順では変わらない
-- 先頭の `if` は、PowerShell 7（`PSEdition` が `Core`）で貼ったときに何もしないで止めるためのもの
-- 機能は Windows Update から取ってくるので、数分かかる
-
-### OpenSSH サーバー / 手順 4: 補足: 最初の起動で作られるもの
-
-- 最初に起動したときに、`C:\ProgramData\ssh` にホスト鍵 3 組（RSA・ECDSA・ED25519）と `sshd_config`、`logs` ができる。
-- [既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)では、レジストリの `HKLM:\SOFTWARE\OpenSSH` に値を足す
-
-### OpenSSH サーバー / 手順 6: 補足: 既定でも有効なのに書く理由と、置き換える理由
-
-- パスワード認証は既定で有効。この手順はそれを明示的な行にするので、[パスワード認証を切る](../windows-setup.md#openssh-サーバーのパスワード認証を切る)で `no` にした PC も、この手順を貼れば戻る
-- `sshd_config` の末尾は `Match Group administrators` のブロックなので、末尾に足した行はそのブロックの中の設定になる。そこで、既定の行を置き換える
-- `sshd -t` は設定の検査だけをする（誤りが無ければ何も出さない）。誤りがあれば再起動しないので、動いている sshd は古い設定のまま残る
-- Windows PowerShell 5.1 の `Set-Content -Encoding ascii` は BOM 無しの ASCII、CRLF で書く
-- Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけとしている
-- 行を置き換えるので、何度貼っても結果は同じ
-
-### OpenSSH サーバー / 手順 7: 補足: ユーザー名
-
-- Microsoft アカウントでも、ユーザー名はメールアドレスではなく、`C:\Users\` の下のフォルダーの名前
-
-### SSH でログインを確かめる / 手順 4: 補足: 変数について
-
-- 変数はそのシェルの中だけで有効
-
-### OpenSSH サーバーに公開鍵でもログインする / 手順 3: 補足: 鍵の種類とパスフレーズ
-
-- ED25519 は Windows と AlmaLinux 10 の OpenSSH のどちらも扱え、鍵が短く、この項の手順 5 で 1 行のまま貼れる
-- パスフレーズは、秘密鍵のファイルが漏れたときの守り。空にすると、この項の手順 7 と[パスワード認証を切る](../windows-setup.md#openssh-サーバーのパスワード認証を切る)の手順 4 で聞かれなくなる。後から付けるなら `ssh-keygen -p -f ~/.ssh/id_ed25519`
-- 秘密鍵（`~/.ssh/id_ed25519`）はクライアントから出さない。Windows に渡すのは、この項の手順 4 の公開鍵だけ
-
-### OpenSSH サーバーに公開鍵でもログインする / 手順 5: 補足: 読み戻し
-
-- `$PUBKEY` が空、または `ssh-` などで始まらなければ、この項の手順 6 は何もしないで止まる
-
-### OpenSSH サーバーに公開鍵でもログインする / 手順 6: 補足: クライアントを足す
-
-- この項の手順 6 を貼り直すと、`administrators_authorized_keys` に行が足される
-
-### OpenSSH サーバーに公開鍵でもログインする / 手順 7: 補足: 鍵で入ったときのログ
-
-- `-o PasswordAuthentication=no` は、鍵が通らなかったときにパスワードへ移らず、そこで終わらせるため
-
-### OpenSSH サーバーのパスワード認証を切る / 手順 3: 補足: 切る前と後
-
-- 行を置き換える理由と `sshd -t` は、[手順 6](../windows-setup.md#openssh-サーバー) の補足と同じ
-- Microsoft の文書は、Windows の OpenSSH の認証の方法は `password` と `publickey` だけで、`KbdInteractiveAuthentication` は使えないとしている
-- 行を置き換えるので、何度貼っても結果は同じ
-
-### SSH の既定のシェルを Git Bash にする / 手順 3: 補足: DefaultShell
-
-- `DefaultShell` は Windows の sshd だけの設定で、`sshd_config` ではなくレジストリに置く。この PC の全ユーザーの SSH のセッションに効く
-- `bin\bash.exe` は、Git の `usr\bin\bash.exe` を `MSYSTEM=MINGW64` と `PATH` を整えて起動する入口。
-- sshd の再起動は要らない。次のログインから変わる
-
-### SSH の既定のシェルを Git Bash にする / 手順 4: 補足: パスワードを 2 回聞かれる理由
-
-- 鍵を登録していなければ 2 回聞かれるのは、`ssh` が 2 つあるため
-
-### scoop のツールを SSH のセッションで使う / 手順 3: 補足: 貼り直し
-
-- 作り直すものが無ければ何も出ないので、何度貼ってもよい
-
 ### git-delta / 手順 2: 補足: VC++ ランタイム
 
 - scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-付録-windows-11-の配布物と資料の調査2026-10-08)）。無い PC では起動しない
@@ -812,8 +609,6 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - **Git の資格情報のヘルパーが無い PC**（[Windows 11 で使う](../windows-setup.md#github-cli)の手順 2 の `GitCred` が空）では、Yes でよい。git の HTTPS の認証を gh に任せることになる
 - **gh が書く自分の場所**: 環境変数 `GH_PATH` が無ければ、`PATH` の上の同じ名前のファイルが自分自身（かそのシンボリックリンク）ならそれ、違えば自分の実行ファイルの場所を書く（`internal/ghcmd/cmd.go`）
   - scoop の shim（`~\scoop\shims\gh.exe`）は別の実行ファイルなので、`C:\Users\<WIN_USER>\scoop\apps\gh\current\bin\gh.exe` になるはず（推論）。`current` は scoop の更新の後も同じ場所を指す
-  - SSH のセッションの git からその場所を呼ぶと、scoop の `current` のジャンクションが [scoop のツールを SSH のセッションで使う](../windows-setup.md#scoop-のツールを-ssh-のセッションで使う)の制限に当たるはず（確かめていない）
-
 ### GitHub CLI / 手順 4: 補足: ワンタイムコード
 
 - gh の既定では、ワンタイムコードはクリップボードにも入る
@@ -912,7 +707,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-で使う--手順-4-補足-windows-では-aac-と-h264-のために何も足さない理由)
 
 - Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
-- 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのは Android の MediaCodec を使うものだけ）
+- 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのはほかの OS の MediaCodec を使うものだけ）
   - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[実施手順](../almalinux-setup.md#firefox)の手順 8〜11 が要る（[選択した方針](almalinux-setup.md#firefox)）
 - MDN も、Firefox は AVC（H.264）と AAC を OS の復号器に頼ると書いている
 
@@ -927,15 +722,11 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - Windows は既定のブラウザーを、`HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\<プロトコル>\UserChoice` にハッシュ付きで記録する。今の Windows 11 では、User Choice Protection Driver（UCPD）が `http`・`https` の `UserChoice` の書き換えを止める
 - Firefox も、まず自分で `UserChoice` を書こうとし、できなければ Windows の設定の「既定に設定」の画面を開く（Mozilla の Set Default の文書）。そのため、本書は初めから設定の画面で行う
 - 確かめを Win+R から開くのは、管理者の PowerShell から URL を開くと、Firefox が管理者の権限で起動するため
-- Claude Code の `/login` は、既定のブラウザーでログインのページを開く。[Windows 11 のセットアップ](../windows-setup.md)の後に通す順で、Claude Code より先にこの手順を行うのはそのため
-
 ### Git Bash と WezTerm の設定 / 手順 2: 補足: PATH と、ほかの git
 
 - `PATH` に足されるのは `C:\Program Files\Git\cmd`（`git.exe`・`git-gui.exe` など）だけ。`bash`・`ssh`・`ls` などは足されないので、PowerShell の `ssh` は Windows のものが使われる
 - Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
 - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
-- Claude Code（Windows）は、Git for Windows があれば Bash のツールを Git Bash で動かし、無ければ PowerShell のツールだけを使う（公式の setup の文書）
-
 ### Git Bash と WezTerm の設定 / 手順 2: 補足: 版
 
 - `git version` の版は、実行した日の最新
@@ -945,55 +736,6 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
 
 - Windows で出る `system` の行（インストーラが書いたもの）より、[Git](../almalinux-setup.md#git)の手順 4・5 で書く `global` の値が優先される
-
-### Windows 11 で Claude Code を入れる / 手順 2: 補足: 確かめていることと、Git for Windows の役割
-
-- `[Environment]::Is64BitProcess` は、インストーラが最初に見る値と同じ。スタートメニューの「Windows PowerShell (x86)」は、64 ビットの Windows でも 32 ビットで動く（公式の Troubleshoot installation）
-- native installer の置き場所は `%USERPROFILE%\.local\bin\claude.exe` に決まっている（公式の文書）。同じ名前のコマンドがほかにもあると、`PATH` の順で先のものが動き、版が食い違う（公式の Check for conflicting installations）
-- Git for Windows は任意（公式の Set up on Windows）。入っていれば、Claude Code は Git Bash を Bash のツールと Monitor のツールに使う。無ければ PowerShell のツールでコマンドを動かす
-- Claude Code が Git Bash を探す順は、`C:\Program Files\Git`・`C:\Program Files (x86)\Git` → `PATH` の `git` の `bin\bash.exe`（公式の Troubleshoot installation）。ほかの場所に入れたときは、設定の `env` の `CLAUDE_CODE_GIT_BASH_PATH` に `bash.exe` のパスを書く
-
-### Windows 11 で Claude Code を入れる / 手順 4: 補足: PATH の足し方
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-で使う--手順-5-補足-path-の足し方)
-
-- native installer は `PATH` を変えない（この項の手順 3 の補足）。公式の文書（Troubleshoot installation の Verify your PATH）は、Windows PowerShell に `[Environment]::SetEnvironmentVariable('PATH', "$currentPath;$env:USERPROFILE\.local\bin", 'User')` を貼る形で足す。この手順も同じ書き方で、あれば足さないようにしただけ
-- `SetEnvironmentVariable` の `User` は、レジストリの `HKCU\Environment` の `Path` に書き、開いているウィンドウに環境が変わったことを知らせる。そのため、この後に開いた PowerShell に効く（サインインし直さなくてよい）
-- 読むときに `%USERPROFILE%` のような書き方は展開され、書き戻すと展開した形（`C:\Users\<WIN_USER>\...`）で残る（.NET Framework の `Environment` の動き）。自分のユーザーの PATH なので、困ることは無いはず
-- 足すのは自分のユーザーの PATH だけで、システムの PATH（管理者の権限が要る）は変えない
-- 公式の文書は、画面からでも同じことができるとしている（システムのプロパティ → 環境変数 → ユーザー環境変数の `Path` → 新規）
-- 開いている PowerShell には効かない。同じ項の手順 5 で開き直す
-
-### Windows 11 で Claude Code を入れる / 手順 5: 補足: 開き直した PowerShell が読む PATH
-
-- 開き直した PowerShell は、同じ項の手順 4 で足した PATH と、Git for Windows を入れたばかりなら、その PATH も読む
-
-### Windows 11 で Claude Code を入れる / 手順 7: 補足: ログインの流れと、ログインの情報の置き場所
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#claude-code-windows-11-で使う--手順-8-補足-ログインの流れとログインの情報の置き場所)
-
-- 公式の文書（Authentication）: 最初の起動でブラウザが開く。`ANTHROPIC_API_KEY` を設定していると、ブラウザの代わりにその鍵を使ってよいか 1 度だけ聞かれる。ブラウザが Claude Code の待ち受けに戻れないとき（SSH のセッションなど）は、ブラウザに出たコードを端末に貼る
-
-- 開き直した PowerShell は `C:\Users\<WIN_USER>` で始まる。ホームのフォルダーの信頼は保存されない（[Claude Code の Remote Control: Windows 11 で使う](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)）ので、起動のたびに聞かれる。作業したいディレクトリに `cd` してから起動してもよい
-- ログインの情報は `%USERPROFILE%\.claude\.credentials.json` に置かれ、ユーザーのプロファイルのアクセス権を引き継ぐ（公式の文書）
-- Remote Control（[Claude Code の Remote Control: Windows 11 で使う](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)）は claude.ai のアカウントでのログインが要る（API キーでは使えない）
-
-### Windows 11 で Claude Code を入れる / 手順 8: 補足: 後ろに続けて貼らない理由
-
-- AlmaLinux 10 では、ブラケットペースト無しで、`claude auth status` の後ろに貼った行を読んで捨てた（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
-
-### Windows 11 で Codex CLI を入れる / 手順 2: 補足: 置き場所と PowerShell の設定
-
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
-
-- 実行ファイルの入口は `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`。`bin` は `%USERPROFILE%\.codex\packages\standalone\` 内の配布物を指すジャンクションになる
-- インストーラーがユーザー用 PATH と、今の PowerShell の PATH の両方を設定する
-- `&` でスクリプトブロックとして呼び、インストーラーの StrictMode・エラー処理の設定を呼び出し元に残さない
-- PowerShell 全体の ExecutionPolicy を変更する手順は不要
-
-### scoop・winget・WSL を上げる / 手順 3: 補足: SSH のセッションの項を貼り直す理由
-
-- scoop で上げると、新しいジャンクションができるため
 
 ### scoop・winget・WSL を上げる / 手順 5: 補足: wsl.exe --update
 
@@ -1008,31 +750,17 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 - これより後は、[scoop・winget・WSL を上げる](../windows-setup.md#scoopwingetwsl-を上げる)の手順 2・3 で、ほかのツールと一緒に上がる
 
-### Git for Windows・Firefox・WezTerm を上げる / 手順 4: 補足: 新しい版が無いとき
+### Git for Windows・Firefox・WezTerm を上げる / 手順 3: 補足: 新しい版が無いとき
 
 - winget に新しい版が無いのは、Firefox が自分で先に上げているからのこともある
 
-### Git for Windows・Firefox・WezTerm を上げる / 手順 5: 補足: winget での更新
+### Git for Windows・Firefox・WezTerm を上げる / 手順 4: 補足: winget での更新
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-の更新--手順-2-補足-winget-での更新)
 
 - winget の定義の `UpgradeBehavior` は `install`。今の Firefox を消さずに、同じ場所へ新しい版のインストーラを重ねて入れる。プロファイルと既定のブラウザーの設定はそのまま
 - winget が渡す `/PreventRebootRequired=true` は、使用中のファイルがあっても再起動が要る処理をしないスイッチ。Mozilla の文書は、動いている Firefox に重ねて入れるときにこれを付けると、入れ替えが途中で終わることがあると書いている
 - winget の定義は、Mozilla が新しい版を出してから、winget-pkgs に定義が足されたときに上がる。Firefox 自身の更新の方が先に上がることもある
-
-### AI エージェントとプラグインを上げる / 手順 2: 補足: 終了する理由
-
-- 先に Grok を終了するのは、動いている `grok.exe` は置き換えられないため
-
-### Windows 11 で Grok Build を入れる / 手順 2: 補足: インストーラーの動き
-
-- `%USERPROFILE%\.grok\downloads\grok-windows-<アーキ>.exe` を取ってきて、`%USERPROFILE%\.grok\bin\grok.exe` と `agent.exe` に写す（リンクではなくコピー）
-- Grok が使う Git（MinGit）を `%LOCALAPPDATA%\grok\git\<版>` に置く。zip は SHA-256 を確かめてから展開する
-- PowerShell の補完を `%USERPROFILE%\.grok\completions\powershell\grok.ps1` に書く（プロファイルには足さない）
-- 自分のユーザーの PATH の先頭に `%USERPROFILE%\.grok\bin` を足し、今の窓の `$env:Path` にも足す（`[Environment]::SetEnvironmentVariable('Path', …, 'User')`。[Claude Code の参考資料](#windows-11-で-claude-code-を入れる--手順-4-補足-path-の足し方)と同じ書き方で、`%USERPROFILE%` のような書き方は展開した形で書き戻される）
-- スクリプトの先頭で `$ErrorActionPreference = 'Stop'` にするので、`irm … | iex` ではなく `&` でスクリプトブロックとして呼び、今の窓にその設定を残さない（Codex CLI と同じ）。失敗したときの `exit 1` は、どちらの呼び方でも窓を閉じることがある
-
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
 
 ### GitLab の表を固定して見る / 手順 3: 補足: 全体表示にした表
 
@@ -1147,20 +875,6 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 | ストレージ センサー | 自分のユーザーの値（ダウンロードは消さない） | ポリシー（`AllowStorageSenseGlobal`）: 設定の画面が灰色になる |
 | マウス キー・ハイ コントラスト・ナレーターのショートカット | 入れない | 3 つのキーを同時に押すので誤って押しにくく、値は広くだけ |
 
-#### CopyQ を使う
-
-| 経路 | 状況 | 採否 |
-|---|---|---|
-| **winget の `hluk.CopyQ` を `--scope user` で** | 管理者が要らず、UniGet UI・PowerToys と同じ形。`## 更新` の winget の一覧で上がる | **採用** |
-| winget の `--scope machine` | `%ProgramFiles%\CopyQ` に入り、管理者の確認が要る | 不採用 |
-| scoop の `extras/copyq` | extras のバケットは git が要り（この文書の時点では Git for Windows が無い）、動いている間は更新を飛ばし、シムが GUI の終了を待つ | 不採用 |
-| Windows のクリップボードの履歴（Win+V） | 標準で入っている | 不採用（利用者の選択） |
-| Win+V を CopyQ に割り当てる | OS が予約しているキー | 不採用 |
-| インストーラの `/MERGETASKS=startup` | 起動のショートカットは作れるが、CopyQ の設定（`autostart`）とずれる | 不採用 |
-| ポリシー `AllowClipboardHistory` で Windows の履歴を禁止する | 設定の画面が灰色になる。既定でオフなので要らない | 不採用 |
-| **RDP や画面を取り込む遠隔操作で使うときは、`prevent_screen_capture` を切る** | 開いている窓にもすぐ効き、PC の画面で開いた窓にも付かない（コード）。PC の画面のスクリーンショットにも写る | **採用**（そのときだけ。この節の手順 7） |
-| RDP の中で窓を開き直す | 開き直せば外れるはず（コード）だが、上流の報告では RDP の中で起動しても空の窓が出る（確かめていない）。PC の画面へ戻して開くと、また付く。Chrome リモート デスクトップ（コンソールのセッション）では、開き直しても付く（コード） | 不採用 |
-
 #### PowerToys のユーティリティを絞る
 
 | 経路 | 状況 | 採否 |
@@ -1191,33 +905,6 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 | LAN から WSL への受信 | 開けない | Hyper-V のファイアウォールの規則: 管理者が要り、WSL の中のサーバーを LAN に開ける |
 | `hostAddressLoopback` | 書かない | LAN の IP あてでも Windows につながるが、`127.0.0.1` で足りる |
 | 既にある `.wslconfig` | 控えてから 1 行足す（`networkingMode` があれば止める） | 上書き: 画面などで書いた値が消える |
-
-#### リモートから再起動する手段を増やす
-
-- **既にある接続（SSH・RDP・Remote Control）からの再起動を第一にし、それが使えないときの経路を足した**
-  - SSH の sshd と RDP のサービスは再起動の後に自動で戻るので、再起動の引き金としても戻る口としても使える
-- **別の PC からの再起動は、Linux からも使える SMB を主に、Windows 同士の WinRM を従にした**
-  - SMB は AlmaLinux の `net rpc shutdown` でも Windows の `shutdown /m` でも使える。WinRM は Windows 同士で、開けるポートが 1 つで済む
-- **電源・帯域外の手段（スマートプラグ + BIOS の通電時起動・IP-KVM・Intel AMT/vPro）は、この文書では扱わない**（利用者の選択）
-  - 機器やマザーボードに依存し、設定が Windows の外になる。電源を切った後に起こすのは、既存の [Wake on LAN を使う](../windows-setup.md#wake-on-lan-を使う)が担う
-
-#### SSH で管理者・非管理者の PowerShell を使う
-
-- 対象は[手順書の「SSH で管理者・非管理者の PowerShell を使う」](../windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)。デスクトップで行う初期設定の項とは検証範囲を分け、SSH の操作と貼り付けの結果は[今回の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)へ置く
-- **管理者かどうかは実効トークンで確かめる**: Administrators のユーザーで SSH に入ると、通常のデスクトップの非管理者シェルと同じ権限にはならない。ユーザー名だけで判断せず、`WindowsPrincipal.IsInRole(Administrator)` と Windows 標準の `whoami.exe /groups` の整合性レベル・管理者 SID の属性を確認する。[Win32-OpenSSH の issue #1652](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
-- **同じユーザーの子だけ降格する**: busybox-w32 の `drop` で起動し、Medium、管理者 SID が拒否専用、`Admin : False` を確認する。同じユーザーの設定・ファイルを引き続き使える。親は管理者のまま待つので、子を `exit` で閉じて親へ戻る。UAC の対話的な昇格を SSH 内に作らず、この往復を使う。[busybox-w32 の drop の実装](https://github.com/rmyorston/busybox-w32/blob/master/miscutils/drop.c)、[OpenSSH のネットワークログオンと UAC の説明](https://github.com/PowerShell/Win32-OpenSSH/issues/1652)
-- **専用の固定版を照合して置く**: [公式配布ファイル](https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe)の x64 用 `FRP-6075-g169694ebd` と SHA-256 を組にし、`%LOCALAPPDATA%\setup-notes\bin\busybox.exe` に置く。[Scoop の busybox の定義](https://github.com/ScoopInstaller/Main/blob/master/bucket/busybox.json)は多数の shim とシェルの初期化を伴うため、降格だけに使う今回は採らない。既存の別ファイルは上書きせず、取得した一時ファイルを照合してから移す
-- **drop の後ろに `--` を置く**: 固定版は後続の `-NoLogo` なども自身のオプションとして読むため、`drop -- powershell.exe …`／`drop -- pwsh.exe …` にする。失敗した呼び出しと修正後の結果は検証記録に保持する
-- **先に対話 SSH、次に PowerShell**: SSH 先の Git Bash でシェル統合を読み、5.1 または 7 を起動する。[Windows OpenSSH の PTY のコマンド生成](https://github.com/PowerShell/openssh-portable/blob/latestw_all/contrib/win32/win32compat/w32-doexec.c)は、シェル・`-c`・コマンド本文を空白で連結する。`ssh -tt <host> '<複数のコマンド>'` では Bash の `-c` の引数の囲みが失われるため、本文では接続先の対話プロンプトから起動する
-- **接続元のクリップボードを渡す**: [WezTerm PR #39](https://github.com/ryo-aoki-pc/wezterm/pull/39) のローカル Windows 向けの Paste は、SSH 先の PowerShell にはそのまま適用できない。接続元では Linux の Wayland の `wl-paste`／X11 の `xclip`、Windows の標準 PowerShell を使い、同じ右クリック・Ctrl+Shift+V の操作から渡す
-- **本文を送る前に二段階で確認する（V2）**: 専用の Ctrl+Shift+F12 で受信ハンドラーを開き、識別子付きの `READY` を照合して、本文を含まない `WZP2:<nonce>:` のヘッダーだけを送る。正しいヘッダー全体を受信した `BODYREADY` を照合してから、改行を含まない `<Base64長>:<Base64>~WZE2:<nonce>~` の本文を送る。長さは UTF-8 のバイト数ではなく Base64 の文字数。受信処理が始まる前に本文を送らず、終端の nonce も同じ値にする
-- **PSReadLine の入力欄へ挿入する**: 検証・復号後の本文は PSReadLine の `Insert`／選択範囲の `Replace` で挿入し、Enter は送らない。CR とタブは既存の `Paste` と同じ扱いにし、空行・日本語・末尾改行を保持する
-- **本文の上限は UTF-8 で 64 KiB にする**: SSH 先の入力処理の負荷を限定し、65,536 バイトを超える本文は送らない。大きな本文はブロックを分ける。上限までの受信時間と、開発中に試した 1 MiB の結果は検証記録に分けて残す
-- **準備待ちに期限を設ける**: SSH 先は正しいヘッダーを受け取るまで開始から 5 秒を上限にし、ヘッダー前の普通の文字・早い `~`・Ctrl+C で期限を延ばさない。接続元の `READY`・`BODYREADY` 待ちはそれぞれ 3 秒にし、応答処理でも期限を確認する。同じ入力待機の識別子（epoch）で専用キーを再発火せず、版が違う応答も拒否する
-- **更新後は新しい SSH と PowerShell を起動する**: 受信処理の C# の型は読み込み済みのプロセス内では入れ替えられない。統合ファイルを更新した後は、手順どおり SSH へログインし直し、新しい PowerShell から読む。V1 の型が残る状態から V2 を初めて読むことと、同じ最終版を再びドットソースすることは、既存の V2 の型を更新する操作とは区別する
-- **終端も nonce で照合する**: 本文の受信開始後は、単独の `~` や別の nonce の終端では入力欄に戻らず、同じ `~WZE2:<nonce>~` まで読み捨てる。利用者が先に `~` を打っても、遅れて届く本文を親の入力欄へ流さない
-- **本文送信と受信の例外でも入力欄へ流さない**: 本文を送れた判定は送信処理が正常に終わった後で立て、途中で送信が失敗したときは取消用の `~WZE2:<nonce>~` を送る処理を行う。SSH 先の Console IO に例外が出たときも、正しいヘッダーを受信した後は同じ nonce の終端まで読み捨ててから入力欄へ戻る。ヘッダー受信前の例外では 5 秒の期限を延ばさない
-- **失敗時に本文を別のシェルへ送らない**: 取得失敗・無応答・取り消し・不正フレームでは通常貼り付けへ切り替えない。SSH 先の PSReadLine が無い、または専用キーの登録に失敗した場合は `unavailable` の目印を出し、貼り付けは通知して止める。ペインごとに配送状態と識別子を照合し、コマンド開始・例外・終了・親 Bash 復帰で SSH の PowerShell の目印を解除する。正しいヘッダーを受信した後の Ctrl+C は本文を末尾まで読み捨てるので、その後に配送が止まった場合は待機が続く可能性がある
 
 #### git-delta
 
@@ -1315,7 +1002,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#補足の実測)
 
-プライバシーと広告・表示と入力と音とストレージ・Edge の常駐・CopyQ の項の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
+プライバシーと広告・表示と入力と音とストレージ・Edge の常駐の項の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
 
 - 文書: [Manage connections from Windows operating system components to Microsoft services — Microsoft Learn](https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services) — 18.1（広告 ID・言語リスト・`Start_TrackProgs`）、18.6（オンライン音声認識）、18.16（フィードバックの頻度）、18.21（手書き入力）、18.22（アクティビティの履歴）
 - 文書: Policy CSP — [Privacy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy)・[Experience](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience)・[System](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system)・[Search](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search)・[Multitasking](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-multitasking)・[Storage](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-storage)・[ApplicationManagement](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement) — 採らなかったポリシーと、値が無いときの動き
@@ -1332,8 +1019,6 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - 文書: [New-Item（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1) — 既にあるレジストリのキーに `-Force` を付けると空のキーになる
 - 文書: [StartupBoostEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/startupboostenabled)・[BackgroundModeEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/backgroundmodeenabled)・[Configure Microsoft Edge](https://learn.microsoft.com/en-us/deployedge/configure-microsoft-edge)（Microsoft Learn）と [Get help with startup boost — Microsoft Support](https://support.microsoft.com/en-us/topic/get-help-with-startup-boost-ebef73ed-5c72-462f-8726-512782c5e442)
 - 文書: [Materials — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/develop/ui/materials) — 透明効果を切るとアクリルが単色になる
-- 文書: [RegisterHotKey](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey)・[SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)・[SetWindowDisplayAffinity](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowdisplayaffinity)・[GetSystemMetrics](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsystemmetrics)・[PowerToys Advanced Paste](https://learn.microsoft.com/en-us/windows/powertoys/advanced-paste) — Microsoft Learn
-- コード: [hluk/CopyQ](https://github.com/hluk/CopyQ)（`shared/copyq.iss`・`src/app/clipboardserver.cpp`・`src/platform/win/winplatform.cpp`・`CHANGES.md`）と [hluk/CopyQ#3621](https://github.com/hluk/CopyQ/issues/3621)（RDP で空の窓が出る報告）、[CopyQ の known-issues](https://copyq.readthedocs.io/en/latest/known-issues.html)、[winget-pkgs の hluk.CopyQ](https://github.com/microsoft/winget-pkgs/tree/master/manifests/h/hluk/CopyQ)、[Inno Setup の PrivilegesRequiredOverridesAllowed](https://jrsoftware.org/ishelp/topic_setup_privilegesrequiredoverridesallowed.htm)
 - コード: [microsoft/winget-dsc](https://github.com/microsoft/winget-dsc)（`Microsoft.Windows.Setting.Accessibility`）・[microsoft/WindowsDeveloperConfig](https://github.com/microsoft/WindowsDeveloperConfig)（`TaskbarEndTask`）
 - コード: [ReactOS の input.cpl](https://github.com/reactos/reactos/blob/master/dll/cpl/input/key_settings_dialog.c)・[Wine の sysparams.c](https://github.com/wine-mirror/wine/blob/master/dlls/win32u/sysparams.c)・[Chromium の animation_win.cc](https://chromium.googlesource.com/chromium/src/+/HEAD/ui/gfx/animation/animation_win.cc)・[Chromium の auto_launch_util.cc](https://chromium.googlesource.com/chromium/src/+/main/chrome/installer/util/auto_launch_util.cc)、[MDN の prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - 広く: [privacy.sexy の windows.yaml](https://github.com/undergroundwires/privacy.sexy/blob/master/src/application/collections/windows.yaml)・[Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
@@ -1351,12 +1036,6 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - 文書: [Advanced settings configuration in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)・[Accessing network applications with WSL（Mirrored mode networking）](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking)・[Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting)・[Hyper-V Firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)・[New-NetFirewallHyperVRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallhypervrule) — Microsoft Learn
 - コード: [microsoft/WSL](https://github.com/microsoft/WSL)（`src/windows/common/WslCoreConfig.cpp`・`WslCoreConfig.h`、日本語の訳の `localization/strings/ja-JP/Resources.resw`）
 
-#### OpenSSH サーバー
-
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#openssh-サーバー-補足の実測)
-
----
-
 ## 設定と確認方法の根拠
 
 - 「Windows Update」の手順 4・7: PSWindowsUpdate 2.2.1.5 は複数件の結果を 1 つの `Collection` として返す場合がある。`ForEach-Object { $_ }` で各更新を展開してから件数を数える。更新対象の Criteria と実際の適用コマンドは変えない。
@@ -1364,7 +1043,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - UniGet UI のユーザー向け [winget 定義](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/Devolutions/UniGetUI/2026.3.0/Devolutions.UniGetUI.installer.yaml)も `elevatesSelf` で、[インストーラー](https://github.com/Devolutions/UniGetUI/blob/v2026.3.0/InstallerExtras/CodeDependencies.iss)は Visual C++ Runtime などを必要に応じて導入する。共有 DLL の導入には[管理者権限が必要](https://learn.microsoft.com/en-us/cpp/windows/choosing-a-deployment-method?view=msvc-170)なため、ユーザー領域への導入でも管理者確認が出る場合がある。
 - 「自動起動と標準アプリ」の手順 2: `OneDriveSetup` は初回導入の項目で、対象へ正確な名前を追加した。`Run` の値・実行ファイルを削除せず、`RunOnce` と Active Setup も変えない。[Run と RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)と [OneDriveSetup を初回導入に使う例](https://learn.microsoft.com/en-us/troubleshoot/sharepoint/lists-and-libraries/cannot-open-onedrive-on-images-using-sysprep)を参照（後者は Windows 10 の Sysprep の例）。実アプリの次回起動の確認とは分けて扱う。
 - 「PC 全体の設定」の手順 7: 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
-- 「WSL の AlmaLinux 10 と自動サインイン」の手順 3・4: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
+- 「WSL の AlmaLinux 10」の手順 3・4: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
 
 実施環境と再実行の結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を参照。
 

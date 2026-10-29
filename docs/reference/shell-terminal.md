@@ -149,25 +149,10 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 - Homebrew の tmux のシステムの設定ファイルは `/home/linuxbrew/.linuxbrew/etc/tmux.conf`（`man tmux`）。`/etc/tmux.conf` は読まない
 - `escape-time`（Esc の後に待つ時間）は、3.7c の既定ですでに 10 ミリ秒なので足さない。Neovim などのために 0〜10 にする例は、古い版の既定の 500 ミリ秒を縮めるためのもの
-- Claude Code の公式ドキュメントには、tmux の設定の推奨は無かった（Shift+Enter のための `extended-keys` なども）。本書では足していない
-
 ### tmux の設定ファイル / 手順 2: 補足: 読み込みとホイール
 
 - 既存・新規のどちらの設定ファイルも、起動時と同じ順で読み込む。既存セッションのマウス設定にも反映する
 - tmux の中でホイールを上へ回すと、さかのぼって読める（右上に `[5/258]` のような位置が出る）。下まで回すか `q` で戻る
-
-### AlmaLinux 10 で Claude Code を tmux の中で動かす（任意） / 手順 1: 補足: claude auth status を最後に置く理由
-
-- ブラケットペースト無しで貼ると、`claude auth status --text` は、端末に残っていた後ろの行を読んで捨てた（後ろの `tmux -V` や `echo` が実行されなかった）
-
-### AlmaLinux 10 で Claude Code を tmux の中で動かす（任意） / 手順 2: 補足: ディレクトリ
-
-- ホームを選ばないのは、Claude Code がホームの信頼を保存しないため（[Windows の手順書](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)の手順 2）
-- 同じ節の手順 4 は、tmux の中で見た作業ディレクトリの名前を Remote Control のセッション名にする
-
-### AlmaLinux 10 で Claude Code を tmux の中で動かす（任意） / 手順 6: 補足: 切った後
-
-- tmux のセッションと、その中の Claude Code は、このホストで動き続ける
 
 ### HackGen Console NF / 手順 1: 補足: HackGen35 Console NF
 
@@ -540,7 +525,7 @@ Importing GPG key 0xCEA2757D:
 ### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 3: 補足: 版を指定して保存する理由
 
 - 7 の `Save-PSResource -Version 2.4.5` で、5.1 のユーザーのモジュールの場所へ保存する。プロファイルへ `Import-Module PSReadLine` の行は足さない
-- 次に開く 5.1 は、ユーザーのモジュールの場所にある新しい版を先に読む。同じユーザーの管理者の窓と、PSReadLine を読む SSH のセッションも対象になる
+- 次に開く 5.1 は、ユーザーのモジュールの場所にある新しい版を先に読む。同じユーザーの管理者の窓も対象になる
 - 5.1 の予測の元は `History` だけで、候補は同じ行に出る。7 の CompletionPredictor と `ListView` の設定は 5.1 に足さない
 - 同梱の 2.0.0 は残す。うまく貼れなかった場合の復旧では、この項で保存した 2.4.5 の版のフォルダーだけを消す
 - 5.1 の起動は約 0.2 秒延びる目安。計り方と貼り付けの確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
@@ -572,7 +557,7 @@ Importing GPG key 0xCEA2757D:
 
 - 5.1 の保存で新しい版を足しても、古い版は消えない。追加前後の版と場所を控え、使用中の窓を閉じてから、不要になった版のフォルダーだけを消す
 
-### Git for Windows・Firefox・WezTerm を上げる / 手順 6: 補足: 窓を閉じる理由
+### Git for Windows・Firefox・WezTerm を上げる / 手順 5: 補足: 窓を閉じる理由
 
 - WezTerm が動いていると、同じ項の手順 7（[Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 4 のブロック）が止まる
 
@@ -669,10 +654,8 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 #### Windows 11 で WezTerm を入れる
 
 - **Windows 11 では、インストーラを直接取って、`.sha256` と比べてから黙って動かす方式を採用した**
-  - [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う)が前提にしている `C:\Program Files\WezTerm` に、公式の形のまま入る
   - `.sha256` は同じリリースに置かれたものなので、分かるのは壊れていないことまで。署名が無いので、ほかに本物かを確かめる手立ては無い（winget の定義の sha256 も、同じファイルから bot が取ったもの）
   - winget の `wez.wezterm.nightly` は、入れられる日なら 1 行で済み `VCRUNTIME140.dll` の依存も入るが、入るかどうかが日によるので採らなかった。依存の再頒布可能パッケージだけは winget で入れる（[Windows 11 で使う](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3）
-
 #### シェルのツールを入れる
 
 - **5 つのツールを 1 つの手順で入れる**: `scoop install` は、版を指定しない 4 つと zoxide の 2 回に分ける
@@ -702,13 +685,12 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - **Windows で CLI ツールを組み込むシェルは、Git Bash を主にする**
   - WezTerm の自分用の設定の Windows の `default_prog` は Git Bash（`C:/Program Files/Git/bin/bash.exe -i -l`。`lua/shells.lua`）。PowerShell 7・Windows PowerShell・WSL は、起動メニュー（Ctrl+Shift+M）から開く
   - 共通の bash 設定（README の「共通の bash 設定を先に入れる」）が、fzf・starship・zoxide・eza・bat・fd を `command -v` で見つけたときだけ読むので、Git Bash では、各ツールを入れるだけで効く。`~/.bashrc` には書かない
-  - Claude Code の Bash ツールと、sshd の `DefaultShell`（[SSH の既定のシェルを Git Bash にする](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)）も Git Bash なので、bash の設定 1 つで済む
 - **PowerShell 7 は用途に合わせて設定する**: この項では starship と zoxide を、入っているときだけ読む。[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)では、補完・予測・PSFzf・eza の `ll` などを足す。yazi の `y` は足さない
 - **Windows PowerShell 5.1 は、貼り付けの設定を土台にする**: 任意の[キー操作](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で Emacs と ↑↓ の履歴検索、[開発の設定](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)で UTF-8 の関数・winget の補完・`ll` を足せる
   - プロファイルは、手順書を貼る管理者の conhost の窓でも読まれ、キーや補完にも効く
-  - starship と zoxide は 5.1 に足さない。見た目と起動の時間が変わり、SSH のセッションでは scoop の shim が RedirectionGuard で起動できないことがある
+  - starship と zoxide は 5.1 に足さない。見た目と起動の時間が変わる
 - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
-- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows の OpenSSH サーバーの `Add-WindowsCapability` など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 6 の後も既定は Windows PowerShell のままのはず（コードからの推測）
+- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows Update の PSWindowsUpdate など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 6 の後も既定は Windows PowerShell のままのはず（コードからの推測）
 
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
@@ -804,10 +786,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - [tmux — Getting Started](https://github.com/tmux/tmux/wiki/Getting-Started) — セッション・ウィンドウ・ペインとキーの説明
 - `man tmux`（`new-session` の `-A` と `-d`、`attach-session` の `-d`、`history-limit`、`mouse`、設定ファイルを読む場所）
 - [Homebrew の tmux の formula](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/t/tmux.rb)
-- [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`、`--spawn`、Limitations（SSH の切断後も残すには tmux か screen、10 分の終了）、4 時間以内の再開
-- [Interactive mode](https://code.claude.com/docs/en/interactive-mode) — `Ctrl+B`（tmux では 2 回）
-- [Claude Code](../ai-agents.md#claude-code) — 導入とログイン、`claude` のコマンドラインの使い方
-- [Claude Code の Remote Control（Windows）](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う) — 同じことを Windows で行う手順書
 - [Homebrew](../almalinux-setup.md) — Homebrew 本体の導入と、Homebrew 系に共通の注意
 
 #### HackGen Console NF

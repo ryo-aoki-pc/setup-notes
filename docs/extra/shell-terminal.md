@@ -74,7 +74,7 @@
 - **PSReadLine の予測は履歴を画面に出す**: 5.1 の PSReadLine 2.4.5 は履歴の候補を同じ行に出す。7 の `ListView` は候補を一覧に出す。5.1・7 の履歴のファイルは共通なので、画面を共有するときも対象になる
 - **PowerShell 7 の PSFzf は Emacs モードのキーを置き換える**: Ctrl+T は文字の入れ替えからパスの選択、Ctrl+R は履歴の検索から fzf の履歴の選択になる。選んだ内容は入力の行に入り、その場では実行しない
 - **道具を上げても、PowerShell 7 の補完の控えは変わらない**: scoop で gh・rg・fd・delta・bat・starship を上げた後は、[PowerShell の開発の設定を更新する](../shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
-- **Windows PowerShell 5.1 の PSReadLine 2.4.5 は同じユーザーの窓で使う**: [版を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)と、次に開く管理者の窓と、PSReadLine を読む SSH のセッションにも効く
+- **Windows PowerShell 5.1 の PSReadLine 2.4.5 は同じユーザーの窓で使う**: [版を上げる](../shell-terminal.md#windows-powershell-51-の-psreadline-を上げる)と、次に開く管理者の窓にも効く
 - **PowerShell の開発の設定は起動の時間にも影響する**: 7 の追加の行は合わせて約 0.1 秒、5.1 の PSReadLine 2.4.5 は約 0.2 秒の目安。PSFzf は最初に Ctrl+T・Ctrl+R を押したときに読み、モジュールの読み込みには約 0.23 秒掛かる
 - **Windows Terminal の copyOnSelect は、選んだだけでクリップボードを置き換える**: 手順書からコピーしたブロックも消え、右クリックが貼り付けになる。任意の[選択のコピー](../shell-terminal.md#windows-terminal-で選択した文字をコピーする)で true にできる
   - 複数行の警告を切っていると、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある

@@ -18,7 +18,7 @@
 
 ### システムの設定 / 手順 1: 補足: 変数の意味
 
-- `HOST_NAME` は、SSH・RDP・Samba・Syncthing などで、この PC を見分ける名前
+- `HOST_NAME` は、SSH・RDP・Samba などで、この PC を見分ける名前
 - 変数はその端末の中だけで有効なので、新しい端末を開いたら貼り直す
 
 ### システムの設定 / 手順 3: 補足: SSH の既定とログイン
@@ -488,112 +488,9 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - `restorecon` は、`~/.ssh` の SELinux のラベルを、sshd が読めるものに合わせる
 
-### Wake on LAN を使う / 手順 2: 補足: Wake-on の値
-
-- `Wake-on:` の `g` がマジック パケット
-- VirtualBox の VM の e1000 は、`Supports Wake-on: umbg` でも `d` のままだった
-
 ### 再起動と確認 / 手順 1: 補足: 再起動で効くもの
 
 - 「システムの設定」の手順 7 の kdump のメモリー（外したとき）、「日本語入力」の手順 2 で入れた ibus-anthy（入れたとき）、「GNOME の表示と入力」の手順 10 の拡大率、同じ項の手順 12 のトレイアイコン、「Flatpak と Flathub」の手順 4 の Flatseal のメニュー
-
-### Claude Code / 手順 1: 補足: 変数について
-
-- `CC_CHANNEL` は `baseurl` の末尾に埋まるだけ。入れた後でチャンネルを変えるときは、[stable チャンネルに切り替える（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-stable-チャンネルに切り替える任意)の手順で repo ファイルを書き換える（`stable` へ移るときは版が下がるので、`upgrade` ではなく `distro-sync` を使う）
-- ネイティブインストーラ版にある `autoUpdatesChannel` / `minimumVersion` の設定は dnf 版では効かない（更新を行うのが dnf のため）
-
-### Codex CLI / 手順 3: 補足: インストーラーが置くもの
-
-- Node.js・npm・Homebrew は不要。CPU に合う公式の配布物を取り、SHA-256 と導入後の版を確認する
-- `~/.local/bin/codex` と `~/.local/bin/codex-code-mode-host` にリンクを置き、配布物は `~/.codex/packages/standalone/` に保存する
-- `~/.local/bin` が PATH に無い場合、bash では `~/.bashrc` に `# >>> Codex installer >>>` から `# <<< Codex installer <<<` までのブロックを足す
-- 自分用の [bash の設定](https://github.com/ryo-aoki-pc/bash)を入れたホストでも、追加の設定を手書きする必要は無い
-
-### Codex CLI / 手順 3: 補足: パッケージマネージャーで入れない理由
-
-- 配布はある: Homebrew の cask `codex`（Linux でも入る）、scoop の main の `codex`、WinGet の `OpenAI.Codex`
-- どれも、そのパッケージマネージャーのコマンド（`brew upgrade --cask codex`・`scoop update codex`・`winget upgrade`）を打たないと上がらない
-- Homebrew の cask で入れた Codex（AlmaLinux 10）では、`codex update` が `Could not detect the Codex installation method.` で止まった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#codex-cli-付録-起動したときの更新とパッケージマネージャー2026-10-09)）
-- standalone のインストーラーで入れたものは、起動したときの知らせから Enter 1 回で上がる（[更新: 補足](#更新-補足-codex-cli-の起動したときの知らせ)）。利用者の希望（自動で最新になるなら公式の方法でよい）に近いので、こちらを採る
-
-### Codex CLI / 手順 3: 補足: Start Codex now? に n と答える理由
-
-- `Start Codex now?` に `n` と答えるのは、同じ節の手順 8 で起動するため
-
-### Codex CLI / 手順 4: 補足: 版
-
-- 検証時の版は `0.160.0`
-
-### Grok Build / 手順 1: 補足: 名前がぶつかるもの
-
-- インストーラーは `~/.grok/bin` に `grok` と `agent` の 2 つのリンクを置く（中身は同じ）
-- `~/.local/bin` が PATH にあって `~/.grok/bin` が無いときは、`~/.local/bin/grok`・`~/.local/bin/agent` にもリンクを置く。`ln -sf` なので、同じ名前のファイルがあっても置き換える
-- Cursor の CLI も `agent` の名前を使う。両方を使うなら、PATH の順でどちらが動くかを確かめる
-
-### Grok Build / 手順 2: 補足: インストーラーが置くものと `~/.bashrc`
-
-- 置くもの（AlmaLinux 10、1.0.50）
-  - 配布物: `~/.grok/downloads/grok-linux-x86_64`（約 175 MB の実行ファイル 1 つ）
-  - リンク: `~/.grok/bin/grok`・`~/.grok/bin/agent`（どちらも `../downloads/…` を指す）
-  - 補完: `~/.grok/completions/bash/grok.bash`・`zsh/_grok`
-  - 文書: `~/.grok/docs/user-guide/*.md`（利用者向けの文書 27 本。Web の文書と同じ内容の手元の写し）
-  - 設定: `~/.grok/config.toml`（`[cli]` と `installer = "internal"` の 2 行）
-- `~/.bashrc` の末尾に足すブロック（`SHELL` が bash のとき。zsh は `~/.zshrc`、fish は `config.fish`）
-
-  ```bash
-  # >>> grok installer >>>
-  export PATH="$HOME/.grok/bin:$PATH"
-  [[ -r "$HOME/.grok/completions/bash/grok.bash" ]] && source "$HOME/.grok/completions/bash/grok.bash"
-  # <<< grok installer <<<
-  ```
-
-  - 初回は元の `~/.bashrc` を `~/.bashrc.bak.<UNIX 時刻>` に控える。2 回目からは、前のブロックを消して末尾に足し直す（ブロックの前の空行が 1 つずつ増える）
-  - 書かせない設定（環境変数など）はインストーラーに無い。`SHELL` が bash・zsh・fish 以外のときだけ書かない
-  - `~/.bashrc` がリンクなら、リンク先のファイルを書き換える
-- setup-notes では `~/.bashrc` への追記を [ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash) に集めているが、このブロックはインストーラーが毎回書くので、手順書では消さずに残す（Codex CLI のインストーラーが足すブロックと同じ扱い）
-  - 共通の bash 設定より後ろで読まれるので、`~/.grok/bin` が PATH の先頭に来る
-- インストーラー（`install.sh`）は、配布物のハッシュや署名を確かめない（Windows の `install.ps1` が同梱の Git の zip の SHA-256 を確かめるだけ）
-
-### Grok Build / 手順 3: 補足: 版と PATH
-
-- 検証時の版は `1.0.50`
-- 新しく開いた端末で `grok` が通るのは、`~/.bashrc` のブロックが PATH を通すため
-
-### Grok Build / 手順 4〜6: 補足: ログインの流れ
-
-- `grok login` は SpaceXAI の OAuth（`auth.x.ai`）でログインする。ブラウザが開けないときは、`https://accounts.x.ai/oauth2/device?user_code=…` の URL と確認用のコードを出して待つ（`--device-auth` と同じ画面）
-- ログインの情報は `~/.grok/auth.json`（Unix では `0600`）に入り、自動で更新される。更新できなくなると、もう一度ログインを求められる（公式の文書 02-authentication）
-- `grok models` は、ログインしていなくても終了コード 0 で、`You are not authenticated.` と既定のモデルの一覧を出す（1.0.50）。Claude Code のプラグインの `/grok-build:check` も、この終了コードだけで「ログイン済み」と判定する（[コーディングエージェントの共同作業 の注意点](../extra/coding-agents.md#注意点)）
-
-### Grok Build / 手順 6: 補足: 検証時のモデルの一覧
-
-- ログインしていなくても出るモデルの一覧は、検証時は `grok-4.6` と `grok-4.5`
-
-### Grok Build / 手順 7: 補足: フォルダーの信頼
-
-- Grok は、信頼したフォルダーでだけ、起動のときにプロジェクトの指示書（AGENTS.md・CLAUDE.md など）・skills・MCP サーバー・hooks を読む
-- 信頼は `~/.grok/trusted_folders.toml` に残る。対話の画面で答えるか、`--trust` を付けて起動すると記録される
-- 信頼はそのリポジトリの下のディレクトリにも効く。入れ子の別の git のチェックアウトや、別の場所の worktree は、別に信頼する
-
-### Grok Build / 手順 7: 補足: Linux の sandbox を起動できないとき
-
-- Linux のファイルアクセス制限には Landlock が要る。カーネルの版が 5.13 以降でも、`CONFIG_SECURITY_LANDLOCK=y` で組み込まれ、起動中のカーネルで有効になっている必要がある。`/sys/kernel/security/lsm` に `landlock` があることを確かめる
-- bubblewrap は、拒否するパスの遮蔽などに使う。bubblewrap があることだけでは `read-only` の書き込み制限が効くと判断しない
-- `runtime-socket deny path /run/podman/podman.sock` の `Permission denied (os error 13)` は、ソケット本体に限らず、親ディレクトリを検索できないときも出る。Podman が停止し、ソケットが存在しなくても、親の検索権限が無ければ失敗する。親ディレクトリの検索権限を確かめ、ソケット本体の権限は緩めない
-- `read-only` は起動時に `/run/docker.sock` と `/run/podman/podman.sock` を調べるが、`workspace` は調べない。`workspace` が `could not apply the 'workspace' sandbox profile` で止まるときは、ソケットの親ではなく Landlock の側を確かめる（Grok 1.0.50 の起動時のシステムコールを実機で追った。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-sandbox-の再起動なしの追加検証)）
-- 親の検索権限を直した後も、カーネルの保護を適用できず起動を拒否する場合がある。Landlock が有効なカーネルで OS を起動してから、同じ sandbox を再試行する。Grok 1.0.50 の実機で確認した 2 つの原因と、対処の準備結果は[追加の調査記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-sandbox-の追加原因調査と対処の準備)にある。今回の実機ではユーザーの指示により対処を適用せず、調査と準備までで終了した
-
-### Grok Build / 手順 7: 補足: 会話のデータの扱い
-
-- `/privacy` は、設定の Coding data, retention, and training を開き、Opt in / Opt out を選ぶ（公式の文書 04-slash-commands）
-- 2026-07 に、ベータ版の `grok` がディレクトリの中身を xAI のクラウドのストレージに送ることがあったと報告された（Simon Willison のブログ、2026-07-15。二次情報）
-  - 同じ記事が引く xAI の発表は「2026-07-12 から、すべての Grok Build の利用者で既定の保存を止めた」「それまでに送られたデータは削除する」としている
-  - その後、ソースコードが Apache-2.0 で公開された（github.com/xai-org/grok-build）
-- 秘密情報のあるディレクトリで `grok` を起動しない。sandbox（`--sandbox read-only` など。Linux と macOS だけ。Linux では有効な Landlock と bubblewrap が要る）で書き込める場所を絞れる
-
-### AlmaLinux 10 で Claude Code を stable チャンネルに切り替える（任意） / 手順 3: 補足: 以後の更新
-
-- 以後の `sudo dnf upgrade claude-code`（[AlmaLinux 10 の更新](../ai-agents.md#almalinux-10-の更新)）は `stable` の版を追う
 
 ### 更新: 補足: Git の dnf upgrade
 
@@ -603,44 +500,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - Firefox 内蔵の自動更新機能は RPM 版では無効で（`/usr/lib/firefox` に一般ユーザーの書き込み権が無い）、更新は dnf 側で行う
 - 本体だけ上げて言語パックを取り残すと UI が英語に戻るので、両方まとめて上げる
-
-### 更新: 補足: dnf 版の Claude Code が自分で更新できない理由
-
-[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
-
-- dnf 版の更新には root 権限が要るため、起動中の Claude Code は自分で更新できない
-
-### 更新: 補足: Codex CLI の起動したときの知らせ
-
-[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
-
-- 端末の Codex は、起動したときに、最新の版を GitHub（`api.github.com/repos/openai/codex/releases/latest`）に問い合わせ、`~/.codex/version.json` に控える。控えが無いか古いときだけ問い合わせる
-- 控えた版が今の版より新しいと、起動の画面に `Update available!` を出す。`1. Update now` は、入れ方に合う更新のコマンドを動かす
-- standalone のインストーラーで入れたものでは、`sh -c 'curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh'` を動かす
-- Windows 用の `install.ps1` を使う同じ形のコマンドも、配布物の中にある
-- `codex update` も、同じインストーラーを動かす
-
-### 更新: 補足: Grok Build の自動の更新の仕組み
-
-[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
-
-- 設定の `[cli] auto_update`（既定は有効）で、対話の画面の起動のときに新しい版を確かめる。環境変数 `GROK_DISABLE_AUTOUPDATER` でも止められる（同梱の文書 05-configuration・26-config-reference）
-- 確かめた時刻は `~/.grok/version.json` の `checked_at` に残り、間もないうちは確かめない
-- 新しい版は `~/.grok/downloads/grok-<版>-<OS>-<CPU>` に入り、`~/.grok/bin` の `grok`・`agent` のリンクが付け替わる。前の配布物は残る
-- 更新の入れ方は、設定の `[cli] installer`（公式のインストーラーは `internal` を書く）で選ばれる（同梱の文書 26-config-reference）
-- 確かめた範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-付録-自動の更新とパッケージマネージャー2026-10-09)
-
-### 更新 / 手順 2: 補足: もう一度実行したとき
-
-[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
-
-- 公式インストーラーをもう一度実行すると、新しい配布物を導入する
-
-### 更新 / 手順 4: 補足: 古い版の配布物
-
-[AI コーディングエージェントのセットアップの「AlmaLinux 10 の更新」](../ai-agents.md#almalinux-10-の更新)の補足。
-
-- 古い版の配布物は `~/.grok/downloads` に残ることがある。使っている量は `grok du` で見る
 
 ### 共通の bash 設定・Homebrew・Flatpak を上げる / 手順 2: 補足: 自動更新
 
@@ -683,8 +542,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - **Ctrl+Alt+T（「GNOME の表示と入力」の手順 13）**: GNOME 49 の media-keys には端末を開くキーが無いので、カスタムのショートカットにする。コマンドは、新しい窓を開く `ptyxis --new-window`
 - **SSH を公開鍵だけにする**: ドロップインのファイル名を `40-pubkey-only.conf` にする。sshd は最初に読んだ値を使い、Workstation の `50-redhat.conf` より前に読ませるため
 - **dnf-automatic**: `dnf-automatic-install.timer` で、毎日更新を入れる（再起動はしない）。GNOME Software の自動の更新（`download-updates`）は切る。2 つの仕組みが同じ更新を落とし合わないようにするため
-- **Wake on LAN**: NetworkManager の接続の `802-3-ethernet.wake-on-lan` に `magic` を入れる。`ethtool -s` で変えた値は再起動で消えるが、接続の設定は接続を上げるたびに入る
-
 #### EPEL と RPM Fusion
 
 - **署名を確かめて入れる**: Configuration の `--nogpgcheck` の例は使わず、keys ページの方法（鍵を先に取り込み、`localpkg_gpgcheck=1`）にした（「EPEL と RPM Fusion」の手順 4 の補足）
@@ -702,11 +559,11 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 | **winget の `Git.Git` を `--scope machine` で** | 上流のインストーラを、winget が sha256 を確かめてから黙って動かす。`C:\Program Files\Git` に入り、`winget upgrade` で上がる。管理者の権限が要る | **採用** |
 | winget の `--scope user` | 同じインストーラで、winget はスコープのスイッチを渡さない。入る先はインストーラが権限で決める | 不採用（PC 全体に入れるので、winget にも `machine` を指定する） |
 | 上流のインストーラを落として、画面で入れる | 選択を画面で選べる。版の確認と更新は手作業 | 不採用 |
-| scoop の `main/git` | Git for Windows の持ち運び版（PortableGit）を `~\scoop\apps\git` に入れ、`git` などを `~\scoop\shims` に置く。`C:\Program Files\Git\bin\bash.exe` が無い | 不採用（[Windows の OpenSSH サーバー](../windows-setup.md#ssh-の既定のシェルを-git-bash-にする)が `C:\Program Files\Git` を前提にしている。[Windows 11 の初期設定](../windows-setup.md)も、scoop の git を使わない） |
+| scoop の `main/git` | Git for Windows の持ち運び版（PortableGit）を `~\scoop\apps\git` に入れ、`git` などを `~\scoop\shims` に置く。`C:\Program Files\Git\bin\bash.exe` が無い | 不採用（[Windows 11 の初期設定](../windows-setup.md)は、PC 全体に入れた Git for Windows を使う） |
 
 - **インストーラの選択は既定のまま**（winget の `--custom` や `--override` で `/o:` を渡さない）
   - 本書は `system` を変えず `global` で上書きするので、`system` の `core.autocrlf=true`・`pull.rebase=false`・`init.defaultBranch=master` は既定のままでよい（[実施手順](../almalinux-setup.md#git)の手順 6 で確かめる）
-  - 既定の PATH の選択（`cmd` だけを足す）で、PowerShell・scoop・Claude Code から `git` が見つかる。Unix の道具まで足す選択は、Windows の `find`・`sort` を隠す（インストーラの画面の警告）
+  - 既定の PATH の選択（`cmd` だけを足す）で、PowerShell・scoop から `git` が見つかる。Unix の道具まで足す選択は、Windows の `find`・`sort` を隠す（インストーラの画面の警告）
   - `--override` は、winget が渡す黙って動かすスイッチ（`/SP- /SILENT …`）ごと置き換える（winget のソース）
 - **Git for Windows は、scoop の `scoop update` が使う git も兼ねる**
   - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（[Windows 11 で Git for Windows を入れる](../windows-setup.md#git-for-windows)の手順 3 の補足）
@@ -771,56 +628,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（[注意点](../extra/almalinux-setup.md#注意点)）に当たる注意が無く、閉じている間の更新も動く
 - **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Windows 11 で使う](../windows-setup.md#firefox)の手順 5 の補足）
 
-#### Claude Code
-
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#claude-code-選択した方針)
-
-| 経路 | EL10 aarch64 での状況 | 採否 |
-|---|---|---|
-| **公式 dnf リポジトリ** | `downloads.claude.ai/claude-code/rpm/{stable,latest}`。aarch64 の RPM があり、署名鍵で検証される。更新は `dnf upgrade`（**自動更新はしない**） | **採用**（他のツールと同じ dnf 管理に揃う） |
-| ネイティブインストーラ（`curl -fsSL https://claude.ai/install.sh \| bash`） | `~/.local/bin/claude` に入り、**バックグラウンドで自動更新する**。root 不要。ただし更新経路が dnf の外になり、`~/.local/share/claude/versions/` に版が積まれる | 不採用（自動更新が要るなら有力） |
-| npm（`npm install -g @anthropic-ai/claude-code`） | Node.js 22 以上が要る。中身は同じネイティブバイナリ | 不採用 |
-
-- どれを選んでも入るのは同じネイティブバイナリで、Node.js は実行時に使わない
-- `ripgrep` は同梱されている（Alpine など musl 系以外では別途入れなくてよい）
-
-**`stable` と `latest` の違い**:
-
-- `stable` は 1 週間ほど遅れて、大きな不具合のある版を飛ばす
-- `latest` は出た版をすぐ配る
-- リポジトリが別 URL になっているだけで、切り替えは `baseurl` の書き換え（[stable チャンネルに切り替える（任意）](../ai-agents.md#almalinux-10-で-claude-code-を-stable-チャンネルに切り替える任意)）
-
-**既定を `latest` にした理由**:
-
-- 本書の目的が最新版を入れることだから。`stable` のままだと 1 週間ほど遅れる
-- ネイティブインストーラ（`install.sh` が取ってくる `bootstrap.sh`）も、まず `claude-code-releases/latest` が指す版を取ってくる
-- 不具合に当たったときの逃げ道として、`stable` へ下げる節を用意した
-
-- **インストーラは `& ([scriptblock]::Create(...)) <チャンネル>` の形で動かす**: 公式の文書がチャンネルを選ぶときに使う形。既定の `irm … | iex` は、インストーラの設定（`Set-StrictMode` など）を、入れた後の PowerShell に残す（[Windows 11 で使う](../ai-agents.md#windows-11-で-claude-code-を入れる)の手順 3 の補足）
-- **`PATH` は本書で足す**: インストーラも `claude install` も足さず、足し方を出すだけなので、公式の文書の Verify your PATH と同じ書き方で、自分のユーザーの PATH に足す（同じ項の手順 4）
-- **署名は入れた後に確かめる**: インストーラは sha256 しか照らさないので、公式の文書の `Get-AuthenticodeSignature` で `claude.exe` の署名を見る（同じ項の手順 6）。インストーラの中で動く前の確かめにはならない
-- **Git for Windows を前提にした**: 公式の文書では任意だが、Claude Code の Bash のツール（と Monitor のツール）が Git Bash を使う。[Windows 11 の初期設定](../windows-setup.md)のリードの順で、先に入れる
-
-#### Grok Build
-
-- xAI の公式のインストーラー（`https://x.ai/cli/install.sh`・`install.ps1`）を使う
-  - 公式のインストーラーで入れた Grok は、対話の画面の起動のときに、自分で新しい版に上がる（[更新: 自動の更新の仕組み](#更新-補足-grok-build-の自動の更新の仕組み)）。利用者の希望（自動で最新になるなら公式の方法でよい）に合う
-  - Node.js を増やさず、両 OS で同じ配布元・同じ `grok update` で上げられる
-- パッケージマネージャーでは入れない
-  - 配布はある: Homebrew の cask `grok-build`（Linux でも入る）、WinGet の `xAI.GrokBuild`（portable）、npm の `@xai-official/grok`。scoop の main と extras には無い（2026-10-09）
-  - Homebrew と WinGet の版は、`brew upgrade --cask grok-build`・`winget upgrade` を打たないと上がらない
-  - npm の版は Node.js が要る
-  - Homebrew の cask で入れた Grok でも、`grok update` は Homebrew を使わずに Grok 自身で入れる
-  - `grok update --force-reinstall` を打つと、Homebrew の外（`~/.grok/bin`・`~/.grok/downloads`）に別の Grok が入り、Homebrew の版はそのままだった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#grok-build-homebrew-の-cask)）
-  - Homebrew で使うなら、自動の更新を止め（`[cli] auto_update = false`）、`brew upgrade --cask grok-build` で上げる形になる
-  - WinGet で入れた Grok では、`grok update` は WinGet のコマンドを出すだけで何も変えない
-  - Homebrew の formula の `grok`（`brew install grok`）は Grok Build ではない（正規表現でログを読む別のツール）
-- ログインは grok.com のアカウント（ブラウザ）で行う
-  - API キー（`XAI_API_KEY`）は、ログインが無いときだけ使われ、API の従量課金になる
-  - 利用者の契約がサブスクリプション（SuperGrok / X Premium）なので、API キーの手順は置かない
-- 非公式の grok-cli（superagent-ai の `grok-dev`）は採らない。同じ `grok` の名前と `~/.grok` を使い、2026-05 から更新が止まっている（調査時）
-- 確認用のディレクトリでの起動は [Codex CLI](../ai-agents.md#codex-cli) と同じ形にした（`~/grok-sandbox`）
-
 ### 参照
 
 - [sudoers(5)](https://www.sudo.ws/docs/man/sudoers.man/) — `verifypw`（`sudo -v` のときの認証の条件）と `NOPASSWD`、`/etc/sudoers.d` の読み込み
@@ -832,7 +639,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - mutter 49.4 の `/usr/share/glib-2.0/schemas/org.gnome.mutter.gschema.xml` — `experimental-features` の `scale-monitor-framebuffer` と `xwayland-native-scaling` の説明
 - [gnome-shell-extension-appindicator](https://github.com/ubuntu/gnome-shell-extension-appindicator) — AppIndicator / KStatusNotifierItem のトレイアイコン（EPEL のパッケージの上流）
 - [dnf-automatic](https://dnf.readthedocs.io/en/latest/automatic.html) — `dnf-automatic-install.timer` と `/etc/dnf/automatic.conf`
-- `man sshd_config`（最初に読んだ値が使われる）と `man nm-settings-nmcli`（`802-3-ethernet.wake-on-lan`）
+- `man sshd_config`（最初に読んだ値が使われる）
 - [Windows 11 の初期設定](../windows-setup.md) — Windows 11 側の同じ形の手順書
 
 #### EPEL と RPM Fusion
@@ -872,7 +679,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [Git for Windows のリリースノート](https://github.com/git-for-windows/build-extra/blob/main/ReleaseNotes.md) — 2.56.0 の `mingw64` から `ucrt64` への変更
 - [microsoft/winget-cli](https://github.com/microsoft/winget-cli) — `ShellExecuteInstallerHandler.cpp`（インストーラに渡すスイッチ）、`ManifestCommon.cpp`（Inno Setup の既定のスイッチ）、`UninstallFlow.cpp`（削除のコマンド）、`doc/Settings.md`（スコープの既定）
 - [Inno Setup の Uninstaller Command-Line Parameters](https://jrsoftware.org/ishelp/topic_uninstcmdline.htm) — 削除のプログラムの `/SILENT`
-- [Claude Code の Set up Claude Code](https://code.claude.com/docs/en/setup) — Windows で Git for Windows があれば Bash のツールに Git Bash を使うこと、`CLAUDE_CODE_GIT_BASH_PATH`
 - [Pro Git 8.1 Git の設定](https://git-scm.com/book/ja/v2/Git-%E3%81%AE%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA-Git-%E3%81%AE%E8%A8%AD%E5%AE%9A) — `core.autocrlf` の説明
 
 #### git-delta
@@ -930,43 +736,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [sxyazi/yazi — yazi-cli/src/env/env.rs（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-cli/src/env/env.rs) — `ya env` の出力
 - [sxyazi/yazi — yazi-config/preset/yazi-default.toml（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-config/preset/yazi-default.toml) — 上流の既定の `[opener]`（Windows の `edit` は `code`）
 - [sxyazi/yazi — yazi-plugin/preset/plugins/mime-local.lua（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-plugin/preset/plugins/mime-local.lua)・[yazi-binding/src/process/command.rs（v26.9.1）](https://github.com/sxyazi/yazi/blob/v26.9.1/yazi-binding/src/process/command.rs) — `YAZI_FILE_ONE` の起動（シェルを挟まない）
-
-#### Claude Code
-
-- [Advanced setup — Claude Code Docs](https://code.claude.com/docs/en/setup) — dnf / apt / apk リポジトリの設定、チャンネル、署名の検証。Windows 11 の節は、Set up on Windows・Install a specific version（チャンネルを選ぶ形）・Update manually・Binary integrity and code signing
-- [Troubleshoot installation and login — Claude Code Docs](https://code.claude.com/docs/en/troubleshoot-install) — インストールが失敗したときの切り分け。Windows 11 の節は、Verify your PATH・Check for conflicting installations・`claude.exe` missing after an update on Windows・Claude Code does not support 32-bit Windows・Git Bash を探す順
-- [CLI reference — Claude Code Docs](https://code.claude.com/docs/en/cli-reference) — `claude` のオプションとサブコマンド（[使い方の基本](../ai-agents.md#claude-code-の使い方の基本)）
-- [Interactive mode](https://code.claude.com/docs/en/interactive-mode) / [Commands](https://code.claude.com/docs/en/commands) — セッションの中のキーとスラッシュコマンド
-- [Run Claude Code programmatically](https://code.claude.com/docs/en/headless) — `-p` と `--output-format`
-- [Connect Claude Code to tools via MCP](https://code.claude.com/docs/en/mcp) — `claude mcp` とスコープ
-- [Continue local sessions from any device with Remote Control](https://code.claude.com/docs/en/remote-control) — `claude remote-control`
-- `man dnf.conf`（`gpgcheck`、`baseurl`）
-- [Authentication — Claude Code Docs](https://code.claude.com/docs/en/authentication) — 最初の起動のログインの流れと、Windows のログインの情報の置き場所（`.credentials.json`）
-- [winget-pkgs の Anthropic.ClaudeCode](https://github.com/microsoft/winget-pkgs/tree/master/manifests/a/Anthropic/ClaudeCode) / [scoop の main/claude-code](https://github.com/ScoopInstaller/Main/blob/master/bucket/claude-code.json) — Windows 11 で採らなかった経路の定義
-- [about_Preference_Variables（`$OutputEncoding`）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1) — Windows PowerShell 5.1 が native のコマンドへパイプで渡す文字コード
-- [Windows 11 の初期設定](../windows-setup.md) — 同じ PC で先に行う設定（貼り付けの設定と、この文書を通す順）
-- [Claude Code の Remote Control](../ai-agents.md#claude-code-の-remote-control-windows-11-で使う) — Windows 11 の節で入れた Claude Code を、SSH の切断後も Remote Control で使う
-
-#### Codex CLI
-
-- [OpenAI: Codex CLI](https://learn.chatgpt.com/docs/codex/cli) — 導入・起動・更新
-- [公式 Linux/macOS インストーラー](https://chatgpt.com/codex/install.sh)
-- [公式 Windows インストーラー](https://chatgpt.com/codex/install.ps1)
-- [OpenAI: Authentication](https://learn.chatgpt.com/docs/auth) — ChatGPT・API キー・デバイスコード・資格情報の保存
-- [OpenAI: Windows sandbox](https://learn.chatgpt.com/docs/windows/windows-sandbox) — Windows 11、初回の管理者承認
-- [OpenAI: Config basics](https://developers.openai.com/codex/config-basic) — ユーザー設定
-- [Homebrew: codex](https://formulae.brew.sh/cask/codex) — Homebrew の cask（使わなかった経路）
-
-#### Grok Build
-
-- [xAI: Grok Build CLI の発表](https://x.ai/news/grok-build-cli)（2026-05-25。対象は SuperGrok と X Premium+）
-- [xAI: Grok Build の文書](https://docs.x.ai/build/overview) — 導入・ログイン・使い方
-- 手元の文書 `~/.grok/docs/user-guide/`（1.0.50 に同梱）: 01-getting-started・02-authentication・05-configuration・12-project-rules・14-headless-mode・18-sandbox・22-permissions-and-safety・26-config-reference
-- [公式の Linux / macOS のインストーラー](https://x.ai/cli/install.sh)・[公式の Windows のインストーラー](https://x.ai/cli/install.ps1)
-- [xai-org/grok-build](https://github.com/xai-org/grok-build) — ソース（Apache-2.0）
-- [Homebrew: grok-build](https://formulae.brew.sh/cask/grok-build) — Homebrew の cask（使わなかった経路）
-- [xAI: Models](https://docs.x.ai/developers/models) — モデルと料金（API キーで使うとき）
-- [Simon Willison: xai-org/grok-build, now open source](https://simonwillison.net/2026/Jul/15/grok-build/)（二次情報）
 
 ## 省略できない初期設定
 

@@ -12,342 +12,14 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - 設定を更新するときは[更新](#更新)を使う
-- AI コーディングエージェント（Claude Code・Codex CLI・Grok Build）は、[AI コーディングエージェントのセットアップの「Windows 11 で使う」](ai-agents.md#windows-11-で使う)で入れる
 - 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で入れる
 - フォント（HackGen Console NF）・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイル・PowerShell の開発の設定は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で入れる
-- WireGuard・Neovim・Samba のクライアント・Syncthing は、[WireGuard のセットアップ](wireguard.md#windows-11-で使う)・[Neovim のセットアップ](neovim.md#windows-11-で使う)・[Samba のセットアップ](samba.md#windows-11-で使う)・[Syncthing のセットアップ](syncthing.md#windows-11-で使う)の「Windows 11 で使う」で入れる
+- Neovim と Samba のクライアントは、[Neovim のセットアップ](neovim.md#windows-11-で使う)と[Samba のセットアップ](samba.md#windows-11-で使う)の「Windows 11 で使う」で入れる
 
 > [!WARNING]
-> - ロックを止め、自動サインイン・インラインの sudo を有効にすると、**PC に触れる人が管理者として操作できる**
-> - Hello 以外のサインインと SSH・RDP も有効にすると、**パスワードを知る人も管理者として操作できる**（SSH は LAN から）
-> - 人が触れる場所では、[PC 全体の設定](#pc-全体の設定)の手順 7 と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 5 は行わない
-
-## Windows の導入
-
-- Windows 11 を新しく入れ、AlmaLinux 10 とのデュアルブートで使う
-
-### Windows と AlmaLinux のデュアルブート
-
-- Windows 11 を新しく入れ、AlmaLinux 10 用の未割り当て領域を残す
-- 前提: Rufus で Windows 11 のインストールメディアを作成済み。カスタムの指定は次の箇条書きで確かめる
-- 実行場所: この PC の画面・機器、セットアップのコマンド プロンプト、導入後の管理者の Windows PowerShell（5.1）。窓はこの項の中で開く
-
-- **インストールメディアは、Rufus で作成済みとする**。「インストーラーをカスタムしますか?」でオンにした項目は次の 7 つ（[選択した方針](reference/windows-dual-boot.md#選択した方針)）
-  - 「4GB以上のRAM、セキュアブート及びTPM 2.0の要件を削除」「オンラインアカウントの要件を削除」「ローカルアカウントを次の名前で作成:」
-  - 「地域設定をこのユーザーと同じものに設定」「データ収集を無効化」「BitLocker 自動デバイス暗号化を無効化します。」「利便性向上パッチ(Microsoftの各種ソフトウェアの無効化)」
-  - **「⚠サイレント⚠ ディスクの削除とインストール:」はオフにしてある**こと（オンだと、最初に見つかったディスクを確かめずに消して入れる）
-  - ビルド 26200 以降の ISO で出る「Windows CA 2023署名のブートローダーを使用する」「インストール時にSkuSiPolicy.p7bを適応する」もオフのまま（既定でオフ）
-
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)・[注意点](extra/windows-dual-boot.md)
-
-- この項の手順 1〜3・6〜8 は、PC の画面と機器で行う。**この項の手順 4・5 は、セットアップのコマンド プロンプトに手で 1 行ずつ打つ**（貼り付けられない）
-- この項の手順 9〜13 は、入れた Windows の管理者の Windows PowerShell 5.1 に **Ctrl+V で貼る**。[貼り付けの設定](#貼り付けの設定)より前に右クリックで貼ると、行が逆順になる
-
-- この項の手順 10・12・13 は、条件に当たるときだけ行う
-- やり直すときは、この項の手順 3 から始める。この項の手順 5 のパーティションが残っていれば、この項の手順 4・5 は飛ばしてよい
-
-- 両方の OS を入れた後、Windows から次回だけ AlmaLinux を起動したいときは、[QEFI Entry Manager を使う節](#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)へ進む
-
-> [!CAUTION]
-> **この項の手順 5 の `clean` で、選んだディスクのパーティションとデータをすべて消す（取り戻せない）。** ディスクの番号は、この項の手順 4 で大きさを見て確かめる。
-
-1. PC の UEFI（BIOS）の設定画面で、起動の設定を確かめる。
-
-   - 起動のモードは UEFI にする（CSM・Legacy の起動は切る）
-   - Secure Boot と TPM は有効のままにする
-   - Secure Boot の項目に「Microsoft 3rd Party UEFI CA」を許可する設定があれば、許可にする
-   - USB からの起動を許可する
-   - 設定画面の開き方（電源を入れた直後に押すキー）と項目の名前は、PC のメーカーごとに違う
-
-1. LAN ケーブルを抜き、Wi-Fi にもつながない状態にする。
-
-   - つなぐのは、この項の手順 7 でデスクトップが出てから
-
-1. Rufus の USB を挿し、PC の起動メニューから UEFI で起動して、セットアップの最初の画面まで進める。
-
-   - 起動メニューを出すキー（F12・F11・Esc など）は PC ごとに違う。USB が 2 つ出るなら、名前が「UEFI:」で始まる方を選ぶ
-   - 黒い画面に `UEFI:NTFS` の文字と `Secure Boot status: Enabled` が出てから、Windows のセットアップが始まる
-   - 「言語設定を選択」の画面が出たら、まだ「次へ」を押さずにこの項の手順 4 へ進む
-   - Secure Boot の違反で止まるなら、この項の手順 1 の 3rd Party UEFI CA を見直す
-   - やり直しのときに「アップグレードを開始し、インストール メディアから起動したようです。」の窓が出たら、「いいえ」（クリーン インストール）を押す
-
-1. Shift+F10 でコマンド プロンプトを開き、UEFI で起動したことと、入れる先のディスクの番号を確かめる。
-
-   ```text
-   wpeutil UpdateBootInfo
-   reg query HKLM\System\CurrentControlSet\Control /v PEFirmwareType
-   diskpart
-   list disk
-   ```
-
-   - 1 行ずつ打って Enter を押す（3 行目から `DISKPART>` のプロンプトになる）
-   - コマンド プロンプトのキー配列は日本語（106/109）。`\` は画面では `¥` と表示される（同じ文字）
-   - Enter の前に、打った文字が画面に正しく出ているかを見る
-   - ノート PC で Shift+F10 が効かなければ、Shift+Fn+F10 を押す
-   - 2 行目の結果が `PEFirmwareType    REG_DWORD    0x2` なら UEFI で起動している。`0x1` なら BIOS（Legacy）の起動なので、この項の手順 1・3 からやり直す
-   - `list disk` に、ディスクの番号・大きさ・空き・GPT の印が並ぶ。**Windows を入れるディスクの番号を、大きさで見分けて控える**
-   - Rufus の USB も 1 台のディスクとして並ぶ（USB メモリの大きさのもの）。選ばない
-
-1. ディスクを消して GPT にし、ESP 2 GiB・MSR・Windows・回復のパーティションを作る（取り戻せない）。
-
-   ```text
-   select disk 0
-   clean
-   convert gpt
-   create partition efi size=2048
-   format quick fs=fat32 label="System"
-   create partition msr size=16
-   create partition primary size=204800
-   format quick fs=ntfs label="Windows"
-   create partition primary size=1024
-   format quick fs=ntfs label="Recovery"
-   set id="de94bba4-06d1-4d40-a16a-bfd50179d6ac"
-   gpt attributes=0x8000000000000001
-   list partition
-   exit
-   exit
-   ```
-
-   - `DISKPART>` のプロンプトに 1 行ずつ打つ。**1 行目の `0` は、この項の手順 4 で控えたディスクの番号に直す**
-   - **7 行目の `204800` は Windows のパーティションの大きさ**（単位は MB。204800 = 200 GiB）。Windows に割り当てたい大きさに直す。ディスクの残りは、AlmaLinux 用の未割り当て領域になる
-   - `list partition` に 4 つのパーティション（`システム` 2048 MB・`予約済み` 16 MB・`プライマリ` Windows の大きさ・`回復` 1024 MB）が並べばよい
-   - 途中で打ち間違えたら、`select disk 0`（控えた番号）から打ち直す
-
-1. セットアップに戻り、この項の手順 5 の「Windows」のパーティションを選んでインストールする。
-
-   - 「言語設定を選択」→「キーボード設定を選択」→「セットアップ オプションの選択」→「プロダクト キーを入力してください」→「イメージの選択」→「適用される通知とライセンス条項」の順に進む
-   - 「キーボード設定を選択」の「キーボードの種類」は、日本語のキーボードなら「日本語キーボード (106/109 キー)」にする
-   - 「セットアップ オプションの選択」では「Windows 11 のインストール」を選び、「ファイル、アプリ、設定など、すべてが削除されることに同意します」に印を付ける
-   - プロダクト キーが無ければ「プロダクト キーがありません」を押し、「イメージの選択」でエディション（Windows 11 Pro など）を選ぶ
-   - **「Windows 11 をインストールする場所の選択」では、この項の手順 5 で作った Windows の大きさのパーティション（`ディスク 0 パーティション 3: Windows` のように、この項の手順 4 で控えたディスクのパーティション 3）を選び、「次へ」を押す**
-   - この画面では「パーティションの削除」を押さず、「未割り当て領域」も選ばない
-   - 「インストール準備完了」の画面で「インストール」を押す。途中で何度か再起動する
-   - 最初の再起動のときに USB を抜く
-   - **注意**: 「適用される通知とライセンス条項」の画面には「戻る」が無い。Esc を押すと「本当に終了しますか?」が出て、「はい」で PC が再起動する（この項の手順 3 からやり直す）
-
-1. 初回の起動を待ち、Rufus で作ったローカル アカウントでデスクトップまで進む。
-
-   - 「ネットワークに接続しましょう」の画面が出たら、「インターネットに接続していません」を押す
-   - 地域・キーボード・ライセンス・プライバシー・アカウントの質問は出ない。ロック画面が出たら、キーを押すとそのままサインインする
-   - デスクトップが出たら、LAN ケーブルや Wi-Fi につないでよい
-   - ローカル アカウントのパスワードは空。**次にサインインするときに「サインインする前にユーザーのパスワードを変更する必要があります。」が出る**ので、「OK」を押して新しいパスワードを決める（「パスワード」の欄は空のまま）
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、右側の「管理者として実行する」を押す（Ctrl+Shift+Enter でも同じ）
-   - 「ユーザー アカウント制御」で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
-
-1. パーティションの並び・ESP の大きさ・未割り当て領域・WinRE の場所を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   $d = (Get-Partition -DriveLetter C).DiskNumber
-   Get-Partition -DiskNumber $d | Format-Table PartitionNumber, DriveLetter, Size, Type -AutoSize
-   Get-Disk -Number $d | Format-List Number, PartitionStyle, Size, LargestFreeExtent
-   reagentc /info
-   ```
-
-   - パーティションが `System`（`2147483648`）・`Reserved`（`16777216`）・`Basic`（C:）・`Recovery`（`1073741824`）の順に 4 つ並べばよい
-   - `PartitionStyle` が `GPT` で、`LargestFreeExtent` が AlmaLinux 用に残した大きさ（バイト）になっていればよい
-   - `reagentc /info` の Windows RE の状態が `Enabled` で、場所が `…\partition4\Recovery\WindowsRE`（回復パーティション）なら、この項の手順 10 は飛ばす
-   - 場所が `partition3`（C:）か空なら、この項の手順 10 で回復パーティションへ移す
-
-1. WinRE が回復パーティションに無いときだけ、回復パーティションへ移す。
-
-   ```powershell
-   reagentc /disable
-   reagentc /enable
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   reagentc /info
-   ```
-
-   - 最後の `reagentc /info` で、場所が `…\partition4\Recovery\WindowsRE` になればよい
-
-1. 高速スタートアップ・BitLocker・タイムゾーンの状態を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' | Format-List HiberbootEnabled
-   Get-BitLockerVolume -MountPoint C: | Format-List VolumeStatus, ProtectionStatus
-   Get-TimeZone | Format-List Id
-   ```
-
-   - `HiberbootEnabled : 0` なら高速スタートアップは切れている。`1` なら、この項の手順 12 で切る。`0` ならこの項の手順 12 は飛ばす
-   - `VolumeStatus : FullyDecrypted` と `ProtectionStatus : Off` なら、BitLocker は使われていない。暗号化されていたら[注意点](extra/windows-dual-boot.md#注意点)
-   - `Id : Tokyo Standard Time` なら、この項の手順 13 は飛ばす。違えば、この項の手順 13 で直す
-   - Home エディションで `Get-BitLockerVolume` が無いと出たら、代わりに `manage-bde -status C:` で見る
-
-1. 高速スタートアップが有効なときだけ、切る。
-
-   ```powershell
-   Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' -Name HiberbootEnabled -Value 0 -Type DWord
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' | Format-List HiberbootEnabled
-   ```
-
-   - `HiberbootEnabled : 0` が出ればよい
-
-1. タイムゾーンが東京でないときだけ、直す。
-
-   ```powershell
-   Set-TimeZone -Id 'Tokyo Standard Time'
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-TimeZone | Format-List Id
-   ```
-
-   - `Id : Tokyo Standard Time` が出ればよい
-   - 設定アプリの「時刻と言語」→「日付と時刻」でも同じ
-
-#### Windows と AlmaLinux のデュアルブート: 次回だけ AlmaLinux で起動する
-
-- Windows から、次回だけ AlmaLinux で起動するように指定する
-- 前提: [Windows と AlmaLinux のデュアルブート](#windows-と-almalinux-のデュアルブート)を通し、AlmaLinux 10 を導入済み。PC の起動メニューから AlmaLinux を起動できる
-- 実行場所: Windows のブラウザ・エクスプローラー、管理者の Windows PowerShell（5.1）。PowerShell はこの項の手順 2 で開く
-
-- QEFI Entry Manager と PowerShell は管理者として起動する。PowerShell のブロックは Ctrl+V で貼る
-
-- 通常の起動順（`BootOrder`）や GRUB の既定の選択は変更しない
-- 初回はこの項の手順 1 から行う。展開済みなら、この項の手順 2 で管理者の Windows PowerShell を開き、同じ項の手順 5 へ進む
-- 同梱 CLI に表示の不具合があるため、Windows 標準の BCDEdit も使って確認する（この項の[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-dual-boot.md)・[参考資料](reference/windows-dual-boot.md)）
-- 再起動前に取り消すときは、[次回起動の指定を取り消す](#windows-と-almalinux-のデュアルブート-次回起動の指定を取り消す)へ進む。QEFI Entry Manager を閉じるだけでは取り消せない
-
-1. Windows のブラウザで、公式の Windows 向け ZIP をダウンロードする。
-
-   - [公式リリース v0.5.0](https://github.com/Inokinoki/QEFIEntryManager/releases/tag/v0.5.0) の Assets から `QEFI.Entry.Manager.for.Windows.Qt6.8.3.zip` を選ぶ
-   - 「ダウンロード」フォルダーに、この名前で保存する（末尾に `(1)` などが付いたら、既存のファイルと区別してからこの名前にする）
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - [Windows と AlmaLinux のデュアルブート](#windows-と-almalinux-のデュアルブート)の手順 8と同じように、スタートメニューから「管理者として実行する」で開く
-   - この窓は、GUI で指定した後の確認にも使うので残しておく
-   - **次の手順は、管理者の窓が開いてから貼る**
-
-1. ダウンロードした ZIP の SHA256 を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   if ((Get-FileHash -LiteralPath "$env:USERPROFILE\Downloads\QEFI.Entry.Manager.for.Windows.Qt6.8.3.zip" -Algorithm SHA256 -ErrorAction Stop).Hash -ne 'FC2D83F1369AF02A48072644B08CA7D3D4B2547B955A2088918E7C1179051A10') {
-       throw '中断: ZIP の SHA256 が確認した配布物と一致しません。展開せず、取得元とファイル名を確かめてください。'
-   } else {
-       'SHA256 は確認した配布物と一致しました。'
-   }
-   ```
-
-   - 一致したと出れば、この項の手順 4 へ進む。エラーなら中断する
-   - 「ダウンロード」を別の場所へ移している場合は、この項の手順 1 で `%USERPROFILE%\Downloads` に保存する
-
-1. エクスプローラーで、ZIP の中身をすべて展開する。
-
-   - ZIP を右クリックして「すべて展開」を選び、展開先を `%LOCALAPPDATA%\Programs\QEFIEntryManager` にする
-   - 展開先が既にある場合は上書きせず中断する
-   - 展開先の直下に `QEFIEntryManager.exe`・`qefibootmgr.exe`・`Qt6Core.dll` があり、`platforms` フォルダーもあることを確かめる
-   - ZIP の中から直接起動せず、exe だけを別のフォルダーに移さない
-
-1. 管理者の PowerShell で、現在の起動順と AlmaLinux のエントリを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
-   if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。' }
-   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
-   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
-   ```
-
-   - CLI の `BootOrder` の並びと、AlmaLinux の `Boot` の後ろの 4 桁の番号を控える。AlmaLinux の行は `*` 付き（有効）であることを確かめる
-   - BCDEdit の AlmaLinux の項目の `identifier`（識別子）と `path` を控える。名前だけでなく、CLI の EFI パスと同じブートローダーを指すことを確かめる（通常は `\EFI\almalinux\shimx64.efi`）
-   - BCDEdit の `{fwbootmgr}`（ファームウェアのブート マネージャー）の `displayorder` も控える
-   - `{fwbootmgr}` に `bootsequence` が既にあれば中断する
-   - エラー・空の起動順・AlmaLinux が無い・無効・同名の候補を区別できない場合も中断する。番号を推測せず、エントリの追加・削除はしない
-   - **次の手順は、両方の一覧と AlmaLinux の対応を確かめてから行う**
-
-1. エクスプローラーで、QEFI Entry Manager を管理者として起動する。
-
-   - 展開先の `QEFIEntryManager.exe` を右クリックして「管理者として実行」を選ぶ
-   - UAC は、展開した実行ファイルであることを確かめてから「はい」を押す（配布物は署名無し）
-   - `Boot Entries` タブに、この項の手順 5 と同じエントリが並ぶことを確かめる
-   - 起動できない・一覧が出ない場合は中断する。Windows の保護を無効にして進めない
-
-1. GUI で AlmaLinux を選び、次回の起動先に指定する。
-
-   - この項の手順 5 で控えた番号と名前の行を選び、`Set reboot` を押す
-   - `Reboot to …` の対象が AlmaLinux であることを確かめ、`Do you want to reboot now?` には `No` を選ぶ
-   - **`No` は「今は再起動しない」で、予約の取り消しではない**
-   - `Make default`・`Move up`・`Move down`・`Save` は使わない
-   - **次の手順は、`No` を選んでから管理者の PowerShell に貼る**
-
-1. 管理者の PowerShell で、次回の起動先と通常の起動順を読み戻す。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
-   if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。再起動しないでください。' }
-   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
-   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。再起動しないでください。' }
-   ```
-
-   - `BootNext` が、この項の手順 5 で控えた AlmaLinux の 4 桁の番号と一致することを確かめる
-   - BCDEdit の `{fwbootmgr}` に `bootsequence` があり、その識別子が AlmaLinux の項目と一致することも確かめる（`BootNext: 0000` だけでは成功とみなさない）
-   - `BootOrder` と `{fwbootmgr}` の `displayorder` が、どちらもこの項の手順 5 と同じ並びであることを確かめる
-   - どれかが一致しない・予約が出ない・エラーが出た場合は、再起動せず中断する。自分が設定した予約だけを[取り消す節](#windows-と-almalinux-のデュアルブート-次回起動の指定を取り消す)で解除する
-
-1. Windows で作業を保存して、再起動する。
-
-   - 未保存の作業を保存し、スタートメニューの電源から「再起動」を選ぶ
-   - AlmaLinux の GRUB のメニューが出たら、AlmaLinux の項目を選ぶ
-
-1. AlmaLinux の画面で、起動できたことを確かめる。
-
-   - AlmaLinux のログイン画面からログインし、デスクトップが出ることを確かめる
-
-#### Windows と AlmaLinux のデュアルブート: 次回起動の指定を取り消す
-
-- 再起動前に、自分が指定した次回だけの起動先を取り消す
-- 前提: [次回だけ AlmaLinux で起動する](#windows-と-almalinux-のデュアルブート-次回だけ-almalinux-で起動する)で予約し、まだ再起動していない。QEFI Entry Manager は同じ場所へ展開済み
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-
-- 解除するのは次回だけの予約。AlmaLinux のエントリ自体は消さず、通常の起動順も変えない
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
-   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
-
-1. BCDEdit で、取り消す予約を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
-   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
-   ```
-
-   - `{fwbootmgr}` の `bootsequence` が自分の指定したエントリの識別子であることを確かめる。別の対象や不明な対象なら中断する
-   - `{fwbootmgr}` に `bootsequence` が無ければ、この項の手順 3 は飛ばす
-
-1. 自分が指定した予約が残っているときだけ、解除する。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -N
-   if ($LASTEXITCODE -ne 0) { throw '中断: 次回起動の指定を解除できませんでした。' }
-   ```
-
-   - オプションは大文字の `-N`。`-B`（エントリ削除）や `-O`（起動順削除）は使わない
-   - `BootNext deleted` が出ても成功と決めず、この項の手順 4 で確認する
-
-1. 予約が消え、通常の起動順が変わっていないことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   & "$env:LOCALAPPDATA\Programs\QEFIEntryManager\qefibootmgr.exe" -v
-   if ($LASTEXITCODE -ne 0) { throw '中断: QEFI の一覧を取得できませんでした。' }
-   & "$env:SystemRoot\System32\bcdedit.exe" /enum firmware
-   if ($LASTEXITCODE -ne 0) { throw '中断: BCDEdit の一覧を取得できませんでした。' }
-   ```
-
-   - BCDEdit の `{fwbootmgr}` に `bootsequence` が無く、`BootOrder` と `displayorder` が指定前の並びならよい
-   - CLI の `BootNext: 0000` は、予約が消えた根拠にも、エントリ `0000` の予約が残っている根拠にもならない
-   - BCDEdit に予約が残る・一覧の取得に失敗する・起動順が違う場合は、解除できたとみなさず中断する
-
----
+> - ロックを止め、インラインの sudo を有効にすると、**PC に触れる人が管理者として操作できる**
+> - Hello 以外のサインインと RDP も有効にすると、**パスワードを知る人も管理者として操作できる**
+> - 人が触れる場所では、[PC 全体の設定](#pc-全体の設定)の手順 7 は行わない
 
 ## 基本の設定
 
@@ -827,7 +499,7 @@
    - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。中断し、既存の導入元と設定を確かめる
    - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
    - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 3）
+   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2）
 
 1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
 
@@ -999,7 +671,7 @@
 ### サインイン・検索・キーボード
 
 - サインイン・検索・ショートカット・キー配列を設定する
-- 前提: 無し。デュアルブートの時計を変えるときは、AlmaLinux の時計が UTC になっている
+- 前提: 無し
 - 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者の Windows PowerShell（5.1）を開く。
@@ -1071,19 +743,6 @@
    - `中断: 別の Scancode Map がある` が出たら、ほかのキーの割り当てがある（両方を使うなら、その値を手で直す。数を 1 つ増やし、終わりの印の前に `1D 00 3A 00` を足す）
    - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
 
-1. AlmaLinux とデュアル ブートし、AlmaLinux の時計を UTC にしているときだけ、Windows も UTC にする。
-
-   ```powershell
-   Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' -Name RealTimeIsUniversal -Type DWord -Value 1
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation' | Format-List RealTimeIsUniversal
-   ```
-
-   - `RealTimeIsUniversal : 1` が出ればよい
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後。時刻がずれていたら、設定の「時刻と言語」→「日付と時刻」の「今すぐ同期」で合わせ直す
-   - AlmaLinux の `timedatectl` の `RTC in local TZ:` が `yes`（`/etc/adjtime` の 3 行目が `LOCAL`）なら、この手順は飛ばす
-   - デュアル ブートしない PC でも、この手順は飛ばす
-
 1. US 配列（101/102 キー）のキーボードを使うときだけ、キーボードの種類を変える。
 
    ```powershell
@@ -1135,10 +794,10 @@
 
 ---
 
-### WSL の AlmaLinux 10 と自動サインイン
+### WSL の AlmaLinux 10
 
-- WSL に AlmaLinux 10 を入れ、必要なら Windows の自動サインインを有効にする
-- 前提: [WSL と再起動](#wsl-と再起動)で機能を入れて再起動し、[Microsoft Store の更新](#microsoft-store-の更新)で winget を用意してある。状態確認は、通した項の値だけを確かめる
+- WSL に AlmaLinux 10 を入れる
+- 前提: [WSL と再起動](#wsl-と再起動)で機能を入れて再起動してある。状態確認は、通した項の値だけを確かめる
 - 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -1170,7 +829,7 @@
      - `ComputerName` が設定した名前（大文字）、`LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`（[PC 全体の設定](#pc-全体の設定)を通したとき）
      - `CtrlEnter : AddLine`（[貼り付けの設定](#貼り付けの設定)を通したとき）
      - `ScancodeMap : 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00`（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-     - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 7 を行ったなら `kbd101.dll`
+     - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら `kbd101.dll`
      - `RemoteDesktop : 0`・`LanCategory : Private`（[ネットワークとリモート](#ネットワークとリモート)を通したとき。Home の `RemoteDesktop` は確かめない）
      - `Hypervisor : True`（[WSL と再起動](#wsl-と再起動)を通したとき）
 
@@ -1197,19 +856,6 @@
    ```
 
    - `AlmaLinux-10` の行の `VERSION` が `2` で、`NAME="AlmaLinux"` と `VERSION="10.2 …"` の形の行が出ればよい
-
-1. 自動サインイン（Sysinternals の Autologon）を入れて起動し、パスワードを入れて有効にする。
-
-   ```powershell
-   winget install --exact --id Microsoft.Sysinternals.Autologon --source winget --scope user --accept-source-agreements --accept-package-agreements
-   $exe = Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\WinGet\Packages" -Recurse -Filter Autologon64.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
-   if (-not $exe) { Write-Error '中断: Autologon64.exe が見つからない' } else { Start-Process -FilePath $exe -ArgumentList '-accepteula' }
-   ```
-
-   - UAC の確認が出たら「はい」。Autologon の窓が開く
-   - `Username` にこの PC のユーザー名、`Domain` に PC の名前（入っている値のまま）、`Password` にこのユーザーのパスワードを入れ、`Enable` を押す
-   - 効くのは、次に起動したときから（起動のときに Shift を押していると、その回は飛ばす）
-   - 人が触れる場所にある PC では、この手順は行わない（リードの `[!WARNING]`）
 
 ---
 
@@ -1772,92 +1418,6 @@
 
 ---
 
-### CopyQ を使う
-
-- Windows のクリップボードの履歴を CopyQ に持たせる
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)で winget を用意してある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-
-- **この項の手順 3 で CopyQ を起動し、この項の手順 5・6 は画面で行う**
-- CopyQ は窓を持つアプリなので、`copyq.exe` のコマンドの結果は、`| Write-Output` を付けないと出ない
-- **CopyQ の履歴は、暗号化されずにディスクに残る**。パスワードなどをコピーするときは、[注意点](extra/windows-setup.md#注意点)を読む
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-
-1. CopyQ を、自分のユーザーに入れる。
-
-   ```powershell
-   winget install --exact --id hluk.CopyQ --source winget --scope user --accept-source-agreements --accept-package-agreements
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget list --exact --id hluk.CopyQ
-   ```
-
-   - 最後の表に `CopyQ` と `hluk.CopyQ` の行が出ればよい
-   - 管理者の確認（UAC）は出ないはず。winget が、出るかもしれない旨の行を出すことはある
-
-1. CopyQ を起動する。
-
-   ```powershell
-   Start-Process -FilePath "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
-   ```
-
-   - 窓を待たずに PowerShell に戻り、通知領域（「^」の中のことがある）に CopyQ のアイコンが出る
-   - 見つからない旨のエラーが出たら、前に別の場所へ入れた CopyQ があるので中断し、既存の導入元と設定を確かめる
-   - **次の手順は、アイコンが出てから貼る**（起動の前に貼ると、サーバーにつながらない旨が出る）
-
-1. サインインのときに CopyQ が起動するようにし、Windows の履歴（Win+V）がオフかを確かめる。
-
-   ```powershell
-   & {
-     $copyq = "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe"
-     & $copyq config autostart false | Out-Null
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     & $copyq config autostart true | Write-Output
-     Test-Path -LiteralPath (Join-Path ([Environment]::GetFolderPath('Startup')) 'copyq.lnk')
-     'EnableClipboardHistory: {0}' -f (Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Clipboard' -ErrorAction SilentlyContinue).EnableClipboardHistory
-   }
-   ```
-
-   - `true`・`True`・`EnableClipboardHistory:` の 3 行が出て、最後の右が空か `0` ならよい
-   - 最後の右が `1` なら、Windows の履歴もオン。この項の手順 5 で切る。空か `0` なら、この項の手順 5 は飛ばす
-
-1. Windows の履歴がオンだったときだけ、設定の画面で切る。
-
-   ```powershell
-   Start-Process 'ms-settings:clipboard'
-   ```
-
-   - 「クリップボードの履歴」をオフにする
-   - オフでも、Win+V は Windows のパネルを開く。そこで「有効にする」は押さない
-   - **次の手順は、設定を閉じてから行う**
-
-1. CopyQ の設定の画面で、窓を開くグローバル ショートカットを割り当てる。
-
-   - 通知領域の CopyQ のアイコンをクリックして窓を開き、「ファイル」→「設定...」（Ctrl+P）→「ショートカット」→「グローバル」で、「メインウィンドウの表示切り替え」にキーを足して「OK」を押す
-   - 次のキーは避ける
-     - Win+V（Windows の履歴のパネル）
-     - Win+Shift+V と Ctrl+Win+Alt+V（[アプリを入れる](#アプリを入れる)の手順 5 の PowerToys の高度な貼り付け）
-     - Ctrl+Shift+V（多くのアプリの、書式なしの貼り付け）
-     - Ctrl+Space（[表示と入力](#表示と入力)の手順 8 の IME）
-   - Windows キーを含むキーは、OS が予約していて効かないことがある。効かなくても、画面には何も出ない
-   - 管理者の窓には、CopyQ から自動では貼れない。クリップボードには入るので、右クリックで貼る
-
-1. RDP や画面を取り込む遠隔操作でこの PC を使うときだけ、スクリーンショットや録画に写らない設定を切る。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\Programs\CopyQ\copyq.exe" config prevent_screen_capture false | Write-Output
-   ```
-
-   - `false` が出ればよい（CopyQ を起動し直さなくてよい）
-   - サーバーにつながらない旨が出たら、この項の手順 3 で CopyQ を起動してから貼り直す
-   - 画面を取り込む遠隔操作は、Chrome リモート デスクトップなど
-   - 「ファイル」→「設定...」→「全般」の「スクリーンショットや録画に写らない」のチェックを外して「OK」を押すのと同じ
-   - **注意**: 切ると、PC の画面のスクリーンショット・録画・画面共有に、CopyQ の窓（クリップボードの履歴）が写る
-
----
-
 ### PowerToys のユーティリティを絞る
 
 - PowerToys の使わないユーティリティを、設定ファイルで切る
@@ -2241,7 +1801,7 @@
    - Caps Lock だけを押しても、Caps Lock のランプは点かず、大文字にもならない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - 日本語の配列（JIS）のキーボードでは、「英数」（Caps Lock）のキーが Ctrl になる（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - Ctrl+Space を押すたびに、IME のオンとオフが入れ替わる（タスクバーの「あ」と「A」）（[表示と入力](#表示と入力)を通したとき）
-   - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 7 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
+   - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
 
 1. エクスプローラー・タスクバー・スタートが変わったことを確かめる。
 
@@ -2276,7 +1836,7 @@
 
 ## ネットワークとリモート操作
 
-- LAN とリモート デスクトップ、WSL のネットワーク、Wake on LAN、リモートからの再起動、RDP の切断。WireGuard は、[WireGuard のセットアップの「Windows 11 で使う」](wireguard.md#windows-11-で使う)で入れる
+- LAN とリモート デスクトップ、WSL のネットワーク、RDP の切断
 
 ### ネットワークとリモート
 
@@ -2374,13 +1934,13 @@
 ### WSL のネットワークをミラーにする
 
 - WSL 2 のネットワークを、Windows と同じ IP を使うミラーに変える
-- 前提: [WSL と再起動](#wsl-と再起動)と[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)で WSL 2 の AlmaLinux 10 を導入済み。Windows の SSH を確かめるときは[OpenSSH サーバー](#openssh-サーバー)を通してある
+- 前提: [WSL と再起動](#wsl-と再起動)と[WSL の AlmaLinux 10](#wsl-の-almalinux-10)で WSL 2 の AlmaLinux 10 を導入済み
 - 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
-- **この項の手順 4・7 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
+- **この項の手順 4・6 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
 - ミラーにして変わること
-  - WSL からこの PC の Windows のサーバー（[OpenSSH サーバー](#openssh-サーバー)など）には、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
-  - Windows が使っているポートは、WSL の中では使えない。Windows の sshd が 22 番で待っていると、WSL の中の sshd は 22 番を使えない
+  - WSL からこの PC の Windows のサーバーには、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
+  - Windows が使っているポートは、WSL の中では使えない
   - Docker のポートの公開と、一部の VPN には、既知の問題がある（[参考資料](reference/windows-setup.md)）
 - 書くのは `networkingMode` だけ。DNS・ファイアウォール・プロキシ・メモリの値は既定のまま。LAN から WSL の中のサーバーに入るための Hyper-V のファイアウォールの規則は、この項では作らない
 - 画面で変えるなら、スタートメニューの「Linux 用 Windows サブシステム設定」→「ネットワーク」→「ネットワーク モード」（同じファイルに書く）
@@ -2436,7 +1996,7 @@
    ```
 
    - `作った:` か `足した:` の行（ファイルがあったときは、その前に `控えた:`）と、`[wsl2]` の次の行が `networkingMode=mirrored` の中身が出ればよい
-   - 控えは `%USERPROFILE%\.wslconfig.windows-setup.bak`。ファイルがあって、控えが無いときだけ作る（この項の手順 6 で使い、戻すと消える）
+   - 控えは `%USERPROFILE%\.wslconfig.windows-setup.bak`。ファイルがあって、控えが無いときだけ作る（この項の手順 5 で使い、戻すと消える）
    - `中断: networkingMode の行がもうある` が出たら、何も書いていない。その行を手で `networkingMode=mirrored` にするか、設定の画面で変える
    - 効くのは、この項の手順 4 で WSL を止めた後
 
@@ -2449,20 +2009,10 @@
    ```
 
    - `mirrored` が出ればよい
-   - `ミラー化されたネットワーク モードはサポートされていません` の行が出て `nat` なら、この PC ではミラーを使えない（理由はその行に出る）。この項の手順 6・7 で戻す
+   - `ミラー化されたネットワーク モードはサポートされていません` の行が出て `nat` なら、この PC ではミラーを使えない（理由はその行に出る）。この項の手順 5・6 で戻す
    - その行が無く `nat` なら、`.wslconfig` が読まれていない（この項の手順 2 で中身を確かめる）
    - `wslinfo` が無い旨が出たら、`wsl.exe --distribution AlmaLinux-10 -- ip -4 -br addr` の IP が、Windows の LAN の IP（`ipconfig`）と同じならミラー
    - WezTerm の WSL のタブは切れているので、開き直す
-
-1. Windows の OpenSSH サーバーを入れたときだけ、WSL から `127.0.0.1` の 22 番に届くことを確かめる。
-
-   ```powershell
-   wsl.exe --distribution AlmaLinux-10 -- bash -c 'exec 3<>/dev/tcp/127.0.0.1/22 && head -n 1 <&3'
-   ```
-
-   - `SSH-2.0-OpenSSH_for_Windows_` で始まる行が出ればよい
-   - WSL から Windows に ssh でつなぐときは、`ssh <WIN_USER>@127.0.0.1` にする（[注意点](extra/windows-setup.md#注意点)の OpenSSH サーバー）
-   - `Connection refused` が出たら、Windows の sshd が動いていない（[OpenSSH サーバー](#openssh-サーバー)の手順で確かめる）
 
 1. この PC でミラーを使えなかったときだけ、`.wslconfig` を元に戻す。
 
@@ -2488,7 +2038,7 @@
    - `控えから戻した:`（ファイルがあったとき）か `消した:`（この項で作ったとき）が出ればよい
    - 控えた後に設定の画面などで変えた値も、控えたときに戻る
    - `中断:` が出たら、`.wslconfig` をメモ帳で開き、`networkingMode=mirrored` の行を消して保存する
-   - 効くのは、この項の手順 7 で WSL を止めた後
+   - 効くのは、この項の手順 6 で WSL を止めた後
 
 1. この PC でミラーを使えなかったときだけ、WSL を止めて、NAT に戻ったことを確かめる。
 
@@ -2503,239 +2053,16 @@
 
 ---
 
-### Wake on LAN を使う
-
-- 有線 LAN の別の PC から、この PC の電源を入れられるようにする
-- 前提: [PC 全体の設定](#pc-全体の設定)で休止状態とアダプターの省電力を切ってある。有線 LAN が接続されている
-- 実行場所: 管理者の Windows PowerShell（5.1）、この PC の UEFI の画面、LAN の別の PC。PowerShell はこの項の手順 1 で開く
-
-- **この項の手順 4 で再起動して UEFI の画面に入り、この項の手順 5 は UEFI の画面、この項の手順 6 はこの PC、この項の手順 7 は LAN の別の PC で行う**
-- Windows の側の値は Microsoft の文書の標準の名前（`*WakeOnMagicPacket`）だけを変える。アダプターに独自の項目があれば、この項の手順 3 の表で確かめる
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く
-
-1. 変数を設定する。
-
-   ```powershell
-   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # 有線 LAN の接続（自動）。<LAN_IF>
-   'LAN_IF = {0}' -f $LAN_IF
-   ```
-
-   - Wi-Fi の名前が出たら、`$LAN_IF = 'イーサネット'` のように有線 LAN の名前に直す
-
-1. アダプターのマジック パケットでの起動を有効にし、MAC アドレスを表示する。
-
-   ```powershell
-   if (-not $LAN_IF) {
-     Write-Error 'この項の手順 2 の $LAN_IF が空'
-   } else {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Set-NetAdapterAdvancedProperty -Name $LAN_IF -RegistryKeyword '*WakeOnMagicPacket' -RegistryValue 1 -NoRestart
-     Get-NetAdapterAdvancedProperty -Name $LAN_IF | Where-Object { $_.RegistryKeyword -like '*Wake*' -or $_.DisplayName -like '*Wake*' } | Format-Table DisplayName, DisplayValue, RegistryKeyword
-     Get-NetAdapter -Name $LAN_IF | Format-List Name, InterfaceDescription, MacAddress
-   }
-   ```
-
-   - 表に `*WakeOnMagicPacket` の行があり、`DisplayValue` が有効の旨（`Enabled` か「有効」）になればよい
-   - `MacAddress` の値を控える（この項の手順 7 で使う）
-   - `*WakeOnMagicPacket` が無ければ、デバイス マネージャーの「詳細設定」で、表のほかの `Wake` 項目（「Shutdown Wake-On-Lan」など）を有効にする
-
-1. 再起動して、UEFI の設定の画面に入る。
-
-   ```powershell
-   shutdown.exe /r /fw /t 0
-   ```
-
-   - すぐに再起動し、UEFI（BIOS）の設定の画面が開く
-   - `入力された環境オプションが見つかりませんでした。(203)` が出て再起動しないときは、スタートメニューの電源から再起動し、起動の直後に機種のキー（F2・Del など）を押して UEFI の設定の画面に入る
-   - **次の手順は、UEFI の設定の画面が開いてから行う**
-
-1. UEFI の設定の画面で、Wake on LAN を有効にして保存し、Windows を起動する。
-
-   - 項目の名前と場所は機種ごとに違う（「Wake on LAN」「Power On By PCI-E」「Resume by LAN」など）。機種の説明書で確かめる
-   - 保存して終える（Save & Exit）と、Windows が起動する
-   - 「ErP」「Deep Sleep」などの、電源を切ったときの消費を減らす項目が有効だと、Wake on LAN が効かないことがある
-
-1. この PC を、スタートメニューの電源の「シャットダウン」で切る。
-
-   - 有線 LAN のケーブルはつないだままにする
-
-1. LAN の別の PC から、この PC の MAC アドレスあてにマジック パケットを送り、この PC が起動することを確かめる。
-
-   - AlmaLinux 10 などの Python があるマシンでは、`python3 -c "import socket; m = bytes.fromhex('<MAC>'.replace('-', '').replace(':', '')); s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1); s.sendto(b'\xff' * 6 + m * 16, ('255.255.255.255', 9))"` で送れる（`<MAC>` はこの項の手順 3 の値）
-   - 起動しなければ、この項の手順 3 の表の項目と、UEFI の設定を見直す
-
----
-
-### リモートから再起動する手段を増やす
-
-- リモートから使える再起動の経路を増やす
-- 前提: [ネットワークとリモート](#ネットワークとリモート)で LAN をプライベートにし、[PC 全体の設定](#pc-全体の設定)で電源・LAN の省電力を設定済み。自動サインインを使うなら[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)、Remote Control の自動起動を使うなら[Claude Code の Remote Control](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)を通してある
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。トリガーのコマンドは別の PC で実行する
-
-- 手段は独立しているので、要るものだけ行う（「〜したいときだけ」の手順は飛ばしてよい）。この項の手順 2〜7 は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）に貼る
-- **別の PC で動かすトリガーのコマンドは、その PC で実行する**（AlmaLinux のシェルか、別の Windows の PowerShell）
-
-- リモートの操作ができなくなったときに備えて、再起動の経路を増やす。1 つが死んでも別の経路で立ち直せるようにする
-- 既にある接続からの再起動（この項の手順にはしない）
-  - SSH でつながるなら `Restart-Computer`。Administrators のユーザーは UAC 不要で、sshd は再起動後も自動で起動する
-  - RDP でつながるなら、スタートメニューの電源の「再起動」か `Restart-Computer`（[ネットワークとリモート](#ネットワークとリモート)の手順 4 で有効。再起動の後はロック画面に戻るが、また入れる）
-  - [Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う) のセッションからも再起動できるが、そのタスクはトリガーが無いので再起動の後は戻らない。戻すにはこの項の手順 7
-- この項で足す手段: クラッシュ時の自動再起動（この項の手順 3）・別の PC からのネットワーク再起動（この項の手順 4・5）・ネットワークが切れたときの自動再起動（この項の手順 6）
-
-> [!WARNING]
-> - この項の手順 4・5 は、LAN の別の PC から管理者の資格情報で再起動できる口を開ける
-> - `LocalAccountTokenFilterPolicy=1` は、ローカル・Microsoft アカウントのネットワークログオンに完全な管理者権限を与える
-> - **人が触れる場所や信用できない LAN の PC では、この項の手順 4・5 を行わない**
-> - この項の手順 6 の見張りタスクは、相手（ルーターなど）がずっと落ちていると再起動を繰り返す（稼働 60 分未満は再起動しない歯止めがある）
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く
-
-1. 変数を設定する（どちらも自動。見張りタスクを使わないなら `WATCHDOG_HOST` は要らない）。
-
-   ```powershell
-   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
-   $WATCHDOG_HOST = if ($LAN_IF) { (Get-NetIPConfiguration -InterfaceAlias $LAN_IF).IPv4DefaultGateway.NextHop | Select-Object -First 1 } else { '' }   # 見張りタスクが生死を見る相手（自動で既定ゲートウェイ）。<WATCHDOG_HOST>
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   'LAN_IF = {0}' -f $LAN_IF
-   'WATCHDOG_HOST = {0}' -f $WATCHDOG_HOST
-   ```
-
-   - `LAN_IF` に Wi-Fi の名前が出たら、`$LAN_IF = 'イーサネット'` のように有線 LAN の名前に直す
-   - `WATCHDOG_HOST` は、LAN の中でいつも応答する相手に変えてもよい（既定ゲートウェイ以外にするとき）
-
-1. クラッシュ（ブルースクリーン）で止まったときに自動で再起動する設定を確かめる（既定で有効）。
-
-   ```powershell
-   $k = 'HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl'
-   if ((Get-ItemProperty -Path $k -ErrorAction SilentlyContinue).AutoReboot -ne 1) { Set-ItemProperty -Path $k -Name AutoReboot -Type DWord -Value 1 }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $k | Format-List AutoReboot
-   ```
-
-   - `AutoReboot : 1` が出ればよい
-
-1. 別の PC から OS 越しに再起動したいときだけ、SMB のリモートシャットダウンを開ける。
-
-   ```powershell
-   Set-NetFirewallRule -Name FPS-SMB-In-TCP -Enabled True -Profile Private
-   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name LocalAccountTokenFilterPolicy -Type DWord -Value 1
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Name FPS-SMB-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
-   Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' | Format-List LocalAccountTokenFilterPolicy
-   ```
-
-   - `FPS-SMB-In-TCP … True  Private  Inbound  Allow` と `LocalAccountTokenFilterPolicy : 1` が出ればよい
-   - 別の PC で動かすトリガー（`<WIN_IP>`・`<WIN_HOST>` はこの PC、`<WIN_USER>` は管理者）
-     - AlmaLinux 10 から: `net rpc shutdown -r -f -t 0 -I <WIN_IP> -U '<WIN_USER>%<PASS>'`（`net` が無ければ `sudo dnf install -y samba-common-tools`）
-     - 別の Windows から: `net use \\<WIN_HOST>\IPC$ /user:<WIN_HOST>\<WIN_USER>`（パスワードを聞かれる）でこの PC の資格情報を渡してから、`shutdown /r /f /t 0 /m \\<WIN_HOST>` を打つ
-     - 別の Windows から送り終わったら、`net use \\<WIN_HOST>\IPC$ /delete` を打つ
-   - `net use` は、パスワードを聞く前に `\\<WIN_HOST>\IPC$ のパスワードまたはユーザー名が無効です。` を出すが、そのまま入れてよい（`コマンドは正常に終了しました。` になればよい）
-   - `アクセスが拒否されました。(5)` なら、`net use` で相手の資格情報を渡してから送り直す
-   - **注意**: この手順は、節のリードの `[!WARNING]` のとおり管理の口を LAN に開ける
-
-1. 別の Windows から PowerShell で再起動したいときだけ、WinRM（PowerShell リモート処理）を有効にする。
-
-   ```powershell
-   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Profile Public
-   Enable-PSRemoting -Force -SkipNetworkProfileCheck
-   Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Enabled True -Profile Private
-   Disable-NetFirewallRule -Name WINRM-HTTP-In-TCP-NoScope -ErrorAction SilentlyContinue
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Group '@FirewallAPI.dll,-30267' | Format-Table Name, Enabled, Profile, Direction, Action
-   ```
-
-   - `WINRM-HTTP-In-TCP` が `True  Private` で、`WINRM-HTTP-In-TCP-NoScope` が `False` になればよい
-   - 別の Windows から送る前に、送る側の管理者の PowerShell で、この PC を `TrustedHosts` に足す。ドメイン外で未登録ならエラーで止まる
-     - `WSMan:\localhost` は WinRM のサービスが動いていないと使えないので、止まっていれば先に `Start-Service WinRM` を行う
-     - 足す前の値を `(Get-Item WSMan:\localhost\Client\TrustedHosts).Value` で控えてから、`Set-Item WSMan:\localhost\Client\TrustedHosts -Value <WIN_HOST> -Concatenate -Force` を行う
-   - 別の Windows で動かすトリガー: `Invoke-Command -ComputerName <WIN_HOST> -Credential <WIN_USER> -ScriptBlock { Restart-Computer -Force }`
-     - 管理者ではない PowerShell でよい
-     - `<WIN_USER>` には、コンピューター名を付けなくてよい
-     - `-ComputerName` には、`TrustedHosts` に足したのと同じ名前を書く
-     - エラー無しに数秒で戻り、この PC が再起動すればよい
-
-1. ネットワークが切れたときに自分で再起動させたいときだけ、見張りのタスクを登録する。
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（この項の手順 1 から）'; return }
-     if (-not $WATCHDOG_HOST) { Write-Error '中断: この項の手順 2 の $WATCHDOG_HOST が空'; return }
-     $dir = 'C:\ProgramData\setup-notes'
-     New-Item -ItemType Directory -Path $dir -Force | Out-Null
-     $body = @'
-   $ErrorActionPreference = 'SilentlyContinue'
-   $target = '__WATCHDOG_HOST__'
-   $key = 'HKLM:\SOFTWARE\setup-notes\net-watchdog'
-   $limit = 6
-   if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
-   if (((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).TotalMinutes -lt 60) {
-     Set-ItemProperty -Path $key -Name Fails -Value 0 -Type DWord
-     return
-   }
-   if (Test-Connection -ComputerName $target -Count 3 -Quiet) {
-     Set-ItemProperty -Path $key -Name Fails -Value 0 -Type DWord
-     return
-   }
-   $fails = [int](Get-ItemProperty -Path $key -Name Fails -ErrorAction SilentlyContinue).Fails + 1
-   if ($fails -ge $limit) {
-     Set-ItemProperty -Path $key -Name Fails -Value 0 -Type DWord
-     Restart-Computer -Force
-   } else {
-     Set-ItemProperty -Path $key -Name Fails -Value $fails -Type DWord
-   }
-   '@
-     Set-Content -LiteralPath "$dir\net-watchdog.ps1" -Value ($body.Replace('__WATCHDOG_HOST__', $WATCHDOG_HOST)) -Encoding ASCII
-     $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$dir\net-watchdog.ps1`""
-     $trigger = New-ScheduledTaskTrigger -AtStartup
-     $trigger.Repetition = (New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration (New-TimeSpan -Days 3650)).Repetition
-     $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest
-     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
-     Register-ScheduledTask -TaskName 'net-watchdog' -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-ScheduledTask -TaskName 'net-watchdog' | Format-List TaskName, State
-   }
-   ```
-
-   - `net-watchdog  Ready` が出ればよい
-   - 登録しただけでは動かない。次に起動したときから動く
-   - **注意**: 相手がずっと落ちていると再起動を繰り返す（節のリードの `[!WARNING]`）。`$limit` を増やすと、再起動までの猶予が延びる
-
-1. Remote Control を再起動の後も使いたいときだけ、タスクをログオン時に自動で始まるようにする。
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     if (-not (Get-ScheduledTask -TaskName 'claude-remote-control' -ErrorAction SilentlyContinue)) { Write-Error '中断: claude-remote-control のタスクが無い（先に Claude Code の Remote Control（Windows）を設定する）'; return }
-     $me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-     Set-ScheduledTask -TaskName 'claude-remote-control' -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $me) | Out-Null
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     (Get-ScheduledTask -TaskName 'claude-remote-control').Triggers | Format-Table -AutoSize
-   }
-   ```
-
-   - ログオンのトリガーが 1 つ表示されればよい。次にそのユーザーでサインインしたときから、タスクが自動で始まる
-
----
-
 ### RDP をロックせずに切断
 
 - RDP のセッションをこの PC の画面へ移し、ロックせずに切断する
-- 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。切断後に SSH で確かめるなら[OpenSSH サーバー](#openssh-サーバー)と[SSH でログインを確かめる](#ssh-でログインを確かめる)を通してある
-- 実行場所: RDP 接続先の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。切断後はクライアントの PC の SSH または接続先の画面で確かめる
+- 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している
+- 実行場所: RDP 接続先の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。切断後は接続先の PC の画面で確かめる
 
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[注意点](extra/windows-rdp-disconnect.md)
 
 - この項の手順 1〜3 は RDP のセッションの中で行う。この項の手順 3 を貼ると、その場で RDP が切れる
-- この項の手順 4・5 は、クライアントの PC から SSH で行う。SSH が無ければ、PC の前で画面を見る
-
-- SSH でログインできなければ、PC の前で画面を見て確かめる
+- この項の手順 4 は、接続先の PC の画面で行う
 
 > [!WARNING]
 > - **切断した後の PC の画面はロックされない**。PC の前にいる人が、このユーザー（Administrators の一員）としてそのまま操作できる。人が触れる場所にある PC では使わない
@@ -2767,22 +2094,11 @@
 
    - RDP のクライアントの窓が閉じる（クライアントが切断を知らせる）
    - 切れずに PowerShell にエラーが出たときは、管理者の PowerShell かを確かめて、この項の手順 1 からやり直す
-   - **次の手順は、RDP が切れてから、クライアントの PC で行う**（この手順の後ろに行を続けて貼らない）
+   - **次の手順は、RDP が切れてから、接続先の PC の画面で行う**（この手順の後ろに行を続けて貼らない）
 
-1. クライアントの PC から、Windows に SSH でログインする。
+1. 接続先の PC の画面で、デスクトップに戻ったことを確かめる。
 
-   - `ssh <WIN_USER>@<WIN_HOST>` でログインする（[Windows 11 の初期設定の「SSH でログインを確かめる」の手順 5](#ssh-でログインを確かめる)と同じ）
-   - PC の前にいるなら、SSH の代わりに PC の画面を見る。ロック画面ではなく、RDP で開いていたままのデスクトップが出ていればよい。そのときはこの項の手順 5 は飛ばす
-   - **次の手順は、ログインした先のプロンプトが出てから貼る**（続けて貼ると、ログインの途中の入力として食われる）
-
-1. SSH でログインしたシェルで、セッションが PC の画面に戻ったことを確かめる。
-
-   ```powershell
-   quser
-   ```
-
-   - 自分の行のセッション名が `console` で、状態が `Active`。ID はこの項の手順 2 と同じ
-   - ログインした先のシェルが Git Bash でも cmd でも、そのまま `quser` と打てばよい
+   - ロック画面ではなく、RDP で開いていたままのデスクトップが出ていればよい
 
 #### RDP をロックせずに切断: ショートカットで切断する
 
@@ -2827,669 +2143,13 @@
    - UAC の確認（Windows PowerShell）で「はい」を押すと、RDP が切れる（[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 3 と同じ）
    - 切れないときは、[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 1〜3 で切って、エラーを見る
    - PC の前（コンソール）では使わない
-   - 切った後の確かめ方は、[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 4・5 と同じ
+   - 切った後の確かめ方は、[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 4 と同じ
 
 ---
 
 ## SSH
 
-- OpenSSH のサーバーとクライアント、SSH の認証とログインのシェル
-
-### OpenSSH サーバー
-
-- LAN からこの PC に SSH でログインできるように、OpenSSH サーバーを入れる
-- 前提: [ネットワークとリモート](#ネットワークとリモート)の手順 3 を通し、LAN の接続をプライベートにしてある
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
-   - ユーザーアカウント制御（UAC）の確認は「はい」
-
-1. LAN の接続の変数を設定する。
-
-   ```powershell
-   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   'LAN_IF = {0}' -f $LAN_IF
-   ```
-
-   - インターネットにつながっている接続の名前が入る。ほかの PC とつながる接続と違うか空なら、`$LAN_IF = 'Wi-Fi'` のように直す
-   - 最後に値を読み戻して確かめる
-   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
-
-1. OpenSSH サーバーの機能を入れる。
-
-   ```powershell
-   if ($PSVersionTable.PSEdition -ne 'Desktop') {
-     Write-Error 'Windows PowerShell（5.1）で貼る。PowerShell 7 では Add-WindowsCapability が失敗する'
-   } else {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-     Get-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 | Format-List Name, State
-   }
-   ```
-
-   - 数分かかる
-   - `RestartNeeded : False` と `State : Installed` が出ればよい
-   - 既に入っていれば、すぐに `State : Installed` が出る
-
-1. sshd を自動で起動するようにして起動し、待ち受けを確かめる。
-
-   ```powershell
-   Set-Service -Name sshd -StartupType Automatic
-   Start-Service -Name sshd
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Service -Name sshd | Format-Table Name, Status, StartType
-   Get-NetTCPConnection -State Listen -LocalPort 22 | Format-Table LocalAddress, LocalPort, OwningProcess
-   ```
-
-   - `sshd  Running  Automatic` が出る
-   - 22 番で `0.0.0.0` と `::` の 2 行が出ればよい
-
-1. LAN の接続がプライベートなことと、sshd の受信の規則を確かめる。
-
-   ```powershell
-   if (-not $LAN_IF) {
-     Write-Error '中断: この項の手順 2 の $LAN_IF が空'
-   } elseif ((Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory -ne 'Private') {
-     Write-Error '中断: LAN の接続がプライベートではない（「ネットワークとリモート」の手順 3 でプライベートにする）'
-   } else {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
-     Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Format-Table Name, Enabled, Profile, Direction, Action
-   }
-   ```
-
-   - `<LAN_IF>  Private` と、`OpenSSH-Server-In-TCP  True  Private  Inbound  Allow` が出ればよい
-   - `中断:` が出たら、[ネットワークとリモート](#ネットワークとリモート)の手順 3 でプライベートにして貼り直す。この項の手順 2 の変数を貼り直す
-   - **注意**: プライベートの LAN では、ネットワーク探索など、ほかのプライベート向けの許可も効く
-
-1. パスワード認証を有効にし、設定を検査してから sshd を再起動する。
-
-   ```powershell
-   $c = "$env:ProgramData\ssh\sshd_config"
-   (Get-Content $c) -replace '^#?PasswordAuthentication .*', 'PasswordAuthentication yes' | Set-Content $c -Encoding ascii
-   & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
-   if ($LASTEXITCODE -eq 0) { Restart-Service -Name sshd } else { Write-Error 'sshd_config に誤りがある（sshd は再起動していない）' }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Select-String -Path $c -Pattern '^PasswordAuthentication', '^Match'
-   ```
-
-   - `…sshd_config:51:PasswordAuthentication yes` と `…sshd_config:87:Match Group administrators` が出ればよい
-
-1. 接続先と、ホスト鍵の指紋を表示する。
-
-   ```powershell
-   if (-not $LAN_IF) {
-     Write-Error '中断: この項の手順 2 の $LAN_IF が空'
-   } else {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     '{0}@{1}' -f $env:USERNAME, (Get-NetIPAddress -InterfaceAlias $LAN_IF -AddressFamily IPv4).IPAddress
-     & "$env:WINDIR\System32\OpenSSH\ssh-keygen.exe" -lf "$env:ProgramData\ssh\ssh_host_ed25519_key.pub"
-   }
-   ```
-
-   - 1 行目の `<WIN_USER>@<WIN_HOST>` を控える（[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 で使う）
-   - 2 行目の `256 SHA256:<指紋> system@<HOSTNAME> (ED25519)` も控え、[SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 5 の初回の接続で照合する
-
----
-
-### SSH でログインを確かめる
-
-- Linux または WSL のクライアントから、この Windows の PC にパスワードでログインして確かめる
-- 前提: [OpenSSH サーバー](#openssh-サーバー)を通し、接続先とホスト鍵の指紋を控えてある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
-- 実行場所: Linux のクライアントの、自分のユーザーの端末（bash）。この PC の WSL を使う場合は、この項の手順 1 の通常の Windows PowerShell（5.1）から開く
-
-1. クライアントの端末を用意する。
-
-   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
-   - この PC の WSL を使うなら、スタートメニューで「Windows PowerShell」を探してクリックし、管理者ではない Windows PowerShell（5.1）を開く
-
-1. この PC の WSL をクライアントに使うときだけ、AlmaLinux 10 のシェルに入る。
-
-   ```powershell
-   wsl.exe --distribution AlmaLinux-10 --cd ~
-   ```
-
-   - この項の手順 1 で開いた PowerShell に貼る。`[<ユーザー>@<HOSTNAME> ~]$` のプロンプトになればよい
-   - ほかの PC（AlmaLinux 10 など）をクライアントにするなら、この項の手順 1 で開いた端末を使い、このブロックは貼らない
-   - WSL のネットワークが既定（NAT）なら、この PC の LAN の IP（`<WIN_HOST>`）あてにつなぐ（[注意点](extra/windows-setup.md#注意点)の WSL からつなぐとき）
-   - **次の手順は、クライアントのシェルに貼る**
-
-1. クライアントに `ssh` が無いときだけ、入れる。
-
-   ```bash
-   command -v ssh || sudo dnf install -y openssh-clients
-   ```
-
-   - `/usr/bin/ssh` が出れば、入っている（何も入れない）
-   - 入れるときは、`sudo` のパスワード（WSL では[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)の手順 3 で決めたもの）を聞かれる
-   - **次の手順は、`Complete!` が出てプロンプトに戻ってから貼る**（続けて貼るとパスワードとして食われる）
-
-1. クライアントのシェルで、変数を設定する（`WIN_HOST` は必ず値を入れる）。
-
-   ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
-   ```
-
-   ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
-   printf '\n\033[7m 確認 \033[0m\n'
-   for v in WIN_HOST WIN_USER; do
-     printf '%-8s = %s\n' "$v" "${!v}"
-   done
-   ```
-
-   - 最後に値を読み戻して確かめる
-   - **新しいシェルを開いたら**、この項の手順 4 の 2 つのブロックを貼り直してから先へ進む
-
-1. クライアントのシェルで、ホスト鍵を照合し、パスワードでログインする。
-
-   ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 4 の WIN_HOST か WIN_USER が空のまま' >&2; else
-     ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}"
-   fi
-   ```
-
-   - 初回は `ED25519 key fingerprint is SHA256:…` と `Are you sure you want to continue connecting (yes/no/[fingerprint])?` が出る。[OpenSSH サーバー](#openssh-サーバー)の手順 7 で控えた指紋と同じなら `yes`
-   - `<WIN_USER>@<WIN_HOST>'s password:` で、Windows のユーザーのパスワードを入れる（Microsoft アカウントなら、そのアカウントのパスワード。PIN ではない）
-   - `<WIN_USER>@<HOSTNAME> C:\Users\<WIN_USER>>` の cmd のプロンプトが出ればよい。`whoami` で `<hostname>\<win_user>`（小文字）が出る
-     - [SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)の後は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` のプロンプトになり、`whoami`（Git のもの）は `<WIN_USER>` だけを出す
-   - `exit` でクライアントのシェルに戻る
-   - Git Bash を既定にした後、PowerShell の操作をするなら、[SSH で管理者・非管理者の PowerShell を使う](#ssh-で管理者非管理者の-powershell-を使う)を行う
-   - **注意**: パスワードを続けて間違えると、Windows のロックアウトのポリシーでアカウントがロックされる（[注意点](extra/windows-setup.md#注意点)）
-   - WSL の AlmaLinux 10 をクライアントにしたときは、続けてもう一度 `exit` を打ち、PowerShell に戻る
-   - **ほかのブロックは、SSH を `exit` で閉じてから貼る**（続けて貼ると Windows 側への入力として食われる）
-
----
-
-### OpenSSH サーバーに公開鍵でもログインする
-
-- クライアントで作った鍵で、パスワードを入れずにこの Windows の PC に入れるようにする
-- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)を通し、クライアントからログインできる。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
-- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2〜4・7 はクライアント、手順 5・6 は Windows
-- パスワード認証は有効のまま
-- 登録できるのは、Administrators の一員のユーザーの鍵だけ（この項の手順 6 で確かめる。標準ユーザーは[注意点](extra/windows-setup.md#注意点)）
-- 登録した鍵を持つ人も、パスワードを知る人と同じく、この PC の管理者として操作できる（[注意点](extra/windows-setup.md#注意点)）
-
-1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
-
-   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
-   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
-   - **次の手順は、クライアントの bash に貼る**
-
-1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
-
-   ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
-   ```
-
-   ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
-   printf '\n\033[7m 確認 \033[0m\n'
-   for v in WIN_HOST WIN_USER; do
-     printf '%-8s = %s\n' "$v" "${!v}"
-   done
-   ```
-
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
-   - 最後に値を読み戻して確かめる
-   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
-
-1. クライアントの PC で、鍵ペアが無ければ作る。
-
-   ```bash
-   ls ~/.ssh/id_ed25519.pub 2>/dev/null || ssh-keygen -t ed25519
-   ```
-
-   - 鍵があれば、`/home/<USER>/.ssh/id_ed25519.pub` と出て何もしない（その鍵を使う）
-   - 無ければ、保存先（Enter で既定の `~/.ssh/id_ed25519`）とパスフレーズ（2 回）を聞かれる
-   - **次の手順は、パスフレーズを入力し終えてから貼る**（続けて貼るとパスフレーズとして食われる）
-
-1. クライアントの PC で、公開鍵を表示する。
-
-   ```bash
-   cat ~/.ssh/id_ed25519.pub
-   ```
-
-   - `ssh-ed25519 AAAA… <USER>@<HOSTNAME>` の 1 行が出る。この 1 行をコピーし、この項の手順 5 で Windows に貼る
-   - 公開鍵は秘密ではない。チャットやメールで Windows 側へ渡してもよい
-
-1. Windows の管理者の PowerShell で、変数を設定する（`$PUBKEY` は必ず値を入れる）。
-
-   ```powershell
-   $PUBKEY = ''                          # ← この項の手順 4 の 1 行を '' の中に貼る。<PUBKEY>
-   ```
-
-   ```powershell
-   'PUBKEY = {0}' -f $PUBKEY
-   ```
-
-   - 改行を入れずに 1 行のまま貼る
-   - 最後に値を読み戻して確かめる
-   - **新しい PowerShell を開いたら**、この手順の 2 つのブロックを貼り直してから先へ進む
-
-1. 公開鍵を `administrators_authorized_keys` に登録する。
-
-   ```powershell
-   if ($PUBKEY -notmatch '^(ssh-|ecdsa-|sk-)') {
-     Write-Error 'この項の手順 5 の $PUBKEY が空か、公開鍵の形でない'
-   } elseif (-not (Get-LocalGroupMember -SID S-1-5-32-544 | Where-Object Name -like "*\$env:USERNAME")) {
-     Write-Error "$env:USERNAME は Administrators の一員ではない（注意点を見る）"
-   } else {
-     $f = "$env:ProgramData\ssh\administrators_authorized_keys"
-     Add-Content -Path $f -Value $PUBKEY -Encoding ascii
-     icacls.exe $f /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     icacls.exe $f
-   }
-   ```
-
-   - 最後の `icacls` に、`NT AUTHORITY\SYSTEM:(F)` と `BUILTIN\Administrators:(F)` の 2 行だけが出ればよい
-   - クライアントを足すときは、そのクライアントでこの項の手順 3・4 を行い、この項の手順 5 の `$PUBKEY` を貼り直してから、この項の手順 6 を貼る
-
-1. クライアントの PC で、鍵で入れることを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
-     ssh -o PasswordAuthentication=no "${WIN_USER}@${WIN_HOST}" whoami
-   fi
-   ```
-
-   - パスワードを聞かれずに、`<hostname>\<win_user>` が出ればよい（パスフレーズを付けたなら、それを聞かれる）
-   - 既定のシェルを Git Bash にした PC では、Git の `whoami` が動き、`<WIN_USER>` だけが出る
-
----
-
-### OpenSSH サーバーのパスワード認証を切る
-
-- 鍵を持たない相手からのパスワード認証を受け付けないようにする
-- 前提: [OpenSSH サーバーに公開鍵でもログインする](#openssh-サーバーに公開鍵でもログインする)を通し、使うクライアントが鍵で入れる。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
-- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
-- 切った後は、鍵を登録していないクライアント（スマートフォンのアプリなど）からは入れない
-
-1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
-
-   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
-   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
-   - **次の手順は、クライアントの bash に貼る**
-
-1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
-
-   ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
-   ```
-
-   ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
-   printf '\n\033[7m 確認 \033[0m\n'
-   for v in WIN_HOST WIN_USER; do
-     printf '%-8s = %s\n' "$v" "${!v}"
-   done
-   ```
-
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
-   - 最後に値を読み戻して確かめる
-   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
-
-1. Windows で、パスワード認証を切り、設定を検査してから sshd を再起動する。
-
-   ```powershell
-   $c = "$env:ProgramData\ssh\sshd_config"
-   (Get-Content $c) -replace '^#?PasswordAuthentication .*', 'PasswordAuthentication no' | Set-Content $c -Encoding ascii
-   & "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
-   if ($LASTEXITCODE -eq 0) { Restart-Service -Name sshd } else { Write-Error 'sshd_config に誤りがある（sshd は再起動していない）' }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Select-String -Path $c -Pattern '^PasswordAuthentication', '^Match', 'administrators_authorized_keys'
-   ```
-
-   - `…sshd_config:51:PasswordAuthentication no` と、`Match Group administrators` とその次の `AuthorizedKeysFile` の行が出ればよい
-
-1. クライアントの PC で、鍵が無いと入れず、鍵ではコマンドが通ることを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
-     ssh -o PubkeyAuthentication=no "${WIN_USER}@${WIN_HOST}" true
-     ssh "${WIN_USER}@${WIN_HOST}" whoami
-   fi
-   ```
-
-   - 1 つ目は、パスワードを聞かずに `<WIN_USER>@<WIN_HOST>: Permission denied (publickey,keyboard-interactive).` で失敗すればよい
-   - 2 つ目は、`<hostname>\<win_user>` が出ればよい（パスフレーズを付けたなら、それを聞かれる）
-     - 既定のシェルを Git Bash にした PC では、Git の `whoami` が動き、`<WIN_USER>` だけが出る
-
----
-
-### SSH の既定のシェルを Git Bash にする
-
-- SSH でログインしたときとコマンドを実行するときのシェルを、cmd.exe から Git Bash に変える
-- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
-- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
-
-1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
-
-   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
-   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
-   - **次の手順は、クライアントの bash に貼る**
-
-1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
-
-   ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
-   ```
-
-   ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
-   printf '\n\033[7m 確認 \033[0m\n'
-   for v in WIN_HOST WIN_USER; do
-     printf '%-8s = %s\n' "$v" "${!v}"
-   done
-   ```
-
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
-   - 最後に値を読み戻して確かめる
-   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
-
-1. Windows で、既定のシェルを Git Bash にする。
-
-   ```powershell
-   if (-not (Test-Path 'C:\Program Files\Git\bin\bash.exe')) {
-     Write-Error 'C:\Program Files\Git\bin\bash.exe が無い（Git for Windows が入っていない）'
-   } else {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value 'C:\Program Files\Git\bin\bash.exe' -PropertyType String -Force | Format-List DefaultShell
-   }
-   ```
-
-   - `DefaultShell : C:\Program Files\Git\bin\bash.exe` が出ればよい
-
-1. クライアントの PC で、bash になったことを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
-     ssh "${WIN_USER}@${WIN_HOST}" 'echo "$BASH_VERSION $MSYSTEM"; git --version'
-     ssh "${WIN_USER}@${WIN_HOST}"
-   fi
-   ```
-
-   - 鍵を登録していなければ、パスワードを 2 回聞かれる
-   - 1 つ目で `5.3.15(1)-release MINGW64` と `git version 2.55.0.windows.3` のような 2 行が出ればよい
-   - 2 つ目は、`<WIN_USER>@<HOSTNAME> MINGW64 ~` と `$` のプロンプトになる。`exit` で戻る
-   - **注意**: コマンドを実行するときも、Windows 側の `~/.bashrc` が読まれる
-   - `Shim: Could not create process …` が出るなら、[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)を行う
-
----
-
-### scoop のツールを SSH のセッションで使う
-
-- SSH で起動できない scoop のツールのジャンクションを、管理者で同じ向き先に作り直す
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)・[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)を通してある。この PC の WSL をクライアントにするなら、[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)も通してある
-- 実行場所: この項の手順 1 で開く、Windows の管理者の Windows PowerShell（5.1）とクライアントの bash。この項の手順 2・4 はクライアント、手順 3 は Windows
-- 症状は、scoop の shim の `Could not create process with command …`、Git Bash の `Is a directory`、Windows のエラー 448
-- `scoop install`・`scoop update` の後は、この項の手順 3 を貼り直す
-
-1. Windows の管理者の Windows PowerShell（5.1）と、クライアントの bash を開く。
-
-   - Windows のスタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - Linux のクライアントでは、自分のユーザーの端末（bash）を開く
-   - この PC の WSL をクライアントにするなら、Win+R で `wsl.exe --distribution AlmaLinux-10 --cd ~` を開く
-   - **次の手順は、クライアントの bash に貼る**
-
-1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
-
-   ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
-   ```
-
-   ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
-   printf '\n\033[7m 確認 \033[0m\n'
-   for v in WIN_HOST WIN_USER; do
-     printf '%-8s = %s\n' "$v" "${!v}"
-   done
-   ```
-
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
-   - 最後に値を読み戻して確かめる
-   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
-
-1. Windows で、scoop のジャンクションを管理者で作り直す。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ChildItem "$env:USERPROFILE\scoop\apps" -Recurse -Depth 4 -Force -Attributes ReparsePoint -ErrorAction SilentlyContinue |
-     Where-Object { $_.LinkType -eq 'Junction' -and (Get-Acl $_.FullName).Owner -notlike '*\Administrators' } |
-     ForEach-Object {
-       $link = $_.FullName; $target = @($_.Target)[0]; $ro = $_.Attributes -band [IO.FileAttributes]::ReadOnly
-       if (Test-Path -LiteralPath $target) {
-         attrib.exe -R "$link" /L
-         cmd.exe /c rmdir "$link"
-         New-Item -ItemType Junction -Path $link -Target $target | Out-Null
-         if ($ro) { attrib.exe +R "$link" /L }
-         '{0} -> {1}' -f $link, $target
-       }
-     }
-   ```
-
-   - 作り直したジャンクションごとに、`…\scoop\apps\<アプリ>\current -> …\scoop\apps\<アプリ>\<版>` の形の行が出る
-   - 作り直すものが無ければ、何も出ない
-
-1. クライアントの PC で、scoop のツールが動くことを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
-     ssh "${WIN_USER}@${WIN_HOST}" 'zoxide --version'
-   fi
-   ```
-
-   - 鍵を登録していなければ、パスワードを聞かれる
-   - `zoxide 0.9.9` のような版が出て、`Shim:` で始まる行が出なければよい（`zoxide` の代わりに、scoop で入れたほかのツールでもよい）
-
----
-
-### SSH で管理者・非管理者の PowerShell を使う
-
-- WezTerm からこの Windows の PC に SSH で入り、管理者と同じユーザーの非管理者の PowerShell を切り替える
-- 前提: [SSH でログインを確かめる](#ssh-でログインを確かめる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[SSH の既定のシェルを Git Bash にする](#ssh-の既定のシェルを-git-bash-にする)を通してある。接続元も WezTerm の設定を入れてある（Windows は[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)、Linux は[WezTerm の設定の導入](shell-terminal.md#wezterm-の設定を導入する)）
-- 実行場所: 接続元の WezTerm の bash のタブ。この項の手順 1 で開く。接続後は各手順に書いた SSH 先の Git Bash・PowerShell
-- 基本は Windows PowerShell 5.1。7 を使うなら、[アプリを入れる](#アプリを入れる)の手順 6 も通してあること
-- **この項の手順 7 が終わるまでは、PowerShell に確認用以外の複数行ブロックを貼らない**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-ssh-の-powershell-操作と貼り付けの検証2026-10-12-jst)・[参考資料](reference/windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)
-
-> [!WARNING]
-> **この項の手順 11 で子を閉じると、管理者の親 PowerShell へ戻る**。この項の手順 12 で権限を確認してから操作する。
-
-1. 接続元と Windows の WezTerm の設定を更新し、接続元の bash のタブを開く。
-
-   - [SSH 貼り付け修正の PR #41](https://github.com/ryo-aoki-pc/wezterm/pull/41) が WezTerm の `main` に取り込まれてから、この手順を行う
-   - Windows では[シェルと端末のセットアップの「Windows 11 で WezTerm の設定を更新する」](shell-terminal.md#windows-11-で-wezterm-の設定を更新する)、Linux では[同じ文書の「WezTerm の設定を更新する」](shell-terminal.md#wezterm-の設定を更新する)を行う。接続元の WezTerm をすべて閉じ、起動し直す
-   - 貼り付けの前提と停止条件は[WezTerm の SSH 貼り付け](shell-terminal.md#wezterm-windows-の-ssh-先で-powershell-に貼り付ける)を先に確認する
-   - Linux の Wayland は `wl-paste`、X11 は `xclip` が必要。導入は同じ項の手順 2 に従う
-   - 接続元の Windows では、標準の Windows PowerShell がクリップボードを読む
-   - Windows の接続元はスタートメニューから「WezTerm」、Linux の接続元は GUI セッションのアプリ一覧から「WezTerm」を開く。新しい bash のタブのプロンプトが出ればよい
-   - **次の手順は、接続元の WezTerm の bash に貼る**
-
-1. クライアントの bash で、変数を設定する（`WIN_HOST` は必ず値を入れる）。
-
-   ```bash
-   WIN_HOST=                             # ← 「OpenSSH サーバー」の手順 7 で控えた @ の後ろ（Windows の IP アドレス）を書く。<WIN_HOST>
-   ```
-
-   ```bash
-   WIN_USER=${USER}                      # Windows のユーザー名。「OpenSSH サーバー」の手順 7 の @ の前と違えば直す。<WIN_USER>
-   printf '\n\033[7m 確認 \033[0m\n'
-   for v in WIN_HOST WIN_USER; do
-     printf '%-8s = %s\n' "$v" "${!v}"
-   done
-   ```
-
-   - [SSH でログインを確かめる](#ssh-でログインを確かめる)の手順 4 と同じ値を入れる
-   - 最後に値を読み戻して確かめる
-   - **新しいクライアントのシェルを開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
-
-1. 接続元の Bash で、Windows にログインする。
-
-   ```bash
-   if [ -z "${WIN_HOST}" ] || [ -z "${WIN_USER}" ]; then echo '中断: この項の手順 2 の WIN_HOST か WIN_USER が空のまま' >&2; else
-     ssh "${WIN_USER}@${WIN_HOST}"
-   fi
-   ```
-
-   - Windows の Git Bash の `$` のプロンプトが出ればよい。cmd のプロンプトなら、前提の既定シェルの設定を確かめる
-   - 5.1 ならこの項の手順 4、7 ならこの項の手順 4 を飛ばしてこの項の手順 5 へ進む
-   - **次の手順は、ログインした Windows の Git Bash に貼る**（続けて貼ると、パスワードなどの入力として食われる）
-
-1. 5.1 を使うときは、SSH 先の Git Bash で統合を読み、PowerShell を開く。
-
-   ```bash
-   if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
-     echo '中断: Windows の WezTerm の設定を導入・更新する' >&2
-   else
-     export TERM_PROGRAM=WezTerm
-     . ~/.config/wezterm/shell/wezterm.sh
-     powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
-   fi
-   ```
-
-   - `PS C:\Users\…>` のプロンプトが出ればよい。読み込みエラーが出たら、そこで止めて設定の更新と実行ポリシーを確かめる
-   - この項の手順 5 は飛ばす
-   - **この項の手順 6 は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
-
-1. 7 を使うときは、この項の手順 4 の代わりに Git Bash から PowerShell を開く。
-
-   ```bash
-   if [ ! -r ~/.config/wezterm/shell/wezterm.sh ] || [ ! -r ~/.config/wezterm/shell/wezterm.ps1 ]; then
-     echo '中断: Windows の WezTerm の設定を導入・更新する' >&2
-   else
-     export TERM_PROGRAM=WezTerm
-     . ~/.config/wezterm/shell/wezterm.sh
-     pwsh.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
-   fi
-   ```
-
-   - `PS C:\Users\…>` のプロンプトが出ればよい。`pwsh.exe: command not found` なら、PowerShell 7 の導入と PATH を確かめる
-   - **次の手順は、開いた SSH 先の PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
-
-1. SSH 先の PowerShell で、版・ユーザー・管理者の権限を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; Get-PSReadLineKeyHandler -Bound | Where-Object Function -eq 'WezTermSshPaste'; & "$env:WINDIR\System32\whoami.exe" /groups
-   ```
-
-   - `Version` が 5.1 または 7 の版、`User` がこの Windows のユーザー、`Admin : True` が出ればよい。`User` の値を控える
-   - Ctrl+Shift+F12 の `Function` が `WezTermSshPaste` ならよい。配送用なので手動では押さない。出ないなら設定を更新し、この項の手順 3 からやり直す
-   - `whoami.exe /groups` の `S-1-16-12288` は High、`S-1-5-32-544` は Administrators で、有効なグループとして出る
-   - `Admin : False` なら管理者の操作とこの項の手順 8・9 は行わず、ログインユーザーを確かめる
-   - **この項の手順 7 は、右クリックか Ctrl+Shift+V で貼り、入力内容を確かめてから Enter を押す**
-   - 貼れる本文は UTF-8 で 64 KiB（65,536 バイト）まで。超えると貼り付けず通知が出るので、ブロックを分ける
-   - 大きなブロックの受信は数十秒〜1分以上かかることがある。受信中は次を貼らず、入力欄に入った内容を確かめてから Enter を押す
-   - 受信中の Ctrl+C は、終端まで受信して本文を捨てる
-   - 配送が止まったら本文を追加で貼らず、接続元の SSH ペインを閉じて接続し直す
-
-1. 管理者の PowerShell で、無害な複数行を右クリックか Ctrl+Shift+V で貼る。
-
-   ```powershell
-   "ssh-paste: first"
-
-   "ssh-paste: 日本語"
-   ```
-
-   - Enter を押す前は、2 行の式と間の空行 1 行が入力欄にあり、結果はまだ出ない
-   - Enter を 1 回押すと、`ssh-paste: first` と `ssh-paste: 日本語` が順に 1 回ずつ出る
-   - 空行が増える、途中で実行される、通知が出て貼れない場合は進まない。失敗時は通常貼り付けへ自動で切り替わらない。両側の設定と Linux のクリップボード取得コマンドを確かめる
-   - この項の手順 8 は x64 用。ARM64 の Windows では行わない
-
-1. x64 の Windows の管理者 PowerShell で、降格用の固定版を照合して配置する。
-
-   ```powershell
-   & {
-     $ErrorActionPreference = 'Stop'
-     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw '中断: 管理者の親 PowerShell で行う' }
-     if ($env:PROCESSOR_ARCHITECTURE -ne 'AMD64') { throw '中断: この手順は x64 の Windows 用' }
-     $exe = Join-Path $env:LOCALAPPDATA 'setup-notes\bin\busybox.exe'
-     $expected = '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075'
-     if (Test-Path -LiteralPath $exe) {
-       if ((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -ne $expected) { throw '中断: 専用の場所に別のファイルがある。上書きしない' }
-     } else {
-       $temp = [IO.Path]::GetTempFileName()
-       try {
-         Invoke-WebRequest -UseBasicParsing -Uri 'https://frippery.org/files/busybox/busybox-w64-FRP-6075-g169694ebd.exe' -OutFile $temp
-         if ((Get-FileHash -LiteralPath $temp -Algorithm SHA256).Hash -ne $expected) { throw '中断: ダウンロードしたファイルの SHA-256 が違う' }
-         New-Item -ItemType Directory -Path (Split-Path -Parent $exe) -Force | Out-Null
-         Move-Item -LiteralPath $temp -Destination $exe
-       } finally {
-         if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp }
-       }
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-FileHash -LiteralPath $exe -Algorithm SHA256 | Format-List
-     & $exe --help | Select-Object -First 1
-   }
-   ```
-
-   - `Hash` が `07BB1E5B…78F075`、`Path` が `%LOCALAPPDATA%\setup-notes\bin\busybox.exe`、版の行に `FRP-6075-g169694ebd` が出ればよい
-   - SHA-256 が違う、取得できない、別のファイルがある場合は、配置せず止まる
-   - 普段の PATH や PowerShell のプロファイルは変えない
-
-1. 管理者の親 PowerShell で、非管理者の子 PowerShell を開く。
-
-   ```powershell
-   if ((Get-FileHash -LiteralPath "$env:LOCALAPPDATA\setup-notes\bin\busybox.exe" -Algorithm SHA256).Hash -ne '07bb1e5b095b00d68a695481f9240879f33c5724b40aa2308f999d54ed78f075') { throw '中断: 降格用実行ファイルの SHA-256 が違う' }
-   & "$env:LOCALAPPDATA\setup-notes\bin\busybox.exe" drop -- powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
-   ```
-
-   - 7 を使っているなら、起動コマンドの `powershell.exe` を `pwsh.exe` にして貼る
-   - `--` は必ず付ける
-   - 新しい PowerShell のプロンプトが出ればよい。`drop` や統合のエラーが出たら、そのまま非管理者の操作を始めない
-   - **次の手順は、新しく開いた非管理者の子 PowerShell に貼る**（続けて貼ると、起動途中のシェルへの入力として食われる）
-
-1. 非管理者の子 PowerShell で、ユーザーと実効権限を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ Version = $PSVersionTable.PSVersion.ToString(); User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List; & "$env:WINDIR\System32\whoami.exe" /groups
-   ```
-
-   - `User` がこの項の手順 6 と同じで、`Admin : False` ならよい
-   - `S-1-16-8192` は Medium、`S-1-5-32-544` は Administrators で「拒否のみに使用するグループ」（英語では `Group used for deny only`）として出る
-   - どれかが違う場合は非管理者の操作を始めず、`exit` で親へ戻る
-   - この項の手順 7 のブロックも貼り、Enter の前には実行されず、Enter の後に 1 回だけ出ることを確かめてから、通常の権限で行う操作を貼る
-
-1. 非管理者の操作を終えたら、子 PowerShell を閉じる。
-
-   ```powershell
-   exit
-   ```
-
-   - 管理者の親 PowerShell のプロンプトに戻る
-   - **次の手順は、親 PowerShell のプロンプトに戻ってから貼る**（続けて貼ると、子への入力として食われる）
-
-1. 親 PowerShell で、管理者の権限に戻ったことを確かめて閉じる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"; [pscustomobject]@{ User = [Security.Principal.WindowsIdentity]::GetCurrent().Name; Admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) } | Format-List
-   ```
-
-   - `User` がこの項の手順 6 と同じで、`Admin : True` なら管理者の操作を再開できる
-   - 今回の操作を終えるなら `exit` を打ち、SSH 先の Git Bash へ戻る
-   - **次の手順は、SSH 先の Git Bash に戻ってから貼る**（続けて貼ると、PowerShell の入力として食われる）
-
-1. SSH 先の Git Bash で、SSH の接続を閉じる。
-
-   ```bash
-   exit
-   ```
-
-   - 接続元のプロンプトに戻ればよい
-
----
+- Windows の OpenSSH クライアントと、接続先の認証
 
 ### Windows の OpenSSH クライアント
 
@@ -3500,7 +2160,6 @@
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows と Git の両方の ssh で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる
-- 逆向き（AlmaLinux 10 などから Windows 11 に入る）は、[OpenSSH サーバー](#openssh-サーバー)で設定する
 
 1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -3688,7 +2347,7 @@
 - 更新後や config の変更後に、Windows と Git の ssh の版と設定を確かめる
 - 前提: [Windows の OpenSSH クライアント](#windows-の-openssh-クライアント)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-- Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 3 で上がる。この項で別に上げるものは無い
+- Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -5412,14 +4071,13 @@
 
 - OS・Store の更新は[Windows Update](#windows-update)（管理者）・[Microsoft Store の更新](#microsoft-store-の更新)（通常）を通す。再起動は手動で行う
 - scoop・winget で入れたアプリは、入れた方法で上げる
-  - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 7 で修正版を確かめ、手順 7 で上げる
+  - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 7 で修正版を確かめ、同じ項の手順 8 で上げる
   - 上げても、git の設定（`~/.gitconfig`）と gh のログイン（資格情報マネージャーと `%APPDATA%\GitHub CLI`）は変わらない
 - Firefox は、自分で新しい版に上がる。待たずに上げるときだけ、その手順を行う
   - Firefox は起動中に取得し、次の起動時に更新する。起動後に作られる `\Mozilla\Firefox Background Update <番号>` のタスクも、7 時間ごとに更新する
   - Firefox の更新は Mozilla Maintenance Service が書き込み、UAC は出ない。日本語版に言語パックを足すと、閉じている間の更新が止まるので使わない
-- Claude Code・Codex CLI・Grok Build とプラグインは、[AI コーディングエージェントのセットアップの「Windows 11 の更新」](ai-agents.md#windows-11-の更新)で上げる
 - WezTerm は自分では更新しない。nightly の新しい版が出ても知らせない（WezTerm の更新の確認が見るのは stable のリリースだけで、nightly の版の方が新しいので何も出ない）
-  - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2・6〜8 で、設定を残して `C:\Program Files\WezTerm` に上書きする
+  - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 5・6 で、設定を残して `C:\Program Files\WezTerm` に上書きする
   - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
 - フォントは[シェルと端末のセットアップの「HackGen Console NF を上げる」](shell-terminal.md#hackgen-console-nf-を上げる)に従い、その文書の版と sha256 を確かめて直してから入れ直す
 - 共通の bash 設定は、[シェルと端末のセットアップの「Windows 11 で共通の bash 設定を更新する」](shell-terminal.md#windows-11-で共通の-bash-設定を更新する)を通して上げる
@@ -5428,18 +4086,16 @@
   - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
 - excel-diff は、[excel-diff を導入・更新する](#excel-diff-を導入更新する)の更新の箇条書きで上げる
 - md-table-sticky は、[md-table-sticky のブックマークレットを登録する](#md-table-sticky-のブックマークレットを登録する)で、お気に入りを作り直す
-- SSH で scoop のツールを使うなら、更新後に[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を管理者の窓に貼り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
-- CopyQ は、更新のインストーラが閉じた後に起動し直さないことがある。通知領域にアイコンが無ければ、スタートメニューの「CopyQ」から起動する
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。設定が変わっていれば、その項の手順を貼り直す（控えは書き換えない）
-- VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)、WireGuard は[WireGuard のセットアップの「WireGuard: Windows 11 の更新」](wireguard.md#wireguard-windows-11-の更新)、Syncthing は[Syncthing のセットアップの「Syncthing: Windows 11 の更新」](syncthing.md#syncthing-windows-11-の更新)
+- VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)
   - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba.md#samba-クライアント-windows-11-の更新)は Samba のセットアップの「Samba クライアント: Windows 11 の更新」（どちらも、上げるものは無い）
 
 ### scoop・winget・WSL を上げる
 
 - scoop・winget のアプリと WSL・AlmaLinux 10 を上げる
-- 前提: [アプリを入れる](#アプリを入れる)・[Git for Windows](#git-for-windows)・[WSL の AlmaLinux 10 と自動サインイン](#wsl-の-almalinux-10-と自動サインイン)を通してある。zoxide を上げるときは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
+- 前提: [アプリを入れる](#アプリを入れる)・[Git for Windows](#git-for-windows)・[WSL の AlmaLinux 10](#wsl-の-almalinux-10)を通してある。zoxide を上げるときは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。zoxide のリリースはブラウザ、上げた後の確認は WezTerm の Git Bash のタブ
 - PSWindowsUpdate は、[Windows Update](#windows-update)を通してこの文書で入れたときだけ上げる
 
@@ -5467,13 +4123,12 @@
 
    - アプリごとに `'<名前>' (<版>) was installed successfully!` の形の行が出る
    - 動いているアプリは `Running process detected, skip updating.` で飛ばされる。閉じてから貼り直す
-   - SSH のセッションで scoop のツールを使っているなら、[scoop のツールを SSH のセッションで使う](#scoop-のツールを-ssh-のセッションで使う)の手順 3 を、管理者の PowerShell で貼り直す
    - **Neovim の設定やプラグインは更新に追従しない**ので、メジャー更新の後は `:checkhealth` で壊れていないか見る（自分用の設定のプラグインと外部コマンドは、[LazyVim の更新](neovim.md#windows-11-で-lazyvim-の本体外部コマンドプラグインを更新する)の全項）
 
 1. winget で入れたものを上げる。
 
    ```powershell
-   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'Microsoft.Sysinternals.Autologon', 'hluk.CopyQ', 'WinMerge.WinMerge') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
+   foreach ($id in 'Devolutions.UniGetUI', 'Microsoft.PowerToys', 'Microsoft.PowerShell', 'WinMerge.WinMerge') { winget upgrade --exact --id $id --source winget --accept-source-agreements --accept-package-agreements }
    ```
 
    - それぞれ、新しい版が無ければ更新が見つからない旨の行を出して何もしない
@@ -5543,16 +4198,10 @@
 - Git for Windows・Firefox・WezTerm を、設定を残して上げる
 - 前提: [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
-- Claude Code の Remote Control のタスクを動かしているときは、この項で止めてから、更新後に始め直す
 
 1. 管理者の Windows PowerShell（5.1）を開く。
 
    - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
-
-1. Remote Control のタスクを動かしているときだけ、先にタスクを止める。
-
-   - [Claude Code の Remote Control の止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 を行う
-   - タスクの Claude Code と WezTerm（中のシェルは Git Bash）は、Git for Windows と WezTerm を上げる間は止めておく。上げた後に、この項の手順 8 で始め直す
 
 1. Git Bash と WezTerm を閉じてから、winget で Git for Windows を上げる。
 
@@ -5564,7 +4213,7 @@
 
    - 上がったら `インストールが完了しました` と出て、`winget list` の `Git.Git` の版が新しくなる
    - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
-   - **注意**: Git Bash・WezTerm のタブ（自分用の設定では Git Bash）や、Git の bash を使う SSH のセッション・Claude Code が動いていると、インストーラは入れ替えずに終わるはず
+   - **注意**: Git Bash・WezTerm のタブ（自分用の設定では Git Bash）が動いていると、インストーラは入れ替えずに終わるはず
    - 上げた後は、WezTerm の新しい Git Bash のタブを開き、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 6 を貼り直す（`pull.ff` が `only` なら同じ項の手順 7 も）
 
 1. Firefox の今の版と、winget に新しい版があるかを確かめる。
@@ -5577,7 +4226,7 @@
 
    - 1 行目が今の版
    - winget に新しい版があれば、`Mozilla.Firefox.ja` の行に今の版と新しい版が並ぶ
-   - 行が出ずに、見つからない旨が出たら、新しい版は無い。この項の手順 5 は飛ばす
+   - 行が出ずに、見つからない旨が出たら、新しい版は無い。この項の手順 4 は飛ばす
 
 1. Firefox の新しい版があるときだけ、Firefox をすべて閉じてから winget で上げる。
 
@@ -5603,11 +4252,7 @@
 
 1. [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 4 のブロックを貼る。
 
-   - 最後に出る `wezterm <版>` が、この項の手順 6 の版より新しければ上がった
+   - 最後に出る `wezterm <版>` が、この項の手順 5 の版より新しければ上がった
    - 同じ版なら、main に新しいコミットが無かった（同じ版を入れ直しただけ）
-
-1. この項の手順 2 でタスクを止めたときだけ、タスクを始め直す。
-
-   - [Claude Code の Remote Control の止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 2 を行う
 
 ---

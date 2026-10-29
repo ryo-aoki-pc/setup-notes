@@ -1,7 +1,6 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）
 
 - 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal・PowerShell 7 のプロファイル・PowerShell の開発の設定も整える
-- Android の Termux のシェルは、Android のセットアップの「[Termux のシェル](android.md#termux-のシェル)」で設定する
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)
 
 > [!IMPORTANT]
@@ -615,7 +614,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 #### tmux の設定ファイル
 
-- マウスのホイールでさかのぼれるようにし、さかのぼれる行数を 2000 から 50000 に増やす。Claude Code のように出力が長く続くものを、tmux の中で読み返すときに効く
+- マウスのホイールでさかのぼれるようにし、さかのぼれる行数を 2000 から 50000 に増やす。出力が長く続くものを、tmux の中で読み返すときに効く
 - 前提: [シェルのツール](#シェルのツール)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 - tmux は、サーバーが起動するときに `~/.tmux.conf` と `~/.config/tmux/tmux.conf` の**両方**を読む（あるものだけ）。新規作成は後者、既存設定がある場合はそのファイルに書く
@@ -985,111 +984,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 2 つ目の見方は`__wezterm_notify_done` と `__wz_mouse_off` が出ればよい。COPR の公式統合が有効なら `__wezterm_set_user_var` も出る
    - tmux の中では `TERM_PROGRAM` が `tmux` になり、マウス報告よけのほかは動かない
 
-#### WezTerm: Windows の SSH 先で PowerShell に貼り付ける
-
-手元の WezTerm から Windows の SSH 先に入り、その PowerShell の PSReadLine の入力欄へ複数行を貼る。接続元は Linux または Windows の WezTerm、接続先は Windows OpenSSH と Git Bash。両側にこの版の設定を置く（この項の手順 1）。
-
-- 前提: 接続元で[WezTerm](#wezterm)（Windows の接続元は[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)）を通してある。Windows 接続先で [OpenSSH サーバー](windows-setup.md#openssh-サーバー)・[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)・[SSH の既定シェル](windows-setup.md#ssh-の既定のシェルを-git-bash-にする)を通してある
-- 実行場所: 接続元の WezTerm のタブ（Linux では GUI セッションから起動した WezTerm）。この項の手順 4・9 は接続先の Git Bash、手順 5〜8 は接続先の PowerShell
-- 通常の PowerShell プロファイルには追記しない
-- 管理者・同じユーザーの非管理者 PowerShell の切り替えは [Windows の SSH 操作手順](windows-setup.md#ssh-で管理者非管理者の-powershell-を使う)を使う
-
-[参照情報](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/wezterm/docs/verification/install.md)
-
-1. 接続元と Windows 接続先の設定を、[WezTerm の設定を更新する](#wezterm-の設定を更新する)の手順 1 で更新する。
-
-   - Windows 接続先では Git Bash で、[Windows の設定更新](#windows-11-で-wezterm-の設定を更新する)の手順 2 を通す
-   - 接続元は `Ctrl+Shift+R` で設定を読み直す
-   - 通常の PowerShell プロファイルには追記しない
-
-1. Linux の接続元では、セッションに対応するクリップボード取得コマンドがあるか確かめる。
-
-   ```bash
-   if [ -n "${WAYLAND_DISPLAY-}" ]; then
-     command -v wl-paste
-   elif [ -n "${DISPLAY-}" ]; then
-     command -v xclip
-   else
-     echo 'GUI セッションから WezTerm を起動してください'
-   fi
-   ```
-
-   - Wayland は `wl-paste`、X11 は `xclip` のパスが出ればよい
-   - 無ければ接続元の dnf で `wl-clipboard`（Wayland）か `xclip`（X11）を導入し、この項の手順 2 をやり直す。GUI セッションが無い場合も先へ進まない
-   - Windows 接続元ではこの手順を飛ばす。標準の Windows PowerShell を `-NoProfile` で使う
-
-1. 接続元の WezTerm の新しいペインで Windows に接続する（`SSH_HOST` は必ず値を入れる）。
-
-   ```bash
-   SSH_HOST=''
-   ```
-
-   ```bash
-   if [ -z "${SSH_HOST}" ]; then echo '中断: SSH_HOST が空のまま。値を入れて貼り直す' >&2; else
-     ssh "${SSH_HOST}"
-   fi
-   ```
-
-   - `SSH_HOST` は Windows 接続先の SSH の接続名か、ホスト名を入れる
-   - Windows OpenSSH の既定シェルは Git Bash とする
-   - **次の手順は、接続先の Git Bash のプロンプトが出てから貼る**
-
-1. 接続先の Git Bash で統合を読み、Windows PowerShell 5.1 を起動する。
-
-   ```bash
-   export TERM_PROGRAM=WezTerm
-   . ~/.config/wezterm/shell/wezterm.sh
-   powershell.exe -NoLogo -NoExit -Command '. "$env:USERPROFILE\.config\wezterm\shell\wezterm.ps1"'
-   ```
-
-   - PowerShell 7 を使う場合は、最後の行の `powershell.exe` を `pwsh.exe` に替える
-   - **次の手順は、PowerShell のプロンプトが出てから貼る**
-
-1. 接続先 PowerShell で、専用受信キーが登録されたか確かめる。
-
-   ```powershell
-   Get-Module PSReadLine | Select-Object Name, Version; Get-PSReadLineKeyHandler -Bound | Where-Object Function -eq WezTermSshPaste
-   ```
-
-   - `Ctrl+Shift+F12` の `WezTermSshPaste` が出ればよい。このキーは配送用で、手動では押さない
-   - キーが無ければ PSReadLine を読み込み、統合を読み直してから確認する
-
-1. 接続元で無害な複数行をコピーし、右クリックまたは `Ctrl+Shift+V` で貼る。
-
-   ```powershell
-   & {
-     '一行目'
-
-     '二行目'
-   }
-   ```
-
-   - このブロックは入力欄に残り、Enter を押すまで実行しない
-   - 空行・日本語・末尾改行を保持する。PSReadLine の Paste と同じく CR を除き、タブを空白 4 個にする
-   - 準備応答・取得・検証が失敗すると通知し、本文を挿入しない。自動で通常貼り付けに切り替えない
-   - 本文は UTF-8 で 64 KiB まで。途中で `Ctrl+C` を押すと終端まで受信して捨てる。配送が止まった場合は受信待機が続くため、本文を追加で貼らず、接続元でその SSH ペインを閉じて接続し直す
-
-1. 入力欄を確認し、Enter を押して実行する。
-
-   - `一行目`・`二行目` が一度ずつ出ればよい
-   - **次の手順は、PowerShell のプロンプトが戻ってから行う**
-
-1. PowerShell を終了して Git Bash に戻る。
-
-   ```powershell
-   exit
-   ```
-
-   - **次の手順は、Git Bash のプロンプトに戻ってから貼る**
-
-1. 接続先の Git Bash で接続を閉じる。
-
-   ```bash
-   exit
-   ```
-
-   - 接続元のプロンプトに戻ればよい
-
 #### WezTerm の設定を更新する
 
 自分用の WezTerm の設定のリポジトリを pull で上げる。WezTerm 本体の更新は[更新](almalinux-setup.md#更新)で行う。
@@ -1399,7 +1293,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。この項の手順 4 で今の nightly に上書きする
      - `Location` が `C:\Program Files\WezTerm\` と違う場所なら中断し、既存の導入元と設定を確かめる
    - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。中断し、既存の導入元と設定を確かめる
-   - `Running` に名前が出たら、その WezTerm の窓を閉じる（[Claude Code の Remote Control（Windows）](ai-agents.md#claude-code-の-remote-control-windows-11-で使う)のタスクは、AI エージェントの手順書の[Claude Code の Remote Control: 止める・もう一度始める](ai-agents.md#claude-code-の-remote-control-止めるもう一度始める)の手順 1 で止める）
+   - `Running` に名前が出たら、その WezTerm の窓を閉じる
    - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
 
 1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
@@ -1681,7 +1575,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### WezTerm のシェル統合を WSL で使う
 
 - WSL の bash で Windows 側の WezTerm のシェル統合を読む
-- 前提: [WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)・[WSL の AlmaLinux 10 と自動サインイン](windows-setup.md#wsl-の-almalinux-10-と自動サインイン)と、WSL 側の[共通の bash 設定](#共通の-bash-設定)を通してある
+- 前提: [WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)・[WSL の AlmaLinux 10](windows-setup.md#wsl-の-almalinux-10)と、WSL 側の[共通の bash 設定](#共通の-bash-設定)を通してある
 - 実行場所: この PC のデスクトップの WezTerm の WSL の bash のタブ。この項の手順 1 で開く
 - WSL の `~/.bashrc` の既存の変更を確かめ、Windows 側の統合を共通の bash 設定の読み込み行より後ろで読む
 

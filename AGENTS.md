@@ -6,7 +6,7 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。Windows・AlmaLinux の実施手順の正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`、AI コーディングエージェントの実施手順の正本は両 OS とも `docs/ai-agents.md`、仮想マシンは両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md`、GNOME のリモート操作（AlmaLinux 10）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md`、コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md`、シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は両 OS とも `docs/shell-terminal.md`、Android（Termux・Termux の Firefox・Termux の開発環境）は `docs/android.md` で、`scripts/` はその手順書を実行可能にしたもの。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、注意点は `docs/extra/<手順書名>.md` に分ける。ロールバック（取り消し・全部消す）の手順は書かない。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`・`docs/shell-terminal.md`・`docs/neovim.md`・`docs/virtual-machines.md`・`docs/samba.md`・`docs/gnome-remote.md`・`docs/containers.md`・`docs/tool-catalog.md` の 9 冊。手順書には操作・前提・成功条件と、操作を変える短い注意だけを書く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md`、背景・採用理由・比較・参照資料は `docs/reference/<手順書名>.md`、注意点は `docs/extra/<手順書名>.md` に分ける。ロールバック（取り消し・全部消す）の手順は書かない。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
@@ -14,46 +14,17 @@
 
 検証の状態と範囲（実施済みと扱わない範囲を含む）は、非公開側の各検証記録と、その要約の `docs/verification-status.md` にある。状態や検証範囲の記述を変える前に読む。
 
-## よく使うコマンド
-
-```bash
-# シェルスクリプトの静的検査（導入は docs/almalinux-setup.md の「ShellCheck と shfmt」。最新の実測は非公開側の docs/verification/shellcheck.md）
-bash -n scripts/wireguard/wg-vpn.sh
-shellcheck -x scripts/wireguard/wg-vpn.sh
-
-# wg-vpn.sh を変更せずに実行予定を見る（root 不要なサブコマンドもある）
-sudo scripts/wireguard/wg-vpn.sh -e scripts/wireguard/site.env --dry-run apply A
-scripts/wireguard/wg-vpn.sh --help
-
-# 図の再生成（docs/diagrams/*.diag → *.svg）。nwdiag / seqdiag を直接呼ばない
-sudo dnf install -y google-noto-sans-cjk-vf-fonts
-python3 -m pip install --user nwdiag seqdiag
-python3 scripts/render-diagrams.py          # 別フォントは WG_DIAG_FONT=... で指定
-
-# GUI の動作を確かめる（docs/ai-agents.md の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」を通したホストで。撮った PNG を開いて見る）
-scripts/gnome-gui.py shot /tmp/gnome-gui.png
-scripts/gnome-gui.py key Escape                 # セッションを始めた直後に開いているアクティビティ画面を閉じる
-scripts/gnome-gui.py launch org.gnome.TextEditor
-scripts/gnome-gui.py type 'hello'
-scripts/gnome-gui.py click 70 15                # 座標は shot の PNG の画素
-scripts/gnome-gui.py windows
-```
-
-GUI の動作を確かめるときは、[AI エージェントの手順書の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」](docs/ai-agents.md#claude-code-の-gnome-操作-almalinux-10-で使う)（前提は [GNOME のリモート操作の「GNOME のヘッドレスセッション」](docs/gnome-remote.md#gnome-のヘッドレスセッション)の手順 1・2）で仮想モニターを付けたヘッドレスのセッションを `scripts/gnome-gui.py`（Mutter の ScreenCast / RemoteDesktop。GNOME Shell の unsafe mode は使わない）で撮って操作する。操作のたびに `shot` で確かめ、利用者に見せるときはその PNG を送る。アクティビティ画面が開いているときに `launch` した窓にはフォーカスが移らないので先に `key Escape`、画面が動くキーの後は `sleep 1` を挟む。キー配列に無い文字は打てない（日本語は IBus でローマ字を打つ形になるはずだが、確かめていない）。PATH の先頭が Homebrew だと `gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになるので、`/usr/bin/` を付ける（Homebrew の `gsettings` は GNOME の dconf に書かない）。ヘッドレスのセッションと仮想モニターのドロップインが無いホスト（リモートログインだけのホストなど）で使うなら、利用者に確かめてから GNOME のリモート操作の「GNOME のヘッドレスセッション」の手順 1・2 と、AI エージェントの手順書の「Claude Code の GNOME 操作: AlmaLinux 10 で使う」の手順 1〜3 を通す（リモートログインのセッションにも仮想モニターが付く）。
-
-`wg-vpn.sh` の本実行を実機の設定に触れずに試す方法は、非公開側の `docs/verification/wireguard.md` の「付録: スクリプトの検証」にある。`unshare -Urm` で uid 0 の user namespace を作り、`/etc/wireguard`・`/etc/sysctl.d`・`/etc/firewalld` に tmpfs を重ね、`firewall-cmd` / `systemctl` / `ip` などのスタブを `PATH` の先頭に置く。`wg genkey` / `wg pubkey` はカーネルモジュール無しで本物が使える。
+AI エージェントの手順と、職場で使わない手順は、Forgejo の非公開リポジトリ `setup-notes-private` にある。この公開リポジトリには、それらへのリンク・案内と、環境が分かる値（ホスト名・アドレス・機材）を書かない。
 
 ## 手順を集約する正本
 
 - 既存・新規の Windows 11・AlmaLinux 10 の操作は、2冊のカテゴリの該当する用途の項へ集約する（骨格は writing-rules.md の「2 冊の骨格（カテゴリ別）」）
-- AI コーディングエージェント（導入・更新・共同作業・ブラウザ操作・Remote Control・GNOME 操作）は、両 OS とも `docs/ai-agents.md` へ集約する。2冊には AI エージェントの項・節を置かず、リードから案内する。AI エージェントの状態で分岐する手順だけは、その節の手順として残す（Remote Control のタスクは windows-setup.md、仮想モニターのドロップインは gnome-remote.md）
-- 仮想マシン（AlmaLinux 10 の VirtualBox・VirtualBox の bootc ゲスト・kvm-container、Windows 11 の Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md`、Forgejo のサーバーは `docs/forgejo.md` へ集約する。2冊には項を置かず、冒頭と `## 更新` のリードから案内する
-- 大きな項のうち、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、WireGuard・Neovim・Samba（クライアント・サーバー）・Syncthing は両 OS とも `docs/wireguard.md`・`docs/neovim.md`・`docs/samba.md`・`docs/syncthing.md` へ集約する。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
+- 仮想マシン（AlmaLinux 10 の VirtualBox・VirtualBox の bootc ゲスト・kvm-container、Windows 11 の Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md` へ集約する。2冊には項を置かず、冒頭と `## 更新` のリードから案内する
+- 大きな項のうち、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、Neovim・Samba（クライアント・サーバー）は両 OS とも `docs/neovim.md`・`docs/samba.md` へ集約する。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
 - シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は、両 OS とも `docs/shell-terminal.md` へ集約する。Homebrew・btop・gdu・Git for Windows・貼り付けの設定・SSH の項は2冊に残す。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
-- コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）と Dropbox（公式のクライアントと rclone）は、AlmaLinux 10 の `docs/containers.md`・`docs/dropbox.md` へ集約する。almalinux-setup.md には項を置かず、冒頭と `## 更新` のリードから案内する
-- Android のスマートフォンの操作（Termux・Termux の Firefox・Termux の開発環境）は、AI エージェントを含めて `docs/android.md` へ集約する（利用者の決定で足した正本）
-- 正本を増やすのは、利用者の決定があるときだけにする。以下の「正本」は、この 14 冊を指す
-- 個別ツール・VPN・VM・リモート操作も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
+- コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）は、AlmaLinux 10 の `docs/containers.md` へ集約する。almalinux-setup.md には項を置かず、冒頭と `## 更新` のリードから案内する
+- 正本を増やす・減らすのは、利用者の決定があるときだけにする。以下の「正本」は、この 9 冊を指す
+- 個別ツール・VM・リモート操作も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
 - 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は正本と元リポジトリの案内を合わせる
 - 冒頭で対話・GUI・条件付き操作の全番号を列挙しない。各手順には成功条件・中断・分岐・停止・危険を短く残す
 - 文書を移す・分ける・まとめるときは、移した経緯と、旧ファイル名・旧見出しとの対応を文書に書かない（経緯は git の履歴と Pull Request の本文に残す）。リンクを今の場所へ直す。中身が新しい場所への案内だけになったファイルは消す
@@ -77,16 +48,6 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - 節のリードの箇条書きと、コマンドの無い GUI・スマートフォンなどの手順（「1 行の説明 → 箇条書き」）は、この順序違反として扱わない
 - 完了報告・コミット・Pull Request の作成や更新の前に、変更した手順を説明から最後の箇条書きまで点検する。1 行だけの変更でも手順全体を確認し、順序違反があれば直してから進める
 - レビューでも同じ点検を行い、違反を指摘する。完了報告と Pull Request の検証欄には、点検したファイルと結果を書く
-
-## wg-vpn.sh の設計
-
-- **入力は `site.env` 1 ファイル**。両拠点に同じファイルを置く。`select_site A|B` が `SITE_A_*` / `SITE_B_*` から `MY_*` / `PEER_*` を組み立てるので、以降の処理は拠点を意識しない。このホストの LAN 側 IP が `WG_x_LAN_IP` と一致しなければ何も変更せずに止まる
-- **変更を伴うコマンドはすべて `run()` を通す**。`--dry-run` はこれで実現しているので、新しい副作用も必ず `run` 経由にする
-- **各段階で検査してから変更する**。`validate_addresses` は Python の `ipaddress` で形式・重複・包含関係を検査する。入力や未知 peer の事前検査で止まれば設定は反映しないが、`apply` の後半で失敗すると、それ以前に行った設定変更は残りうる。すべての検査失敗で無変更になるとは案内しない
-- `apply` は冪等。`clients.list` の登録簿から毎回 conf を組み立て直し、firewalld は存在確認してから追加し、最後は常に `systemctl restart`（reload では経路が変わらないため）
-- `PrivateKey` は conf に直接書く。`PostUp` で読み込む方式は reload で鍵が消える
-
-スクリプトの挙動を変えたら、[WireGuard の参考資料の「スクリプトの動作」](docs/reference/wireguard.md#スクリプトの動作)と `--help`（ファイル冒頭コメントを `usage()` がそのまま表示する）も合わせて直す。
 
 ## 共同作業の規則
 
@@ -117,4 +78,4 @@ GUI の動作を確かめるときは、[AI エージェントの手順書の「
 - Claude Code から頼まれたエージェントは、上の自分の役割の範囲で作業する
 - レビューの指摘は、実物で確かめてから採る。採らなかった指摘は、理由を付けて報告する
 - 使えないエージェント（入っていない・ログインが切れた）は飛ばし、そのことを報告する
-- 頼み方は、[setup-notes](https://github.com/ryo-aoki-pc/setup-notes) の `docs/ai-agents.md` の「コーディングエージェントの共同作業: Windows 11 で既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
+- 頼み方は、Forgejo の非公開リポジトリ `setup-notes-private` の `docs/ai-agents.md` の「コーディングエージェントの共同作業: Windows 11 で既定で分担する」と、`docs/reference/coding-agents.md` の「既定の分担」
