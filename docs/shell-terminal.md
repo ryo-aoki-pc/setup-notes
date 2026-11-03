@@ -1135,6 +1135,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
 - この項の手順 2〜5 は `settings.json` だけを読み書きし、既定のプロファイル（Windows PowerShell）と `copyOnSelect` は変えない
 - 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す
+- 貼った複数行が行ごとに動かないようにするなら、[Windows Terminal で複数行を 1 つの入力として貼る](#windows-terminal-で複数行を-1-つの入力として貼る)を通す
 
 > [!WARNING]
 > - この項の手順 4 で警告を切ると、信用できない複数行の文字も、確かめずにそのまま貼られて動く
@@ -1259,6 +1260,67 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - `copyOnSelect: True` が出ればよい。開いている Windows Terminal にも効くはず（文書とソースからの推測で、実機では確かめていない）
    - `中断:` が出たら、何も書いていない。コメントや末尾のカンマを残すときは、Windows Terminal の設定の「操作」で「選択範囲をクリップボードに自動的にコピー」をオンにして保存する
+
+#### Windows Terminal で複数行を 1 つの入力として貼る
+
+- 任意で、Windows Terminal に貼った複数行が行ごとに動かないように、Enter の割り当てをプロファイルに足す
+- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）。PowerShell 7 でも使うなら、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 2 を通してある
+- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は、Windows Terminal の新しいタブ
+- 足す行は ASCII の文字だけで、行末の印は `# shell-terminal.md:paste`。プロファイルのほかの行は変えない
+- 同じプロファイルを読む窓すべてに効く（管理者の窓も）。貼った全体を先に構文解析するので、1 か所の構文エラーで全体が動かない（[注意点](extra/shell-terminal.md)・[補足](reference/shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る--手順-2-補足-enter-の割り当て)）
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+
+1. 5.1 と、既にある 7 のプロファイルの末尾に Enter の割り当てを足す。
+
+   ```powershell
+   & {
+     $line = 'if ((Get-Module -Name PSReadLine) -and $ExecutionContext.SessionState.LanguageMode -eq ''FullLanguage'') { Set-PSReadLineKeyHandler -Chord Enter -BriefDescription PasteAwareEnter -Description ''Keep pasted lines in one input'' -ScriptBlock { $rl = [Microsoft.PowerShell.PSConsoleReadLine]; $queue = $null; try { $queue = $rl.GetField(''_queuedKeys'', [Reflection.BindingFlags]''NonPublic,Instance'').GetValue($rl.GetField(''_singleton'', [Reflection.BindingFlags]''NonPublic,Static'').GetValue($null)) } catch {}; $more = $false; $clock = [Diagnostics.Stopwatch]::StartNew(); do { if ((($null -ne $queue) -and ($queue.Count -gt 0)) -or [Console]::KeyAvailable) { $more = $true; break }; [Threading.Thread]::Sleep(2) } while ($clock.ElapsedMilliseconds -lt 30); if ($more) { $rl::AddLine() } else { $rl::AcceptLine() } } }  # shell-terminal.md:paste'
+     $paths = @($PROFILE, (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'))
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     foreach ($p in $paths) {
+       if (-not (Test-Path -LiteralPath $p)) {
+         if ($p -ne $PROFILE) { "飛ばした: 7 のプロファイルが無い: $p"; continue }
+         New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null
+       }
+       $text = Get-Content -LiteralPath $p -Raw
+       if ($text -and $text.Contains($line)) { "すでにある: $p" } else {
+         $add = $line
+         if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+         Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+         "足した: $p"
+       }
+     }
+   }
+   ```
+
+   - プロファイルごとに `足した:` か `すでにある:` が出ればよい。7 のプロファイルが無ければ `飛ばした:` が出る
+   - 何度貼ってもよい
+   - 開いているタブには効かない。次の手順は新しいタブで行う
+
+1. Windows Terminal で Windows PowerShell（5.1）の新しいタブを開き、Enter の割り当てを確かめる。
+
+   ```powershell
+   Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Enter' | Format-Table Key, Function -AutoSize
+   ```
+
+   - `Enter` の行に `PasteAwareEnter` が出ればよい
+   - 出なければ、この項の手順 2 と、実行ポリシー（[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 4）を確かめる
+   - PowerShell 7 でも使うなら、新しい「PowerShell」のタブでも同じ 1 行を貼る
+
+1. 同じタブに右クリックで貼って Enter を押し、1 つの入力として動くことを確かめる。
+
+   ```powershell
+   $pasteCheck = (Get-History).Count
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   '入力の数: {0}' -f ((Get-History).Count - $pasteCheck + 1)
+   ```
+
+   - `入力の数: 1` が出ればよい
+   - `入力の数: 3` なら、行ごとに動いている。新しいタブで開いたかと、この項の手順 3 の割り当てを確かめる
+   - 「警告」の窓が出たら「強制的に貼り付け」を押す。この項の設定では警告は変わらない（出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4）
 
 ---
 

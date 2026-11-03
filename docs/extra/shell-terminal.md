@@ -80,6 +80,10 @@
   - 複数行の警告を切っていると、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある
 - **Windows の starship.toml は Git Bash と PowerShell 7 で共有する**: 任意の[表示の設定](../shell-terminal.md#windows-11-で-starship-の表示を変える)は、既存の配色・プリセットも置き換える。控えを書き戻すと、両方のシェルに効く
   - PowerShell 7 では、[プロファイルの設定](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 2 の starship の行が必要。`STARSHIP_CONFIG` を別の場所に向けている場合、このファイルは読まれない
+- **Windows Terminal で複数行を 1 つの入力にすると、全体を先に構文解析する**: 任意の[複数行を 1 つの入力として貼る設定](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)では、1 か所の構文エラーで全体が動かない
+  - 実行中に先打ちした複数のコマンドも、1 つの入力にまとまる
+  - 末尾に改行がある文字を貼ると、Enter を押さなくても全体が動く
+  - PSReadLine の非公開の内部を読むため、将来の版で読めなくなると今までどおり行ごとに動く。Enter 自体は動く
 - **Windows Terminal に複数行を貼ると「警告」が出ることがある**: 管理者ではない窓（Windows Terminal）に複数行のブロックを貼ると出るはず（コードからの推測。確かめていない）。出たら「強制的に貼り付け」を押す
   - 出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4
 - **HackGen Console NF: Windows 11 では、自分のユーザーのフォントが見えないアプリがある**: ユーザーごとのフォントは Windows 10 1809 からで、古いアプリには見えないことがある。そのアプリだけ、PC 全体に入れ直す（本書では扱わない）

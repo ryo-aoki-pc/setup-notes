@@ -271,7 +271,7 @@ Importing GPG key 0xCEA2757D:
 - `automatic` は、シェルが角かっこで囲む貼り付け（bracketed paste）を有効にしていないときに、改行を含む文字を貼ると警告する（`TerminalPage.cpp`）。Windows PowerShell 5.1 の PSReadLine 2.0.0 も ConPTY もこれを有効にしないので、5.1 の窓では毎回出るはず（コードからの推測。確かめていない）
 - 画面では「操作」→「改行を貼り付ける際に警告する」（「"角かっこで囲まれた貼り付け" がオフの場合」・「常時」・「なし」）。ダイアログの題は「警告」で、ボタンは「強制的に貼り付け」と「キャンセル」
 - 出るダイアログは 1 つだけ。複数行の警告が出ないときに、5 KiB（UTF-16 で 5,120 文字）を超えると `warning.largePaste`（既定 true）の警告が出る
-- Windows Terminal は、貼るときに改行を Enter として送る。PSReadLine は、閉じていない文（`& {` など）の行を続きとして受けるので、1 行ずつ届いても、この文書のブロックは正しく動く
+- Windows Terminal は、貼るときに改行を Enter として送る。PSReadLine は、閉じていない文（`& {` など）の行を続きとして受けるので、1 行ずつ届いても、この文書のブロックは正しく動く。閉じた文が続くブロックは行ごとに動く（1 つの入力にするなら、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)）
 - `trimPaste`（既定 true）は、1 行の貼り付けの末尾の空白だけを削る。貼った後に Enter が要るのは、コピーボタンの中身に末尾の改行が無いため
 
 ### Windows Terminal で選択した文字をコピーする / 手順 2: 補足: copyOnSelect と貼り付け
@@ -280,6 +280,17 @@ Importing GPG key 0xCEA2757D:
 - 読み書きは親の項と同じく、コメントと末尾のカンマがあれば止め、BOM の無い UTF-8 で書く。控えの `settings.json.windows-setup.bak` は、あれば上書きしない
 - 選択で、手順書からコピーしたブロックも置き換わる。親の[Windows Terminal のフォントと貼り付けの警告を変える](../shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4 で複数行の警告を切っていれば、管理者の Windows Terminal の窓でも複数行が確かめずに動くおそれがある
 - ソースと文書での確認で、実機では確かめていない
+
+### Windows Terminal で複数行を 1 つの入力として貼る / 手順 2: 補足: Enter の割り当て
+
+- Windows Terminal は改行を Enter として送り、PSReadLine の `AcceptLine` は閉じた文を実行するため、閉じた文が続くブロックは行ごとに動く
+- 右クリックは Windows Terminal が処理する。Ctrl+V も `keybindings` が `Terminal.PasteFromClipboard` に割り当てていれば、プロファイルの `Paste` まで届かない。Ctrl+V の割り当てを外す方式は右クリックに効かず、ほかのタブの Ctrl+V の貼り付けも失うため、Enter を割り当てる
+- PSReadLine は bracketed paste を有効にしない（[PSReadLine の issue #1471](https://github.com/PowerShell/PSReadLine/issues/1471)）。2.4.5 に上げてもこの問題は直らない。Ctrl+Enter の `AddLine` は conhost の LF 向けで、Windows Terminal では効かない
+- `ReadOneOrMoreKeys` が読めるキーを内部の `_queuedKeys` へ先に移すため、`KeyAvailable` だけでは足りない。static の `_singleton` から instance の `_queuedKeys` も読む。入力の切れ目で実行しないよう、約 30 ms まで待つ（Enter を打ったときも、この分だけ遅れる）
+- 内部の名前は非公開で、版で変わることがある。読めなければ `KeyAvailable` だけの判定になり、貼り付けは行ごとの実行に戻る。Enter 自体は動く
+- 制限言語モード（Constrained Language）の窓では割り当てない。割り当てると、この行のメソッドの呼び出しが禁じられ、Enter でコマンドが動かなくなるため。この窓の貼り付けは行ごとのまま
+- 印を `# shell-terminal.md:paste` にして、Emacs モードと 5.1 のキー操作の再実行時の削除対象から外す。`EditMode` は前のキーの割り当てを既定に戻すため、末尾に足す。Emacs の手順は最初のキーの割り当てより前へ入れるので、後から通しても順序は保たれる
+- 実機の動きと範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)を参照する
 
 ### Windows 11 で WezTerm を入れる / 手順 1: 補足: WezTerm の中の PowerShell を使わない理由
 

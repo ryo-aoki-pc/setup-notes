@@ -24,7 +24,7 @@
   - Windows 11 の項は「Windows 11 で HackGen Console NF を入れる」「Windows 11 で WezTerm を入れる」。「Git Bash と WezTerm の設定」の子の同名の 4 項にも「Windows 11 で」を付ける。「HackGen Console NF を上げる」は、HackGen の項の `####` に置く
   - AlmaLinux 10 の Homebrew とオフライン導入は「基本の設定」、btop・gdu は「アプリ」、Windows 11 の Git for Windows は「基本の設定」に置く。貼り付けの設定と SSH の項は2冊の該当カテゴリに置く
   - 参考資料と注意点は `docs/reference/shell-terminal.md`・`docs/extra/shell-terminal.md`、検証記録は `docs/verification/shell-terminal.md` に置く
-  - PowerShell 7 の基本のプロファイルの行は印 `# windows-setup.md`、Emacs モードと 5.1 のキー操作は `# shell-terminal.md`、開発の設定は `# shell-terminal.md:dev`。Windows Terminal の控えは `settings.json.windows-setup.bak`
+  - PowerShell 7 の基本のプロファイルの行は印 `# windows-setup.md`、Emacs モードと 5.1 のキー操作は `# shell-terminal.md`、開発の設定は `# shell-terminal.md:dev`。「Windows Terminal で複数行を 1 つの入力として貼る」は印 `# shell-terminal.md:paste` で Enter を割り当てる。Windows Terminal の控えは `settings.json.windows-setup.bak`
   - 「PowerShell を開発に使う」はモジュールと環境変数を扱い、子の項で 7 と 5.1 のプロファイル・5.1 の PSReadLine・開発の設定の更新を分ける。7 は ConsoleHost で UTF-8 にして終了時に戻し、5.1 は `Invoke-Utf8Native` の間だけ変える。補完の控えは 5.1 で作り、7 で読む
 - `docs/containers.md` — コンテナの手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に Podman・podman-compose・podman-tui・lazydocker・Distrobox の用途の項を置く
   - 検証記録・参考資料・extra は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使う
