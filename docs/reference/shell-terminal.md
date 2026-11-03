@@ -288,6 +288,7 @@ Importing GPG key 0xCEA2757D:
 - PSReadLine は bracketed paste を有効にしない（[PSReadLine の issue #1471](https://github.com/PowerShell/PSReadLine/issues/1471)）。2.4.5 に上げてもこの問題は直らない。Ctrl+Enter の `AddLine` は conhost の LF 向けで、Windows Terminal では効かない
 - `ReadOneOrMoreKeys` が読めるキーを内部の `_queuedKeys` へ先に移すため、`KeyAvailable` だけでは足りない。static の `_singleton` から instance の `_queuedKeys` も読む。入力の切れ目で実行しないよう、約 30 ms まで待つ（Enter を打ったときも、この分だけ遅れる）
 - 内部の名前は非公開で、版で変わることがある。読めなければ `KeyAvailable` だけの判定になり、貼り付けは行ごとの実行に戻る。Enter 自体は動く
+- 制限言語モード（Constrained Language）の窓では割り当てない。割り当てると、この行のメソッドの呼び出しが禁じられ、Enter でコマンドが動かなくなるため。この窓の貼り付けは行ごとのまま
 - 印を `# shell-terminal.md:paste` にして、Emacs モードと 5.1 のキー操作の再実行時の削除対象から外す。`EditMode` は前のキーの割り当てを既定に戻すため、末尾に足す。Emacs の手順は最初のキーの割り当てより前へ入れるので、後から通しても順序は保たれる
 - 実機の動きと範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)を参照する
 
