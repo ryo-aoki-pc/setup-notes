@@ -20,6 +20,8 @@
   - Windows 11 の「Windows 11 で VirtualBox を入れる」は、AlmaLinux 10 の「VirtualBox」と区別する
 - `docs/gnome-remote.md`・`docs/neovim.md`・`docs/samba.md` — virtual-machines.md と同じく、`## AlmaLinux 10 で使う`・`## Windows 11 で使う` の下に用途の項を置く（gnome-remote.md は AlmaLinux 10 だけ）
   - gnome-remote.md は「GNOME のデスクトップ共有」「GNOME のヘッドレスセッション」「GNOME のリモートログイン」、samba.md は「Samba クライアント」「Samba サーバー」と「Windows 11 で Samba クライアントを使う」、neovim.md は両 OS の項を扱う
+  - gnome-remote.md の検証記録・参考資料・注意点・選択した方針は、3 用途それぞれの末尾の「補足と注意点」に置く。出力例と説明は、折りたたみの各項のリード・手順の区分に置く
+  - リモートログインの winpr-makecert の証明書作成と、FreeRDP・ログによる接続確認は、同じ用途の子の任意の項に置く。grd.conf の確認と修復は「GNOME のリモートログイン」の手順 8 に置く
   - neovim.md の補足・注意点・参照資料は、AlmaLinux 10 の「Neovim」と「Windows 11 で Neovim を入れる」の末尾の折りたたみに分ける。両 OS にかかる treesitter・公式スタイル・健全性の読み方と設定ファイルの場所は、冒頭の「この文書の補足と注意点」に置く。検証記録は各折りたたみの「参照」で「検証記録（`docs/verification/neovim.md`）」と文字で指す
   - samba.md の補足・注意点・選択した方針・参照資料は「Samba クライアント」「Samba サーバー」「Windows 11 で Samba クライアントを使う」の各用途の末尾の折りたたみに分ける。検証記録は各折りたたみの「参照」で、サーバーは「検証記録」、両 OS のクライアントは「検証記録（`docs/verification/samba-client.md`）」と文字で指す
   - Neovim の Windows 11 の項と子の LazyVim の 5 項には「Windows 11 で」を付ける
