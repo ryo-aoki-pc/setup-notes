@@ -167,6 +167,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - 前提: [共通の bash 設定](#共通の-bash-設定)を通してある（一般ユーザーの共通 bash 設定を先に入れる）
 - 実行場所: この項の手順 1 は自分のユーザーの端末（bash）。手順 2 からは、その端末から `sudo -i` で入った root のシェル（手順 3 で入り直す）
+- `sudo -i` は `ALL_PROXY` を渡さない
 
 1. 自分のユーザーのシェルから root に入る。
 
@@ -186,6 +187,8 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 控えが既にある状態で変更が必要なら中断する
    - 独自設定は共通設定の読み込み行より後ろに置く。構文エラーなら変更せず中断する
+   - `~` は `/root`。clone 済みなら更新し、`bash ~/.config/bash/install.sh` を実行する
+   - 控えは `/root/.bashrc.before-bash`
 
 1. `exit` で抜け、自分のユーザーから `sudo -i` で入り直す。
 
@@ -264,16 +267,6 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - Workstation で入れた PC は、bash-completion が最初から入っている
 - BaseOS から入れるときは、依存の `pkgconf` 系 4 つも入る
 
-**[共通の bash 設定を root に入れる](#共通の-bash-設定を-root-に入れる)のリード**
-
-- `sudo -i` は `ALL_PROXY` を渡さない
-
-**[共通の bash 設定を root に入れる](#共通の-bash-設定を-root-に入れる)の手順 2**
-
-- `~` は `/root`。clone 済みなら更新し、`bash ~/.config/bash/install.sh` を実行する
-
-- 控えは `/root/.bashrc.before-bash`
-
 **[共通の bash 設定を更新する](#共通の-bash-設定を更新する)の手順 1**
 
 - `set-url` は、HTTPS で clone したホストでは何も変えない。SSH で clone したホストを HTTPS にそろえる
@@ -282,7 +275,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - **bash-completion はシステムの RPM にした**: BaseOS の 2.11 で足りる。Homebrew にも `bash-completion@2`（2.16 系）があるが、RPM の各パッケージが置く `/usr/share/bash-completion/completions/` を読むのはシステムのものの方が素直で、`sudo` のシェルでも同じものが効く
 - **Homebrew の補完は bash リポジトリから全部読む**: 遅延読み込みの対象のディレクトリに無いため（[シェルのツール](#シェルのツール)の手順 3 の補足）。`~/.local/share/bash-completion/completions/` にシンボリックリンクを置けば遅延読み込みにできるが、入れるたびに足す手間があるので採らない
-- **`~/.inputrc` を使い、`~/.bashrc` の `bind` にはしない**（[共通の bash 設定](#共通の-bash-設定)の手順 4 の補足）
+- **`~/.inputrc` を使い、`~/.bashrc` の `bind` にはしない**
 - **採らなかった設定**
   - `HISTTIMEFORMAT`（`history` に時刻を出す）: 履歴ファイルに `#<epoch>` の行が増える。本書は履歴の見え方を変えない範囲にとどめる
   - `HISTCONTROL=…:erasedups`（同じ行を全部消して 1 つにする）: 覚えている一覧の中だけを直し、ファイルの古い重複は残る。効き目が分かりにくいので入れない
@@ -291,7 +284,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
   - `shopt -s histappend`: `/etc/bashrc` が対話のシェルで入れている（[共通の bash 設定](#共通の-bash-設定)の手順 2）
 - **atuin（履歴を SQLite に持ち、同期もする）は使わない**: 履歴の検索は [fzf の使い方の基本](#fzf-の使い方の基本) の Ctrl+R で足りる。[導入元一覧](tool-catalog.md#cli-定番の置き換え)の行のまま
 
-検証記録（`docs/verification/almalinux-setup.md`）
+- 検証記録（`docs/verification/almalinux-setup.md`）
 
 **参照**
 
@@ -401,6 +394,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 一覧に `Git` の列が出ればよい
    - `ll` は `eza -l --git --group-directories-first`、`la` は `-la`、`lt` は `eza --tree --level=2`
+   - `eza --version` は `v0.23.5 [+git]` のような行を含む
 
 1. bat の版と、色と行番号、man のページャを確かめる。
 
@@ -612,6 +606,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - Ctrl+T と Alt+C の候補を、fd の一覧に変える（`.git` の中を除き、隠しファイルは含める。`.gitignore` の対象は fd が既定で除く）
 - 前提: [シェルのツール](#シェルのツール)を通してある（bat は、その項の手順 1 で入る）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
+- `**<Tab>` の候補は変わらない（`find` のまま）
 - fd は[Neovim](neovim.md#neovim)の手順 2（自分用の Neovim の設定の導入）と[yazi](almalinux-setup.md#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
 
 1. brew で fd を入れる。
@@ -894,7 +889,6 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 **[シェルのツール](#シェルのツール)の手順 6**
 
-- `eza --version` は `v0.23.5 [+git]` のような行を含む
 
 - `Permissions Size User Date Modified Git Name` の見出しの一覧が出る
 
@@ -936,7 +930,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 - 右側のプレビューは、共通の bash 設定が、bat があるときに入れる
 - Tab で複数を選べる（選んだ行に印が付き、Enter で全部入る）
 
-**[キー操作を試す](#キー操作を試す)の手順 4: ** の補完**
+**[キー操作を試す](#キー操作を試す)の手順 4: `**` の補完**
 
 - `**` を付けなければ、今までどおりの補完
 - `ssh **<Tab>` は `~/.ssh/config` と `known_hosts` のホスト名、`export **<Tab>` は変数名の一覧になる
@@ -989,8 +983,6 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 **[fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)のリード**
 
 - 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
-
-- `**<Tab>` の候補は変わらない（`find` のまま）
 
 **[fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)の手順 1: fd-find と二重に入れない理由**
 
@@ -1298,6 +1290,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
    - fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）
    - トランザクション表の `[y/N]` と鍵の確認に答える
+   - アプリ一覧には「WezTerm」が出る
 
 1. 自分用の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れ、起動し直した WezTerm に移る。
 
@@ -1353,9 +1346,8 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 #### WezTerm の設定ファイル
 
 - パッケージ（Windows 11 ではインストーラ）は設定ファイルを置かない。無ければ組み込みの既定値で動く
-
-  - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
-  - `~/.wezterm.lua` があると、clone した設定は読まれない
+- nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
+- `~/.wezterm.lua` があると、clone した設定は読まれない
 
 #### WezTerm の設定を導入する
 
@@ -1409,6 +1401,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
    ```
 
    - `fatal: destination path '/home/<USER>/.config/wezterm' already exists and is not an empty directory.` と出たら、手順 1 から見直す
+   - `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
 
 1. WezTerm がこの設定を読めるか確かめる。
 
@@ -1438,6 +1431,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
    ```
 
    - 1 行目は `WezTerm`、2 行目は `.config/wezterm/shell/wezterm.sh` で終わるパス
+   - 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
      - AlmaLinux 10 の公式 Bash 統合: `__wezterm_set_user_var`・`__wezterm_notify_done`・`__wz_mouse_off` の 3 行
      - 公式の統合が無いとき（Windows の Git Bash など）: `__wezterm_notify_done` と `__wz_mouse_off` の 2 行
    - 1 行目が空なら、WezTerm の外で貼っている。2 行目が空なら、手順 5 の前から開いていたタブで貼っている
@@ -1482,6 +1476,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
    ```
 
    - 同期済みの設定は再 clone しない
+   - clone 済みなら、そのリポジトリの更新を行う
    - **次の手順は、clone が成功してから行う**
 
 1. 手元の WezTerm の新しいタブから、ssh し直す。
@@ -1573,8 +1568,6 @@ enabled_metadata=1
 
 - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
 
-- アプリ一覧には「WezTerm」が出る
-
 **[WezTerm](#wezterm)の手順 2: wezterm はメタパッケージ / 取り込まれる鍵**
 
 この節の検証記録: `docs/verification/shell-terminal.md` の「WezTerm: 実施手順 / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵」
@@ -1629,19 +1622,13 @@ Importing GPG key 0xCEA2757D:
 
 - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
 
-**[WezTerm の設定を導入する](#wezterm-の設定を導入する)の手順 3**
-
-- `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
-
 **[WezTerm の設定を導入する](#wezterm-の設定を導入する)の手順 6**
 
-- 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
 
 - 公式統合との併用は[注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#注意点)を参照する
 
 **[WezTerm のシェル統合を SSH 先で使う](#wezterm-のシェル統合を-ssh-先で使う)の手順 3**
 
-- clone 済みなら、そのリポジトリの更新を行う
 
 - WezTerm 本体は SSH 先のシェル統合には要らない
 
@@ -1663,7 +1650,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - 検証記録（`docs/verification/shell-terminal.md`）
 
-[背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・検証記録（`repos/wezterm/docs/verification/install.md`）
+- [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・検証記録（`repos/wezterm/docs/verification/install.md`）
 
 </details>
 
@@ -1806,9 +1793,9 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 **[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)の手順 2: 出た結果の意味**
 
-検証記録（`docs/verification/windows-setup.md`）
+- 検証記録（`docs/verification/windows-setup.md`）
 
-- 自分のユーザーの登録と `%LOCALAPPDATA%` のファイルが出たら、この節の手順で入れたもの（[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 は何度貼ってもよい）
+- 自分のユーザーの登録と `%LOCALAPPDATA%` のファイルが出たら、[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)で入れたもの（同じ項の手順 3 は何度貼ってもよい）
 - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っていて、そのまま使える
 
 **[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)の手順 3**
@@ -1957,6 +1944,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    ```
 
    - `warning.multiLinePaste: never` が出ればよい
+   - 5 KiB を超える文字を貼るときは、別の警告が出ることがある
 
 1. Windows Terminal の設定の画面で、フォントが見つかっていることを確かめる。
 
@@ -2114,10 +2102,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - hackgen.md は自分のユーザーのフォントに入れ、パッケージのアプリ向けに読み取りの権限（`S-1-15-2-1`・`S-1-15-2-2`）を足す。MSIX の Windows Terminal から見えるかは確かめていない
 - 見つからないと、設定の画面に「見つからないフォント:」、端末に「次のフォントが見つかりません: …」が出る（`Resources.resw` の日本語の訳）
 
-**[Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4**
-
-- 5 KiB を超える文字を貼るときは、別の警告が出ることがある
-
 **[Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4: 複数行の貼り付けの警告**
 
 - 値は版で変わった。1.22 以前は `multiLinePasteWarning`（真偽値）、1.23 は `warning.multiLinePaste`（真偽値）、1.24 から `warning.multiLinePaste` が `automatic`・`always`・`never`（既定は `automatic`。`true` は `automatic`、`false` は `never` として読む）。古い名前も読み、新しい名前に直して書き直す。Microsoft の文書（interaction のページ）は、まだ古い名前だけを書いている
@@ -2218,6 +2202,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    - `OnPath` に `C:\Program Files\WezTerm\wezterm.exe` 以外（scoop の `shims` など）が出たら、ほかの方法で入れた WezTerm がある。中断し、既存の導入元と設定を確かめる
    - `Running` に名前が出たら、その WezTerm の窓を閉じる
    - `VCRuntime : True` なら、この項の手順 3 は飛ばす。`False` なら、この項の手順 3 で入れる
+   - 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
 
 1. `VCRUNTIME140.dll` が無いときだけ、Visual C++ の再頒布可能パッケージを入れる。
 
@@ -2271,6 +2256,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    - 終わってプロンプトが戻るまで待つ
    - `中断:` で始まるエラーが出たら、そこで止まっている
    - `取れない` と `sha256 が一致しない` は、nightly が入れ替わる最中に取ったときにも出る。少し待って貼り直す
+   - インストーラの画面は出ない。終わるまでプロンプトが戻らない
 
 1. 入ったものと、`PATH`・スタートメニューを確かめる。
 
@@ -2289,6 +2275,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    - `DisplayVersion` と `wezterm --version` の版が同じならよい
    - PC 全体の `PATH` に `C:\Program Files\WezTerm` が 1 行と、スタートメニューの `True` が出る
    - 開いていた PowerShell の `PATH` には入らない。新しく開いた窓（WezTerm の中も）では、`wezterm` を名前で呼べる
+   - 最後に `wezterm.exe`・`wezterm-gui.exe`・`unins000.exe` などのファイルの名前が並ぶ
 
 1. スタートメニューから WezTerm を起動し、窓が開くことを確かめる。
 
@@ -2316,16 +2303,14 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - **WezTerm: Windows 11 では、stable と nightly が同じ登録を使う**: インストーラの `AppId` が同じなので、PC に入るのはどちらか 1 つ。後から入れた方が上書きするはず
 
-
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 1: WezTerm の中の PowerShell を使わない理由**
 
-検証記録（`docs/verification/windows-setup.md`）
+- 検証記録（`docs/verification/windows-setup.md`）
 
 - WezTerm が動いていると、[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4 が止まる
 
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 2**
 
-- 初めて入れる PC では、`Version`・`Location`・`OnPath`・`Running` が空
 
 - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4 で今の nightly に上書きする
 
@@ -2339,8 +2324,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - 何度貼ってもよい
 
 - `WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0` と、`wezterm 20260929-043349-cab25161` の形の 1 行が出ればよい
-
-- インストーラの画面は出ない。終わるまでプロンプトが戻らない
 
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4: 版と、中断・貼り直し**
 
@@ -2356,7 +2339,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - `UninstallString` は `"C:\Program Files\WezTerm\unins000.exe"`
 
-- 最後に `wezterm.exe`・`wezterm-gui.exe`・`unins000.exe` などのファイルの名前が並ぶ
 
 - `DisplayVersion` と `wezterm --version` の版が同じ（`20260929-043349-cab25161` の形）
 
@@ -2540,6 +2522,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    ```
 
    - `fatal: destination path '/home/<USER>/.config/wezterm' already exists and is not an empty directory.` と出たら、この項の手順 2 から見直す
+   - `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
 
 1. WezTerm がこの設定を読めるか確かめる。
 
@@ -2569,6 +2552,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    ```
 
    - 1 行目は `WezTerm`、2 行目は `.config/wezterm/shell/wezterm.sh` で終わるパス
+   - 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
      - AlmaLinux 10（COPR の公式統合）: `__wezterm_set_user_var`・`__wezterm_notify_done`・`__wz_mouse_off` の 3 行
      - 公式の統合が無いとき（Windows の Git Bash など）: `__wezterm_notify_done` と `__wz_mouse_off` の 2 行
    - 1 行目が空なら、WezTerm の外で貼っている。2 行目が空なら、この項の手順 6 の前から開いていたタブで貼っている
@@ -2632,6 +2616,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - WezTerm の設定のリポジトリを更新する
 - 前提: [Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの、自分のユーザーの WezTerm の Git Bash のタブ。この項の手順 1 で開く
+- WezTerm 本体は[Git for Windows・Firefox・WezTerm を上げる](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)で更新する
 - 手元の変更は `git -C ~/.config/wezterm status` で確認してから進む
 
 1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
@@ -2754,14 +2739,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - あったものだけ、`renamed '/home/<USER>/.config/wezterm' -> '/home/<USER>/.config/wezterm.bak'` のように出る
 
-**[Windows 11 で WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)の手順 4**
-
-- `Cloning into '/home/<USER>/.config/wezterm'...` の後に、最新のコミットが 1 行出る
-
-**[Windows 11 で WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)の手順 7**
-
-- 3 つ目は、WezTerm のパッケージの公式のシェル統合があるかどうかで変わる
-
 **[WezTerm のシェル統合を WSL で使う](#wezterm-のシェル統合を-wsl-で使う)の手順 2**
 
 - `/mnt/c/Users/<WIN_USER>/.config/wezterm/shell/wezterm.sh` の 1 行が出ればよい
@@ -2771,10 +2748,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - WSL の `$HOME` は Linux 側なので、Windows 側の統合をこのパスで読む
 
 - `/mnt/c/Users/<WIN_USER>/.config/wezterm/shell/wezterm.sh` を 2 回含む 1 行が出る
-
-**[Windows 11 で WezTerm の設定を更新する](#windows-11-で-wezterm-の設定を更新する)のリード**
-
-- WezTerm 本体は[Git for Windows・Firefox・WezTerm を上げる](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)で更新する
 
 **[Windows 11 で bash のログイン時の読み込みを確かめる](#windows-11-で-bash-のログイン時の読み込みを確かめる)のリード**
 
@@ -2796,7 +2769,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - 検証記録（`docs/verification/shell-terminal.md`）
 
-[背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・検証記録（`repos/wezterm/docs/verification/install.md`）
+- [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・検証記録（`repos/wezterm/docs/verification/install.md`）
 
 </details>
 
@@ -2861,10 +2834,12 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
    - `Scoop was updated successfully!` が出ればよい
    - 各ツールの `was installed successfully!` と、`zoxide is now held` が出ればよい（zoxide は `0.9.9`）
+   - 入っているツールは、何も出さずに飛ばされる（`was installed successfully!` も `Skipping` も出ない）
    - `zoxide` の `is already installed.` は正常
    - `zoxide` の `is already held.` は正常
    - `Notes` の starship のプロファイル追記と、`suggests installing` の VC++ ランタイム・less の導入は行わない
    - **zoxide は 0.9.9 に固定する**。0.10.0 は Git Bash の移動を記録しない。修正版は[更新](windows-setup.md#scoopwingetwsl-を上げる)の手順 7・8、ほかのツールは同じ項の手順 2・3 で上げる
+   - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
 
 1. 版と場所と、zoxide を止めたことを確かめる。
 
@@ -2913,7 +2888,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 1. WezTerm の新しいタブ（Git Bash）で、[シェルのツール](#シェルのツール)の手順 4〜7・9・10 のブロックを貼る。
 
-   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[シェルのツール](#シェルのツール)の手順 2 の補足と同じ）
+   - WezTerm を起動するか、新しいタブ（Ctrl+Shift+T）を開く。前から開いているタブで `. ~/.bashrc` を読み直さない（[シェルのツール の補足と注意点](#シェルのツール-の補足と注意点)の「シェルのツールの手順 2」と同じ）
    - 新しいタブのプロンプトが starship の形にならなければ、WezTerm の窓をすべて閉じて起動し直す
    - 成功の条件は、「シェルのツール」のそれぞれの手順と同じ。違うのは次のところ
      - `command -v` は `/c/Users/<WIN_USER>/scoop/shims/<名前>`（starship は `/c/Users/<WIN_USER>/scoop/apps/starship/current/starship`）。版は、この項の手順 5 と同じ
@@ -3032,7 +3007,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
 
-- `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
 
 - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（zoxide は `0.9.9`）
 
@@ -3277,7 +3251,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - 任意で、PowerShell 7 のキー操作を Emacs モードにし、Ctrl+V の貼り付けを割り当て直す
 - 前提: [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 2 を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3・4 は、新しい PowerShell 7 の窓
-- 足す2行は、キーの割り当てより前、先頭の `using`・`param`・`#Requires` などの宣言より後に入れる
+- 足す 2 行は、キーの割り当てより前、先頭の `using`・`param`・`#Requires` などの宣言より後に入れる
 
 > [!WARNING]
 > この項の手順 2 はファイルだけを変える。今開いている窓で `Set-PSReadLineOption -EditMode` を実行すると、それまでのキーの割り当てが消えるので、貼り付けを続ける窓では実行しない。
@@ -3486,7 +3460,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は新しい Windows PowerShell（5.1）の窓
 - 対象は Windows PowerShell 5.1 の自分のユーザーのプロファイル
-- 足す4行は、Ctrl+Enter などのキーの割り当てより前、先頭の宣言より後に入れる
+- 足す 4 行は、Ctrl+Enter などのキーの割り当てより前、先頭の宣言より後に入れる
 - Ctrl+V は `Paste` を割り当て直す。複数行を作る Ctrl+Enter は、貼り付けの設定の `AddLine` のまま
 - conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、文字をキーとして送る。LF は Ctrl+Enter として届くので、[貼り付けの設定](windows-setup.md#貼り付けの設定)の Ctrl+Enter の `AddLine` の行が、この項の EditMode の行より後に残っている必要がある（この項の手順 2 は、その順に入れる）。Emacs モードの窓に右クリックで貼ることは、実機では確かめていない（[Windows PowerShell 5.1 のキー操作を変える の補足と注意点](#windows-powershell-51-のキー操作を変える-の補足と注意点)の「Windows PowerShell 5.1 のキー操作を変えるの手順 2: 適用範囲と貼り付け」）
 
@@ -3668,6 +3642,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    - 5.1 と 7 の版、`pwsh.exe` の場所、PSResourceGet の 3 つのコマンドが出ればよい。`pwsh.exe` が無いときは、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を確かめる
    - モジュールの名前・版・`ModuleBase` と、2 つの環境変数の値を控える
    - 補完の控えがあれば、名前と大きさが出る。[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 2 は、同じ名前の控えを作り直す（上書きする）
+   - モジュールや控えが無いときは、その一覧には何も出ない
 
 1. PowerShell 7 に、検査・テスト・予測・fzf のモジュールを入れる。
 
@@ -3863,6 +3838,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
    - 9 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
    - 開いている窓ではプロファイルを読み直さず、この項の手順 4 で新しい窓を開く
+   - 前の版の winget の行があれば、`置き換えた: <新しい行>` も出る
 
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
@@ -4208,10 +4184,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - プロファイルは子の項で設定する
 
-**[PowerShell を開発に使う](#powershell-を開発に使う)の手順 2**
-
-- モジュールや控えが無いときは、その一覧には何も出ない
-
 **[PowerShell を開発に使う](#powershell-を開発に使う)の手順 2: 5.1 の版とモジュールの確認**
 
 - 貼る窓は 7 なので、5.1 の版とモジュールの一覧は `powershell.exe -NoProfile -Command { … }` で直接起動した 5.1 に出させる。`cmd` や `Start-Process` で中継しない
@@ -4254,10 +4226,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - 6 つの生成は合わせて約 0.3 秒掛かるので、起動のたびには生成しない。プロファイルでは控えを読み、scoop で道具を上げた後に作り直す
 - 生成中だけコンソールの入出力を UTF-8 にし、`finally` で戻す。ファイルは UTF-8（BOM 付き）で書く。fd の補完には ASCII 以外の文字が含まれる
 - 無い道具は飛ばす。生成に失敗した道具の控えは上書きしないので、失敗したままなら、前に生成した内容が残る
-
-**[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 3**
-
-- 前の版の winget の行があれば、`置き換えた: <新しい行>` も出る
 
 **[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 3: UTF-8 と終了時の復元**
 
