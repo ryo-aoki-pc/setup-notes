@@ -495,7 +495,7 @@
 ### lazydocker
 
 - Homebrew の lazydocker を入れ、podman の API ソケットにつないで、確認用のコンテナを画面（TUI）から止める
-- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)、[Homebrew](almalinux-setup.md#homebrew)の手順 1〜3、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)、[Homebrew](almalinux-setup.md#homebrew)の手順 1〜2、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
   - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
   - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）

@@ -14,7 +14,7 @@
 - **ホストオンリー・ブリッジ・Extension Pack・USB の受け渡しは、VM を作って使う節の対象外**。この節の検証では確かめていない
 
 - **EPEL が要る**: 依存の `liblzf` が EPEL にしか無い（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）。前提の [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) で有効にする
-- **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[VirtualBox を入れる](../virtual-machines.md#virtualbox-virtualbox-を入れる)の手順 4・5）
+- **`Complete!` でもモジュールができていないことがある**: `%post` は失敗を無視する。`systemctl is-active vboxdrv` と `/var/log/vbox-setup.log` で確かめる（[VirtualBox を入れる](../virtual-machines.md#virtualbox-virtualbox-を入れる)の手順 4）
 - **sudo を付けない dnf にも鍵の確認が要る**: `repo_gpgcheck=1` のため。確認を通すまで、`sudo` 無しの dnf はどのパッケージでも失敗する（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](../reference/virtualbox.md)）
 - **Secure Boot では `mokutil` と、登録した鍵が要る**: vboxdrv.sh は `mokutil --sb-state` の出力だけで判定する。鍵の場所は `/var/lib/shim-signed/mok/` 固定で、前提の [Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) で作って登録する
 - **MokManager でキーボードが効かなければ、[Secure Boot の署名鍵](../almalinux-setup.md#secure-boot-の署名鍵) の手順 6 に従って対処する**。Secure Boot を無効にするとモジュールは署名されない。後で有効に戻すなら、鍵を登録して `sudo /sbin/vboxconfig` を実行する

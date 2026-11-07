@@ -171,7 +171,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### シェルのツール
 
 - starship・zoxide・fzf・eza・bat・tmux を Homebrew で入れ、共通の bash 設定が読み込んだことを確かめる
-- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](almalinux-setup.md#homebrew)の手順 1〜3 を通してある
+- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](almalinux-setup.md#homebrew)の手順 1〜2 を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
 
 1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
@@ -461,7 +461,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
 - 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
 - `**<Tab>` の候補は変わらない（`find` のまま）
-- fd は[Neovim](neovim.md#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](almalinux-setup.md#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
+- fd は[Neovim](neovim.md#neovim)の手順 2（自分用の Neovim の設定の導入）と[yazi](almalinux-setup.md#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
 
 1. brew で fd を入れる。
 
@@ -649,7 +649,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### HackGen Console NF
 
 - 日本語と Nerd Fonts のアイコンを含む等幅のフォント HackGen Console NF を、Homebrew の cask で入れる
-- 前提: [Homebrew](almalinux-setup.md#homebrew)の手順 1〜3 を通してある
+- 前提: [Homebrew](almalinux-setup.md#homebrew)の手順 1〜2 を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 
 1. 変数を設定する。

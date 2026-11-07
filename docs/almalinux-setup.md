@@ -74,6 +74,7 @@
 1. OS を更新し、ファームウェアの情報を再取得する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo dnf upgrade --refresh
    sudo fwupdmgr refresh --force
    ```
@@ -91,6 +92,7 @@
 1. ファームウェアを更新し、OS の再起動の要否を確認する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo fwupdmgr update
    dnf needs-restarting -r
    ```
@@ -412,7 +414,7 @@
    ```
 
    - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
-   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#homebrew--手順-4-補足-ibus-の-path-を固定する理由)）
+   - GNOME で日本語入力を使う PC では、この手順を飛ばさない（理由は[参考資料](reference/almalinux-setup.md#homebrew--手順-3-補足-ibus-の-path-を固定する理由)）
    - 効くのは、[再起動と確認](#再起動と確認)の手順 1 の再起動の後
 
 #### Homebrew の使い方の基本
@@ -805,7 +807,7 @@
    - 2 つ目の `get` が `[('xkb', 'jp'), ('ibus', 'anthy')]`（US 配列なら `'us'`）になればよい
    - **ほかの入力ソースは消える**。残すものは `set` の値に足す
    - **注意**: `/usr/bin/` を外さない（[GNOME の表示と入力](#gnome-の表示と入力)の手順 1〜14 も同じ）
-   - [Neovim](neovim.md#neovim)の手順 3 では、JIS 配列でも入力ソースが「英語 (US)」と Anthy に変わる
+   - [Neovim](neovim.md#neovim)の手順 2 では、JIS 配列でも入力ソースが「英語 (US)」と Anthy に変わる
    - 最初の `get` は変える前の値（最初のログインの後は、今の配列だけの `[('xkb', 'us')]` など）。この値を控える
 
 ---
@@ -1551,14 +1553,14 @@
    brew install lazygit
    ```
 
-   - [Neovim](neovim.md#neovim)の手順 3 で入っていれば、`Warning: lazygit … is already installed and up-to-date.` と出て何も変えない
+   - [Neovim](neovim.md#neovim)の手順 2 で入っていれば、`Warning: lazygit … is already installed and up-to-date.` と出て何も変えない
    - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて進むと、導入を断ったときや失敗したときも、自分用の設定の導入へ進む）
 
 1. 自分用の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を入れる。
 
    - [lazygit の設定を導入する](#lazygit-の設定を導入する)の全項を通す
    - 差分の表示に delta（[git-delta](#git-delta)）、アイコンに Nerd Fonts（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）を使う設定
-   - `e` キーで開くエディタは、`EDITOR`（[Neovim](neovim.md#neovim)の手順 4）から決まる
+   - `e` キーで開くエディタは、`EDITOR`（[Neovim](neovim.md#neovim)の手順 3）から決まる
 
 1. lazygit が入ったか確かめる。
 
@@ -1597,7 +1599,7 @@
     - Windows 11 への導入は[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)。WezTerm は自分用の設定で変わる
     - Windows Terminal のフォントは[シェルと端末のセットアップの「Windows Terminal のフォントと貼り付けの警告を変える」](shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
   - 差分に delta を使う（[AlmaLinux](#git-delta)・[Windows 11](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
-  - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 4）
+  - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 3）
     - Windows 11 で Windows PowerShell から起動するなら、[Neovim のセットアップの「Neovim を既定のエディタにする」](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
 
 #### lazygit の設定を導入する
@@ -2012,7 +2014,7 @@
    brew install yazi ${YAZI_EXTRAS}
    ```
 
-   - fd・ripgrep（[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 5）と fzf（[シェルのツール](shell-terminal.md#シェルのツール)の手順 1）を入れてあれば、`Warning: fd … is already installed and up-to-date.` のように出る
+   - fd・ripgrep（[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 4）と fzf（[シェルのツール](shell-terminal.md#シェルのツール)の手順 1）を入れてあれば、`Warning: fd … is already installed and up-to-date.` のように出る
    - 依存を合わせて 170 個ほどが入り、数分から 10 分ほどかかる
    - **次の手順は、確認が出たら表示された導入予定を確かめて `y` と答え、プロンプトに戻ってから貼る**（続けて進むと、導入を断ったときや失敗したときも、設定の clone へ進む。[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
 
@@ -2509,8 +2511,8 @@
 - インターネットに出られないホストで、SSH の SOCKS トンネルを通して AppStream の Node.js と npm を入れ、Neovim の Mason に npm のパッケージ（LSP サーバー・リンター）を入れる
 - 前提: オンラインのホストから[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 でトンネルを張り、オフラインのホストへ接続してある
   - この項の手順 1 の前に、[SSH の SOCKS トンネル: dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)も通してある
-  - 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入)と[Neovim](neovim.md#neovim)の手順 1・2 を通してある
-  - この項の手順 1・2 で経路を設定してから、[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 10 の初回起動を含む導入を行い、この項の手順 3 へ進む。Mason の npm パッケージは未導入でよい
+  - 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入)と[Neovim](neovim.md#neovim)の手順 1 を通してある
+  - この項の手順 1・2 で経路を設定してから、[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 8 の初回起動を含む導入を行い、この項の手順 3 へ進む。Mason の npm パッケージは未導入でよい
 - 実行場所: オフラインのホストの、`sudo` できる自分のユーザーのシェル（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 のシェル）。この項の手順 4 でトンネルを閉じてログインし直し（オンラインのホストでも操作する）、この項の手順 5 はログインし直したシェルに貼る
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[注意点](extra/npm-offline.md)
 
@@ -2604,6 +2606,7 @@
 1. Mason のパッケージを更新し、トンネルを切断する。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    nvim -R ~/.config/nvim/init.lua
    exit
    ```
@@ -3335,10 +3338,10 @@
 
 1. [日本語入力](#日本語入力)を通したときだけ、入力ソースを切り替えて、日本語を打ってみる。
 
-   - Super+Space で「英語 (US)」と Anthy に切り替わる。[Neovim](neovim.md#neovim)の手順 3 を飛ばしたなら、[日本語入力](#日本語入力)の手順 3 の配列と Anthy
+   - Super+Space で「英語 (US)」と Anthy に切り替わる。[Neovim](neovim.md#neovim)の手順 2 を飛ばしたなら、[日本語入力](#日本語入力)の手順 3 の配列と Anthy
    - Anthy に切り替えてからテキストエディターなどで `nihongo` と打ち、Space を押すと「日本語」に変わり、Enter で確定する
    - Anthy は、ひらがなで始まる
-   - 英字と日本語は Super+Space で切り替える。[Neovim](neovim.md#neovim)の手順 3 を通したときは、Neovim 内では `<C-j>` で切り替え、JIS キーボードでも US 配列で打つため、一部の記号は刻印と異なる
+   - 英字と日本語は Super+Space で切り替える。[Neovim](neovim.md#neovim)の手順 2 を通したときは、Neovim 内では `<C-j>` で切り替え、JIS キーボードでも US 配列で打つため、一部の記号は刻印と異なる
 
 1. [GNOME の表示と入力](#gnome-の表示と入力)を通したときだけ、Files で、フォルダーの名前と、隠しファイルとフォルダーの並びを確かめる。
 
@@ -3349,7 +3352,7 @@
 1. [Neovim](neovim.md#neovim)を通したときだけ、Neovim で、日本語の検索・整形と IME 連携を確かめる。
 
    - [LazyVim の日本語検索・整形・IME 連携を確かめる](neovim.md#lazyvim-の日本語検索整形ime-連携を確かめる)の全項を WezTerm のタブで行う
-   - `/tmp/lazyvim-check.md` が無ければ、[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 11 の `printf …` の行を貼ってから開く
+   - `/tmp/lazyvim-check.md` が無ければ、[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 9 の `printf …` の行を貼ってから開く
    - `o` で足した行は保存せず、`:qa!` で閉じる
 
 ---

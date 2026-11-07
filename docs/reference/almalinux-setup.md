@@ -12,7 +12,7 @@
 
 - 貼り直しても同じ内容で置き直すだけ（何度貼ってもよい）
 
-### OS とファームウェアの更新 / 手順 2: 補足: fwupd の起動待ち
+### OS とファームウェアの更新 / 手順 1: 補足: fwupd の起動待ち
 
 - `デーモンへの接続に失敗しました: … タイムアウトしました` が出るのは、起動の直後に fwupd の起動が間に合わないことがあるため
 
@@ -61,7 +61,7 @@
 - `--setopt=localpkg_gpgcheck=1` を外さない理由は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)と[RPM Fusion の選択した方針](#epel-と-rpm-fusion)
 - 有効にするのは free だけ。nonfree は扱わない
 
-### EPEL と RPM Fusion / 手順 5: 補足: 使えるようになるもの
+### EPEL と RPM Fusion / 手順 4: 補足: 使えるようになるもの
 
 - [Firefox の AAC・H.264](../almalinux-setup.md#firefox)（RPM Fusion の `ffmpeg-libs` を入れる）が使えるようになる
 
@@ -90,11 +90,11 @@
 
 - `Next steps` の `~/.bashrc` への追記を行わないのは、共通の bash 設定が `brew shellenv` を読むため
 
-### Homebrew / 手順 3: 補足: 日々の操作
+### Homebrew / 手順 2: 補足: 日々の操作
 
 - 日々の操作は[Homebrew の使い方の基本](../almalinux-setup.md#homebrew-の使い方の基本)
 
-### Homebrew / 手順 4: 補足: IBus の PATH を固定する理由
+### Homebrew / 手順 3: 補足: IBus の PATH を固定する理由
 
 - Anthy のエンジン（`/usr/libexec/ibus-engine-anthy`）は、`exec python3 /usr/share/ibus-anthy/engine/main.py` と書かれた sh の包みで、PATH で最初に見つかった `python3` で動く
 - 共通の bash 設定は、Homebrew のディレクトリを PATH の先頭に置く。2026-10-11 の Hyper-V の VM では、`gnome-shell` と `ibus-daemon` の環境にも Homebrew を含む PATH があった。セッションへ取り込まれる具体的な経路は、確かめていない
@@ -428,7 +428,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 - 既定の `YAZI_EXTRAS` では、依存として Homebrew の `python3`（2026-10-11 は `python@3.15`）と `curl` も入る
 - 共通の bash 設定が Homebrew のディレクトリを PATH の先頭に置くので、端末では、どちらも `/usr/bin` のものより先に見つかるようになる（2026-10-11 の 3 つの VM で、この後の `command -v curl` は `/home/linuxbrew/.linuxbrew/bin/curl` を返した）
-- 日本語入力（IBus）を OS の `python3` で動かす設定は、「Homebrew」の手順 4
+- 日本語入力（IBus）を OS の `python3` で動かす設定は、「Homebrew」の手順 3
 
 ### yazi / 手順 2: 補足: ボトルと、依存ツールの役割
 
@@ -480,7 +480,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 このリポジトリは `baseurl` に `$basearch` を含まない**全アーキテクチャ共通**の作りなので、`dnf list` には `firefox.x86_64` の行も出る。インストールされるのは実行中のアーキテクチャのものだけ。
 
-### Firefox / 手順 11: 補足: 起動し直す理由
+### Firefox / 手順 10: 補足: 起動し直す理由
 
 - 起動中の Firefox は FFmpeg を読み直さない
 
@@ -517,12 +517,12 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 ### 選択した方針
 
-- **sudo をパスワード無しにする（「ログインと sudo」の手順 3）**: このリポジトリの手順書は、`sudo` の後ろに続く行がパスワードの入力に食われないように、NOPASSWD を前提に書いてある（README の記法）。最初に設定する
+- **sudo をパスワード無しにする（「ログインと sudo」の手順 3）**: このリポジトリの手順書は、NOPASSWD を前提に書いてある（README の記法）。最初に設定する
   - `/etc/sudoers.d/nopasswd` に、このユーザーだけの 2 行を置く。`/etc/sudoers` の `%wheel ALL=(ALL) ALL` は残す
   - `Defaults:<USER> verifypw=any` も置く。`sudo -v`（`-v` は資格を更新するだけ）は、`verifypw` の既定の `all` では、そのユーザーに当たるすべての行が NOPASSWD のときだけパスワードを聞かない。`%wheel` の行が残るので、`verifypw=any` が無いと Homebrew のインストーラの `sudo -v` がパスワードを聞いた（sudoers(5) の `verifypw`）
   - 書く前に `visudo -cf -` で確かめ、`install -m 0440` で置き、最後に `visudo -c` で全体を確かめる（書式の誤りがあると `sudo` そのものが使えなくなるため）
-- **ファームウェアは fwupd（「OS とファームウェアの更新」の手順 2・3）**: Workstation に入っている `fwupdmgr` で、LVFS から入れる。AlmaLinux 10 の既定では LVFS のリモートが無効で、`refresh` が有効にするかを聞く
-  - `--assume-yes` を付けても、この問いは出た。問いに答えるため、`refresh` と `update` は別の手順にする
+- **ファームウェアは fwupd（「OS とファームウェアの更新」の手順 1・2）**: Workstation に入っている `fwupdmgr` で、LVFS から入れる。AlmaLinux 10 の既定では LVFS のリモートが無効で、`refresh` が有効にするかを聞く
+  - `--assume-yes` を付けても、この問いは出た。リモートの有効化と情報取得の結果を確かめてから更新へ進むため、`refresh` と `update` は別の手順にする
 - **journal を永続にする（「システムの設定」の手順 5）**: `/etc/systemd/journald.conf.d/` のドロップインで `Storage=persistent` にする（`/etc/systemd/journald.conf` は書き換えない）
   - journald が作った `/var/log/journal` には、`systemd-journal` のグループと ACL が付かなかった。`systemd-tmpfiles --create --prefix /var/log/journal` で、パッケージの tmpfiles の定義どおりに付け直す
   - tmpfiles の定義（`/usr/lib/tmpfiles.d/systemd.conf` の `z`・`a+`）は、すでにあるものだけを直す。`/var/log/journal` は `journalctl --flush` のときに作られるので、tmpfiles はその後に行う（前に行うと、何も直らなかった）
@@ -688,7 +688,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [lazygit 0.65.1 の差分表示設定](https://github.com/jesseduffield/lazygit/blob/v0.65.1/docs/Custom_DiffRenderers.md) — `git.diffRenderers` の `stdinFilter` と delta の指定
 - `delta --help` / `delta --show-config` / `delta --list-syntax-themes` — オプションと実効値、配色の一覧
 - `git help config` の `core.pager` / `interactive.diffFilter` — git 側の仕様
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜2 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [ScoopInstaller/Main — delta.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/delta.json) — scoop の版、x64 の zip と hash、`delta.exe` の shim
 - [winget-pkgs — dandavison.delta 0.20.1](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/dandavison/delta/0.20.1/dandavison.delta.installer.yaml) — 同じ zip の sha256 と、VC++ ランタイムの依存（採らなかった経路）
 - [delta manual — Using Delta on Windows](https://dandavison.github.io/delta/tips-and-tricks/using-delta-on-windows.html) — Windows では新しい less が要るという案内
@@ -715,7 +715,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - [jesseduffield/lazygit — README](https://github.com/jesseduffield/lazygit) — 各 OS のインストール方法と機能一覧
 - [lazygit Config Docs](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md) — `config.yml` の項目（`os.edit` など）
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜2 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [atim/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/atim/lazygit/) / [dejan/lazygit — Copr](https://copr.fedorainfracloud.org/coprs/dejan/lazygit/) — chroot の一覧（`epel-10-aarch64` はある）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の設定（`config.yml`）。導入方法と変えた項目は README にある
 - [ScoopInstaller/Extras — lazygit.json](https://github.com/ScoopInstaller/Extras/blob/master/bucket/lazygit.json) — Windows 11 の scoop の定義
@@ -728,7 +728,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - [Quick Start — Yazi](https://yazi-rs.github.io/docs/quick-start/) — `y` シェル関数（`--cwd-file`）の原典
 - [Configuration — Yazi](https://yazi-rs.github.io/docs/configuration/overview/) — `yazi.toml` / `keymap.toml` / `theme.toml`
 - [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) — 自分用の設定。入れ方・独自のキー・上流との差分の管理は README にある
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜2 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [Installation — Yazi の Windows](https://yazi-rs.github.io/docs/installation/#windows) — scoop の経路と依存、`YAZI_FILE_ONE`（Git for Windows の `file.exe`）
 - [Image Preview — Yazi](https://yazi-rs.github.io/docs/image-preview/) — Windows で画像を出せる端末（WezTerm の nightly、Windows Terminal 1.22.10352.0 以降）と ConPTY の制約
 - [ScoopInstaller/Main — yazi.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/yazi.json) — Windows 11 の scoop の定義
@@ -741,9 +741,9 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 必要な項だけを通す場合も、次の手順は省略しない。
 
-- [ログインと sudo](../almalinux-setup.md#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](../almalinux-setup.md#os-とファームウェアの更新)の手順 1・4・5
+- [ログインと sudo](../almalinux-setup.md#ログインと-sudo)の手順 1〜3、[OS とファームウェアの更新](../almalinux-setup.md#os-とファームウェアの更新)の手順 1・2・3
 - [システムの設定](../almalinux-setup.md#システムの設定)の手順 1、[共通の bash 設定](../shell-terminal.md#共通の-bash-設定)の手順 1・2
-- [Homebrew](../almalinux-setup.md#homebrew)の手順 1〜3、[シェルのツール](../shell-terminal.md#シェルのツール)の手順 1・2
-- [Git](../almalinux-setup.md#git)の手順 1〜6、[Firefox](../almalinux-setup.md#firefox)の手順 1〜7（ブラウザ認証に使う）
-- [HackGen Console NF](../shell-terminal.md#hackgen-console-nf)の手順 1〜5（WezTerm と等幅のフォントに使う）、[WezTerm](../shell-terminal.md#wezterm)の手順 1〜5
+- [Homebrew](../almalinux-setup.md#homebrew)の手順 1〜2、[シェルのツール](../shell-terminal.md#シェルのツール)の手順 1・2
+- [Git](../almalinux-setup.md#git)の手順 1〜6、[Firefox](../almalinux-setup.md#firefox)の手順 1〜6（ブラウザ認証に使う）
+- [HackGen Console NF](../shell-terminal.md#hackgen-console-nf)の手順 1〜5（WezTerm と等幅のフォントに使う）、[WezTerm](../shell-terminal.md#wezterm)の手順 1〜3
 - [再起動と確認](../almalinux-setup.md#再起動と確認)の手順 1

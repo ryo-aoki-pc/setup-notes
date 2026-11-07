@@ -12,12 +12,12 @@ podman-tui は Go で書かれた 1 つの実行ファイルで、`rpm -q --requ
 
 - fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
-### podman-tui / 手順 3: 補足: 確認用のコンテナ
+### podman-tui / 手順 2: 補足: 確認用のコンテナ
 
 - 初回はイメージ（285 MB）を取得する。[Podman: Quadlet で自動起動する](../containers.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
 - ポートは公開しない（画面から止めるためだけのコンテナ）
 
-### podman-tui / 手順 4: 補足: 画面の中身と、つながらないとき
+### podman-tui / 手順 3: 補足: 画面の中身と、つながらないとき
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#実施手順--手順-4-補足-画面の中身とつながらないとき)
 
@@ -36,7 +36,7 @@ podman.sock: connect: connection refused
 - `Ctrl+C` で終了し、`systemctl --user start podman.socket` で起動し直す
 - `v5.7.1` は、podman-tui が使っている podman の API の版（1.10.0 は podman 5.7.1 の部品で作られている）
 
-### podman-tui / 手順 5: 補足: podman でも確かめる理由
+### podman-tui / 手順 3: 補足: podman でも確かめる理由
 
 - `podman-tui-web Exited (0) ...` と出れば、画面の操作が API を通して podman に届いている
 

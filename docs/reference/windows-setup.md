@@ -163,7 +163,7 @@
 - Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
 - 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
 - `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
-- `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため（続けて貼った行が答えとして食われないように）
+- `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため
 - `…\AppData\Local\Programs\Git\cmd\git.exe` の Git for Windows を外してから始めるのは、ほかの手順書が `C:\Program Files\Git` を前提にしているため
 
 ### Git for Windows / 手順 3: 補足: UAC
@@ -193,7 +193,7 @@
 ### PC 全体の設定 / 手順 5: 補足: 名前の決まりと、確認の問いを出さないこと
 
 - Windows の PC の名前は 15 文字まで（NetBIOS の名前の長さ）で、使える文字は英字・数字・ハイフン。先頭は英数字で、末尾はハイフンにしない（Microsoft の文書。数字だけの名前はドメインに入れない）
-- `Rename-Computer` は、15 文字を超える名前だと「短くするが続けるか」を聞く（`-Force` で聞かない）。聞かれると、続けて貼った行が答えとして食われるので、ブロックで先に 15 文字までかを確かめて止める
+- `Rename-Computer` は、15 文字を超える名前だと確認の問いで短縮されうるため、先に 15 文字までかを確かめ、指定した名前をそのまま使える場合だけ変更する
 - 今と同じ名前を渡すと、`Rename-Computer` はエラー（`NewNameIsOldName`）を出すので、先に比べる
 - SSH・リモート デスクトップは、この名前でこの PC を見分ける
 
@@ -277,7 +277,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - `Hypervisor : True` になるのは、「WSL と再起動」の手順 2 で WSL の機能を入れたため
 
-### WSL の AlmaLinux 10 / 手順 4: 補足: 版と、冒頭の 2 行
+### WSL の AlmaLinux 10 / 手順 3: 補足: 版と、冒頭の 2 行
 
 - `VERSION="10.2 …"` の版は、入れた日のイメージ
 - 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（「WSL の AlmaLinux 10」の手順 3 も同じ）
@@ -733,7 +733,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 - Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
 - 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのはほかの OS の MediaCodec を使うものだけ）
-  - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[実施手順](../almalinux-setup.md#firefox)の手順 8〜11 が要る（[選択した方針](almalinux-setup.md#firefox)）
+  - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[実施手順](../almalinux-setup.md#firefox)の手順 7〜10 が要る（[選択した方針](almalinux-setup.md#firefox)）
 - MDN も、Firefox は AVC（H.264）と AAC を OS の復号器に頼ると書いている
 
 - N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が必要になる可能性がある
@@ -1073,7 +1073,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - UniGet UI のユーザー向け [winget 定義](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/Devolutions/UniGetUI/2026.3.0/Devolutions.UniGetUI.installer.yaml)も `elevatesSelf` で、[インストーラー](https://github.com/Devolutions/UniGetUI/blob/v2026.3.0/InstallerExtras/CodeDependencies.iss)は Visual C++ Runtime などを必要に応じて導入する。共有 DLL の導入には[管理者権限が必要](https://learn.microsoft.com/en-us/cpp/windows/choosing-a-deployment-method?view=msvc-170)なため、ユーザー領域への導入でも管理者確認が出る場合がある。
 - 「自動起動と標準アプリ」の手順 2: `OneDriveSetup` は初回導入の項目で、対象へ正確な名前を追加した。`Run` の値・実行ファイルを削除せず、`RunOnce` と Active Setup も変えない。[Run と RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)と [OneDriveSetup を初回導入に使う例](https://learn.microsoft.com/en-us/troubleshoot/sharepoint/lists-and-libraries/cannot-open-onedrive-on-images-using-sysprep)を参照（後者は Windows 10 の Sysprep の例）。実アプリの次回起動の確認とは分けて扱う。
 - 「PC 全体の設定」の手順 7: 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
-- 「WSL の AlmaLinux 10」の手順 3・4: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
+- 「WSL の AlmaLinux 10」の手順 3: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
 
 実施環境と再実行の結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を参照。
 

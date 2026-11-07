@@ -12,7 +12,7 @@
 
 - 弱い依存として `socat` が一緒に入る
 
-### VS Code / 手順 5: 補足: .el8 タグの rpm が EL10 で解決できる理由
+### VS Code / 手順 4: 補足: .el8 タグの rpm が EL10 で解決できる理由
 
 入る rpm は `code-1.138.0-1789458729.el8.aarch64` で、release の末尾が **`.el8` に固定されている**。
 
@@ -25,7 +25,7 @@
 - [WezTerm](../shell-terminal.md#wezterm) の「作者が EL9 向けに出した COPR ビルドを EL10 で使う」とは事情が違う
 - dnf は release 文字列を比較するだけなので、`.el8` のままでも `dnf upgrade` は正しく効く
 
-### VS Code / 手順 7: 補足: 設定のディレクトリ
+### VS Code / 手順 6: 補足: 設定のディレクトリ
 
 - `~/.config/Code` は設定と履歴
 

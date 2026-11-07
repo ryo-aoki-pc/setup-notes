@@ -198,7 +198,7 @@
    - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
    - Mason の未完了の導入は、この項の手順 9 で補う
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 8 のブロックを貼り直す
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
 
@@ -280,7 +280,7 @@
    - `pull` が `Not possible to fast-forward` で止まったら、このマシンに push していないコミットがある。先に push するか、`git -C ~/.config/nvim log --oneline '@{u}..'` で中身を見る
    - `pull` が `Your local changes to the following files would be overwritten by merge:` と `lazy-lock.json` を出して止まったら、lock の変更を確認する
    - `:Lazy update` の結果として残すのでなければ、`git -C ~/.config/nvim checkout -- lazy-lock.json` で戻して、この手順を貼り直す
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 1 のブロックを貼り直す
 
 1. GitLab プレビューの公式スタイルを、設定が指定する版に揃える。
@@ -522,7 +522,7 @@
 
    - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `lazy-lock.json` だけが変わっていればよい
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
    - 上げた後は、Neovim を起動して使えることを確かめてから、`lazy-lock.json` をコミットして push する
 
@@ -726,7 +726,7 @@
    - Mason の未完了の導入は、この項の手順 8 で補う
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazyvim-の設定を導入する--手順-10-補足-lazy-lockjson-を戻してから-restore-する理由)を参照する
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 7 のブロックを貼り直す
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
 
@@ -799,7 +799,7 @@
    - `Not possible to fast-forward` なら、`restore` も状態表示も走らない。push していないコミットを先に push するか、`git -C "$env:LOCALAPPDATA\nvim" log --oneline '@{u}..'` で見る
    - `Your local changes to the following files would be overwritten by merge:` が `lazy-lock.json` を挙げたら、手元で lock が変わっている
    - `:Lazy update` の結果として残すのでなければ、`git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json` で戻してから、この手順を貼り直す
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
 
 1. Windows 11 で、GitLab プレビューの公式スタイルを設定が指定する版に揃える。
@@ -953,7 +953,7 @@
 
    - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `lazy-lock.json` だけが変わっていればよい
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 3 のブロックを貼り直す
 
 ---

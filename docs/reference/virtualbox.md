@@ -39,7 +39,7 @@
 - このリポジトリは、メタデータにも署名がある（`repo_gpgcheck=1`）
 - dnf はそれを確かめるための鍵を rpm とは別に持つので、最初の 1 回だけ鍵の取り込みを聞かれる
 
-### リポジトリを置く / 手順 5: 補足: sudo を付けない dnf にも通す理由
+### リポジトリを置く / 手順 4: 補足: sudo を付けない dnf にも通す理由
 
 - `sudo` を付けない dnf は、ユーザーごとの別のキャッシュを使う
 - 通しておかないと、`sudo` を付けない `dnf list` などが関係の無いパッケージでも失敗する
@@ -52,7 +52,7 @@
 
 - VirtualBox は、自分のカーネルモジュール（`vboxdrv` / `vboxnetflt` / `vboxnetadp`）をインストールの途中で、この PC の上でビルドする
 
-### VirtualBox を入れる / 手順 5: 補足: Complete! だけでは成功とは限らない理由
+### VirtualBox を入れる / 手順 4: 補足: Complete! だけでは成功とは限らない理由
 
 - モジュールのビルドや読み込みに失敗しても、dnf は `Complete!` で終わる
 
@@ -81,7 +81,7 @@
 
 ### AlmaLinux 10 で使う / 更新 / 手順 2: 補足: 同じ系列の中で上げたとき
 
-- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../virtual-machines.md#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
+- 更新のたびに `%post` がモジュールをビルドし直すので、[VirtualBox を入れる](../virtual-machines.md#virtualbox-virtualbox-を入れる)の手順 4 と同じ確認をする
 - コンテナで 7.2.18 → 7.2.20 を上げたときは、`%post` が新規導入のときと同じ表示を出した
 - モジュールは 7.2.20 用に作り直された（`modinfo -F version` が `7.2.18 r175117` → `7.2.20 r175154`）
 - `/sbin/vboxconfig` と udev のルールも残った

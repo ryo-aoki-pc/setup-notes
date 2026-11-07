@@ -137,11 +137,11 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 - デタッチしても、セッションの中のシェルと、そこで動かしているコマンドは動き続ける
 
-### tmux を試す / 手順 2: 補足: tmux の使い方
+### tmux を試す / 手順 1: 補足: tmux の使い方
 
 - キーとコマンドは[tmux の使い方の基本](../shell-terminal.md#tmux-の使い方の基本)
 
-### tmux を試す / 手順 3: 補足: tmux のサーバー
+### tmux を試す / 手順 1: 補足: tmux のサーバー
 
 - セッションが 1 つも無くなると、tmux のサーバーも終わる
 
@@ -192,7 +192,7 @@ enabled_metadata=1
 
 - chroot は `uname -m` から `rhel-9-x86_64` か `rhel-9-aarch64` になる（COPR に EL10 向けが無いので EL9 向けを使う）
 
-### WezTerm / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵
+### WezTerm / 手順 2: 補足: wezterm はメタパッケージ / 取り込まれる鍵
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
 
@@ -208,7 +208,7 @@ Importing GPG key 0xCEA2757D:
  From       : https://download.copr.fedorainfracloud.org/results/wezfurlong/wezterm-nightly/pubkey.gpg
 ```
 
-### WezTerm / 手順 4: 補足: wezterm ls-fonts と wezterm-gui --version
+### WezTerm / 手順 2: 補足: wezterm ls-fonts と wezterm-gui --version
 
 - **`wezterm ls-fonts`** は GUI 無しでフォント解決を確認できる
   - 既定のフォントは組み込みの `JetBrains Mono` で、フォールバックに `Noto Color Emoji`（fontconfig 経由）と組み込みの `Symbols Nerd Font Mono` が並ぶ
@@ -216,7 +216,7 @@ Importing GPG key 0xCEA2757D:
 - **`wezterm-gui --version` は `wezterm-gui someone forgot to call assign_version_info` と出る**（rc=0）
   - COPR ビルドでは GUI バイナリにバージョン情報が埋め込まれていない。バージョンは `wezterm --version` で見る
 
-### WezTerm / 手順 4: 補足: アプリ一覧の項目
+### WezTerm / 手順 2: 補足: アプリ一覧の項目
 
 - アプリ一覧の「WezTerm」は、`/usr/share/applications/org.wezfurlong.wezterm.desktop` から出る
 
@@ -271,7 +271,7 @@ Importing GPG key 0xCEA2757D:
 - `automatic` は、シェルが角かっこで囲む貼り付け（bracketed paste）を有効にしていないときに、改行を含む文字を貼ると警告する（`TerminalPage.cpp`）。Windows PowerShell 5.1・PowerShell 7 とも、PSReadLine はこれを有効にしないため、複数行の警告の対象になる
 - 画面では「操作」→「改行を貼り付ける際に警告する」（「"角かっこで囲まれた貼り付け" がオフの場合」・「常時」・「なし」）。ダイアログの題は「警告」で、ボタンは「強制的に貼り付け」と「キャンセル」
 - 出るダイアログは 1 つだけ。複数行の警告が出ないときに、5 KiB（UTF-16 で 5,120 文字）を超えると `warning.largePaste`（既定 true）の警告が出る
-- Windows Terminal は、貼るときに改行を Enter として送る。PSReadLine は、閉じていない文（`& {` など）の行を続きとして受けるので、1 行ずつ届いても、この文書のブロックは正しく動く。閉じた文が続くブロックは行ごとに動く（1 つの入力にするなら、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)）
+- 手順書では、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)の Enter の割り当て後、貼った全体を 1 つの入力として実行する。割り当て前は、Windows Terminal が改行を Enter として送り、閉じた文が続くブロックは行ごとに動く。閉じていない文（`& {` など）は、PSReadLine が行を続きとして受ける
 - `trimPaste`（既定 true）は、1 行の貼り付けの末尾の空白だけを削る。貼った後に Enter が要るのは、コピーボタンの中身に末尾の改行が無いため
 
 ### Windows Terminal で選択した文字をコピーする / 手順 2: 補足: copyOnSelect と貼り付け
@@ -284,14 +284,15 @@ Importing GPG key 0xCEA2757D:
 ### Windows Terminal で複数行を 1 つの入力として貼る / 手順 2: 補足: Enter の割り当て
 
 - 貼る窓は 7 なので、`$PROFILE` は 7 のプロファイルを指す。5.1 と 7 のパスを明示し、7 が無ければ作り、5.1 が無ければ飛ばす。足す行は ASCII だけなので、BOM の無い 5.1 のプロファイルが ANSI でも、既存のバイトは変えない
-- Windows Terminal は改行を Enter として送り、PSReadLine の `AcceptLine` は閉じた文を実行するため、閉じた文が続くブロックは行ごとに動く
+- Enter の割り当て前は、Windows Terminal が改行を Enter として送り、PSReadLine の `AcceptLine` は閉じた文を実行するため、閉じた文が続くブロックは行ごとに動く
 - 右クリックは Windows Terminal が処理する。Ctrl+V も `keybindings` が `Terminal.PasteFromClipboard` に割り当てていれば、プロファイルの `Paste` まで届かない。Ctrl+V の割り当てを外す方式は右クリックに効かず、ほかのタブの Ctrl+V の貼り付けも失うため、Enter を割り当てる
-- PSReadLine は bracketed paste を有効にしない（[PSReadLine の issue #1471](https://github.com/PowerShell/PSReadLine/issues/1471)）。2.4.5 に上げてもこの問題は直らない。Ctrl+Enter の `AddLine` は conhost の LF 向けで、Windows Terminal では効かない
+- PSReadLine は bracketed paste を有効にしない（[PSReadLine の issue #1471](https://github.com/PowerShell/PSReadLine/issues/1471)）。2.4.5 に上げてもこの問題は直らない。そのため、Enter の割り当てで貼った全体を 1 つの入力にする。Ctrl+Enter の `AddLine` は conhost の LF 向けで、Windows Terminal では効かない
 - `ReadOneOrMoreKeys` が読めるキーを内部の `_queuedKeys` へ先に移すため、`KeyAvailable` だけでは足りない。static の `_singleton` から instance の `_queuedKeys` も読む。入力の切れ目で実行しないよう、約 30 ms まで待つ（Enter を打ったときも、この分だけ遅れる）
-- 内部の名前は非公開で、版で変わることがある。読めなければ `KeyAvailable` だけの判定になり、貼り付けは行ごとの実行に戻る。Enter 自体は動く
-- 制限言語モード（Constrained Language）の窓では割り当てない。割り当てると、この行のメソッドの呼び出しが禁じられ、Enter でコマンドが動かなくなるため。この窓の貼り付けは行ごとのまま
+- 内部の名前は非公開で、版で変わることがある。読めなければ `KeyAvailable` だけの判定になり、貼り付けは行ごとの実行に戻る。Enter 自体は動くが、貼った全体が 1 つの入力になる前提を満たさないので、以降の手順を続けず、割り当てを直す
+- 制限言語モード（Constrained Language）の窓では割り当てない。割り当てると、この行のメソッドの呼び出しが禁じられ、Enter でコマンドが動かなくなるため。この窓の貼り付けは行ごとのままで、貼った全体が 1 つの入力になる前提を満たさない
 - 印を `# shell-terminal.md:paste` にして、Emacs モードと 5.1 のキー操作の再実行時の削除対象から外す。`EditMode` は前のキーの割り当てを既定に戻すため、末尾に足す。Emacs の手順は最初のキーの割り当てより前へ入れるので、後から通しても順序は保たれる
 - 実機の動きと範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)を参照する
+- ほかの手順書の PowerShell のブロックは、この割り当てを前提に書く。割り当てがあると、`Read-Host`・`choice.exe` の問いの後ろの文は答えとして読まれず、答えた後に動く。子の PowerShell の後ろの文は、閉じた後に元の窓で動く。Ctrl+C で外部コマンドを止めると、同じ入力の後ろの文も動かない（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)）
 
 ### Windows 11 で WezTerm を入れる / 手順 1: 補足: WezTerm の中の PowerShell を使わない理由
 
@@ -762,6 +763,12 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | 履歴の連続した重複の除去 | 既定の `HistoryNoDuplicates` を使う | 同じ設定を追加: 5.1・7 とも既定で有効 |
 | 設定アプリの「詳細設定」→「PowerShell」 | この項では扱わない | 実行ポリシーを RemoteSigned にするスイッチで、貼り付けの設定と 7 のプロファイルの項で扱う |
 
+- 手順書のブロックは、貼った全体が 1 つの入力になる窓に貼る前提で書く（2026-11-07、利用者の決定）。bash はブラケットペースト、PowerShell は「Windows Terminal で複数行を 1 つの入力として貼る」の Enter の割り当てで、そうなる
+  - 対話（`[y/N]`・パスワード・`Read-Host`・`choice.exe`・エディタ・TUI）のコマンドの後ろの行は、答えとして読まれず、対話が終わってから動く。`sudo` の後ろの行も捨てられない。そのため、対話のコマンドの後ろでも手順を分けず、`sudo` の後ろの行を `{ }` で囲まない
+  - 子のシェル（`ssh`・`tmux`・`distrobox enter`・子の PowerShell など）の後ろの行は、その中ではなく、閉じた後の元のシェルで動き、`exec` の後ろの行は消える。PowerShell では、Ctrl+C が同じ入力の後ろの文も止める。こうなる所では、今までどおり手順を分ける
+  - 貼っただけでは動かず、Enter で動く（bash は、末尾に改行があっても Enter を待つ）
+  - 実測は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)
+
 ### 参照
 
 #### 共通の bash 設定
@@ -774,7 +781,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - [bash-completion](https://github.com/scop/bash-completion)（`_completion_loader`、`BASH_COMPLETION_USER_DIR`、`XDG_DATA_DIRS`）
 - [Homebrew — Shell Completion](https://docs.brew.sh/Shell-Completion)（`etc/bash_completion.d` を読む形）
 - [fzf](../almalinux-setup.md) — Ctrl+R の履歴の検索と `**<Tab>`。Homebrew の補完の行との並び
-- [Homebrew](../almalinux-setup.md) — `brew shellenv` の行（手順 3）
+- [Homebrew](../almalinux-setup.md) — `brew shellenv` の行（手順 2）
 
 #### シェルのツール
 
@@ -833,7 +840,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - [Nerd Fonts](https://www.nerdfonts.com/) — 追加されているアイコンの一覧（コードポイントの確認に使える）
 - `man fc-list` / `man fc-match` / `man fc-cache` — fontconfig の照会と、キャッシュの作り直し
 - [WezTerm](../shell-terminal.md#wezterm) — WezTerm の導入と設定ファイルの置き場所
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜2 が Homebrew 本体の導入手順。`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [HackGen v2.10.0](https://github.com/yuru7/HackGen/releases/tag/v2.10.0) — Windows 11 の節で取る `HackGen_NF_v2.10.0.zip`
 - [Join-Path（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/join-path?view=powershell-5.1) — `-Path` と `-ChildPath` だけ（scoop の個人のバケットを採らなかった理由）
 - [matthewjberger/scoop-nerd-fonts](https://github.com/matthewjberger/scoop-nerd-fonts) — Windows で自分のユーザーにフォントを入れる定義（issue #198 のアクセス権）
