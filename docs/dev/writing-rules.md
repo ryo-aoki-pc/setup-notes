@@ -28,7 +28,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
    - `---` は、各 `###` 用途のまとまりの末尾にだけ置く
 1. **どの項も単独で通せるようにする。** 項のリードは「何をするか → `- 前提: …` → `- 実行場所: …` → そのほかの箇条書き → アラート」の順にする
    - 前提は、先に通しておく項へのリンクで書く（無ければ `- 前提: 無し`）。冒頭の全体の前提は繰り返さない。子の項の前提は、その用途の導入を済ませる項（親が手順を持たなければ、導入の兄弟の項）にする
-   - 実行場所は、ホスト・ユーザー・シェル・窓（Windows は管理者か通常の Windows PowerShell 5.1 か、Git Bash か）を書く。冒頭の既定と同じでも書く
+   - 実行場所は、ホスト・ユーザー・シェル・窓（Windows は管理者か通常か、PowerShell 7 か Windows PowerShell 5.1 か、Git Bash か）を書く。冒頭の既定と同じでも書く
    - 前提は `[!IMPORTANT]` に入れず、箇条書きにする。`[!IMPORTANT]` は、項全体にかかわる権限・実行場所の注意だけにする
    - 変数は、それを使う項ごとに手順 1 で設定する（ほかの項の変数に頼らない）。同じ値にする変数は、どの項と同じ値かを箇条書きに書く。自動で取れる値は同じ式で取り直す
    - windows-setup.md では、窓を開く手順の無い項は、手順 1 で窓を開き、変数を設定する手順は手順 2 にする
@@ -93,11 +93,20 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
   - コマンドのある手順では、箇条書きを最初のコードブロックより前や、複数のコードブロックの間に置かない。確認・分岐・注意の箇条書きは、最後のコードブロックの後ろにまとめる
   - 並べてよいのは「1 変数だけのブロック（0 個以上）→ ほかのブロック 1 つ」だけ
   - 言語は bash。手で書き足す設定の断片（lazygit の yaml など）だけは、その言語のブロックでよい
-  - Windows の操作は `powershell` のブロックにし、Windows PowerShell 5.1 で貼る。管理者が必要な操作は該当項で指定する
+  - Windows の操作は `powershell` のブロックにし、PowerShell 7（Microsoft Store 版）で貼る。管理者が必要な操作は該当項で指定する
+    - 次に当たる項（または手順）だけは Windows PowerShell 5.1 で貼り、理由を参考資料の `### <項> / 手順 N: 補足: 5.1 にする理由` に置く
+      - 7 を入れる前に通す項（windows-setup.md の「Windows Update」「Microsoft Store の更新」「貼り付けの設定」「アプリを入れる」の手順 1〜7）
+      - Dism のコマンド（`*-WindowsCapability`・`*-WindowsOptionalFeature` など）
+      - PowerShell のリモートの受け口（`Enable-PSRemoting`）
+      - 5.1 だけで動くモジュール（PSWindowsUpdate）
+      - PowerShell 7 自身を上げる手順
+      - 主題が Windows PowerShell 5.1 の項
+    - 冒頭の全体の前提に、7 に貼ることと windows-setup.md の「アプリを入れる」の手順 6〜9 を書き、各項の `- 前提:` には 7 を足さない。7 の窓を開く手順には「「PowerShell」が無ければ、[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 6〜9 を通す」を付ける
+    - タスク・ショートカットなどが起動する `powershell.exe` は、貼る窓とは別に決める
   - Git Bash・WSL・別ホストの bash を使う操作は、貼り先を説明で明記する。共通 CLI の同一ブロックを参照するときもシェルを指定する
   - 貼り付け設定前の conhost は Ctrl+V を使う。scoop の導入は管理者ではない窓で行い、SSH の昇格済みセッションには貼らない
   - PowerShell の変数が空ならブロック先頭で中断する。`}` と `else` / `elseif` は同じ行に置く
-  - Windows Sandbox の状態確認・有効化・再起動は管理者の Windows PowerShell 5.1、起動・試験・窓を閉じた後の確認は通常のデスクトップで行う
+  - Windows Sandbox の状態確認・有効化・再起動は Dism のコマンドを使うため、管理者の Windows PowerShell 5.1 に貼る。起動・試験・窓を閉じた後の確認は通常のデスクトップで行う
   - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。shell-terminal.md の「Git Bash と WezTerm の設定」の手順 4 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 4 と shell-terminal.md の「シェルのツールを入れる」の手順 7・8 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、shell-terminal.md の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
   - `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。手順の外の節や tool-catalog.md のブロックも同じ

@@ -133,7 +133,7 @@
   - つながるのはログインしている間だけ。GIO を使わないアプリからは `/run/user/<UID>/gvfs/` の下に見える
 - **Windows 11 では、資格情報マネージャー（`cmdkey`）と `New-SmbMapping -Persistent $true` で、ドライブ文字に割り当てる**
   - パスワードは、`cmdkey` が聞いて資格情報マネージャーに置く。コマンドラインにも、PowerShell の履歴にも残らない
-  - 窓は管理者ではない Windows PowerShell 5.1（[Windows 11 で使うの手順 1 の補足](#windows-11-の-samba-クライアント--手順-1-補足-管理者ではない窓で割り当てる理由)）。PowerShell 7 でも `SmbShare` のモジュールは使えるはずだが、ほかの Windows の手順書に合わせて 5.1 にした
+  - 窓は管理者ではない PowerShell 7（[Windows 11 で使うの手順 1 の補足](#windows-11-の-samba-クライアント--手順-1-補足-管理者ではない窓で割り当てる理由)）。貼る窓は、ほかの Windows の手順書と同じ PowerShell 7 にする
   - 採らなかった割り当て方
     - `net use <ドライブ>: \\<SERVER>\<SHARE> /savecred /persistent:yes`: `/savecred` は `/user` と一緒に使えない（Microsoft の Windows Server 2003 の文書）。今の Microsoft Learn の `net use` のページは 404 で、Windows Server 2012 R2 の版しか読めなかった
     - `New-SmbMapping -UserName <SMB_USER> -Password <パスワード>`: パスワードをコマンドラインに書くことになる。`-Credential` は windowsserver2025-ps の版の文書にだけあり、Windows 11 の SmbShare にあるかを確かめていない

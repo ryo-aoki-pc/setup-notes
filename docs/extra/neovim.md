@@ -18,7 +18,7 @@
 - **Neovim: `vi` は RPM の `vim-minimal`**: 別物が `/usr/bin/vi` として残っている。エイリアスを張らない限り `vi` は Neovim にならない
 - **Neovim: Windows 11 では、winget などで入れた Neovim と両方入れない**: winget の `Neovim.Neovim` は PC 全体（`C:\Program Files\Neovim`）に入り、PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、そちらが使われる。どちらか一方にする
 - **Neovim: Windows 11 で自分用の設定（LazyVimStarter）を使うと、`:!` や `:terminal` のシェルは PowerShell になる**: `pwsh` を実行ファイルとして見つけられれば PowerShell 7、見つけられなければ Windows PowerShell 5.1。素の Neovim の既定は `cmd.exe`
-  - [「アプリを入れる」の手順 6](../windows-setup.md#アプリを入れる) の PowerShell 7（MSIX）は、pwsh の中から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
+  - [「アプリを入れる」の手順 6](../windows-setup.md#アプリを入れる) の PowerShell 7（MSIX）は、PowerShell 7 の窓から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
 - **Neovim: treesitter のパーサーが入らない**: `Lock file '…' appears stale` が出たら、次の順で鍵を消す
   - Neovim をすべて閉じ、tree-sitter が動いていないことを確かめる
     - AlmaLinux 10 は `pgrep -a tree-sitter`、Windows 11 は `Get-Process tree-sitter -ErrorAction SilentlyContinue` が何も出さなければよい

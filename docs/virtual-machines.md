@@ -5,7 +5,7 @@
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
@@ -23,7 +23,7 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
-> - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-virtualbox-を入れる)を管理者の Windows PowerShell 5.1 で通す
+> - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-virtualbox-を入れる)を通し、貼る窓は各手順に従う
 > - Windows では EPEL・Secure Boot の前提と KVM の設定は不要
 > - **対象ホスト（x86_64 の PC）上で実行する**。VirtualBox には Linux の arm64 版が無いので、aarch64 のホストには入らない
 > - **自分のシェルで実行する**。`sudo -i` した root のシェルでは行わない
@@ -1632,6 +1632,7 @@
 - 前提: 無し
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
 - Windows 11 Pro・Enterprise・Education の x64 が対象。Home には Hyper-V が無い
+- [5.1 にする理由](reference/hyper-v.md#この-pc-で使えるかを確かめる--手順-1-補足-51-にする理由)
 
 1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
 
@@ -1666,6 +1667,7 @@
 - この PC の Hyper-V を有効にし、自分のユーザーで管理できるようにする
 - 前提: [Hyper-V: この PC で使えるかを確かめる](#hyper-v-この-pc-で使えるかを確かめる)を通してある
 - 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- [5.1 にする理由](reference/hyper-v.md#hyper-v-を有効にして再起動する--手順-1-補足-51-にする理由)
 
 > [!IMPORTANT]
 > - **この項の手順 5 で再起動する**。開いている作業を先に保存し、動いている VM を止める。SSH やリモート デスクトップのセッションからは行わない
@@ -1724,11 +1726,12 @@
 
 - 再起動後に、昇格せずに Hyper-V を管理できることを確かめる
 - 前提: [Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)を通し、再起動してサインインしてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Hyper-V の管理のコマンドが、昇格せずに使えるかを確かめる。
 
@@ -1748,11 +1751,12 @@
 
 - この PC に、第 2 世代の VM を作る
 - 前提: [Hyper-V: 再起動の後に確かめる](#hyper-v-再起動の後に確かめる)を通し、入れる OS のインストール用の ISO を用意してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`HV_ISO` は必ず値を入れる）。
 
@@ -1819,11 +1823,12 @@
 
 - VM を起動し、OS をインストールする
 - 前提: [Hyper-V: VM を作る](#hyper-v-vm-を作る)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`HV_VM` は必ず値を入れる）。
 
@@ -1871,11 +1876,12 @@
 
 - 動いている VM の状態と、ゲストへの SSH を確かめる
 - 前提: [Hyper-V: VM を起動して OS を入れる](#hyper-v-vm-を起動して-os-を入れる)を通してある。SSH を確かめるときは、ゲストの SSH サーバーとファイアウォールを設定してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`HV_VM` は必ず値を入れる）。
 
@@ -1913,7 +1919,7 @@
 
 #### Hyper-V: 使い方の基本
 
-- 管理者ではない Windows PowerShell（5.1）で打つ。`<VM 名>` は VM の名前
+- 管理者ではない PowerShell 7 で打つ。`<VM 名>` は VM の名前
 
 | すること | コマンド |
 |---|---|
@@ -1930,14 +1936,15 @@
 
 - チェックポイントを取って戻し、その時点から別の VM を作る
 - 前提: [Hyper-V: 動作を確かめる](#hyper-v-動作を確かめる)まで通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 > [!WARNING]
 > **この項の手順 5 で作った VM があるあいだは、元の VM のチェックポイントを消さない**。消すと元のディスクが書き換わり、そこから作った VM がすべて起動しなくなる。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`HV_VM` は必ず値を入れる）。
 
@@ -2009,12 +2016,13 @@
 
 - Private のスイッチを作り、止めてある VM に 2 枚目の NIC として付ける
 - 前提: [Hyper-V: 動作を確かめる](#hyper-v-動作を確かめる)まで通し、対象の VM を止めてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - このスイッチは VM どうしだけが通信でき、この PC ともインターネットともつながらない。ゲストの中で固定の IP を付ける
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`HV_VM` は必ず値を入れる）。
 
@@ -2054,14 +2062,15 @@
 
 - VM の登録とディスクを消す
 - 前提: [Hyper-V: 動作を確かめる](#hyper-v-動作を確かめる)まで通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 > [!CAUTION]
 > **この項の手順 2 は、VM のディスクごと消す（取り戻せない）**。[チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 5 で、この VM から作った VM が残っているなら、先にそちらを消す。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. VM を止めて、登録とファイルを消す（取り戻せない）。
 
@@ -2096,9 +2105,10 @@
 - VirtualBox を入れ、使い捨ての VM と管理画面の起動を確かめる
 - VM を作って使う・消す・上げるときは、この項の後ろの「VirtualBox: 〜」の項を通す
 - 前提: [Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で winget を用意してある
-- 実行場所: この PC のデスクトップ。管理者の Windows PowerShell（5.1）をこの項の手順 1、管理者ではない窓を手順 5 で開く
+- 実行場所: この PC のデスクトップ。管理者の Windows PowerShell（5.1）をこの項の手順 1、管理者ではない PowerShell 7 を手順 5 で開く
 - Windows 11 の x64 が対象
 - Atomic Desktop のゲストに Guest Additions を入れるなら、[bootc ゲスト](#virtualbox-の-bootc-ゲスト)を通す
+- [5.1 にする理由](reference/virtualbox.md#windows-11-で-virtualbox-を入れる--手順-1-補足-51-にする理由)
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
@@ -2154,9 +2164,10 @@
    - ドライバーは `VBoxSup`・`VBoxNetLwf`・`VBoxNetAdp`・`VBoxUSBMon` などが出て、`VBoxSup` が `Running` ならよい
    - ホストオンリーのアダプターが 1 つ出る（`Name` は `イーサネット 2` のように PC で違う）
 
-1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 使い捨ての VM を画面無しで起動し、Hyper-V の上で動くかを見てから止めて消す。
 
@@ -2221,11 +2232,12 @@
 
 - この PC に、AlmaLinux 10 の VM を作る
 - 前提: [VirtualBox](#windows-11-で-virtualbox-を入れる)を通し、AlmaLinux 10 の x86_64 の ISO を用意してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VB_ISO` は必ず値を入れる）。
 
@@ -2294,11 +2306,12 @@
 
 - 作った VM を起動し、AlmaLinux をインストールする
 - 前提: [VirtualBox: VM を作る](#virtualbox-vm-を作る)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VB_VM` は必ず値を入れる）。
 
@@ -2347,11 +2360,12 @@
 
 - この PC で VM の起動と、ゲストへの SSH を確かめる
 - 前提: [VirtualBox: VM を起動して OS を入れる](#virtualbox-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの SSH サーバーとファイアウォールを設定してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VB_VM`・`VB_SSH_PORT` は必ず値を入れる）。
 
@@ -2394,7 +2408,7 @@
 
 #### VirtualBox: 使い方の基本
 
-- 以下は Windows 11 のホスト用。管理者ではない Windows PowerShell（5.1）で、[VM を作る](#virtualbox-vm-を作る)の手順 2 の変数を使う
+- 以下は Windows 11 のホスト用。管理者ではない PowerShell 7 で、[VM を作る](#virtualbox-vm-を作る)の手順 2 の変数を使う
 
 | すること | コマンド |
 |---|---|
@@ -2410,14 +2424,15 @@
 
 - 停止した VM のスナップショットを取り、独立したディスクを持つ完全クローンを作る
 - 前提: [VirtualBox: Windows のホストで VM の動作を確かめる](#virtualbox-windows-のホストで-vm-の動作を確かめる)まで通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 > [!WARNING]
 > **この項の手順 5 の復元では、スナップショットより後の変更は消える**。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VB_VM` は必ず値を入れる）。
 
@@ -2500,14 +2515,15 @@
 
 - 停止した VM の登録とディスクを消す
 - 前提: [VirtualBox](#windows-11-で-virtualbox-を入れる)を通し、消す VM を止めてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 > [!CAUTION]
 > **この項の手順 3 は、指定した VM のディスクとスナップショットも消す（取り戻せない）**。必要なデータを先に退避する。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する。
 
@@ -2546,13 +2562,14 @@
 
 - VirtualBox を winget で上げる
 - 前提: [VirtualBox](#windows-11-で-virtualbox-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 - **更新の途中でも、ネットワークがいったん切れるはず**。SSH やリモート デスクトップのセッションからは行わない
 - VM の中の Guest Additions は、この項では上がらない（Atomic Desktop の VM は [VirtualBox の bootc ゲストの更新](#virtualbox-の-bootc-ゲスト-更新)）
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. VirtualBox の VM と VirtualBox マネージャーをすべて閉じる。
 
@@ -2602,7 +2619,7 @@
 
 - Windows 用のインストーラーを取得し、署名と版を確かめる
 - 前提: Broadcom のアカウントを用意してある
-- 実行場所: この PC のデスクトップのブラウザと管理者の Windows PowerShell（5.1）。この項の手順 2 で開く
+- 実行場所: この PC のデスクトップのブラウザと管理者の PowerShell 7。この項の手順 2 で開く
 - Windows 11 の x64 が対象
 
 1. ブラウザで Broadcom のサポート ポータルにログインし、VMware Workstation Pro の Windows 用のインストーラーを「ダウンロード」フォルダーに保存する。
@@ -2610,9 +2627,10 @@
    - ファイル名は `VMware-Workstation-Full-<版>-<ビルド番号>.exe` の形
    - **次の手順は、ダウンロードが終わってから行う**
 
-1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（取得したインストーラーのパスが自動で入る。違えば直す）。
 
@@ -2644,15 +2662,16 @@
 
 - 取得したインストーラーで VMware Workstation Pro を入れる
 - 前提: [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)を通してある。Hyper-V や WSL 2 と併用するなら、[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 3 で Windows ハイパーバイザー プラットフォームを有効にしてある
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
 > [!IMPORTANT]
 > - **インストーラーはネットワークのドライバーを入れる**。SSH やリモート デスクトップのセッションからは確かめていない
 > - **この項の手順 4 は、再起動が必要なときだけ行う**。開いている作業を保存し、動いている VM を止めてから進む
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する。
 
@@ -2695,11 +2714,12 @@
 
 - 入った版と、コマンドの場所、仮想ネットワークを確かめる
 - 前提: [VMware Workstation Pro: インストールする](#vmware-workstation-pro-インストールする)を通し、必要な再起動を済ませてサインインしてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 入った版と、コマンドの場所、仮想ネットワークを確かめる。
 
@@ -2721,12 +2741,13 @@
 
 - この PC に、AlmaLinux などの VM を作る
 - 前提: [VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)を通し、入れる OS のインストール用の ISO を用意してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Windows 11 を入れる VM（仮想 TPM が要る）は、この項では扱わない
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VMW_ISO` は必ず値を入れる）。
 
@@ -2798,11 +2819,12 @@
 
 - 作った VM を起動し、OS をインストールする
 - 前提: [VMware Workstation Pro: VM を作る](#vmware-workstation-pro-vm-を作る)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VMW_VM` は必ず値を入れる）。
 
@@ -2852,11 +2874,12 @@
 
 - この PC で VM の起動と、ゲストの IP・SSH を確かめる
 - 前提: [VMware Workstation Pro: VM を起動して OS を入れる](#vmware-workstation-pro-vm-を起動して-os-を入れる)を通し、VM を止めてある。SSH を確かめるときは、ゲストの SSH サーバーとファイアウォールを設定してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VMW_VM` は必ず値を入れる）。
 
@@ -2899,7 +2922,7 @@
 
 #### VMware Workstation Pro: 使い方の基本
 
-- 管理者ではない Windows PowerShell 5.1 で打つ。`<vmx>` は VM の `.vmx` のパス。`$VMW_DIR` は[VM を作る](#vmware-workstation-pro-vm-を作る)の手順 2 で設定する
+- 管理者ではない PowerShell 7 で打つ。`<vmx>` は VM の `.vmx` のパス。`$VMW_DIR` は[VM を作る](#vmware-workstation-pro-vm-を作る)の手順 2 で設定する
 
 | すること | コマンド |
 |---|---|
@@ -2918,14 +2941,15 @@
 
 - スナップショットを取って戻し、その時点から別の VM（リンククローン）を作る
 - 前提: [VMware Workstation Pro: 動作を確かめる](#vmware-workstation-pro-動作を確かめる)まで通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 > [!WARNING]
 > **この項の手順 5 で作った VM があるあいだは、元の VM とそのスナップショットを消さない**。リンククローンは元の VM のディスクを読むので、消すと起動しなくなる。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`VMW_VM` は必ず値を入れる）。
 
@@ -2994,14 +3018,15 @@
 
 - VM の登録とディスクを消す
 - 前提: [VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 > [!CAUTION]
 > **この項の手順 3 は、VM のディスクごと消す（取り戻せない）**。[スナップショットとクローン](#vmware-workstation-pro-スナップショットとクローン)の手順 5 で、この VM から作った VM が残っているなら、先にそちらを消す。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する。
 
@@ -3041,6 +3066,7 @@
 - 前提: Windows 11 Pro・Enterprise・Education などの対応エディション（Home は不可）、AMD64 または ARM64（ARM64 は 22H2 以降）。UEFI / BIOS で仮想化を有効にし、RAM 4 GB 以上・ディスクの空き 1 GB 以上・CPU 2 コア以上を用意してある。Windows の VM の中では、入れ子の仮想化も有効にしてある
 - 実行場所: この PC のデスクトップ。状態確認・有効化・再起動は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）。起動・試験・窓を閉じた後の確認は、通常のデスクトップと Sandbox の画面
 - **この項の手順 4 は、再起動が必要な場合だけ行う**。先に開いているファイルを保存し、実行中の作業を終える
+- [5.1 にする理由](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-1-補足-51-にする理由)
 - [参考資料](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)
 
 > [!CAUTION]

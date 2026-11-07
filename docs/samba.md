@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > - **前提と実行場所（サーバーかクライアントか・どの窓か）は、各項のリードに従う**。AlmaLinux 10 の項は自分のユーザーの bash で行い、`sudo -i`・`su -` のシェルでは行わない
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常（管理者ではない）の窓は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
@@ -25,7 +25,7 @@
 - 前提: サーバーで[Samba サーバー](#samba-サーバー)を通してある（Windows や NAS の共有でもよい）
 - 実行場所: クライアントの PC の、自分のユーザーの bash（デスクトップの端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
-- AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-samba-クライアントを使う)を、管理者ではない Windows PowerShell 5.1 で通す
+- AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-samba-クライアントを使う)を、管理者ではない PowerShell 7 で通す
 - **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
 
@@ -685,7 +685,7 @@
 
 - Samba の共有をドライブ文字に割り当て、サインインのたびにつなぎ直す
 - 前提: サーバーで [Samba サーバー](#samba-サーバー)を通し、サーバーにつながる LAN に接続してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。手順 7 はサーバーの bash、手順 8 はこの PC のデスクトップ
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。手順 7 はサーバーの bash、手順 8 はこの PC のデスクトップ
 - パスワードは Windows の資格情報マネージャーに置く
 - Samba サーバーの `[root]`・`[home]` も割り当てるなら、この項を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
@@ -693,9 +693,10 @@
 > [!IMPORTANT]
 > **管理者の窓で割り当てたドライブは、エクスプローラーに出ない**。管理者ではない窓で行う。
 
-1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - Windows Terminal の管理者のタブや、`sudo` で開いた窓も使わない
 
 1. 変数を設定する（`SERVER` と `SMB_USER` は必ず値を入れる）。
@@ -823,12 +824,13 @@
 
 - Samba サーバーで変えたパスワードを、Windows の資格情報マネージャーにも入れ直す
 - 前提: [Samba クライアント](#windows-11-で-samba-クライアントを使う)を通し、サーバーで Samba のパスワードを変えてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。手順 4 はこの PC のデスクトップ
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。手順 4 はこの PC のデスクトップ
 - SMB のクライアントは Windows Update で上がる。この項で上げるものは無い
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`SERVER`・`SMB_USER` は必ず値を入れる）。
 

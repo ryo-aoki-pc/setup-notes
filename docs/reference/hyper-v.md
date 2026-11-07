@@ -4,6 +4,16 @@
 
 ## 補足
 
+### この PC で使えるかを確かめる / 手順 1: 補足: 5.1 にする理由
+
+- 手順 2 は Dism モジュールの `Get-WindowsOptionalFeature` を使うため、Windows PowerShell 5.1 に貼る
+- Microsoft Store 版の PowerShell 7 で、同じ Dism モジュールの `Add-WindowsCapability` が「クラスが登録されていません」で失敗した。`*-WindowsOptionalFeature` も、VM で確かめるまでは 5.1 にする
+
+### Hyper-V を有効にして再起動する / 手順 1: 補足: 5.1 にする理由
+
+- 手順 2・3 は Dism モジュールの `Enable-WindowsOptionalFeature`・`Get-WindowsOptionalFeature` を使うため、再起動まで Windows PowerShell 5.1 に貼る
+- Microsoft Store 版の PowerShell 7 で、同じ Dism モジュールの `Add-WindowsCapability` が「クラスが登録されていません」で失敗した。`*-WindowsOptionalFeature` も、VM で確かめるまでは 5.1 にする
+
 ### この PC で使えるかを確かめる / 手順 2: 補足: 確かめる値の意味
 
 - `Edition`: Hyper-V の役割は、Windows 11 の Pro・Enterprise・Education にある。Home には入らない

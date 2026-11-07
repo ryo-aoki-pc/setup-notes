@@ -249,8 +249,8 @@ Importing GPG key 0xCEA2757D:
 ### Windows Terminal のフォントと貼り付けの警告を変える / 手順 2: 補足: 設定ファイルの読み書き
 
 - 場所は、Store（MSIX）版の `%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json`（Microsoft の文書）
-- Windows Terminal は、初めて起動したときにコメントの無い `settings.json` を書く。設定の画面でリセットすると、コメント入りの `userDefaults.json` をそのまま書く（`CascadiaSettingsSerialization.cpp`）。5.1 の `ConvertFrom-Json` はコメントを読めないので、文字列を除いた残りにコメントか末尾のカンマがあれば、書かずに止める
-- Windows Terminal は BOM の無い UTF-8 で書き、ASCII 以外の文字（訳したプロファイルの名前）も入る。5.1 の `Get-Content` は BOM の無いファイルを ANSI として読むので、`[IO.File]::ReadAllText` で読む
+- Windows Terminal は、初めて起動したときにコメントの無い `settings.json` を書く。設定の画面でリセットすると、コメント入りの `userDefaults.json` をそのまま書く（`CascadiaSettingsSerialization.cpp`）。5.1・7 の `ConvertFrom-Json` はコメントと末尾のカンマを読めないので、文字列を除いた残りにコメントか末尾のカンマがあれば、書かずに止める
+- Windows Terminal は BOM の無い UTF-8 で書き、ASCII 以外の文字（訳したプロファイルの名前）も入る。BOM の無い UTF-8 のファイルを PowerShell の版によらず同じに読むため、`[IO.File]::ReadAllText` で読む
 - `ConvertTo-Json` は `-Depth 100`（既定の 2 では深い入れ子が潰れる）。字下げと、`<`・`>`・`&`・`'` の書き方（`\u003c` など）が変わるが、JSON の中身は同じで、Windows Terminal が次に保存するときに整える
 - `profiles` が配列なのは古い形式で、この節のブロックは扱わない
 - 保存すると、Windows Terminal がファイルの変化を見て読み直し、開いているタブにも効く
@@ -268,7 +268,7 @@ Importing GPG key 0xCEA2757D:
 ### Windows Terminal のフォントと貼り付けの警告を変える / 手順 4: 補足: 複数行の貼り付けの警告
 
 - 値は版で変わった。1.22 以前は `multiLinePasteWarning`（真偽値）、1.23 は `warning.multiLinePaste`（真偽値）、1.24 から `warning.multiLinePaste` が `automatic`・`always`・`never`（既定は `automatic`。`true` は `automatic`、`false` は `never` として読む）。古い名前も読み、新しい名前に直して書き直す。Microsoft の文書（interaction のページ）は、まだ古い名前だけを書いている
-- `automatic` は、シェルが角かっこで囲む貼り付け（bracketed paste）を有効にしていないときに、改行を含む文字を貼ると警告する（`TerminalPage.cpp`）。Windows PowerShell 5.1 の PSReadLine 2.0.0 も ConPTY もこれを有効にしないので、5.1 の窓では毎回出るはず（コードからの推測。確かめていない）
+- `automatic` は、シェルが角かっこで囲む貼り付け（bracketed paste）を有効にしていないときに、改行を含む文字を貼ると警告する（`TerminalPage.cpp`）。Windows PowerShell 5.1・PowerShell 7 とも、PSReadLine はこれを有効にしないため、複数行の警告の対象になる
 - 画面では「操作」→「改行を貼り付ける際に警告する」（「"角かっこで囲まれた貼り付け" がオフの場合」・「常時」・「なし」）。ダイアログの題は「警告」で、ボタンは「強制的に貼り付け」と「キャンセル」
 - 出るダイアログは 1 つだけ。複数行の警告が出ないときに、5 KiB（UTF-16 で 5,120 文字）を超えると `warning.largePaste`（既定 true）の警告が出る
 - Windows Terminal は、貼るときに改行を Enter として送る。PSReadLine は、閉じていない文（`& {` など）の行を続きとして受けるので、1 行ずつ届いても、この文書のブロックは正しく動く。閉じた文が続くブロックは行ごとに動く（1 つの入力にするなら、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)）
@@ -283,6 +283,7 @@ Importing GPG key 0xCEA2757D:
 
 ### Windows Terminal で複数行を 1 つの入力として貼る / 手順 2: 補足: Enter の割り当て
 
+- 貼る窓は 7 なので、`$PROFILE` は 7 のプロファイルを指す。5.1 と 7 のパスを明示し、7 が無ければ作り、5.1 が無ければ飛ばす。足す行は ASCII だけなので、BOM の無い 5.1 のプロファイルが ANSI でも、既存のバイトは変えない
 - Windows Terminal は改行を Enter として送り、PSReadLine の `AcceptLine` は閉じた文を実行するため、閉じた文が続くブロックは行ごとに動く
 - 右クリックは Windows Terminal が処理する。Ctrl+V も `keybindings` が `Terminal.PasteFromClipboard` に割り当てていれば、プロファイルの `Paste` まで届かない。Ctrl+V の割り当てを外す方式は右クリックに効かず、ほかのタブの Ctrl+V の貼り付けも失うため、Enter を割り当てる
 - PSReadLine は bracketed paste を有効にしない（[PSReadLine の issue #1471](https://github.com/PowerShell/PSReadLine/issues/1471)）。2.4.5 に上げてもこの問題は直らない。Ctrl+Enter の `AddLine` は conhost の LF 向けで、Windows Terminal では効かない
@@ -372,7 +373,7 @@ Importing GPG key 0xCEA2757D:
 - **VC++ ランタイム**: 5 つの Windows の実行ファイル（x64）の DLL の読み込みの表（PE のインポート表）で、`VCRUNTIME140.dll` を使うのは bat だけだった
   - fzf（Go）は `kernel32.dll` だけ。zoxide と starship は MSVC のビルドだが、C のランタイムを静的にリンクする（zoxide の `.cargo/config.toml`、starship の `release.yml` の `+crt-static`）。eza は MinGW のビルドで、Windows に付いている `msvcrt.dll` を使う
   - bat の定義の `suggest` は、extras の `vcredist2022` と `less` を勧める表示だけで、入れはしない。本書では [WezTerm](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（winget の `Microsoft.VCRedist.2015+.x64`、PC 全体）を前提にした。starship の定義の `suggest`（`vcredist2022`）は、入れなくてよい
-- starship の定義の `notes` は、PowerShell の `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足すよう案内するが、従わない。Windows PowerShell 5.1 の `$PROFILE` は、手順書を貼る窓（管理者の窓も）が読むプロファイル。PowerShell 7 には、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が、zoxide と starship の行を 1 回だけ置く
+- starship の定義の `notes` は、PowerShell の `$PROFILE` に `Invoke-Expression (&starship init powershell)` を足すよう案内するが、従わない。貼る窓は PowerShell 7 なので、`$PROFILE` は 7 のプロファイルを指す。[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)が、zoxide と starship の行を 1 回だけ置く。5.1 の `$PROFILE` は 5.1 の窓が読むプロファイルで、starship は足さない
 
 ### シェルのツールを入れる / 手順 6: 補足: bat の設定ファイル
 
@@ -415,7 +416,7 @@ Importing GPG key 0xCEA2757D:
 
 ### PowerShell 7 のプロファイルを設定する / 手順 2: 補足: 足す行
 
-- プロファイルは PowerShell 7 の `$PROFILE`（CurrentUserCurrentHost）で、ドキュメントの既知のフォルダーの下の `PowerShell\Microsoft.PowerShell_profile.ps1`（`CorePsPlatform.cs`・about_Profiles）。5.1 から書くので、`[Environment]::GetFolderPath('MyDocuments')` で求める。PowerShell はプロファイルを自分では作らない。MSIX の PowerShell 7 は、全ユーザーのプロファイル（`$PSHOME`）を使えない
+- プロファイルは PowerShell 7 の `$PROFILE`（CurrentUserCurrentHost）で、ドキュメントの既知のフォルダーの下の `PowerShell\Microsoft.PowerShell_profile.ps1`（`CorePsPlatform.cs`・about_Profiles）。書き先を明示するため、`[Environment]::GetFolderPath('MyDocuments')` で求める。PowerShell はプロファイルを自分では作らない。MSIX の PowerShell 7 は、全ユーザーのプロファイル（`$PSHOME`）を使えない
 - Ctrl+Enter: PowerShell 7.5 の PSReadLine 2.3.6 と、7.6 の 2.4.5 も、Windows モードの Ctrl+Enter は `InsertLineAbove`（`KeyBindings.cs`）
   - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（「表示と入力」の手順 7 の補足）、右クリックで貼ると 5.1 と同じく行が逆順になるはず
   - Windows Terminal は、貼るときに LF を CR に直す（`ControlCore::PasteText`）ので起きない。WezTerm（Windows では、貼るときに改行を CRLF に直す）は確かめていない
@@ -424,7 +425,7 @@ Importing GPG key 0xCEA2757D:
   - 予測の一覧（ListView）が出ているときは、候補を選ぶ。複数行の入力の中では、ほかの行へ移る
   - 履歴のファイル（`%APPDATA%\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt`）は 5.1 と共有する
 - 各行を `if (Get-Module -Name PSReadLine) { … }` で囲むのは、`pwsh -Command`・`-File` では PSReadLine が読み込まれず（`ConsoleHost.cs` の `LoadPSReadline`）、囲まないと `Set-PSReadLineKeyHandler` が PSReadLine を自動で読み込むため。`-NoExit` 付きの起動（WezTerm の起動メニューの PowerShell 7）では読み込まれる
-- 行は ASCII の文字だけにする。5.1 の `Add-Content` は新しいファイルを ANSI で書き、PowerShell 7 は BOM の無いファイルを UTF-8 として読むので、日本語を書くと化ける
+- 行は ASCII の文字だけにする。7 の `Add-Content` は新しいファイルを BOM の無い UTF-8 で書く。5.1 の `Add-Content` は新しいファイルを ANSI で書き、PowerShell 7 は BOM の無いファイルを UTF-8 として読むので、5.1 から日本語を書くと化ける
 - 基本の設定では予測（Predictive IntelliSense）は書かない。PSReadLine 2.2.6 から既定で有効で、7 では `HistoryAndPlugin`・`InlineView`（`Cmdlets.cs`）。F2 で一覧へ切り替わる
   - [PowerShell 7 のプロファイルに開発の設定を足す](../shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)では `ListView` にし、CompletionPredictor を読む。プラグインが無ければ候補は履歴だけ
 - EditMode は Windows（既定）のまま。[PowerShell 7 で Emacs モードを使う](../shell-terminal.md#powershell-7-で-emacs-モードを使う)を選ぶときだけ変える
@@ -447,10 +448,11 @@ Importing GPG key 0xCEA2757D:
 - 既定の Tab は、候補を 1 つずつ入れ替える
 - 一覧を出す既定のキーの Ctrl+Space は、[「表示と入力」](../windows-setup.md#表示と入力)の手順 8 で IME が受け取るので、Tab がその代わりになる
 
-### PowerShell 7 のプロファイルを設定する / 手順 4: 補足: 5.1 から確かめる形と実行ポリシー
+### PowerShell 7 のプロファイルを設定する / 手順 4: 補足: 子のプロセスで確かめる形と実行ポリシー
 
-- 5.1 から `pwsh.exe -Command { … }` にスクリプト ブロックを渡すと、5.1 が `-EncodedCommand` に変えて渡し、結果をオブジェクトで受け取る（5.1 の `NativeCommandProcessor.cs` の minishell）。Windows では確かめていない
-- 結果は、子の pwsh で `Out-String` にして文字列で受け取る。オブジェクトのまま受け取ると、5.1 は最初に届いた実行ポリシーの列で表を作るので、キーの行が空になる
+- 7 から `pwsh.exe -NoProfile -Command { … }` を直接起動し、子のプロセスでプロファイルを 1 度だけ読む。貼る窓のプロファイルは読み直さない
+- 5.1 から `pwsh.exe -Command { … }` にスクリプト ブロックを渡した場合は、5.1 が `-EncodedCommand` に変えて渡し、結果をオブジェクトで受け取る（5.1 の `NativeCommandProcessor.cs` の minishell）。Windows では確かめていない
+- 結果は、子の pwsh で `Out-String` にして文字列で受け取る。5.1 でオブジェクトのまま受け取ると、最初に届いた実行ポリシーの列で表を作るので、キーの行が空になる
   - `-Width 120` を付けるのは、子が端末の幅を取れないと、`Out-String` が空の行だけを返すため
 - `-NoProfile` でも `$PROFILE` は設定される（`ConsoleHost.cs`）ので、`. $PROFILE` で読む
 - Windows 版の PowerShell 7 は、`$PSHOME\powershell.config.json` に `RemoteSigned` を持って配られ、これが `LocalMachine` の値になる（`build.psm1`。MSIX の `$PSHOME` にもあるかは推測）。「貼り付けの設定」の手順 4 の 5.1 の値（レジストリ）は効かない
@@ -465,7 +467,12 @@ Importing GPG key 0xCEA2757D:
 - 印の無い EditMode の行がキーの割り当てより後にあれば、後から割り当てを消すので、書かずに止める。前にある行は残す。任意の 2 行を再実行で増やさず、既存の文字コードと、ほかの行のバイトを保つ
 - 複合文の中の EditMode が挿入位置より後になる場合も、書かずに止める。モードとキーの設定を別の行へ分け、モードを先に置いてからやり直す
 - バイトを保つための文字列と、構文解析する文字列を分ける。解析時だけ先頭の BOM を除き、挿入位置にはその長さを足して書き戻す
+- BOM の無いファイルを UTF-8 として読めなければ、現在のカルチャの ANSI コード ページで構文解析する。`[Text.Encoding]::Default` は 5.1 では ANSI、7 では UTF-8 なので使わない
 - 開いている窓では EditMode を変えない。貼り付けに使うキーの割り当てまで変わるため、プロファイルに書くだけにして、新しい窓で確かめる。実機では確かめていない
+
+### Windows PowerShell 5.1 のキー操作を変える / 手順 1: 補足: 5.1 にする理由
+
+- 主題が 5.1 自身のキー操作で、`$PROFILE` と PSReadLine の確認も 5.1 を対象にするため、Windows PowerShell 5.1 に貼る
 
 ### Windows PowerShell 5.1 のキー操作を変える / 手順 2: 補足: 適用範囲と貼り付け
 
@@ -478,6 +485,10 @@ Importing GPG key 0xCEA2757D:
   - [Clipboard.cpp](https://github.com/microsoft/terminal/blob/main/src/interactivity/win32/Clipboard.cpp)の `Clipboard::Paste` → `StringPaste` → `TextToKeyEvents` → `pInputBuffer->Write`
   - キーとして届くので、Ctrl+Enter の割り当てには依る。コピーボタンの中身の LF は Ctrl+Enter として届き、Windows モードの既定の `InsertLineAbove` では行が逆順になる（[貼り付けの設定の手順 2 の補足](windows-setup.md#貼り付けの設定--手順-2-補足-行を足す理由)）。EditMode を変えると、それより前に付けた `AddLine` は消えるので、この項の行は、貼り付けの設定の Ctrl+Enter の行より前に入れる
   - Emacs モードの管理者の conhost で、右クリックと複数行の貼り付けは実機では確かめていない
+
+### PowerShell を開発に使う / 手順 2: 補足: 5.1 の版とモジュールの確認
+
+- 貼る窓は 7 なので、5.1 の版とモジュールの一覧は `powershell.exe -NoProfile -Command { … }` で直接起動した 5.1 に出させる。`cmd` や `Start-Process` で中継しない
 
 ### PowerShell を開発に使う / 手順 3: 補足: モジュールの導入元
 
@@ -498,9 +509,13 @@ Importing GPG key 0xCEA2757D:
 - ほかの値があれば止める形は、[Neovim を既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)と同じ
 - 設定アプリの「詳細設定」→「PowerShell」のスイッチは実行ポリシーを RemoteSigned にするもの。[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 4 と、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 5 で扱う
 
+### PowerShell を開発に使う / 手順 8: 補足: 5.1 にする理由
+
+- 手順 8・9 は、5.1 用の保存先に置いたモジュールを、新しく開いた 5.1 で読み込めるか確かめる。確認の対象が 5.1 自身なので、Windows PowerShell 5.1 に貼る
+
 ### PowerShell 7 のプロファイルに開発の設定を足す / 手順 2: 補足: 補完の控え
 
-- gh・rg・fd・delta・bat・starship の補完は、5.1 から生成し、`%LOCALAPPDATA%\PowerShell\completions\<名前>.ps1` に置く。MSIX の 7 も同じ場所を読む
+- gh・rg・fd・delta・bat・starship の補完は、7 から生成し、`%LOCALAPPDATA%\PowerShell\completions\<名前>.ps1` に置く。MSIX の 7 も同じ場所を読む
 - 6 つの生成は合わせて約 0.3 秒掛かるので、起動のたびには生成しない。プロファイルでは控えを読み、scoop で道具を上げた後に作り直す
 - 生成中だけコンソールの入出力を UTF-8 にし、`finally` で戻す。ファイルは UTF-8（BOM 付き）で書く。fd の補完には ASCII 以外の文字が含まれる
 - 無い道具は飛ばす。生成に失敗した道具の控えは上書きしないので、失敗したままなら、前に生成した内容が残る
@@ -527,11 +542,19 @@ Importing GPG key 0xCEA2757D:
 - `ll` は eza があるときだけ定義し、`--long --group-directories-first` と引数を渡す。`err` は 7 の `Get-Error -Newest 1` を呼ぶ。既存の `ls`・`cat` は置き換えない
 - 追加する行は合わせて約 0.1 秒の目安。負荷で起動の時間がばらつくので、個々の行の内訳と計り方は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
 
+### Windows PowerShell 5.1 のプロファイルに開発の設定を足す / 手順 1: 補足: 5.1 にする理由
+
+- 主題が 5.1 自身のプロファイルで、`$PROFILE` の書き先と文字コード・補完の確認も 5.1 を対象にするため、Windows PowerShell 5.1 に貼る
+
 ### Windows PowerShell 5.1 のプロファイルに開発の設定を足す / 手順 2: 補足: 必要なときだけ UTF-8 にする
 
 - 5.1 のコンソールの文字コードは変えず、`Invoke-Utf8Native`・winget の補完・`ll` の 3 行だけを足す。管理者の窓に貼る手順の出力を変えないため
 - `Invoke-Utf8Native` の UTF-8 は `New-Object Text.UTF8Encoding($false)` で作る。winget の補完からもこの関数を呼び、補完した後に元の文字コードへ戻す
 - 5.1 を常に UTF-8 にすると、`ipconfig`・`whoami` などが英語になる。UTF-8 の外部コマンドの出力を取り込むときだけ、関数へスクリプト ブロックを渡す
+
+### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 1: 補足: 5.1 にする理由
+
+- 主題が 5.1 自身の PSReadLine で、導入前後の版・キー・貼り付けも 5.1 で確かめるため、Windows PowerShell 5.1 に貼る。モジュールの保存だけは 7 の `Save-PSResource` を使う
 
 ### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 3: 補足: 版を指定して保存する理由
 
@@ -644,7 +667,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | 経路 | 状況 | 採否 |
 |---|---|---|
 | **上流の zip を版と sha256 を固定して、自分のユーザーに入れる** | 管理者の権限も scoop も要らず、Windows PowerShell 5.1 で動く。更新は手作業 | **採用** |
-| scoop の個人のバケット mo-san の `font-hackgen-console-nf` | リリースの zip を使い、scoop と UniGet UI で上げられる。ただし、インストールのスクリプトが `Join-Path` に 3 つ以上の引数を渡していて、Windows PowerShell 5.1 の `Join-Path`（`-Path` と `-ChildPath` だけ）では失敗するはず。scoop はそのスクリプトを、`scoop` を打った PowerShell の中で動かす | 不採用（PowerShell 7 が要り、個人の保守） |
+| scoop の個人のバケット mo-san の `font-hackgen-console-nf` | リリースの zip を使い、scoop と UniGet UI で上げられる。インストールのスクリプトが `Join-Path` に 3 つ以上の引数を渡していて、Windows PowerShell 5.1 の `Join-Path`（`-Path` と `-ChildPath` だけ）では失敗するはず。scoop はそのスクリプトを、`scoop` を打った PowerShell の中で動かす。手順書は 7 に貼るので、この制約には当たらない | 不採用（個人の保守） |
 | scoop の nerd-fonts のバケット | HackGen は無い | — |
 | winget | 既定のソース（winget-pkgs）に HackGen は無い。winget の一覧のサイトには `yuru7.HackGen`（第三者の `dfirr/winget-hackgen` が作り直したインストーラで、PC 全体に入れる）が載っている | 不採用 |
 | Chocolatey | 上流の README が Windows 向けに案内している | 不採用（別のパッケージ マネージャーを足し、管理者が要る） |
@@ -657,7 +680,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | 書く場所 | `settings.json`（コメントがあれば止める） | fragment: 全体の設定と `profiles.defaults` を読まない |
 | フォント | `profiles.defaults`（全プロファイル） | プロファイルごと（fragment の `updates`）: 一致するプロファイルの無い窓に効かない |
 | 複数行の警告 | 既定（`automatic`）。切るのは条件付き（この節の手順 4） | 無条件に `never`: 信用できない複数行も、確かめずに動く |
-| 既定のプロファイル | Windows PowerShell のまま | PowerShell 7: 5.1 でだけ動く手順を貼り違えやすい（[PowerShell 7 のプロファイルの選択した方針](#powershell-7-のプロファイルを設定する)） |
+| 既定のプロファイル | Windows PowerShell のまま | この項では変えない。手順書は各項で指定した窓やタブを開く（[PowerShell 7 のプロファイルの選択した方針](#powershell-7-のプロファイルを設定する)） |
 | `copyOnSelect` | 既定（false）のまま。任意の手順で true にできる | true: 選ぶとクリップボードが置き換わり、右クリックが貼り付けになる。複数行の警告を切っている窓では、意図しない貼り付け（実行）になりやすい |
 | 起動の大きさ | 既定（120×30）のまま | 好みなので扱わない |
 | 管理者の窓（conhost）のフォント | 扱わない | 別の設定（`HKCU\Console`・ショートカットごと） |
@@ -698,10 +721,10 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - 共通の bash 設定（README の「共通の bash 設定を先に入れる」）が、fzf・starship・zoxide・eza・bat・fd を `command -v` で見つけたときだけ読むので、Git Bash では、各ツールを入れるだけで効く。`~/.bashrc` には書かない
 - **PowerShell 7 は用途に合わせて設定する**: この項では starship と zoxide を、入っているときだけ読む。[PowerShell を開発に使う](../shell-terminal.md#powershell-を開発に使う)では、補完・予測・PSFzf・eza の `ll` などを足す。yazi の `y` は足さない
 - **Windows PowerShell 5.1 は、貼り付けの設定を土台にする**: 任意の[キー操作](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で Emacs と ↑↓ の履歴検索、[開発の設定](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)で UTF-8 の関数・winget の補完・`ll` を足せる
-  - プロファイルは、手順書を貼る管理者の conhost の窓でも読まれ、キーや補完にも効く
+  - プロファイルは、5.1 に貼る項で使う管理者の conhost の窓でも読まれ、キーや補完にも効く
   - starship と zoxide は 5.1 に足さない。見た目と起動の時間が変わる
 - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
-- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: PowerShell 7（`{574e775e-4f2a-5b96-ac1e-a2962a402336}`）にすると、Win+X の「ターミナル」などで開く窓が PowerShell 7 になり、5.1 でだけ動く手順（Windows Update の PSWindowsUpdate など）を貼り違えやすい。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 6 の後も既定は Windows PowerShell のままのはず（コードからの推測）
+- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: 手順書は、各項でスタートメニューから指定の窓を開き、Windows Terminal の項ではタブを選ぶ。貼る窓は既定のプロファイルに頼らないので、この設定は変えない。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 6 の後も既定は Windows PowerShell のままのはず（コードからの推測）
 
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
@@ -722,7 +745,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | 7 の外部コマンドの文字コード | ConsoleHost の入出力を UTF-8 にし、元の値を終了のイベントで戻す | 変更したまま終了する: 同じコンソールの親の 5.1 にも残る |
 | 5.1 の外部コマンドの文字コード | `Invoke-Utf8Native` の間だけ UTF-8 にし、`finally` で戻す | 常に UTF-8: `ipconfig`・`whoami` などが英語になり、手順書を貼る窓の出力が変わる |
 | winget の補完 | 5.1・7 とも `Invoke-Utf8Native` で `winget complete` を包む | Microsoft の例のまま文字コードを変える: 5.1 の窓にも変化が残る |
-| 6 つの道具の補完 | 5.1 で控えを生成し、7 のプロファイルで読む | 起動のたびに生成: 6 つで約 0.3 秒掛かる |
+| 6 つの道具の補完 | 7 で控えを生成し、7 のプロファイルで読む | 起動のたびに生成: 6 つで約 0.3 秒掛かる |
 | PSScriptAnalyzer・Pester | 7 に `Install-PSResource`、5.1 の場所へ 7 から `Save-PSResource -IncludeXml` | 5.1 の PowerShellGet と NuGet の提供者を先に更新する: 導入の手順が増える |
 | 7 の予測 | `ListView` と CompletionPredictor。元は既定の `HistoryAndPlugin` | 既定の `InlineView` のまま: 履歴と補完の候補を一覧で見たいという選択 |
 | PSFzf | 7 の Ctrl+T・Ctrl+R を押したときに読む | 起動のときに読む: 約 0.23 秒掛かる |
