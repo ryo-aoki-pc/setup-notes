@@ -20,6 +20,7 @@
   - Windows 11 の「Windows 11 で VirtualBox を入れる」は、AlmaLinux 10 の「VirtualBox」と区別する
 - `docs/gnome-remote.md`・`docs/neovim.md`・`docs/samba.md` — virtual-machines.md と同じく、`## AlmaLinux 10 で使う`・`## Windows 11 で使う` の下に用途の項を置く（gnome-remote.md は AlmaLinux 10 だけ）
   - gnome-remote.md は「GNOME のデスクトップ共有」「GNOME のヘッドレスセッション」「GNOME のリモートログイン」、samba.md は「Samba クライアント」「Samba サーバー」と「Windows 11 で Samba クライアントを使う」、neovim.md は両 OS の項を扱う
+  - samba.md の補足・注意点・選択した方針・参照資料は「Samba クライアント」「Samba サーバー」「Windows 11 で Samba クライアントを使う」の各用途の末尾の折りたたみに分ける。検証記録は各折りたたみの「参照」で、サーバーは「検証記録」、両 OS のクライアントは「検証記録（`docs/verification/samba-client.md`）」と文字で指す
   - Neovim の Windows 11 の項と子の LazyVim の 5 項には「Windows 11 で」を付ける
   - 検証記録は、用途ごとに `gnome-desktop-sharing`・`gnome-headless-session`・`gnome-remote-desktop`・`samba`・`samba-client`・`neovim` を使う。補足と注意点は、各用途の末尾の折りたたみに置く
 - `docs/shell-terminal.md` — シェルと端末の手順書。`## AlmaLinux 10 で使う` が共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm、`## Windows 11 で使う` が HackGen Console NF・Windows Terminal・WezTerm・Git Bash と WezTerm の設定・シェルのツール・PowerShell 7 のプロファイル・PowerShell の開発の設定
