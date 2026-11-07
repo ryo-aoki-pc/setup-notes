@@ -83,7 +83,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 - [npm/agent の lib/proxy.js](https://github.com/npm/agent/blob/main/lib/proxy.js) — npm が読むプロキシの環境変数と、SOCKS の扱い
 - [mason.nvim](https://github.com/mason-org/mason.nvim) — `lua/mason-core/installer/managers/npm.lua`（npm のパッケージの入れ方）、`lua/mason-core/fetch.lua`（curl と wget）
 - [LazyVim の LSP の設定](https://www.lazyvim.org/plugins/lsp) — mason.nvim と mason-lspconfig.nvim の `ensure_installed`
-- [SSH の SOCKS トンネル](../almalinux-setup.md#ssh-の-socks-トンネル) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の「トンネルを閉じる」の手順 1〜3 を使う
+- [SSH の SOCKS トンネル](../almalinux-setup.md#ssh-の-socks-トンネル) — 前提のトンネルと dnf のプロキシ。手順 4 で同書の「トンネルを閉じる」の手順 1・3 を使う
 - [Homebrew のオフライン導入](../almalinux-setup.md#homebrew-のオフライン導入) — 前提の Homebrew（Neovim をトンネル越しに入れる）
 - [Neovim のセットアップの「Neovim」](../neovim.md#neovim) — 前提の Neovim と、自分用の設定
 

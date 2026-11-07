@@ -70,7 +70,7 @@ SocketMode=0660
 - `%t` はシステムでは `/run` なので、ソケットは `/run/podman/podman.sock`。持ち主は root で `srw-rw----`、つなげるのは root だけ
 - 要求が来たときだけ、root の `podman.service`（`podman system service`）が起動し、要求が途切れると自分から終わる
 - `sudo podman --remote` は、指定が無ければこのソケットにつなぐ
-- この節の手順 8 で止めた後も、ソケットのファイルは再起動まで残る。つなごうとすると失敗する（`curl` は終了コード 7）
+- `podman.socket` を止めた後も、ソケットのファイルは再起動まで残る。つなごうとすると失敗する（`curl` は終了コード 7）
 - 自分のユーザーのソケット（[Podmanの手順 7](../containers.md#podman) の `systemctl --user`）とは別のソケット
 
 ### root でも使う / 手順 3: 補足: 確認用のコンテナ
