@@ -1,7 +1,5 @@
 # AlmaLinux 10 の CLI / GUI ツール導入元一覧
 
-- 検証記録・[参考資料](reference/tool-catalog.md)
-
 AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れるか**（導入元）で比べた一覧。この文書は手順書ではない。
 
 - ツールごとに推奨する導入元・その時点の版・導入コマンド・ほかの経路・aarch64 での提供の有無を 1 行にまとめてある
@@ -23,6 +21,20 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 - Flathub（`sudo flatpak install`）: [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub)（Flatpak / Flathub）を通してあること
 - ベンダーの dnf リポジトリ: [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)の節で、そのリポジトリを登録してあること
 - コンテナの節の行は、どの導入元でも [Podman](containers.md#podman) を通してあること（Pods・Podman Desktop などは、その API ソケットを使う）
+
+<details id="この文書の補足と注意点">
+  <summary>この文書の補足と注意点</summary>
+
+**参照**
+
+- 検証記録
+- [Homebrew Formulae](https://formulae.brew.sh/) — formula の版とボトルの一覧（JSON API は `https://formulae.brew.sh/api/formula/<名前>.json`）
+- [EPEL — Fedora Docs](https://docs.fedoraproject.org/en-US/epel/) — EPEL の方針と有効化の手順
+- [Flathub](https://flathub.org/) — アプリの検索、公開元の検証（Verified）の表示
+- [RPM Fusion — Configuration](https://rpmfusion.org/Configuration) — EL 向けの有効化の手順（本書では使っていない。有効にする手順は [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」](almalinux-setup.md#epel-と-rpm-fusion)の手順 2〜4）
+- [Google Chrome の Linux 向けリポジトリ](https://www.google.com/linuxrepositories/) / [mise — Installing](https://mise.jdx.dev/installing-mise.html) — ベンダーのリポジトリの登録手順
+
+</details>
 
 ---
 
