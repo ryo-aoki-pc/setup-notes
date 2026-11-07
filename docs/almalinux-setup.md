@@ -3112,7 +3112,7 @@
    ls -l ~/.config/btop
    ```
 
-   - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
+   - EPEL の署名鍵の確認が出たら、fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
    - トランザクション表の `[y/N]` に答える
    - 画面が出たら `q` で終了する
    - `btop.conf` と `themes/` があればよい
