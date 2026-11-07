@@ -2764,14 +2764,10 @@
 
    - 上げるものが無ければ `Nothing to do.`（日本語では `行うべきことはありません。`）と `Complete!`（`完了しました!`）で終わる
 
-1. Mason のパッケージを更新し、トンネルを切断する。
+1. Neovim でファイルを開き、Mason のパッケージを上げる。
 
    ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   # Neovim で設定ファイルを開く
    nvim -R ~/.config/nvim/init.lua
-   # トンネルのシェルを閉じる
-   exit
    ```
 
    - `:MasonUpdate` で、Mason のパッケージの一覧を取り直す（`Successfully updated 1 registry.` の通知が出る）
@@ -2779,6 +2775,13 @@
    - 案内が無ければ、上げるものは無い
    - 上げ終わると `markdown-toc was successfully installed.` のような通知が出る。通知が出そろってから、`:qa` で閉じる
    - 画面の `Installing` の表示は、上げ終わっても残ることがある（`q` で閉じて `:Mason` で開き直すと、`Installed` に移っている）
+   - **次の手順は、上げ終わったことを確かめ、`:qa` で Neovim を閉じてから貼る**（続けて貼ると、上げ終わったかを確かめる前にトンネルを閉じる）
+
+1. オフラインのホストからログアウトして、トンネルを閉じる。
+
+   ```bash
+   exit
+   ```
 
 ---
 

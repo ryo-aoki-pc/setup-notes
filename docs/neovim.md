@@ -904,7 +904,7 @@
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
    - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
    - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
-   - **ほかのブロックは、Neovim を閉じてから貼る**（続けて貼ると、後ろの行も Neovim の本文に入る）
+   - **ほかのブロックは、Neovim を閉じてから貼る**（Neovim を開いたまま貼ると、Neovim への入力になる）
 
 #### Windows 11 で LazyVim の GitLab プレビューを設定する
 
