@@ -746,7 +746,7 @@ podman-compose は、ディレクトリの名前（`compose-sample`）をプロ�
 **注意点**
 
 - **終了は `Ctrl+C`**: `q` を押しても何も起きない
-- **API ソケットが止まっていると、つながらない**: `❌ STATUS_ERROR` とエラーの枠が出る（この折りたたみの「podman-tuiの手順 3: 画面の中身と、つながらないとき」）。`systemctl --user start podman.socket` で直る
+- **API ソケットが止まっていると、つながらない**: `❌ STATUS_ERROR` とエラーの枠が出る（この折りたたみの「podman-tui の手順 3: 画面の中身と、つながらないとき」）。`systemctl --user start podman.socket` で直る
 - **podman に接続を登録していると、そちらを使う**: `podman system connection add` で登録した接続があると、podman-tui は `localhost` の代わりにそれを出す
   - 接続を消す（`podman system connection remove`）と、`localhost` に戻る
 - **Homebrew の 2.x と二重に入れない**: `brew install podman-tui` の 2.0.0 は `/home/linuxbrew/.linuxbrew/bin` に入り、PATH の先頭で `/usr/bin/podman-tui` を隠す
@@ -1552,7 +1552,7 @@ Retry count: 3
 
 **[Distrobox: ボックスのコマンドをホストから呼ぶ](#distrobox-ボックスのコマンドをホストから呼ぶ)の手順 3: ボックスの中の sudo**
 
-- ボックスの中の `sudo` はパスワードを聞かない（この折りたたみの「Distroboxの手順 4: 初期化で行われること」の初期化で、パスワード無しにしてある）
+- ボックスの中の `sudo` はパスワードを聞かない（この折りたたみの「Distrobox の手順 4: 初期化で行われること」の初期化で、パスワード無しにしてある）
 
 **[Distrobox: ボックスのコマンドをホストから呼ぶ](#distrobox-ボックスのコマンドをホストから呼ぶ)の手順 4**
 
