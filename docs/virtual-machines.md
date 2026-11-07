@@ -100,6 +100,7 @@
 
    - fingerprint が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
    - `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）で終わればよい
+   - `sudo` を付けた dnf と付けない dnf で、それぞれ最初の 1 回だけ鍵の取り込みを聞かれる
 
 #### VirtualBox: VirtualBox を入れる
 
@@ -231,6 +232,7 @@
 
    - 版、`active`、vbox のモジュール、`N`（または `kvm は未ロード`）が出ればよい
    - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 4 に戻る）
+   - 最後の行は、[VirtualBox: KVM と USB の設定](#virtualbox-kvm-と-usb-の設定)の手順 2 を行ったときだけ `vboxusers` になる
 
 1. Secure Boot が有効なときだけ、モジュールの署名を見る。
 
@@ -377,7 +379,6 @@
 
 **[VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)の手順 4**
 
-- `sudo` を付けた dnf と付けない dnf で、それぞれ最初の 1 回だけ鍵の取り込みを聞かれる
 
 - 鍵の表示は `Importing GPG key 0x2980AECF:`（日本語は `GPG 鍵 0x2980AECF をインポート中:`）
 
@@ -385,7 +386,7 @@
 
 **[VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)の手順 4: repo ファイルは Oracle 公式のものとほぼ同じ**
 
-**repo ファイルは Oracle 公式のもの（`https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo`）とほぼ同じ**。
+repo ファイルは Oracle 公式のもの（`https://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo`）とほぼ同じ。
 
 - 変えたのは、`baseurl` の `http://` を `https://` にしたこと（同じホストが HTTPS でも応答する）と、`name` だけ
 - `gpgcheck` / `repo_gpgcheck` / `gpgkey` は公式どおり
@@ -457,7 +458,6 @@
 
 **[VirtualBox: 動作を確かめる](#virtualbox-動作を確かめる)の手順 1**
 
-- 最後の行は、[VirtualBox: KVM と USB の設定](#virtualbox-kvm-と-usb-の設定)の手順 2 を行ったときだけ `vboxusers` になる
 
 - `7.2.20r175154` のような版、`active`、vbox の 3 行、`N`（または `kvm は未ロード`）が出ればよい
 
@@ -568,7 +568,7 @@ aarch64 には入らない:
 - `vboxguest` の警告が出ても、手順 7・8 で起動状態とログを確かめる。起動が止まったら手順 7 の注意に従う
 
 > [!WARNING]
-> **Windows のホストで Hyper-V が動いていると（WSL 2 を使っている PC など）、手順 6 の途中で VM が 1〜7 分ずつ止まることがある**。VirtualBox が Hyper-V の上で VM を動かす形になるため（VM のウィンドウの状態バーの「機能」のアイコンの説明に「実行エンジン: native API」と出る）。出力が止まったら、VM のウィンドウで Shift キーを押すと動き出す。止まっている間に systemd の watchdog が `systemd-logind` などを止め、GNOME がログイン画面に戻ることもある（[注意点](#virtualbox-の-bootc-ゲスト-の補足と注意点)の「注意点」）。
+> **Windows のホストで Hyper-V が動いていると（WSL 2 を使っている PC など）、手順 6 の途中で VM が 1〜7 分ずつ止まることがある**。VirtualBox が Hyper-V の上で VM を動かす形になるため（VM のウィンドウの状態バーの「機能」のアイコンの説明に「実行エンジン: native API」と出る）。出力が止まったら、VM のウィンドウで Shift キーを押すと動き出す。止まっている間に systemd の watchdog が `systemd-logind` などを止め、GNOME がログイン画面に戻ることもある（[VirtualBox の bootc ゲスト の補足と注意点](#virtualbox-の-bootc-ゲスト-の補足と注意点)の「注意点」）。
 
 1. 変数を設定する（既定のままでよい）。
 
@@ -733,6 +733,7 @@ aarch64 には入らない:
    - `pinging container registry quay.io` と `dial tcp: lookup quay.io` で止まったら、VM がインターネットに出られない
    - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)でビルドする
    - **注意**: Hyper-V が動く Windows ホストで出力が止まったら、VM のウィンドウで Shift キーを押す
+   - カーネルも新しくなったとき（ベースの更新）は、`mknod` の行が出て `installer exit=1` になる
    - **次の手順は、`Successfully tagged` が出てから貼る**（続けて貼ると、ビルドに失敗しても後ろのイメージ切り替えと再起動が動く）
 
 1. 作ったイメージに切り替えて、再起動する。
@@ -757,7 +758,7 @@ aarch64 には入らない:
    sudo bootc status
    ```
 
-   - `vboxguest` の行と、`active` が 2 行出ればよい
+   - `vboxguest` の行と、`active` が 2 行出ればよい（`vboxsf` は、共有フォルダーを足すまで読み込まれない）
    - `pgrep` に `/usr/bin/VBoxClient --clipboard`・`--vmsvga-session` があればよい
    - `● Booted image: containers-storage:localhost/vbox-ga:latest` ならよい
 
@@ -963,6 +964,7 @@ aarch64 には入らない:
    fi
    ```
 
+   - `vbox-ga.tar` が約 4.8G で並び、`scp` がそれを VM のホームに送る。送った後に、ホストのファイルは消す
    - **次の手順は、パスワードに答え、転送が終わってから、VM の端末で貼る**
 
 1. VM の端末で、送ったファイルからイメージを取り込む。
@@ -980,6 +982,8 @@ aarch64 には入らない:
    - `Loaded image:` に派生イメージとベースのイメージが出ればよい
    - 続けて[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 から先を行う
    - **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 は、`Loaded image:` が出てから貼る**（続けて貼ると、取り込みに失敗しても既存のイメージへの切り替えと再起動が動く）
+   - VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 2 の空きの目安より多く）
+   - `sudo podman images` に、この 2 つが並べばよい
 
 1. 署名設定のコピーやビルドに失敗して復旧するときは、ホストの端末で変数を設定し直す。
 
@@ -1019,6 +1023,7 @@ aarch64 には入らない:
    - **注意**: 控えが無い・不完全なときや、設定の内容が変わったときは、`policy.json`・`registries.d`・`pki` をまとめて消さない。退避と控えを見て、今回追加・変更したファイルや項目だけを手で戻す
      - 手動で戻した後に、ビルドの材料を `rm -rf ~/vbox-ga-host` で消し、イメージを `podman rmi localhost/vbox-ga:latest "${BASE_IMAGE:?この項の手順 3 を貼り直す}"` で消す
      - コピーの途中で失敗した場合も、残ったファイルを確かめてから戻す。比較自体が失敗した場合は原因を直すか、同じく手で確認する
+   - 自動で消せたときは、`Untagged:` が 2 行と、`Deleted:` の行が並ぶ
 
 #### VirtualBox の bootc ゲスト: 共有フォルダーを使う
 
@@ -1027,6 +1032,7 @@ aarch64 には入らない:
 - 実行場所:
   - ホスト: VirtualBox マネージャーか `VBoxManage`（この項の手順 1）
   - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash（この項の手順 2〜4）
+- 読み書きできるのは `vboxsf` グループのユーザーだけ
 
 1. ホストの VirtualBox で、VM の設定の「共有フォルダー」にフォルダーを足す。
 
@@ -1056,7 +1062,7 @@ aarch64 には入らない:
    findmnt -t vboxsf
    ```
 
-   - `vboxsf` の行と、共有フォルダーのマウントの行が出ればよい
+   - `vboxsf` の行と、共有フォルダーのマウントの行（`/run/media/sf_<名前>` の `vboxsf`）が出ればよい
    - `vboxsf` が出ないときは、VM を再起動してログインし直し、この手順を貼り直す
 
 #### VirtualBox の bootc ゲスト: 更新
@@ -1128,14 +1134,14 @@ aarch64 には入らない:
 
 **注意点**
 
-- **dnf でも `.run` でも入らない**: bootc の `/usr`・`/opt` は読み取り専用。派生イメージに焼き込む（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3〜7](#virtualbox-の-bootc-ゲスト)）
-- **公式の ISO で入れた VM は `:latest` を追う**: `BASE_IMAGE` の既定は `:latest`。別のタグを追う VM では、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 2 の `Booted image:` に合わせて[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 を直す（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1](#virtualbox-の-bootc-ゲスト) の補足）
-- **Guest Additions のインストーラは、bootc 向けに 4 か所を直して使う**: unit・`/var` の設定・ユーザーとグループ・カーネルの版（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3](#virtualbox-の-bootc-ゲスト) の補足）
-  - ただし起動のたびに、`vboxguest` を読み込んだ直後にカーネルの `WARNING` が 1 回出る。Guest Additions の働きには影響が見えなかった（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 8](#virtualbox-の-bootc-ゲスト) の補足）
+- **dnf でも `.run` でも入らない**: bootc の `/usr`・`/opt` は読み取り専用。派生イメージに焼き込む（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3〜7）
+- **公式の ISO で入れた VM は `:latest` を追う**: `BASE_IMAGE` の既定は `:latest`。別のタグを追う VM では、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 2 の `Booted image:` に合わせて[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 を直す（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 1 の補足）
+- **Guest Additions のインストーラは、bootc 向けに 4 か所を直して使う**: unit・`/var` の設定・ユーザーとグループ・カーネルの版（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3 の補足）
+  - ただし起動のたびに、`vboxguest` を読み込んだ直後にカーネルの `WARNING` が 1 回出る。Guest Additions の働きには影響が見えなかった（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 8 の補足）
 - **既定のカーネルでも、`vboxguest` の読み込みで同じ警告が出て、まれに起動が止まる**
   - `vboxguest` を読み込んだ直後にカーネルの `WARNING` が出ることがある。[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7・8 の起動状態とログを確認する
-  - VM をリセットすると、次の起動は通った（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7](#virtualbox-の-bootc-ゲスト) の箇条書き、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 8](#virtualbox-の-bootc-ゲスト) の補足）
-- **Windows のホストでも、同じ手順で入る**: Guest Additions の CD は、VirtualBox のインストール先の ISO（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5](#virtualbox-の-bootc-ゲスト) の補足）。メニューの名前も本文と同じ
+  - VM をリセットすると、次の起動は通った（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 の箇条書き、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 8 の補足）
+- **Windows のホストでも、同じ手順で入る**: Guest Additions の CD は、VirtualBox のインストール先の ISO（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5 の補足）。メニューの名前も本文と同じ
 - **Hyper-V が動いている Windows のホストでは、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 の途中で VM が 1〜7 分ずつ止まる**
   - VirtualBox が Hyper-V の上で VM を動かす形（NEM。VBox.log に `HM: HMR3Init: Attempting fall back to NEM`）で起きた。止まっている間は、VM の中の時計も仮想の時計も進まない
   - VM のウィンドウでキーを押す、VM に SSH でつなぐなど、外から働きかけると動き出した（Shift キーでは 2 回とも 5 秒以内）
@@ -1145,12 +1151,12 @@ aarch64 には入らない:
 - **ホストオンリーアダプターだけの VM では、ホストでビルドして運ぶ**: ホストの rootless の podman でビルドし、`podman save -m` のファイルを ssh で VM に送って `podman load` する（[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)）
   - ベースの署名は、VM の `policy.json` と公開鍵をホストの `~/.config/containers` に写して確かめる。写さないと、AlmaLinux 10 の既定の設定では確かめずに取り込む（その項の手順 7 の補足）
   - OS を上げるときは、ホストから運ぶ。`podman save` はファイルがすでにあると書かないので、消してから書く（その項の手順 9 の補足）
-- **インストールに使った ISO が残っていると、Guest Additions の CD を入れられない**: VM の中で `eject /dev/sr0` してから入れる（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 4](#virtualbox-の-bootc-ゲスト)）
-- **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3](#virtualbox-の-bootc-ゲスト) の補足）
+- **インストールに使った ISO が残っていると、Guest Additions の CD を入れられない**: VM の中で `eject /dev/sr0` してから入れる（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 4）
+- **イメージに `libXt` を入れる**: 無いと GNOME のセッションで `VBoxClient --clipboard` が 5 秒ごとに落ち、クリップボードの共有が動かない（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3 の補足）
 - **切り替えた後は、OS の更新もビルドし直しになる**: `bootc upgrade` はこの VM の中のイメージしか見ない（[VirtualBox の bootc ゲスト: 更新](#virtualbox-の-bootc-ゲスト-更新)）
 - **カーネルが変わったら、VM の上ではモジュールを作り直せない**: ビルドの道具をイメージから消しているため。イメージごとビルドし直す
 - **Secure Boot では鍵の登録が要る**: 前提の [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵) で登録する（MokManager の最初の画面は 10 秒で消え、逃すと登録されない）。鍵を作り直したら `--no-cache` でビルドし直す（[VirtualBox の bootc ゲスト: 更新](#virtualbox-の-bootc-ゲスト-更新)）
-- **CD を入れても、GNOME は何も表示しない**: 自動実行の確認も、デスクトップのアイコンも出ない。10 秒ほど待ってから[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5 を貼る（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 4](#virtualbox-の-bootc-ゲスト)）
+- **CD を入れても、GNOME は何も表示しない**: 自動実行の確認も、デスクトップのアイコンも出ない。10 秒ほど待ってから[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5 を貼る（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 4）
 - **ホスト側の手順書は別**: VirtualBox 本体は [VirtualBox](#virtualbox)。ホスト側でモジュールを署名する鍵（同じ `/var/lib/shim-signed/mok/` の置き場所。どちらも [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵) で作る）は、ホストの PC のもので、VM の鍵とは別物
 
 **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)のリード**
@@ -1207,7 +1213,6 @@ aarch64 には入らない:
 
 - 自作の kernel-rt のイメージなど、`policy.json` に載っていないレジストリのイメージは、既定（`insecureAcceptAnything`）のとおり署名を確かめずに取り込む
 
-- カーネルも新しくなったとき（ベースの更新）は、`mknod` の行が出て `installer exit=1` になる
 
 
 
@@ -1237,7 +1242,6 @@ aarch64 には入らない:
 
 **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 8**
 
-- `vboxguest` の行と、`active` が 2 行出ればよい（`vboxsf` は、共有フォルダーを足すまで読み込まれない）
 
 - `pgrep` に `/usr/bin/VBoxClient --clipboard`・`--vmsvga-session` などが並べばよい（GNOME にログインしたときに自動で起動する）
 
@@ -1254,12 +1258,9 @@ aarch64 には入らない:
 - [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする)での接続は未確認
 
 - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 と違うところ:
-
-- ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 7）
-
-- Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5。登録は [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5〜7）
-
-- OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
+  - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 7）
+  - Secure Boot の鍵はホストで作り、秘密鍵はホストに置く。VM には証明書だけを置く（[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 4・5。登録は [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5〜7）
+  - OS を上げるたびに、ベースを含むイメージの全体（`podman save` のファイルで約 4.8G）を VM に運ぶ
 
 **[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 2**
 
@@ -1324,21 +1325,16 @@ aarch64 には入らない:
 
 **[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 9**
 
-- `vbox-ga.tar` が約 4.8G で並び、`scp` がそれを VM のホームに送る。送った後に、ホストのファイルは消す
 
 - VM のユーザーのパスワードを聞かれる。`scp` が進み具合を出す
 
 **[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 10**
 
-- VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 2 の空きの目安より多く）
 
 - `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest` が出る
 
-- `sudo podman images` に、この 2 つが並べばよい
-
 **[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 12**
 
-- 自動で消せたときは、`Untagged:` が 2 行と、`Deleted:` の行が並ぶ
 
 - ビルドの最初の段（`<none>`、6.43 MB）が残る。`podman image prune` で消せる（`[y/N]` を聞く）
 
@@ -1353,15 +1349,9 @@ aarch64 には入らない:
 
 - `findmnt` の表示は `/run/media/sf_<名前>`（Atomic Desktop では `/media` が `run/media` へのリンク）
 
-- 読み書きできるのは `vboxsf` グループのユーザーだけ
-
 **[VirtualBox の bootc ゲスト: 共有フォルダーを使う](#virtualbox-の-bootc-ゲスト-共有フォルダーを使う)の手順 2: vboxsf グループ**
 
 - `vboxsf` グループは、切り替えた後の最初の起動で `systemd-sysusers` が作っている
-
-**[VirtualBox の bootc ゲスト: 共有フォルダーを使う](#virtualbox-の-bootc-ゲスト-共有フォルダーを使う)の手順 4**
-
-- `vboxsf` の行と、共有フォルダーのマウントの行（`/run/media/sf_<名前>` の `vboxsf`）が出ればよい
 
 **[VirtualBox の bootc ゲスト: 更新](#virtualbox-の-bootc-ゲスト-更新)のリード**
 
@@ -2351,6 +2341,8 @@ Guest Additions の入手元とビルドの場所:
    vmconnect.exe localhost $HV_VM
    ```
 
+   - VM の画面のウィンドウが開く
+
 1. VM の画面で、OS のインストーラーを最後まで進める。
 
    - Windows の ISO は、起動の直後に `Press any key to boot from CD or DVD` が出ているあいだに、VM の画面をクリックしてキーを押す
@@ -2521,6 +2513,7 @@ Guest Additions の入手元とビルドの場所:
 
    - `VhdType : Differencing` と、元の VM のディスクを指す `ParentPath` が出ればよい
    - 新しい VM は、ホスト名もログインも元の VM と同じ。起動してから、ゲストの中でホスト名を変える
+   - 仮想 TPM と、ファームウェアに登録した鍵（MOK など）は引き継がれない
 
 #### Hyper-V: VM どうしだけがつながるスイッチを作る
 
@@ -2699,10 +2692,6 @@ Guest Additions の入手元とビルドの場所:
 - `Set-VMKeyProtector -NewLocalKeyProtector` は、この PC だけで使う鍵の保護を VM に付ける。`Enable-VMTPM` は、その保護の下で仮想 TPM を有効にする
 - 仮想 TPM を付けた VM を別の PC へ移すと、起動できないことがある
 
-**[Hyper-V: VM を起動して OS を入れる](#hyper-v-vm-を起動して-os-を入れる)の手順 3**
-
-- VM の画面のウィンドウが開く
-
 **[Hyper-V: VM を起動して OS を入れる](#hyper-v-vm-を起動して-os-を入れる)の手順 5**
 
 - `DVD ドライブの数: 0` が出ればよい
@@ -2715,10 +2704,6 @@ Guest Additions の入手元とビルドの場所:
 
 - `IPAddresses` は、ゲストの中のデーモン（Linux は `hyperv-daemons` の KVP デーモン）が Hyper-V に知らせた値
 - Default Switch は VM に IP を自動で配る。配る範囲を決める設定は無いので、IP は毎回引き直す
-
-**[Hyper-V: チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 5**
-
-- 仮想 TPM と、ファームウェアに登録した鍵（MOK など）は引き継がれない
 
 **[Hyper-V: チェックポイントとクローン](#hyper-v-チェックポイントとクローン)の手順 5: 差分ディスク**
 
@@ -2805,6 +2790,8 @@ Guest Additions の入手元とビルドの場所:
    ```
 
    - 入れ終えた旨の行（英語の表示では `Successfully installed`）が出ればよい
+   - **途中でネットワークがいったん切れる**
+   - インストーラの画面は出ず、進み具合だけが出る。最後に、入れ終えた旨の行（英語の表示では `Successfully installed`）が出ればよい
    - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、導入に失敗しても後ろの版やドライバーの確認が動く）
 
 1. 入ったか、ドライバーとホストオンリーのアダプターができたかを確かめる。
@@ -2946,6 +2933,7 @@ Guest Additions の入手元とビルドの場所:
 
    - `firmware="EFI"`、`chipset="piix3"`、指定した `cpus`・`memory`、`graphicscontroller="vmsvga"`、`nic1="nat"` が出ればよい
    - エラーが出たら中断する。途中まで作った VM は[VM を消す](#virtualbox-vm-を消す)で消してから作り直す
+   - `Forwarding(0)="ssh,tcp,127.0.0.1,<指定したポート>,,22"` は、この PC の中だけから SSH を受け付ける設定
 
 1. 可変のディスクと光学ドライブを作り、ISO を付ける。
 
@@ -3250,6 +3238,7 @@ Guest Additions の入手元とビルドの場所:
 - VirtualBox を winget で上げる
 - 前提: [VirtualBox](#windows-11-で-virtualbox-を入れる)を通してある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
+- VM の中の Guest Additions は、この項では上がらない（Atomic Desktop の VM は [VirtualBox の bootc ゲスト: 更新](#virtualbox-の-bootc-ゲスト-更新)）
 - **更新の途中でも、ネットワークがいったん切れるはず**。SSH やリモート デスクトップのセッションからは行わない
 
 1. 管理者の PowerShell 7 を開く。
@@ -3325,12 +3314,6 @@ Guest Additions の入手元とビルドの場所:
 - `Hypervisor` が `True` なら、Hyper-V のハイパーバイザーが動いている（WSL 2 を使う PC など）。VirtualBox の VM は Hyper-V の上で動き、遅くなる（この折りたたみの「注意点」）
 - 最後の表は、Hyper-V を使う Windows の機能の状態（`Enabled` / `Disabled`）。一覧を作るのに数秒かかる
 
-**[Windows 11 で VirtualBox を入れる](#windows-11-で-virtualbox-を入れる)の手順 3**
-
-- **途中でネットワークがいったん切れる**
-
-- インストーラの画面は出ず、進み具合だけが出る。最後に、入れ終えた旨の行（英語の表示では `Successfully installed`）が出ればよい
-
 **[Windows 11 で VirtualBox を入れる](#windows-11-で-virtualbox-を入れる)の手順 3: winget で入れるときに起きること**
 
 - 依存の Microsoft Visual C++ の再頒布可能パッケージ（`Microsoft.VCRedist.2015+.x64`）が無ければ、先にそれが入る
@@ -3392,10 +3375,6 @@ Guest Additions の入手元とビルドの場所:
 
 - `VB_BASE` の下に VM の名前のフォルダーを作る。VirtualBox 全体の既定の置き場所は変えない
 
-**[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 3**
-
-- `Forwarding(0)="ssh,tcp,127.0.0.1,<指定したポート>,,22"` は、この PC の中だけから SSH を受け付ける設定
-
 **[VirtualBox: VM を作る](#virtualbox-vm-を作る)の手順 3・4: 選んだ構成**
 
 - `createvm --basefolder` で VM ごとの置き場所を指定する。`setproperty machinefolder` は全体の既定を変えるため使わない
@@ -3417,10 +3396,6 @@ Guest Additions の入手元とビルドの場所:
 - `clonevm --snapshot clean-install --mode machine` は、そのスナップショットの状態を、履歴を含めずコピーする。`--options link` を付けないので、元の VM のディスクに依存しない完全クローンになる
 - MAC アドレスは既定で再生成される。NAT の転送設定はコピーされるため、クローン用のポートに変える
 - コマンドの一次情報は [Oracle VirtualBox User Guide 7.2 — VBoxManage Command Reference](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html) の各節と、Windows 11 に入った `VBoxManage.exe help createvm`・`help modifyvm`・`help createmedium`・`help storagectl`・`help storageattach`・`help startvm`・`help controlvm`・`help snapshot`・`help clonevm`・`help unregistervm`。一部のサブコマンドは `--help` を受け付けないため、`help <コマンド>` で読む
-
-**[VirtualBox: Windows 11 の更新](#virtualbox-windows-11-の更新)のリード**
-
-- VM の中の Guest Additions は、この項では上がらない（Atomic Desktop の VM は [VirtualBox の bootc ゲスト: 更新](#virtualbox-の-bootc-ゲスト-更新)）
 
 **[VirtualBox: Windows 11 の更新](#virtualbox-windows-11-の更新)の手順 3: VBoxSVC が残る理由**
 
@@ -3574,6 +3549,7 @@ Guest Additions の入手元とビルドの場所:
    ```
 
    - インストール先と版、動いている VM の一覧が出ればよい
+   - `VMware Network Adapter VMnet1`（この PC と VM だけ）と `VMnet8`（NAT）の行が出る
 
 #### VMware Workstation Pro: VM を作る
 
@@ -3969,7 +3945,6 @@ Guest Additions の入手元とビルドの場所:
 
 **[VMware Workstation Pro: 入ったかを確かめる](#vmware-workstation-pro-入ったかを確かめる)の手順 2**
 
-- `VMware Network Adapter VMnet1`（この PC と VM だけ）と `VMnet8`（NAT）の行が出る
 
 - インストール先のフォルダーと版が出て、`Total running VMs: 0` が出ればよい
 
