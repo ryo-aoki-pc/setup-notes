@@ -29,7 +29,8 @@
   - PowerShell 7 の基本のプロファイルの行は印 `# windows-setup.md`、Emacs モードと 5.1 のキー操作は `# shell-terminal.md`、開発の設定は `# shell-terminal.md:dev`。「Windows Terminal で複数行を 1 つの入力として貼る」は印 `# shell-terminal.md:paste` で Enter を割り当てる。Windows Terminal の控えは `settings.json.windows-setup.bak`
   - 「PowerShell を開発に使う」はモジュールと環境変数を扱い、子の項で 7 と 5.1 のプロファイル・5.1 の PSReadLine・開発の設定の更新を分ける。7 は ConsoleHost で UTF-8 にして終了時に戻し、5.1 は `Invoke-Utf8Native` の間だけ変える。補完の控えは 7 で作り、7 で読む
 - `docs/containers.md` — コンテナの手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に Podman・podman-compose・podman-tui・lazydocker・Distrobox の用途の項を置く
-  - 検証記録は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使う。補足と注意点は、各用途の末尾の折りたたみに置く
+  - 補足・注意点・選択した方針・参照資料は、各用途の末尾の「Podman の補足と注意点」などの折りたたみに置く。検証記録は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使い、各折りたたみの「参照」で「検証記録（`docs/verification/<名前>.md`）」と文字で指す
+  - 文中の短いコマンドの言及と、誤用・手順で使わないコマンド・試験用のものへの影響の注意は、各用途の折りたたみに置く。Distrobox のボックスがホームなどを共有して隔離にならないことは、作る項のリードに残す。見える箇条書きは判断と操作に要るものに絞り、出力例・版・件数・予告・説明は手順ごとの補足へ移す
 - 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の `repos/<リポジトリ名>/` に置く
 - 補足と注意点はこのリポジトリの正本に置き、`docs/verification/` は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスに置く
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
