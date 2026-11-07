@@ -21,7 +21,7 @@
 
 ### VirtualBox
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
+- 検証記録（`docs/verification/virtualbox.md`）・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
 > - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-virtualbox-を入れる)を通し、貼る窓は各手順に従う
@@ -301,7 +301,7 @@
 - 前提: [VirtualBox: リポジトリを置く](#virtualbox-リポジトリを置く)から[VirtualBox: 動作を確かめる](#virtualbox-動作を確かめる)までを通し、新しいカーネルで起動してある
 - 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash。新しいカーネルで起動した後に開いたもの）
 - この項は AlmaLinux 10 だけのもの（Windows 11 のドライバーは、ビルド済みのものをインストーラが入れる）
-- `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)）
+- `sudo dnf upgrade` で新しいカーネルが入ると、同じ版の `kernel-devel` も一緒に入る（installonly。検証記録: `docs/verification/virtualbox.md`・[参考資料](reference/virtualbox.md)）
 - **新しいカーネルで起動すると、`vboxdrv.service` がその場でモジュールをビルドし直す**（Secure Boot なら [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵) の鍵で署名もする）。そのぶん、その 1 回の起動が遅くなる
   - スクリプトは、動いているカーネル用の vbox のモジュールが無ければ、その場でビルドする
   - 最後に「もう入っていないカーネル」用のモジュールを消す
@@ -376,7 +376,7 @@
 - 実行場所:
   - ゲスト: VirtualBox の VM の中の AlmaLinux Atomic Desktop（GNOME）にログインし、端末を開いた自分のユーザーの bash。手順 1〜3・5〜8・10。`sudo -i` した root のシェルでは行わない
   - ホスト: ホストのデスクトップの、VM のウィンドウ（メニューの操作）。手順 4・9（手順 4 の CD の挿入は、ホスト側の操作）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md)・[参考資料](reference/virtualbox-guest-bootc.md)・[注意点](extra/virtualbox-guest-bootc.md)
+- 検証記録（`docs/verification/virtualbox-guest-bootc.md`）・[参考資料](reference/virtualbox-guest-bootc.md)・[注意点](extra/virtualbox-guest-bootc.md)
 - この項の手順 1 で変数を設定したシェルに貼る。新しい端末を開いたら、この項の手順 1 を貼り直す
 - **手順 7 で再起動する**。手順 6 はビルドが終わるのを待ってから次を貼る
 - **インターネットに出られないホストオンリーだけの VM は、手順 6 の代わりに[オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)を通す**
@@ -644,7 +644,7 @@
 
    - `enp0s3  UP  192.168.56.101/24` のような行の IP（`/24` の前）が、この項の手順 3 で使う `<VM_IP>`
    - 何も出ないときは、有線の接続が上がっていない。`nmcli -t -f NAME,DEVICE connection show` で接続の名前を見て、`sudo nmcli connection up <名前>` で上げる
-     - 自動接続しない VM は `sudo nmcli connection modify <名前> connection.autoconnect yes` で有効にする（[インストール時の状態](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox-guest-bootc.md#実施前の状態)）
+     - 自動接続しない VM は `sudo nmcli connection modify <名前> connection.autoconnect yes` で有効にする（インストール時の状態: `docs/verification/virtualbox-guest-bootc.md` の「実施前の状態」）
 
 1. ホストの端末で、変数を設定する（`VM_SSH` は必ず値を入れる）。
 
@@ -986,7 +986,7 @@
   - CPU の SVM（AMD）/ VT-x（Intel）が有効であること。VM 内なら外側からネストした仮想化が提供されていること
   - VM 作成は x86_64 用
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
-- [仕様](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/SPEC.md)・[参照情報](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/kvm-container/docs/verification/setup.md)
+- [仕様](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/SPEC.md)・[参照情報](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/reference/setup.md)・検証記録（`repos/kvm-container/docs/verification/setup.md`）
 - 既に clone したリポジトリやホスト自身の libvirt がある PC では、この項の手順 3・4 の確認を省かない
 - ホストごとに 1 度だけ行う。2 回目からは[VM を使う](#kvm-container-の-vm-を使う)から始める
 
@@ -1669,7 +1669,7 @@
 ### Hyper-V
 
 - Hyper-V で VM を作って使う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/hyper-v.md)・[参考資料](reference/hyper-v.md)・[注意点](extra/hyper-v.md)
+- 検証記録（`docs/verification/hyper-v.md`）・[参考資料](reference/hyper-v.md)・[注意点](extra/hyper-v.md)
 
 #### Hyper-V: この PC で使えるかを確かめる
 
@@ -2195,7 +2195,7 @@
 - Windows 11 の x64 が対象
 - Atomic Desktop のゲストに Guest Additions を入れるなら、[bootc ゲスト](#virtualbox-の-bootc-ゲスト)を通す
 - [5.1 にする理由](reference/virtualbox.md#windows-11-で-virtualbox-を入れる--手順-1-補足-51-にする理由)
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
+- 検証記録（`docs/verification/virtualbox.md`）・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 
 > [!IMPORTANT]
 > - **SSH やリモート デスクトップのセッションからは行わない**。この項の手順 3 の途中でネットワークがいったん切れ、手順 7 は画面で行う
@@ -2323,7 +2323,7 @@
 #### VirtualBox: Windows 11 で VM を作って使う
 
 - AlmaLinux 10 の x86_64 の ISO から VM を作って使う。インストーラーの画面は人が操作する
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/virtualbox.md)・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
+- 検証記録（`docs/verification/virtualbox.md`）・[参考資料](reference/virtualbox.md)・[注意点](extra/virtualbox.md)
 - ふだんの操作は[使い方の基本](#virtualbox-使い方の基本)、状態を残す・複製するなら[スナップショットとクローン](#virtualbox-スナップショットとクローン)、要らなくなったら[VM を消す](#virtualbox-vm-を消す)
 
 ##### VirtualBox: VM を作る
@@ -2739,7 +2739,7 @@
 ### VMware Workstation Pro
 
 - VMware Workstation Pro を入れて VM を作る
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](reference/vmware.md)・[注意点](extra/vmware.md)
+- 検証記録（`docs/verification/vmware.md`）・[参考資料](reference/vmware.md)・[注意点](extra/vmware.md)
 
 #### VMware Workstation Pro: インストーラーを取得して確かめる
 
@@ -3230,7 +3230,7 @@
 - 実行場所: この PC のデスクトップ。状態確認・有効化・再起動は、この項の手順 1 で開く管理者の Windows PowerShell（5.1）。起動・試験・窓を閉じた後の確認は、通常のデスクトップと Sandbox の画面
 - **この項の手順 4 は、再起動が必要な場合だけ行う**。先に開いているファイルを保存し、実行中の作業を終える
 - [5.1 にする理由](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-1-補足-51-にする理由)
-- [参考資料](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)
+- [参考資料](reference/windows-sandbox.md#windows-sandbox-で配布物を試す--手順-2-補足-対応環境)・検証記録（`docs/verification/windows-sandbox.md`）
 
 > [!CAUTION]
 > **この項の手順 8 で Sandbox 内のファイルとアプリの状態が消える**。残す結果をホストへコピーしてから閉じる。

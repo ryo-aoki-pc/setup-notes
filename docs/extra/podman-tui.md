@@ -1,6 +1,6 @@
 # podman-tui の注意点
 
-[手順書](../containers.md#podman-tui)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](../reference/podman-tui.md)
+[手順書](../containers.md#podman-tui)・検証記録・[参考資料](../reference/podman-tui.md)
 
 - 「手順 N」は[手順書](../containers.md#podman-tui)の手順 N、「本書」「この文書」は手順書を指す
 

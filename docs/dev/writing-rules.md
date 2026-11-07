@@ -44,7 +44,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
      - 項の見出しには番号を入れず、同じファイルのほかの見出しとアンカーがぶつからない名前にする。既存の名前は維持する。集約する見出しにはツール名を付ける
      - 2冊に同名の見出しがあったものを 1 冊へ移すときは、AlmaLinux 10 側の名前を保ち、Windows 11 側の名前に「Windows 11 で」を付ける（neovim.md の「Neovim」と「Windows 11 で Neovim を入れる」）
      - 変数ブロックは、それを置いた項の手順 1 になる（neovim.md の「Neovim」など）。2 冊では、変数を使う項ごとに手順 1 に置き、windows-setup.md で窓を開く手順のある項は手順 2 にする
-1. 手順ごとの実測・出力例・検証結果は `docs/verification/<手順書名>.md` で保持し、理由・比較・背景は用途の末尾の折りたたみに置く。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証記録の見出しには、対応する節と手順番号を含める。操作に必要な分岐・失敗時の対処・短い注意は、見える部分の手順に残す
+1. 手順ごとの実測・出力例・検証結果は `docs/verification/<手順書名>.md` で保持し、理由・比較・背景は用途の末尾の折りたたみに置く。検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスにある。手順書・折りたたみ・参考資料・注意点から検証記録へは URL で指さず、「`docs/verification/<名前>.md` の「<見出し>」」と文字で書く（見出しを指さないときは、同じ名前の文書の記録なら「検証記録」とだけ書き、ほかの記録は「検証記録（`<パス>`）」と書く）。検証記録の見出しには、対応する節と手順番号を含める。操作に必要な分岐・失敗時の対処・短い注意は、見える部分の手順に残す
 1. 環境固有の値は手順冒頭の変数ブロックだけで設定する（`${SERVER_IP}` 形式。値の置き場所は、2 冊は項ごと、ほかの文書は用途ごとに 1 か所）。**変更が必須の変数は 1 変数ずつのコードブロックに分け、変更が任意の変数（既定のままでよい・自動で入るが違えば直す）は 1 つのブロックにまとめて必須ブロックの後に置く。** 値の読み戻しは任意の変数のブロックの末尾に入れる。シェルに貼って編集する手間を減らすため
    - **変える必要の無い値は変数にせず、コマンドに直接書く。** 固定の URL・パス・パッケージ名、ツールが既定の場所からしか読まないパス（`~/.config/bat/config` など。変数を変えても読み込み先は変わらない）、動作確認にだけ使う名前、`${USER}` や `$(uname -m)` の言い換えがこれに当たる
    - 変数が 1 つも無い文書には変数の手順を置かず、手順 1 から主題を始める
@@ -86,7 +86,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
 - 同じ文書へのリンクは `#<アンカー>`、ほかの正本へのリンクは `<正本>.md#<アンカー>` にする
 - 同じ折りたたみの中を指すリンクは外すか、「この折りたたみの「<区分名>」」と書く。閉じた中にアンカーを置かない
 - 本文から特定の手順の補足を指すときは、`[btop の補足と注意点](#btop-の補足と注意点)の「btop の手順 1」` のように、折りたたみへリンクして区分名を文で示す
-- 文書全体にかかる補足・注意点・冒頭の検証記録や参照資料へのリンクは、冒頭のリードの直後の `<details id="この文書の補足と注意点">` に置く。`<summary>` は「この文書の補足と注意点」にする
+- 文書全体にかかる補足・注意点・冒頭の検証記録の案内や参照資料へのリンクは、冒頭のリードの直後の `<details id="この文書の補足と注意点">` に置く。`<summary>` は「この文書の補足と注意点」にする
 - 冒頭のリードの対象 OS・前提・実行場所・権限・貼り方・読み方は減らさない
 - 迷ったら見える部分に残す
 
@@ -110,7 +110,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
 
 **参照**
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)
+- 検証記録（`docs/verification/btop.md`）
 
 </details>
 
@@ -161,7 +161,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
   - コマンドのある手順では、箇条書きを最初のコードブロックより前や、複数のコードブロックの間に置かない。確認・分岐・注意の箇条書きは、最後のコードブロックの後ろにまとめる
   - 並べてよいのは「1 変数だけのブロック（0 個以上）→ ほかのブロック 1 つ」だけ
   - 言語は bash。手で書き足す設定の断片（lazygit の yaml など）だけは、その言語のブロックでよい
-  - **貼り先**: 貼った全体が 1 つの入力になる窓に貼る前提で書く。どちらも、貼っただけでは動かず、Enter で動く（実測は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)）
+  - **貼り先**: 貼った全体が 1 つの入力になる窓に貼る前提で書く。どちらも、貼っただけでは動かず、Enter で動く（実測は検証記録の付録: `docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）
     - bash は、ブラケットペーストの効く端末（bash 5.1 以降で `enable-bracketed-paste` が on。AlmaLinux 10 の GNOME の端末・WezTerm、Windows Terminal・WezTerm からの SSH、WezTerm の Git Bash）
     - PowerShell は、shell-terminal.md の「Windows Terminal で複数行を 1 つの入力として貼る」を通した窓（PSReadLine は bracketed paste を使わない。管理者の窓にも効く）
     - 例外（貼った行が 1 行ずつ届く窓）: windows-setup.md の「Windows Update」「Microsoft Store の更新」「貼り付けの設定」「アプリを入れる」と、shell-terminal.md の「Windows Terminal で複数行を 1 つの入力として貼る」（割り当てより前に通す）、制限言語モードの窓、VM のコンソールにキー入力で送る所、bash が 5.1 未満の環境。例外の項は、今までの形（上の骨格の対話入力と、下の `sudo` の `{ }`）で書く
@@ -188,7 +188,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
   - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。shell-terminal.md の「Git Bash と WezTerm の設定」の手順 4 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 4 と shell-terminal.md の「シェルのツールを入れる」の手順 7・8 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、shell-terminal.md の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
   - 貼り先の例外の項で、`sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む（中は 2 スペース字下げ。ヒアドキュメントの本文と終端の行は字下げしない）。例外でない項では囲まない
-    - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる（NOPASSWD でも捨てる。実測は [samba-client.md の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）。ブラケットペーストで貼れば捨てない（同じ付録と、[shell-terminal.md の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)）
+    - ブラケットペーストが効かないときに貼ると、`sudo`（1.9.17 の `use_pty`）が端末に残った行を読んで捨てる（NOPASSWD でも捨てる。実測は `docs/verification/samba-client.md` の「付録: sudo の後ろの行が失われる条件（2026-09-28）」）。ブラケットペーストで貼れば捨てない（同じ付録と、`docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）
     - bash は `}` まで読んでから実行するので、捨てられる行が残らない。変数の空を弾くブロックは `if … fi` でもよい（samba.md の「Samba クライアント」）
     - 点検は、ブロックを bash が 1 回に読む単位（`bash -n` が通る最小の行のまとまり）に区切り、`sudo` を含む単位の後ろにコメント以外の行が残らないかで見る
   - 目視で確かめてから次を実行するもの（dry-run の後の本番など）は、手順（手順の外ならブロック）を分ける

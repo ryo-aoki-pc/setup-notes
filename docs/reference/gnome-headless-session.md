@@ -2,7 +2,7 @@
 
 [AlmaLinux 10 の「GNOME のヘッドレスセッション」](../gnome-remote.md#gnome-のヘッドレスセッション)・[注意点](../extra/gnome-headless-session.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#補足の実測)
+検証記録: `docs/verification/gnome-headless-session.md` の「補足の実測」
 
 ## 補足
 
@@ -80,9 +80,9 @@
 ### GNOME のヘッドレスセッション / 手順 10: 補足: FreeRDP の証明書の確認と、つなぐときの表示
 
 - FreeRDP 3.10.3 は、保存した証明書（`~/.config/freerdp/server/<SERVER_IP>_<RDP_PORT>.pem`）が無い初めての接続でも、`REMOTE HOST IDENTIFICATION HAS CHANGED!` の警告を出してから、証明書の確認（`Do you trust the above certificate? (Y/T/N)`）を出す。初めてでも警告が出る理由は、確かめていない
-- `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）。`T` と `N` で答えたときの動きは、確かめていない
+- `Y` で答えると、証明書がこのファイルに保存され、次からは聞かれない（検証記録: `docs/verification/gnome-headless-session.md` の「付録: Hyper-V の VM で通した記録（2026-10-11）」）。`T` と `N` で答えたときの動きは、確かめていない
 - FreeRDP 3.10.3 は、`Password:` の後に `[ERROR][com.winpr.sspi.Kerberos] - [kerberos_AcquireCredentialsHandleA]: krb5_parse_name (Configuration file does not specify default realm [-1765328160])` を 2 行出してから、つながった（2026-10-11 の Hyper-V の VM。この行が出る理由は、確かめていない）
-  - [GNOME のリモートログイン の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#常に出るが無害なログ)には、近い行（`kerberos_AcquireCredentialsHandleA: krb5_init_context ...`）が、Kerberos を設定していない環境で NTLM に切り替わるときの出力として載っている
+  - GNOME のリモートログイン の検証記録（`docs/verification/gnome-remote-desktop.md` の「常に出るが無害なログ」）には、近い行（`kerberos_AcquireCredentialsHandleA: krb5_init_context ...`）が、Kerberos を設定していない環境で NTLM に切り替わるときの出力として載っている
 
 ### 接続元を LAN に絞る / 手順 2: 補足: 引用符
 
@@ -90,7 +90,7 @@
 
 ### リモートログインだけにする（併用をやめる） / 手順 1・6: 補足: セッションの見分け方
 
-- **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md#付録-実機でリモートログインだけにした記録2026-10-08)）
+- **`Service` で見分ける**: GDM がリモートログインで作るセッションも seat が無く、`loginctl list-sessions` の `TTY` の列は `headless` になる。ヘッドレスのセッションは PAM の `gdm-autologin`、リモートログインのセッションは `gdm-password` で作られるので、`loginctl show-session` の `Service` で分ける（検証記録: `docs/verification/gnome-headless-session.md` の「付録: 実機でリモートログインだけにした記録（2026-10-08）」）
 - **`grdctl --headless status` で確かめない**: `~/.local/share/gnome-remote-desktop/credentials.ini` が無いと、空のまま作る（[実施手順 8 の補足](#gnome-のヘッドレスセッション--手順-5-補足-資格情報の置き場所)）
 - 同じ項の手順 1 の `for` の行は、`<SESSION_ID> <Service>` を 1 セッション 1 行で出す
 - 同じ項の手順 6 の最後の数は、このユーザーの `gdm-autologin` のセッションだけを数え、リモートログインのセッションは数えない。`for` の行で、セッションが終わるまで、30 秒まで待つ

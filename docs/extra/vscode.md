@@ -1,6 +1,6 @@
 # VS Code の注意点
 
-[手順書](../almalinux-setup.md#vs-code)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](../reference/vscode.md)
+[手順書](../almalinux-setup.md#vs-code)・検証記録・[参考資料](../reference/vscode.md)
 
 - 「手順 N」は[手順書](../almalinux-setup.md#vs-code)の手順 N、「本書」「この文書」は手順書を指す
 

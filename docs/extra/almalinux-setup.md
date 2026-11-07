@@ -1,6 +1,6 @@
 # AlmaLinux 10 のセットアップの注意点
 
-[手順書](../almalinux-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](../reference/almalinux-setup.md)
+[手順書](../almalinux-setup.md)・検証記録・[参考資料](../reference/almalinux-setup.md)
 
 - 手順書の手順は、番号付きリストを持つ見出し（項）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -43,7 +43,7 @@
   - 仮想マシンの中では、gnome-settings-daemon は放置によるサスペンドをしない。電源ボタンは `nothing` 以外だと電源オフになる
   - その節の手順 4 の後は、設定アプリに「自動サスペンド」の行が出ない
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
-- **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#homebrew-の記録)
+- **Homebrew の導入先を変えるとすべてソースビルドになる**: 検証記録（`docs/verification/almalinux-setup.md` の「Homebrew の記録」）
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu) で実際に問題になる）
   - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 3 を通す
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない

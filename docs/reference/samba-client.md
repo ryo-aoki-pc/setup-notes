@@ -2,7 +2,7 @@
 
 [手順書](../samba.md#samba-クライアント)・[注意点](../extra/samba-client.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#補足の実測)
+検証記録: `docs/verification/samba-client.md` の「補足の実測」
 
 ## 補足
 

@@ -1,7 +1,7 @@
 # Neovim のセットアップ（AlmaLinux 10・Windows 11）
 
 - Neovim を入れ、自分用の設定（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)。LazyVim をもとにした設定）を導入する。AlmaLinux 10 は Homebrew、Windows 11 は scoop で入れる
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)
+- 検証記録・[参考資料](reference/neovim.md)・[注意点](extra/neovim.md)
 
 > [!IMPORTANT]
 >
@@ -87,7 +87,7 @@
 - 自分用の Neovim の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を `~/.config/nvim` に入れる。外部コマンドと日本語入力の設定を全部入れてから、Neovim を初回起動する
 - 前提: [EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)・[共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[HackGen Console NF](shell-terminal.md#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
 - 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 2 の既存の設定の退避を省かない
-- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
+- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・検証記録（`repos/LazyVimStarter/docs/verification/setup.md`）
 - この項の手順 10 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 
 1. 外部コマンドと日本語入力を導入し、導入結果を確認する。
@@ -664,7 +664,7 @@
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
 - この項の手順 10 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
-- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
+- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・検証記録（`repos/LazyVimStarter/docs/verification/setup.md`）
 
 1. 管理者ではない PowerShell 7 を開く。
 

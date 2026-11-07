@@ -1,6 +1,6 @@
 # 構成（文書ごとのメモ）
 
-リポジトリのファイルごとのメモ。[AGENTS.md](../../AGENTS.md) の「文書を書く・直すとき」から案内する。文書を直す前に、その文書の項を読む。文書を足したときは、ここも直す。検証の状態と範囲の要約は、非公開の `ryo-aoki-pc/setup-notes-verification` の `docs/verification-status.md` にある。状態（検証範囲）を変えたときは、そちらの項も直す。
+リポジトリのファイルごとのメモ。[AGENTS.md](../../AGENTS.md) の「文書を書く・直すとき」から案内する。文書を直す前に、その文書の項を読む。文書を足したときは、ここも直す。検証の状態と範囲の要約は、Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/verification-status.md` にある。状態（検証範囲）を変えたときは、そちらの項も直す。
 
 ## 現在の文書構成
 
@@ -30,10 +30,10 @@
   - 「PowerShell を開発に使う」はモジュールと環境変数を扱い、子の項で 7 と 5.1 のプロファイル・5.1 の PSReadLine・開発の設定の更新を分ける。7 は ConsoleHost で UTF-8 にして終了時に戻し、5.1 は `Invoke-Utf8Native` の間だけ変える。補完の控えは 7 で作り、7 で読む
 - `docs/containers.md` — コンテナの手順書（AlmaLinux 10）。`## AlmaLinux 10 で使う` の下に Podman・podman-compose・podman-tui・lazydocker・Distrobox の用途の項を置く
   - 検証記録は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使う。補足と注意点は、各用途の末尾の折りたたみに置く
-- 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の `repos/<リポジトリ名>/` に置く
-- 補足と注意点はこのリポジトリの正本に置き、`docs/verification/` は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスに置く
+- 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の `repos/<リポジトリ名>/` に置く
+- 補足と注意点はこのリポジトリの正本に置き、`docs/verification/` は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスに置く
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
-- [共同 VM 検証の横断報告](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/hypervisor-verification.md)
+- 共同 VM 検証の横断報告は、Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/hypervisor-verification.md` にある
   - 現在の操作リンクは正本の該当用途へ向け、検証時の版と手順番号は記録で確認する
 - 新しい手順は正本の該当用途へ追加し、対応する記録とこの構成一覧を更新する
 - Windows の[Git Bash 設定](../shell-terminal.md#git-bash-と-wezterm-の設定)は、共通 Git（4）→長いパス（5）→bash（6）→WezTerm（7）

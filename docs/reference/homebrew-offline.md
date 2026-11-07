@@ -21,7 +21,7 @@
 
 ### 選択した方針
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md#選択した方針)
+この節の検証記録: `docs/verification/homebrew-offline.md` の「選択した方針」
 
 | 経路 | 要るもの | 採否 |
 |---|---|---|

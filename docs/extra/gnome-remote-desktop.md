@@ -1,6 +1,6 @@
 # GNOME のリモートログインの注意点
 
-[手順書](../gnome-remote.md#gnome-のリモートログイン)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](../reference/gnome-remote-desktop.md)
+[手順書](../gnome-remote.md#gnome-のリモートログイン)・検証記録・[参考資料](../reference/gnome-remote-desktop.md)
 
 - 「手順 N」は[手順書](../gnome-remote.md#gnome-のリモートログイン)の手順 N、「本書」「この文書」は手順書を指す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
@@ -25,7 +25,7 @@
 
 - **リモートログインのセッション**: そのユーザーのセッションが無ければ、ログインで新しいセッションができる
   - ローカルでログイン中のユーザーと同一ユーザーで接続すると、GDM が既存セッションの扱い（切替 or 拒否）を求める場合がある
-  - PC の物理モニターに表示しているデスクトップを見る用途は「デスクトップ共有」方式（ユーザーのデーモン）。[GNOME のデスクトップ共有](../gnome-remote.md#gnome-のデスクトップ共有)で扱う。aarch64 の[実機](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-このホストでの検証2026-10-07)と[クリーン VM](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-公式-iso-から新規インストールした-aarch64-vm-での検証2026-10-07)、[x86_64 VM](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-virtualbox-の-vm-での本実行2026-10-07)で確かめた範囲を参照（物理 HDMI への表示は未確認）
+  - PC の物理モニターに表示しているデスクトップを見る用途は「デスクトップ共有」方式（ユーザーのデーモン）。[GNOME のデスクトップ共有](../gnome-remote.md#gnome-のデスクトップ共有)で扱う。aarch64 の実機（`docs/verification/gnome-desktop-sharing.md` の「付録: このホストでの検証（2026-10-07）」）とクリーン VM（`docs/verification/gnome-desktop-sharing.md` の「付録: 公式 ISO から新規インストールした aarch64 VM での検証（2026-10-07）」）、x86_64 VM（`docs/verification/gnome-desktop-sharing.md` の「付録: VirtualBox の VM での本実行（2026-10-07）」）で確かめた範囲を参照（物理 HDMI への表示は未確認）
 - **ヘッドレスのセッションを常駐させている PC**（[GNOME のヘッドレスセッション](../gnome-remote.md#gnome-のヘッドレスセッション)）
   - そのユーザーのセッションの中で、リモートログインの受け渡し役のデーモン（`gnome-remote-desktop-handover.service`）が起動する（TCP では待ち受けない）
   - このデーモン（`gnome-remote-desktop.service`）を再起動したら、受け渡し役のデーモンも再起動する（[デーモンを起動し直す](../gnome-remote.md#gnome-のリモートログイン-デーモンを起動し直す)の手順 2）。しないと、そのユーザーでログインしたときに、ログイン画面が名前とアイコンのまま進まない

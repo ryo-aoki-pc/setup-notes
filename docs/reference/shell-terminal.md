@@ -1,6 +1,6 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../shell-terminal.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[注意点](../extra/shell-terminal.md)
+[手順書](../shell-terminal.md)・検証記録・[注意点](../extra/shell-terminal.md)
 
 - プロファイルの行の印は、7 の基本の設定が `# windows-setup.md`、任意のキー操作が `# shell-terminal.md`、5.1・7 の開発の設定が `# shell-terminal.md:dev`
 - Windows Terminal の控えは `settings.json.windows-setup.bak`
@@ -27,11 +27,11 @@
 
 ### シェルのツール / 手順 1: 補足: starship のボトル
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#starship-補足の実測)
+検証記録: `docs/verification/shell-terminal.md` の「starship: 補足の実測」
 
 ### シェルのツール / 手順 1: 補足: fzf の依存と、入れてあるホストで貼る意味
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#fzf-実施手順--手順-1-補足-依存と入れてあるホストで貼る意味)
+この節の検証記録: `docs/verification/shell-terminal.md` の「fzf: 実施手順 / 手順 1: 補足: 依存と、入れてあるホストで貼る意味」
 
 - fzf の依存は `ncurses` だけ（`brew deps fzf`）
 - [yazi](../almalinux-setup.md#yazi)や[シェルのツール](../shell-terminal.md#シェルのツール)で入れた fzf は、`brew install zoxide fzf` のように名前を挙げて入れているので、Homebrew の「頼まれて入れた」印（`installed_on_request`）が付いている。`brew install fzf` を貼り直しても害は無く、印が無かったホストでは付く（印が無いと、zoxide や yazi を `brew uninstall` した際の自動削除や、明示的な `brew autoremove` で fzf も消えうる）
@@ -67,7 +67,7 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ### シェルのツール / 手順 8: 補足: BaseOS の tmux
 
-- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#tmux-実施手順--手順-2-補足-baseos-の-tmux-と並べたとき)）
+- BaseOS の tmux で始めたセッションに Homebrew の tmux からはつなげない（検証記録: `docs/verification/shell-terminal.md` の「tmux: 実施手順 / 手順 2: 補足: BaseOS の tmux と並べたとき」）
 
 ### シェルのツール / 手順 10: 補足: z と zi の使い方
 
@@ -156,9 +156,9 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 ### HackGen Console NF / 手順 1: 補足: HackGen35 Console NF
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#hackgen-console-nf-補足の実測)
+検証記録: `docs/verification/shell-terminal.md` の「HackGen Console NF: 補足の実測」
 
-- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#hackgen-console-nf-の記録)）
+- 文字幅が半角 3:全角 5 の版 `HackGen35 Console NF` も、同じ手順で一緒に入る（検証記録: `docs/verification/shell-terminal.md` の「HackGen Console NF の記録」）
 
 ### HackGen Console NF / 手順 2: 補足: unzip が要る理由
 
@@ -194,7 +194,7 @@ enabled_metadata=1
 
 ### WezTerm / 手順 2: 補足: wezterm はメタパッケージ / 取り込まれる鍵
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#wezterm-実施手順--手順-3-補足-wezterm-はメタパッケージ--取り込まれる鍵)
+この節の検証記録: `docs/verification/shell-terminal.md` の「WezTerm: 実施手順 / 手順 3: 補足: wezterm はメタパッケージ / 取り込まれる鍵」
 
 - `wezterm` 本体（6.4 KB、`rpm -ql wezterm` は空）は、`wezterm-common`（CLI の `wezterm`、シェル統合、補完）/ `wezterm-gui`（`wezterm-gui`、desktop ファイル、アイコン）/ `wezterm-mux-server` を Requires で束ねているだけ
 - `dnf repoquery --requires wezterm` に `gcc` / `*-devel` / `make` が並んで見えるのは、同名の **SRPM の BuildRequires** が一緒に表示されているため。x86_64 パッケージには入っていない
@@ -228,7 +228,7 @@ Importing GPG key 0xCEA2757D:
 
 ### Windows 11 で HackGen Console NF を入れる / 手順 2: 補足: 出た結果の意味
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+検証記録（`docs/verification/windows-setup.md`）
 
 - 自分のユーザーの登録と `%LOCALAPPDATA%` のファイルが出たら、この節の手順で入れたもの（同じ節の手順 3 は何度貼ってもよい）
 - `C:\Windows\Fonts` のファイルが出たら、PC 全体に入っていて、そのまま使える
@@ -291,12 +291,12 @@ Importing GPG key 0xCEA2757D:
 - 内部の名前は非公開で、版で変わることがある。読めなければ `KeyAvailable` だけの判定になり、貼り付けは行ごとの実行に戻る。Enter 自体は動くが、貼った全体が 1 つの入力になる前提を満たさないので、以降の手順を続けず、割り当てを直す
 - 制限言語モード（Constrained Language）の窓では割り当てない。割り当てると、この行のメソッドの呼び出しが禁じられ、Enter でコマンドが動かなくなるため。この窓の貼り付けは行ごとのままで、貼った全体が 1 つの入力になる前提を満たさない
 - 印を `# shell-terminal.md:paste` にして、Emacs モードと 5.1 のキー操作の再実行時の削除対象から外す。`EditMode` は前のキーの割り当てを既定に戻すため、末尾に足す。Emacs の手順は最初のキーの割り当てより前へ入れるので、後から通しても順序は保たれる
-- 実機の動きと範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)を参照する
-- ほかの手順書の PowerShell のブロックは、この割り当てを前提に書く。割り当てがあると、`Read-Host`・`choice.exe` の問いの後ろの文は答えとして読まれず、答えた後に動く。子の PowerShell の後ろの文は、閉じた後に元の窓で動く。Ctrl+C で外部コマンドを止めると、同じ入力の後ろの文も動かない（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)）
+- 実機の動きと範囲は検証記録を参照する
+- ほかの手順書の PowerShell のブロックは、この割り当てを前提に書く。割り当てがあると、`Read-Host`・`choice.exe` の問いの後ろの文は答えとして読まれず、答えた後に動く。子の PowerShell の後ろの文は、閉じた後に元の窓で動く。Ctrl+C で外部コマンドを止めると、同じ入力の後ろの文も動かない（検証記録の付録: `docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）
 
 ### Windows 11 で WezTerm を入れる / 手順 1: 補足: WezTerm の中の PowerShell を使わない理由
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+検証記録（`docs/verification/windows-setup.md`）
 
 - WezTerm が動いていると、同じ節の手順 4 が止まる
 
@@ -385,7 +385,7 @@ Importing GPG key 0xCEA2757D:
 - `bat --config-file` の出力は使わない。bat はパイプに UTF-8 で書く（bat 0.26.1 の `src/bin/bat/main.rs` の `println!`）が、Windows PowerShell 5.1 は外部コマンドの出力を `[Console]::OutputEncoding`（日本語の Windows では OEM のコードページ 932）で読む。ユーザーのフォルダー名に ASCII 以外の文字があると、場所の文字が化けて書けない（Windows では確かめていない）
 - 「無いときだけ」ではなく「空のときだけ」書く。scoop は最初の導入で空の `config` を作る（定義の `pre_install`）。`%APPDATA%\bat\config` から写されたものや、手で書いたものは変えない
 - `-Encoding ASCII` にしたのは、BOM を付けないため
-  - Windows PowerShell 5.1 の `-Encoding UTF8` は BOM を付ける。bat は設定の各行の前後の空白を削ってから読むが、BOM は削らず、1 行目をファイルの名前として読んで失敗する（Linux の bat 0.26.1 で確かめた。[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-シェルのツールの任意節のブロックの確認2026-10-08)）
+  - Windows PowerShell 5.1 の `-Encoding UTF8` は BOM を付ける。bat は設定の各行の前後の空白を削ってから読むが、BOM は削らず、1 行目をファイルの名前として読んで失敗する（Linux の bat 0.26.1 で確かめた。検証記録: `docs/verification/windows-setup.md` の「付録: シェルのツールの任意節のブロックの確認（2026-10-08）」）
   - テーマの名前と 3 行の中身は ASCII だけ。改行は CRLF になるが、bat は行末の `\r` も削る（同じ記録）
 - `current\config` に書いた中身は、ハードリンクのもう一方の控え（`persist`）にも入るはず（Linux のハードリンクと PowerShell 7.5.3 では、同じ中身になった。Windows の NTFS と 5.1 では確かめていない）
 
@@ -545,7 +545,7 @@ Importing GPG key 0xCEA2757D:
 - PSFzf の読み込みは約 0.23 秒掛かる。Ctrl+T・Ctrl+R のスクリプト ブロックから読み、対応するハンドラーを呼ぶ。起動のときには読み込まない
 - キーから読むモジュールを `-Global` にするのは、その後のキーでも同じモジュールを使うため。PSFzf が無ければ、Ctrl+R は PSReadLine の `ReverseSearchHistory` を呼ぶ
 - `ll` は eza があるときだけ定義し、`--long --group-directories-first` と引数を渡す。`err` は 7 の `Get-Error -Newest 1` を呼ぶ。既存の `ls`・`cat` は置き換えない
-- 追加する行は合わせて約 0.1 秒の目安。負荷で起動の時間がばらつくので、個々の行の内訳と計り方は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
+- 追加する行は合わせて約 0.1 秒の目安。負荷で起動の時間がばらつくので、個々の行の内訳と計り方は検証記録に置く
 
 ### Windows PowerShell 5.1 のプロファイルに開発の設定を足す / 手順 1: 補足: 5.1 にする理由
 
@@ -567,7 +567,7 @@ Importing GPG key 0xCEA2757D:
 - 次に開く 5.1 は、ユーザーのモジュールの場所にある新しい版を先に読む。同じユーザーの管理者の窓も対象になる
 - 5.1 の予測の元は `History` だけで、候補は同じ行に出る。7 の CompletionPredictor と `ListView` の設定は 5.1 に足さない
 - 同梱の 2.0.0 は残す。うまく貼れなかった場合の復旧では、この項で保存した 2.4.5 の版のフォルダーだけを消す
-- 5.1 の起動は約 0.2 秒延びる目安。計り方と貼り付けの確認の範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)に置く
+- 5.1 の起動は約 0.2 秒延びる目安。計り方と貼り付けの確認の範囲は検証記録に置く
 
 ### Windows PowerShell 5.1 の PSReadLine を上げる / 手順 7: 補足: 名前を変えてから消す理由
 
@@ -615,7 +615,7 @@ Importing GPG key 0xCEA2757D:
   - `shopt -s histappend`: `/etc/bashrc` が対話のシェルで入れている（「共通の bash 設定」の手順 2）
 - **atuin（履歴を SQLite に持ち、同期もする）は使わない**: 履歴の検索は [fzf](../almalinux-setup.md) の Ctrl+R で足りる。[導入元一覧](../tool-catalog.md#cli-定番の置き換え)の行のまま
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)
+検証記録（`docs/verification/almalinux-setup.md`）
 
 #### シェルのツール
 
@@ -632,7 +632,7 @@ Importing GPG key 0xCEA2757D:
 
 ##### eza
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#eza-選択した方針)
+この節の検証記録: `docs/verification/shell-terminal.md` の「eza: 選択した方針」
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|
@@ -767,7 +767,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - 対話（`[y/N]`・パスワード・`Read-Host`・`choice.exe`・エディタ・TUI）のコマンドの後ろの行は、答えとして読まれず、対話が終わってから動く。`sudo` の後ろの行も捨てられない。そのため、対話のコマンドの後ろでも手順を分けず、`sudo` の後ろの行を `{ }` で囲まない
   - 子のシェル（`ssh`・`tmux`・`distrobox enter`・子の PowerShell など）の後ろの行は、その中ではなく、閉じた後の元のシェルで動き、`exec` の後ろの行は消える。PowerShell では、Ctrl+C が同じ入力の後ろの文も止める。こうなる所では、今までどおり手順を分ける
   - 貼っただけでは動かず、Enter で動く（bash は、末尾に改行があっても Enter を待つ）
-  - 実測は[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)
+  - 実測は検証記録の付録（`docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）
 
 ### 参照
 
