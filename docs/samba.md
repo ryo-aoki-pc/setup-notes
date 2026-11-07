@@ -60,13 +60,11 @@
 1. cifs-utils を入れ、カーネルのモジュールと、サーバーの 445/tcp に届くかを確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo dnf install -y cifs-utils
-     rpm -q cifs-utils
-     modinfo -n cifs
-     timeout 5 bash -c "exec 3<>/dev/tcp/${SERVER:?手順 1 の SERVER が空のまま}/445" && echo '445/tcp に届く'
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo dnf install -y cifs-utils
+   rpm -q cifs-utils
+   modinfo -n cifs
+   timeout 5 bash -c "exec 3<>/dev/tcp/${SERVER:?手順 1 の SERVER が空のまま}/445" && echo '445/tcp に届く'
    ```
 
    - 入っていれば、`パッケージ cifs-utils-… は既にインストールされています。`（英語の環境では `Package cifs-utils-… is already installed.`）と出る
@@ -282,11 +280,9 @@
 1. samba・samba-client・cifs-utils を入れる。
 
    ```bash
-   {
-     sudo dnf install -y samba samba-client cifs-utils
-     printf '\n\033[7m 確認 \033[0m\n'
-     rpm -q samba samba-client cifs-utils
-   }
+   sudo dnf install -y samba samba-client cifs-utils
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q samba samba-client cifs-utils
    ```
 
 1. 既定の smb.conf を退避して最小構成に置き換え、構文を検査する。
@@ -324,21 +320,17 @@
 1. SELinux の boolean `samba_enable_home_dirs` を on にする。
 
    ```bash
-   {
-     sudo setsebool -P samba_enable_home_dirs on
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
-   }
+   sudo setsebool -P samba_enable_home_dirs on
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
    ```
 
 1. firewalld で 445/tcp を開ける。
 
    ```bash
-   {
-     sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo firewall-cmd --list-ports               # 445/tcp が含まれる
-   }
+   sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo firewall-cmd --list-ports               # 445/tcp が含まれる
    ```
 
 1. OS のアカウントを確かめ、Samba ユーザーを登録する。
@@ -364,12 +356,10 @@
 1. smb.service を有効にして起動する。
 
    ```bash
-   {
-     sudo systemctl enable --now smb.service
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl is-active smb.service              # active
-     ss -ltnp | grep -E ':(139|445) '             # 445 だけが LISTEN。139 は出ない
-   }
+   sudo systemctl enable --now smb.service
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl is-active smb.service              # active
+   ss -ltnp | grep -E ':(139|445) '             # 445 だけが LISTEN。139 は出ない
    ```
 
 1. 別のマシンから、クライアントで接続する。
@@ -425,17 +415,15 @@
 1. SELinux で、smbd に `/root`（`admin_home_t`）の読み書きを許すモジュールを入れる。
 
    ```bash
-   {
-     cat > /tmp/samba_root_home.cil <<'EOF'
+   cat > /tmp/samba_root_home.cil <<'EOF'
    (allow smbd_t admin_home_t (dir (add_name create getattr ioctl link lock open read remove_name rename reparent rmdir search setattr unlink watch watch_reads write)))
    (allow smbd_t admin_home_t (file (append create getattr ioctl link lock open read rename setattr unlink watch watch_reads write)))
    (allow smbd_t admin_home_t (lnk_file (append create getattr ioctl link lock read rename setattr unlink watch watch_reads write)))
    EOF
-     sudo semodule -i /tmp/samba_root_home.cil
-     rm /tmp/samba_root_home.cil
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo semodule -l | grep -x samba_root_home   # samba_root_home
-   }
+   sudo semodule -i /tmp/samba_root_home.cil
+   rm /tmp/samba_root_home.cil
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo semodule -l | grep -x samba_root_home   # samba_root_home
    ```
 
    - 最後に `samba_root_home` の 1 行が出ればよい
@@ -571,15 +559,13 @@
 1. `mount.cifs` でマウントして書き込み、`smbstatus` でセッションを確かめる。
 
    ```bash
-   {
-     sudo mkdir -p /mnt/smbtest
-     sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
-     printf '\n\033[7m 確認 \033[0m\n'
-     mount | grep cifs                            # vers=3.1.1
-     echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
-     ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
-     sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
-   }
+   sudo mkdir -p /mnt/smbtest
+   sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
+   printf '\n\033[7m 確認 \033[0m\n'
+   mount | grep cifs                            # vers=3.1.1
+   echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
+   ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
+   sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
    ```
 
    - **次の手順は、`smbstatus` の出力を確かめてから貼る**（この項の手順 6 でアンマウントすると見えなくなる）
@@ -614,12 +600,10 @@
 1. root のホームも公開したときだけ、作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
-     sudo rm /root/smb-root-test.txt
-     sudo ausearch -m AVC -ts recent              # <no matches>
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
+   sudo rm /root/smb-root-test.txt
+   sudo ausearch -m AVC -ts recent              # <no matches>
    ```
 
    - ファイルは `root root` の所有で、ラベルは `admin_home_t`

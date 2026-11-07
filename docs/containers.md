@@ -693,13 +693,11 @@
 1. システムの podman の API ソケットを有効にして、root で応答を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo systemctl enable --now podman.socket
-     systemctl is-active podman.socket
-     sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
-     sudo podman --remote version --format '{{.Server.Version}}'
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo systemctl enable --now podman.socket
+   systemctl is-active podman.socket
+   sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
+   sudo podman --remote version --format '{{.Server.Version}}'
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
@@ -717,11 +715,9 @@
 1. 確認用のコンテナを root で動かす。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
-     sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
+   sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
    ```
 
    - コンテナの ID の後に、`lazydocker-root-web Up Less than a second` のように出る
@@ -741,11 +737,9 @@
 1. 確認用のコンテナが止まったことと、root の設定ファイルができたことを確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
-     sudo ls -l /root/.config/lazydocker
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
+   sudo ls -l /root/.config/lazydocker
    ```
 
    - `lazydocker-root-web Exited (0) ...` と出ればよい

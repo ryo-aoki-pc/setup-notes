@@ -66,12 +66,10 @@
 1. 一致したら、鍵を rpm に取り込み、入ったか確かめて、落としたファイルを消す。
 
    ```bash
-   {
-     sudo rpm --import /tmp/oracle_vbox_2016.asc
-     printf '\n\033[7m 確認 \033[0m\n'
-     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i virtualbox
-     rm -f /tmp/oracle_vbox_2016.asc
-   }
+   sudo rpm --import /tmp/oracle_vbox_2016.asc
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i virtualbox
+   rm -f /tmp/oracle_vbox_2016.asc
    ```
 
    - `gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) ...` が出れば入っている
@@ -79,8 +77,7 @@
 1. repo ファイルを置き、`sudo` の dnf でメタデータの鍵を受け入れる。
 
    ```bash
-   {
-     sudo tee /etc/yum.repos.d/virtualbox.repo >/dev/null <<'EOF'
+   sudo tee /etc/yum.repos.d/virtualbox.repo >/dev/null <<'EOF'
    [virtualbox]
    name=Oracle VirtualBox for EL$releasever - $basearch
    baseurl=https://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch
@@ -89,10 +86,9 @@
    repo_gpgcheck=1
    gpgkey=https://www.virtualbox.org/download/oracle_vbox_2016.asc
    EOF
-     cat /etc/yum.repos.d/virtualbox.repo
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo dnf makecache --repo virtualbox
-   }
+   cat /etc/yum.repos.d/virtualbox.repo
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo dnf makecache --repo virtualbox
    ```
 
    - 最初の 1 回だけ鍵の取り込みを聞かれる
@@ -144,12 +140,10 @@
 1. カーネルモジュールのビルドに要るものを、VirtualBox より先に入れて確かめる。
 
    ```bash
-   {
-     sudo dnf install -y gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
-     printf '\n\033[7m 確認 \033[0m\n'
-     rpm -q gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
-     ls -d "/lib/modules/$(uname -r)/build/include"
-   }
+   sudo dnf install -y gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+   ls -d "/lib/modules/$(uname -r)/build/include"
    ```
 
    - 6 つとも版が出て、最後の行がディレクトリを返せばよい
@@ -192,12 +186,10 @@
 1. KVM が仮想化支援を先に取らないように、modprobe.d に設定を置いて確かめる。
 
    ```bash
-   {
-     echo 'options kvm enable_virt_at_load=0' | sudo tee /etc/modprobe.d/kvm-virtualbox.conf
-     printf '\n\033[7m 確認 \033[0m\n'
-     cat /etc/modprobe.d/kvm-virtualbox.conf
-     modprobe -c | grep enable_virt_at_load
-   }
+   echo 'options kvm enable_virt_at_load=0' | sudo tee /etc/modprobe.d/kvm-virtualbox.conf
+   printf '\n\033[7m 確認 \033[0m\n'
+   cat /etc/modprobe.d/kvm-virtualbox.conf
+   modprobe -c | grep enable_virt_at_load
    ```
 
    - `cat` と `modprobe -c` のどちらにも `options kvm enable_virt_at_load=0` が出ればよい
@@ -206,11 +198,9 @@
 1. USB 機器を VM に渡すときだけ、自分を `vboxusers` に入れて確かめる。
 
    ```bash
-   {
-     sudo usermod -aG vboxusers "${USER}"
-     printf '\n\033[7m 確認 \033[0m\n'
-     getent group vboxusers
-   }
+   sudo usermod -aG vboxusers "${USER}"
+   printf '\n\033[7m 確認 \033[0m\n'
+   getent group vboxusers
    ```
 
    - **VM を動かすだけなら要らない**（この手順は飛ばしてこの項の手順 3 へ）
@@ -679,14 +669,12 @@
 1. Secure Boot が有効なときだけ、VM の端末で証明書を置き、MOK への登録を予約する。
 
    ```bash
-   {
-     sudo install -d -m 0700 /var/lib/shim-signed/mok
-     sudo install -m 0644 ~/MOK.der /var/lib/shim-signed/mok/MOK.der
-     rm ~/MOK.der
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo ls -l /var/lib/shim-signed/mok
-     sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
-   }
+   sudo install -d -m 0700 /var/lib/shim-signed/mok
+   sudo install -m 0644 ~/MOK.der /var/lib/shim-signed/mok/MOK.der
+   rm ~/MOK.der
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo ls -l /var/lib/shim-signed/mok
+   sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
    ```
 
    - `MOK.der` だけが並ぶ（秘密鍵は VM に置かない）
@@ -783,12 +771,10 @@
 1. VM の端末で、送ったファイルからイメージを取り込む。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo podman load -i ~/vbox-ga.tar
-     rm ~/vbox-ga.tar
-     sudo podman images
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo podman load -i ~/vbox-ga.tar
+   rm ~/vbox-ga.tar
+   sudo podman images
    ```
 
    - `Loaded image: localhost/vbox-ga:latest` と `Loaded image: quay.io/almalinuxorg/atomic-desktop-gnome:latest` が出る
@@ -1066,18 +1052,16 @@
 1. 両コンテナと、コンテナをまたぐ libvirt の接続を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo podman exec kvm systemctl is-system-running         # running (degraded ではない)
-     sudo podman exec kvm ls -l /run/libvirt/virtqemud-sock   # srw-rw---- root libvirt
-     ./kvm.sh virsh list --all                                # 空の一覧 (ヘッダだけ) で可
-     if sudo podman container exists kvm-gui; then
-       sudo podman exec kvm-gui systemctl is-system-running                          # running
-       sudo podman exec kvm-gui runuser -u "$USER" -- virsh -c qemu:///system list   # 一般ユーザーが kvm-gui から kvm の libvirt に接続できること
-     else
-       echo 'kvm-gui が無い (画面なし): skip'
-     fi
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo podman exec kvm systemctl is-system-running         # running (degraded ではない)
+   sudo podman exec kvm ls -l /run/libvirt/virtqemud-sock   # srw-rw---- root libvirt
+   ./kvm.sh virsh list --all                                # 空の一覧 (ヘッダだけ) で可
+   if sudo podman container exists kvm-gui; then
+     sudo podman exec kvm-gui systemctl is-system-running                          # running
+     sudo podman exec kvm-gui runuser -u "$USER" -- virsh -c qemu:///system list   # 一般ユーザーが kvm-gui から kvm の libvirt に接続できること
+   else
+     echo 'kvm-gui が無い (画面なし): skip'
+   fi
    ```
 
    - `kvm` の `systemctl is-system-running` が `running` (`degraded` ではない)

@@ -45,18 +45,16 @@
 1. sudo をパスワード無しで使えるようにする（パスワードを 1 回聞かれる）。
 
    ```bash
-   {
-     if ! id -nG | grep -qw wheel; then
-       echo '中断: このユーザーは wheel の一員ではない（インストールのときに管理者にしたユーザーで貼る）' >&2
-     else
-       printf '\n\033[7m 確認 \033[0m\n'
-       printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo visudo -cf - &&
-         printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/nopasswd
-       sudo visudo -c
-     fi
-     sudo -k
-     sudo -n -v && sudo -n true && echo 'sudo はパスワードを聞かない'
-   }
+   if ! id -nG | grep -qw wheel; then
+     echo '中断: このユーザーは wheel の一員ではない（インストールのときに管理者にしたユーザーで貼る）' >&2
+   else
+     printf '\n\033[7m 確認 \033[0m\n'
+     printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo visudo -cf - &&
+       printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/nopasswd
+     sudo visudo -c
+   fi
+   sudo -k
+   sudo -n -v && sudo -n true && echo 'sudo はパスワードを聞かない'
    ```
 
    - `[sudo] <USER> のパスワード:` にはログインのパスワードを入れる
@@ -169,14 +167,12 @@
 1. SSH の待ち受けとファイアウォールを確かめ、この PC の IP アドレスを見る。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl is-enabled sshd
-     systemctl is-active sshd
-     sudo firewall-cmd --query-service=ssh
-     sudo firewall-cmd --permanent --query-service=ssh
-     ip -4 -brief address show scope global
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl is-enabled sshd
+   systemctl is-active sshd
+   sudo firewall-cmd --query-service=ssh
+   sudo firewall-cmd --permanent --query-service=ssh
+   ip -4 -brief address show scope global
    ```
 
    - `enabled`・`active`・`yes`・`yes` と、この PC の IP アドレスが出ればよい（この項の手順 4 は飛ばす）
@@ -185,15 +181,13 @@
 1. SSH の待ち受けか、ファイアウォールの ssh が違うときだけ、直す。
 
    ```bash
-   {
-     if ! rpm -q openssh-server; then sudo dnf install -y openssh-server; fi
-     sudo systemctl enable --now sshd
-     sudo firewall-cmd --permanent --add-service=ssh
-     sudo firewall-cmd --reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl is-active sshd
-     sudo firewall-cmd --query-service=ssh
-   }
+   if ! rpm -q openssh-server; then sudo dnf install -y openssh-server; fi
+   sudo systemctl enable --now sshd
+   sudo firewall-cmd --permanent --add-service=ssh
+   sudo firewall-cmd --reload
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl is-active sshd
+   sudo firewall-cmd --query-service=ssh
    ```
 
    - `active` と `yes` が出ればよい
@@ -201,16 +195,14 @@
 1. ログ（journal）を、再起動の後も残るようにディスクに書く。
 
    ```bash
-   {
-     sudo mkdir -p /etc/systemd/journald.conf.d
-     printf '[Journal]\nStorage=persistent\n' | sudo tee /etc/systemd/journald.conf.d/50-persistent.conf >/dev/null
-     sudo systemctl restart systemd-journald
-     sudo journalctl --flush
-     sudo systemd-tmpfiles --create --prefix /var/log/journal
-     printf '\n\033[7m 確認 \033[0m\n'
-     ls -ld /var/log/journal
-     journalctl --disk-usage
-   }
+   sudo mkdir -p /etc/systemd/journald.conf.d
+   printf '[Journal]\nStorage=persistent\n' | sudo tee /etc/systemd/journald.conf.d/50-persistent.conf >/dev/null
+   sudo systemctl restart systemd-journald
+   sudo journalctl --flush
+   sudo systemd-tmpfiles --create --prefix /var/log/journal
+   printf '\n\033[7m 確認 \033[0m\n'
+   ls -ld /var/log/journal
+   journalctl --disk-usage
    ```
 
    - `drwxr-sr-x+ … root systemd-journal … /var/log/journal` の行と、journal の大きさが出ればよい
@@ -230,14 +222,12 @@
 1. kdump が有効なときだけ、止めて、カーネルが落ちたときのために予約しているメモリーを外す（効くのは再起動の後）。
 
    ```bash
-   {
-     sudo systemctl disable --now kdump
-     sudo sed -i 's/^auto_reset_crashkernel yes$/auto_reset_crashkernel no/' /etc/kdump.conf
-     sudo grubby --update-kernel=ALL --remove-args=crashkernel
-     printf '\n\033[7m 確認 \033[0m\n'
-     grep -n '^auto_reset_crashkernel' /etc/kdump.conf
-     sudo grubby --info=ALL | grep -E '^args='
-   }
+   sudo systemctl disable --now kdump
+   sudo sed -i 's/^auto_reset_crashkernel yes$/auto_reset_crashkernel no/' /etc/kdump.conf
+   sudo grubby --update-kernel=ALL --remove-args=crashkernel
+   printf '\n\033[7m 確認 \033[0m\n'
+   grep -n '^auto_reset_crashkernel' /etc/kdump.conf
+   sudo grubby --info=ALL | grep -E '^args='
    ```
 
    - `auto_reset_crashkernel no` と、`crashkernel=` を含まない `args=` の行が出ればよい
@@ -263,12 +253,10 @@
 1. EPEL が無ければ入れ、有効になったか確かめる。
 
    ```bash
-   {
-     if ! dnf repolist enabled | grep -qE '^epel'; then sudo dnf install -y epel-release; fi
-     printf '\n\033[7m 確認 \033[0m\n'
-     rpm -q epel-release
-     dnf repolist enabled | grep -E '^epel'
-   }
+   if ! dnf repolist enabled | grep -qE '^epel'; then sudo dnf install -y epel-release; fi
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q epel-release
+   dnf repolist enabled | grep -E '^epel'
    ```
 
    - `epel-release` の版と、`epel` の行が出れば有効になっている
@@ -293,11 +281,9 @@
 1. 一致したら、鍵を rpm に取り込み、入ったか確かめる。
 
    ```bash
-   {
-     sudo rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10'
-     printf '\n\033[7m 確認 \033[0m\n'
-     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i fusion
-   }
+   sudo rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10'
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i fusion
    ```
 
    - `rpm --import` は何も表示しない
@@ -334,12 +320,10 @@
 1. flatpak を確かめ（無ければ入れ）、登録されているリモートを見る。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     if ! rpm -q flatpak; then sudo dnf install -y flatpak; fi
-     flatpak --version
-     flatpak remotes --show-details
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   if ! rpm -q flatpak; then sudo dnf install -y flatpak; fi
+   flatpak --version
+   flatpak remotes --show-details
    ```
 
    - `flatpak-1.16.0-…` と `Flatpak 1.16.0` が出る
@@ -358,11 +342,9 @@
 1. Flathub を system に登録して、登録されたか確かめる。
 
    ```bash
-   {
-     sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-     printf '\n\033[7m 確認 \033[0m\n'
-     flatpak remotes --show-details
-   }
+   sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+   printf '\n\033[7m 確認 \033[0m\n'
+   flatpak remotes --show-details
    ```
 
    - `flathub` の行が出て、`Options` の列が `system` になっていればよい
@@ -455,13 +437,11 @@
 1. IBus の GNOME 向けユーザーサービスの PATH を、Homebrew を含まない固定値にする。
 
    ```bash
-   {
-     mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
-     printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
-     systemctl --user daemon-reload
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
-   }
+   mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
+   printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
+   systemctl --user daemon-reload
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
    ```
 
    - `Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` が出ればよい
@@ -525,17 +505,15 @@
 1. sudo の `secure_path` の末尾に Homebrew を足すファイルを置き、`sudo` の PATH を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
-     elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
-     else
-       line='Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin'
-       echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
-       sudo visudo -c
-     fi
-     sudo bash -c 'printenv PATH; command -v brew'
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
+   elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
+   else
+     line='Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin'
+     echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
+     sudo visudo -c
+   fi
+   sudo bash -c 'printenv PATH; command -v brew'
    ```
 
    - `stdin: parsed OK`・`/etc/sudoers: parsed OK`・`/etc/sudoers.d/homebrew: parsed OK` の 3 行が出る
@@ -654,11 +632,9 @@
 1. 更新を入れるタイマーを有効にする。
 
    ```bash
-   {
-     sudo systemctl enable --now dnf-automatic-install.timer
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl list-timers 'dnf-automatic*' --no-pager
-   }
+   sudo systemctl enable --now dnf-automatic-install.timer
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl list-timers 'dnf-automatic*' --no-pager
    ```
 
    - `dnf-automatic-install.timer` の行に、次に動く日時（`NEXT`）が出ればよい
@@ -676,12 +652,10 @@
 1. 今すぐ 1 回動かして、動くことを確かめる。
 
    ```bash
-   {
-     sudo systemctl start dnf-automatic-install.service
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl status dnf-automatic-install.service --no-pager | head -n 5
-     journalctl -u dnf-automatic-install.service -b --no-pager | tail -n 5
-   }
+   sudo systemctl start dnf-automatic-install.service
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl status dnf-automatic-install.service --no-pager | head -n 5
+   journalctl -u dnf-automatic-install.service -b --no-pager | tail -n 5
    ```
 
    - `Active: inactive (dead)` と、`… Finished dnf-automatic-install.service …` の行が出ればよい（更新が無ければすぐに終わる）
@@ -806,12 +780,10 @@
 1. linger が無効のときだけ、linger を有効にして、有効になったか確かめる。
 
    ```bash
-   {
-     sudo loginctl enable-linger "${USER}"
-     printf '\n\033[7m 確認 \033[0m\n'
-     loginctl show-user "$(id -u)" -p Linger
-     ls /var/lib/systemd/linger
-   }
+   sudo loginctl enable-linger "${USER}"
+   printf '\n\033[7m 確認 \033[0m\n'
+   loginctl show-user "$(id -u)" -p Linger
+   ls /var/lib/systemd/linger
    ```
 
    - `enable-linger` は何も出さない
@@ -1200,11 +1172,9 @@
 1. OS 全体で、サスペンドとハイバネートを止める。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-     systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+   systemctl is-enabled sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
    ```
 
    - `Created symlink '/etc/systemd/system/sleep.target' → '/dev/null'.` のような行が 5 つ出て、`masked` が 5 行出ればよい
@@ -1213,16 +1183,14 @@
 1. 蓋を閉じても何もしないように、logind のドロップインを置く。
 
    ```bash
-   {
-     sudo mkdir -p /etc/systemd/logind.conf.d
-     sudo tee /etc/systemd/logind.conf.d/90-lid.conf >/dev/null <<'EOF'
+   sudo mkdir -p /etc/systemd/logind.conf.d
+   sudo tee /etc/systemd/logind.conf.d/90-lid.conf >/dev/null <<'EOF'
    [Login]
    HandleLidSwitch=ignore
    EOF
-     sudo systemctl reload systemd-logind
-     printf '\n\033[7m 確認 \033[0m\n'
-     busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
-   }
+   sudo systemctl reload systemd-logind
+   printf '\n\033[7m 確認 \033[0m\n'
+   busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
    ```
 
    - `s "ignore"` と出ればよい
@@ -1550,12 +1518,10 @@
 1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
 
    ```bash
-   {
-     sudo dnf install -y 'dnf-command(config-manager)'
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-     cat /etc/yum.repos.d/gh-cli.repo
-   }
+   sudo dnf install -y 'dnf-command(config-manager)'
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+   cat /etc/yum.repos.d/gh-cli.repo
    ```
 
    - `repo の追加: https://cli.github.com/packages/rpm/gh-cli.repo` と出て、`/etc/yum.repos.d/gh-cli.repo` ができる
@@ -2336,11 +2302,9 @@
 1. Node.js が無ければ dnf で入れ、版を確かめる。
 
    ```bash
-   {
-     command -v node >/dev/null || sudo dnf install -y nodejs nodejs-npm
-     printf '\n\033[7m 確認 \033[0m\n'
-     node --version
-   }
+   command -v node >/dev/null || sudo dnf install -y nodejs nodejs-npm
+   printf '\n\033[7m 確認 \033[0m\n'
+   node --version
    ```
 
    - `v22.` 以上の版が出ればよい
@@ -2482,11 +2446,9 @@
 1. fingerprint が一致したら署名鍵を取り込み、確かめて鍵ファイルを消す。
 
    ```bash
-   {
-     sudo rpm --import /tmp/microsoft.asc
-     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i microsoft
-     rm -f /tmp/microsoft.asc
-   }
+   sudo rpm --import /tmp/microsoft.asc
+   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i microsoft
+   rm -f /tmp/microsoft.asc
    ```
 
    - `gpg-pubkey-be1229cf-5631588c Microsoft (Release signing) ...` が出れば入っている
@@ -2494,8 +2456,7 @@
 1. リポジトリを追加する。
 
    ```bash
-   {
-     sudo tee /etc/yum.repos.d/vscode.repo >/dev/null <<'EOF'
+   sudo tee /etc/yum.repos.d/vscode.repo >/dev/null <<'EOF'
    [vscode]
    name=Visual Studio Code
    baseurl=https://packages.microsoft.com/yumrepos/vscode
@@ -2503,19 +2464,16 @@
    gpgcheck=1
    gpgkey=https://packages.microsoft.com/keys/microsoft.asc
    EOF
-     printf '\n\033[7m 確認 \033[0m\n'
-     cat /etc/yum.repos.d/vscode.repo
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   cat /etc/yum.repos.d/vscode.repo
    ```
 
 1. 何が入るかを先に見てから、VS Code を入れる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo dnf install --assumeno code
-     sudo dnf install code
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo dnf install --assumeno code
+   sudo dnf install code
    ```
 
    - 先に何が入るかだけ見る（`--assumeno` は必ず中断する）
@@ -2750,11 +2708,9 @@
 1. 一致したら、鍵を rpm に取り込み、入ったか確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo rpm --import https://packages.mozilla.org/rpm/firefox/signing-key.gpg
-     rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo rpm --import https://packages.mozilla.org/rpm/firefox/signing-key.gpg
+   rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i mozilla
    ```
 
    - `rpm --import` は期限切れの副鍵についての warning を出すが、問題ない
@@ -2763,8 +2719,7 @@
 1. Mozilla のリポジトリを追加し、入手できる版を見る。
 
    ```bash
-   {
-     sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
+   sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
    [mozilla]
    name=Mozilla Packages
    baseurl=https://packages.mozilla.org/rpm/firefox
@@ -2774,9 +2729,8 @@
    gpgkey=https://packages.mozilla.org/rpm/firefox/signing-key.gpg
    priority=10
    EOF
-     printf '\n\033[7m 確認 \033[0m\n'
-     dnf -q list --showduplicates "${FF_PKG}" | tail -6
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   dnf -q list --showduplicates "${FF_PKG}" | tail -6
    ```
 
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
@@ -2890,8 +2844,7 @@
 1. Trivy の公式 dnf リポジトリを登録し、ファイルと版を確かめてから Trivy を入れる。
 
    ```bash
-   {
-     sudo tee /etc/yum.repos.d/trivy.repo >/dev/null <<'EOF'
+   sudo tee /etc/yum.repos.d/trivy.repo >/dev/null <<'EOF'
    [trivy]
    name=Trivy repository
    baseurl=https://aquasecurity.github.io/trivy-repo/rpm/releases/$basearch/
@@ -2899,11 +2852,10 @@
    enabled=1
    gpgkey=https://aquasecurity.github.io/trivy-repo/rpm/public.key
    EOF
-     printf '\n\033[7m 確認 \033[0m\n'
-     cat /etc/yum.repos.d/trivy.repo
-     dnf -q list --showduplicates trivy
-     sudo dnf install trivy
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   cat /etc/yum.repos.d/trivy.repo
+   dnf -q list --showduplicates trivy
+   sudo dnf install trivy
    ```
 
    - ファイルに `gpgcheck=1` があることを確かめる
@@ -3229,12 +3181,10 @@
 1. パスワードでの SSH のログインを切る。
 
    ```bash
-   {
-     printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' | sudo install -m 0600 /dev/stdin /etc/ssh/sshd_config.d/40-pubkey-only.conf
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo sshd -t && sudo systemctl reload sshd
-     sudo sshd -T | grep -Ei '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
-   }
+   printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' | sudo install -m 0600 /dev/stdin /etc/ssh/sshd_config.d/40-pubkey-only.conf
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo sshd -t && sudo systemctl reload sshd
+   sudo sshd -T | grep -Ei '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
    ```
 
    - `passwordauthentication no`・`kbdinteractiveauthentication no`・`pubkeyauthentication yes` が出ればよい

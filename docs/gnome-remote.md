@@ -62,15 +62,13 @@
 1. 再起動の後も SSH で入り直せて、GNOME が自動で起動するかを確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     systemctl is-enabled sshd.service
-     sudo firewall-cmd --permanent --query-service=ssh
-     systemctl get-default
-     systemctl is-enabled gdm.service
-     cat /sys/class/drm/card*-*/status 2>/dev/null | grep -cx connected
-     lsblk -rno TYPE | grep -cx crypt
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   systemctl is-enabled sshd.service
+   sudo firewall-cmd --permanent --query-service=ssh
+   systemctl get-default
+   systemctl is-enabled gdm.service
+   cat /sys/class/drm/card*-*/status 2>/dev/null | grep -cx connected
+   lsblk -rno TYPE | grep -cx crypt
    ```
 
    - `enabled`・`yes`・`graphical.target`・`enabled`・`1` 以上・`0` の 6 行が出ればよい
@@ -449,11 +447,9 @@
 1. 起動画面（plymouth）を止め、自動ログインの後にログイン画面が前に出ないようにする。
 
    ```bash
-   {
-     sudo grubby --update-kernel=ALL --args="rd.plymouth=0 plymouth.enable=0"
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo grubby --info=DEFAULT | grep '^args='
-   }
+   sudo grubby --update-kernel=ALL --args="rd.plymouth=0 plymouth.enable=0"
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo grubby --info=DEFAULT | grep '^args='
    ```
 
    - `args=` の行に `rd.plymouth=0 plymouth.enable=0` が入っていればよい
@@ -1142,16 +1138,14 @@
 1. 今の状態を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
-       echo "${s} $(loginctl show-session "${s}" -p Service --value)"
-     done
-     systemctl is-enabled "gnome-headless-session@${USER}.service"
-     systemctl --user is-enabled gnome-remote-desktop-headless.service
-     sudo firewall-cmd --list-ports
-     sudo firewall-cmd --list-rich-rules
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
+     echo "${s} $(loginctl show-session "${s}" -p Service --value)"
+   done
+   systemctl is-enabled "gnome-headless-session@${USER}.service"
+   systemctl --user is-enabled gnome-remote-desktop-headless.service
+   sudo firewall-cmd --list-ports
+   sudo firewall-cmd --list-rich-rules
    ```
 
    - `grdctl --headless status` では確かめない
@@ -1294,13 +1288,11 @@
 1. 証明書と鍵のパーミッションと、SELinux のコンテキストを整える。
 
    ```bash
-   {
-     sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
-     sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-     sudo restorecon -Rv /var/lib/gnome-remote-desktop
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
-   }
+   sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+   sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   sudo restorecon -Rv /var/lib/gnome-remote-desktop
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
    ```
 
    - `rdp-tls.key` が `-rw-------`、`rdp-tls.crt` が `-rw-r--r--` で、どちらも所有者が `gnome-remote-desktop`、コンテキストに `gnome_remote_desktop_var_lib_t` が出ればよい
@@ -1308,11 +1300,9 @@
 1. grdctl で、システムデーモンに鍵と証明書を設定し、RDP を有効にする。
 
    ```bash
-   {
-     sudo grdctl --system rdp set-tls-key  /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
-     sudo grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
-     sudo grdctl --system rdp enable
-   }
+   sudo grdctl --system rdp set-tls-key  /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
+   sudo grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   sudo grdctl --system rdp enable
    ```
 
    - `sudo grdctl --system status` に表示される **TLS fingerprint を控えておく**（この項の手順 10・11 で使う）
@@ -1321,17 +1311,15 @@
 1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
    ```bash
-   {
-     sudo mkdir -p /etc/systemd/system/gnome-remote-desktop.service.d
-     sudo tee /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf >/dev/null <<'CONF'
+   sudo mkdir -p /etc/systemd/system/gnome-remote-desktop.service.d
+   sudo tee /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf >/dev/null <<'CONF'
    [Unit]
    After=gdm.service
    CONF
-     sudo systemctl daemon-reload
-     sudo systemctl enable --now gnome-remote-desktop.service
-     sudo firewall-cmd --permanent --add-service=rdp
-     sudo firewall-cmd --reload
-   }
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now gnome-remote-desktop.service
+   sudo firewall-cmd --permanent --add-service=rdp
+   sudo firewall-cmd --reload
    ```
 
    - ドロップイン（`10-after-gdm.conf`）は、起動のときにこのデーモンを GDM より後に立ち上げる
@@ -1356,23 +1344,19 @@
 1. サーバー側の状態を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo grdctl --system status              # Status: enabled / Username: (hidden)
-     systemctl status gnome-remote-desktop    # active (running)
-     ss -lntp | grep 3389                     # *:3389 で LISTEN
-     sudo firewall-cmd --list-services        # rdp が含まれる
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo grdctl --system status              # Status: enabled / Username: (hidden)
+   systemctl status gnome-remote-desktop    # active (running)
+   ss -lntp | grep 3389                     # *:3389 で LISTEN
+   sudo firewall-cmd --list-services        # rdp が含まれる
    ```
 
 1. 鍵と証明書が対応しているかを確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
-     sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo openssl x509 -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout -modulus | openssl sha256
+   sudo openssl rsa  -in /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -noout -modulus | openssl sha256
    ```
 
    - 2 つのハッシュが一致すれば、ペアとして正しい
@@ -1462,14 +1446,12 @@
 1. デーモンを起動し直す必要があるときは、止めて待ってから起動する。
 
    ```bash
-   {
-     sudo systemctl stop gnome-remote-desktop.service
-     sleep 5
-     sudo systemctl start gnome-remote-desktop.service
-     sleep 5
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -E 'GetManagedObjects|RDP server started'
-   }
+   sudo systemctl stop gnome-remote-desktop.service
+   sleep 5
+   sudo systemctl start gnome-remote-desktop.service
+   sleep 5
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo journalctl --no-pager _PID="$(systemctl show -p MainPID --value gnome-remote-desktop.service)" | grep -E 'GetManagedObjects|RDP server started'
    ```
 
    - `RDP server started` の 1 行だけが出ればよい
@@ -1478,12 +1460,10 @@
 1. ヘッドレスのセッションがある PC では、そのユーザーのシェルで、受け渡し役のデーモンを再起動する。
 
    ```bash
-   {
-     systemctl --user restart gnome-remote-desktop-handover.service
-     sleep 3
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo journalctl --no-pager _PID="$(systemctl --user show -p MainPID --value gnome-remote-desktop-handover.service)" | grep 'RDP server started'
-   }
+   systemctl --user restart gnome-remote-desktop-handover.service
+   sleep 3
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo journalctl --no-pager _PID="$(systemctl --user show -p MainPID --value gnome-remote-desktop-handover.service)" | grep 'RDP server started'
    ```
 
    - `RDP server started` と出ればよい

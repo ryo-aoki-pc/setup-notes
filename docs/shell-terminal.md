@@ -944,11 +944,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. ssh 先で、sshd が `TERM_PROGRAM` を受け取るようにする。
 
    ```bash
-   {
-     echo 'AcceptEnv TERM_PROGRAM' | sudo tee /etc/ssh/sshd_config.d/50-wezterm.conf
-     sudo sshd -t && sudo systemctl reload sshd
-     sudo sshd -T | grep -i '^acceptenv'
-   }
+   echo 'AcceptEnv TERM_PROGRAM' | sudo tee /etc/ssh/sshd_config.d/50-wezterm.conf
+   sudo sshd -t && sudo systemctl reload sshd
+   sudo sshd -T | grep -i '^acceptenv'
    ```
 
    - 最後に `acceptenv TERM_PROGRAM` と出ればよい

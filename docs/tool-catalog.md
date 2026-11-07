@@ -216,8 +216,7 @@ Meld は GUI の規則の 4 番目にあたる。
 **Google Chrome**（Google は `.repo` ファイルを配っていないので、自分で置く）:
 
 ```bash
-{
-  sudo tee /etc/yum.repos.d/google-chrome.repo >/dev/null <<'EOF'
+sudo tee /etc/yum.repos.d/google-chrome.repo >/dev/null <<'EOF'
 [google-chrome]
 name=google-chrome
 baseurl=https://dl.google.com/linux/chrome/rpm/stable/$basearch
@@ -225,9 +224,8 @@ enabled=1
 gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
 EOF
-  sudo dnf install -y google-chrome-stable
-  google-chrome-stable --version
-}
+sudo dnf install -y google-chrome-stable
+google-chrome-stable --version
 ```
 
 - `google-chrome-stable` の導入時の処理（rpm の scriptlet）は、同じ `/etc/yum.repos.d/google-chrome.repo` を書き直す
@@ -237,11 +235,9 @@ EOF
 **mise**:
 
 ```bash
-{
-  sudo dnf config-manager --add-repo https://mise.jdx.dev/rpm/mise.repo
-  sudo dnf install -y mise
-  mise --version
-}
+sudo dnf config-manager --add-repo https://mise.jdx.dev/rpm/mise.repo
+sudo dnf install -y mise
+mise --version
 ```
 
 鍵を確かめる場合、登録・導入のときに取り込まれる鍵の fingerprint は次の値だった（調査日）。
