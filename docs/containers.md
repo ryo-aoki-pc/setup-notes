@@ -219,7 +219,6 @@
 
 #### Podman: 使い方の基本
 
-
 | コマンド | 用途 |
 |---|---|
 | `podman ps -a` | コンテナの一覧（止まっているものも） |
@@ -288,10 +287,9 @@
 - **Homebrew の formula が podman を連れてくることがある**: podman-compose などを Homebrew で入れると、依存の podman が `/usr/bin/podman` を隠す（[ツール一覧](tool-catalog.md#注意点)）
   - システムの podman との互換性が要るものや、別の podman を依存で入れるものは RPM を選ぶ
   - [画像の道具](almalinux-setup.md#画像の道具) の hadolint・dive と [lazydocker](#lazydocker) は、RPM の提供状況などを比べて Homebrew を選んでいる
-- この項の手順 7 の API ソケットにつなげると、自分のコンテナを何でも操作できる。ソケットの権限（`srw-rw----`、持ち主は自分）を変えない
-- この項の手順 1 の `:Z` は指定したディレクトリの SELinux ラベルを付け替える。ホーム全体やシステムのディレクトリには付けず、コンテナ用の `~/hello-web` だけに付ける
-- この項の手順 3 で再起動すると、SSH の接続は切れる
-- ボリュームの `:Z` は SELinux のラベルを付け替える。ホーム全体やシステムのディレクトリには付けず、コンテナ用のディレクトリだけに付ける
+- [Podman](#podman)の手順 7 の API ソケットにつなげると、自分のコンテナを何でも操作できる。ソケットの権限（`srw-rw----`、持ち主は自分）を変えない
+- [Podman: Quadlet で自動起動する](#podman-quadlet-で自動起動する)の手順 1 の `:Z` は指定したディレクトリの SELinux ラベルを付け替える。ホーム全体やシステムのディレクトリには付けず、コンテナ用の `~/hello-web` だけに付ける
+- [Podman: Quadlet で自動起動する](#podman-quadlet-で自動起動する)の手順 3 で再起動すると、SSH の接続は切れる
 
 **[Podman](#podman)の手順 1**
 
@@ -299,7 +297,7 @@
 
 **[Podman](#podman)の手順 1: Server の環境では最初から入っている**
 
-実測は検証記録（`docs/verification/podman.md` の「実施手順 / 手順 1 補足 server の環境では最初から入っている」）
+実測は検証記録（`docs/verification/podman.md` の「実施手順 / 手順 1: 補足: Server の環境では最初から入っている」）
 
 AlmaLinux 10 のインストーラのグループ定義（AppStream の comps）では、Server と Server with GUI の環境に「コンテナー管理」（`container-management`）のグループが入っている。
 
@@ -429,7 +427,6 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 
-
 - PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する) で動かす（[podman-compose の補足と注意点](#podman-compose-の補足と注意点)の「注意点」）
 
 > [!IMPORTANT]
@@ -518,7 +515,6 @@ AppStream には、podman・buildah・skopeo・toolbox・cockpit-podman・podman
    - **ほかの項の手順は、プロンプトが戻ってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 #### podman-compose: 使い方の基本
-
 
 どれも compose ファイル（`compose.yaml`）のあるディレクトリで打つ。別の場所からなら `-f <ファイル>` を付ける。
 
@@ -843,7 +839,6 @@ podman.sock: connect: connection refused
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)
 
-
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 
@@ -1080,8 +1075,8 @@ podman.sock: connect: connection refused
 - **`E` と `a` は `docker` コマンドを呼ぶ**: podman だけの PC では、`+ docker exec -it <ID> /bin/sh -c ...` と `Press enter to return to lazydocker ...` が出るだけで、エラーも出ない
   - シェルは [podman exec の節](#lazydocker-podman-exec-でシェルを開く)の `c` で開く
   - `a` は `-it` で起動したコンテナにだけ使える。`-it` でないコンテナでは `Container does not support attaching. ...` と出る
-- **UBI のイメージのコンテナは、イメージの名前で並ぶ**: lazydocker はコンテナの `name` ラベルを名前として出す（この折りたたみの「参照」）
-  - 同じイメージのコンテナが並ぶと見分けにくい。操作前の対象確認は [lazydocker](#lazydocker)のリードにある
+- **UBI のイメージのコンテナは、イメージの名前で並ぶ**: lazydocker はコンテナの `name` ラベルを名前として出す（この折りたたみの「lazydocker の手順 2: --label name= を付ける理由」）
+  - 同じイメージのコンテナが並ぶと見分けにくい。操作する前に、右の枠の `Config` タブの `ID` を `podman ps` と見比べる
   - 自分で動かすコンテナなら、手順 2 のように `podman run` の `--label name=<名前>` で分けられる
 - **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 接続先が無い場合は `Cannot connect to the Docker daemon at unix:///var/run/docker.sock` と出る
 - **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](#podman-tui) で見る
@@ -1089,7 +1084,7 @@ podman.sock: connect: connection refused
 - **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）
   - root のコンテナは、[root でも使う](#lazydocker-root-でも使う)の節を通して `sudo -i lazydocker` で見る
 - `r` は確認なしでコンテナを再起動する。操作前に右の `Config` タブの `ID` を `podman ps` と見比べ、対象を確かめる
-- この項の手順 2 の `r` は、確認なしで `web` を再起動する。対象の行を確かめてから押す
+- [lazydocker: compose のプロジェクトを見る](#lazydocker-compose-のプロジェクトを見る)の手順 2 の `r` は、確認なしで `web` を再起動する。対象の行を確かめてから押す
 
 **[lazydocker](#lazydocker)のリード**
 
@@ -1209,7 +1204,7 @@ lazydocker は、コンテナに `name` というラベルがあると、コン�
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
 - この項の手順 4 で lazydocker の画面（TUI）が開く
 - root のコンテナは `/var/lib/containers` にあり、[lazydocker](#lazydocker)の手順 3 の一般ユーザーの画面には出ない
-- `-i` の無い `sudo lazydocker` は root の `~/.bashrc` を読まないので、root のコンテナにつながらない（この折りたたみの「root で使うときの補足」）
+- `-i` の無い `sudo lazydocker` は root の `~/.bashrc` を読まないので、root のコンテナにつながらない（この折りたたみの「lazydocker: root でも使うの手順 4: root で使うときの補足」）
 
 **[lazydocker: root でも使う](#lazydocker-root-でも使う)の手順 1**
 
@@ -1229,7 +1224,7 @@ SocketMode=0660
 - 要求が来たときだけ、root の `podman.service`（`podman system service`）が起動し、要求が途切れると自分から終わる
 - `sudo podman --remote` は、指定が無ければこのソケットにつなぐ
 - `podman.socket` を止めた後も、ソケットのファイルは再起動まで残る。つなごうとすると失敗する（`curl` は終了コード 7）
-- 自分のユーザーのソケット（[Podmanの手順 7](#podman) の `systemctl --user`）とは別のソケット
+- 自分のユーザーのソケット（[Podman](#podman)の手順 7 の `systemctl --user`）とは別のソケット
 
 **[lazydocker: root でも使う](#lazydocker-root-でも使う)の手順 2**
 
@@ -1268,7 +1263,7 @@ Retry count: 3
 
 - 自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
 
-**root で使うときの補足**
+**[lazydocker: root でも使う](#lazydocker-root-でも使う)の手順 4: root で使うときの補足**
 
 | 入口 | `DOCKER_HOST` | 画面に出るもの |
 |---|---|---|
@@ -1307,10 +1302,7 @@ Retry count: 3
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）
 - この項の手順 1 で変数を設定したシェルに貼る
-
-> [!WARNING]
-> - この項の手順 3 で作るボックスはホームを共有し、ホストのファイルシステム全体が `/run/host` に見え、ネットワークとプロセスも共有する。信用できないソフトを試す場所にはしない
-
+- **この項の手順 3 で作るボックスはホームを共有し、ホストのファイルシステム全体が `/run/host` に見え、ネットワークとプロセスも共有する。信用できないソフトを試す場所にはしない**
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（ボックスは自分のユーザーの rootless の podman で動かすため）
@@ -1461,6 +1453,7 @@ Retry count: 3
    distrobox upgrade "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}"
    ```
 
+   - ボックスの中身は、ホストの `dnf upgrade` では上がらない。ボックスごとにこの手順を行う
    - **ほかの項の手順は、プロンプトが戻ってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 <details id="distrobox-の補足と注意点">
@@ -1586,10 +1579,6 @@ fi
 - 呼ぶたびに `distrobox enter` を通るので、ボックスが止まっていれば起動から始まる
 - ホームはボックスと共有しているので、ホームの中のファイルはそのままのパスで渡せる
 - `~/.local/bin` は、AlmaLinux の既定の `~/.bashrc` で PATH に入っている
-
-**[Distrobox: 更新](#distrobox-更新)の手順 3**
-
-- **ボックスの中身は `dnf upgrade` では上がらない**。ボックスごとにこの手順を行う
 
 **[Distrobox: 更新](#distrobox-更新)の手順 3: ボックスの中の更新**
 
