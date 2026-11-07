@@ -499,6 +499,7 @@ Importing GPG key 0xCEA2757D:
 ### PowerShell を開発に使う / 手順 4: 補足: 5.1 に保存する形
 
 - 7 の `Save-PSResource -IncludeXml` で、ドキュメントの既知のフォルダーの下の `WindowsPowerShell\Modules` に保存する。5.1 の古い PowerShellGet や NuGet の提供者を上げずに済む
+- `-Path` の保存先が無いと止まるので、先に作る。Windows Update の項を通していない PC には `Documents\WindowsPowerShell\Modules` が無いことがある
 - 保存先は名前・版ごとのフォルダーになる。`Get-PSResource -Path` で版と場所を見る。5.1 の `Get-InstalledModule` には出ない
 - 同じ版の `Save-PSResource` は上書きする。新しい版を保存しても古い版は残る。5.1 に同梱の Pester は消さず、追加した版を先に読む形にする
 - 導入前後の名前・版・保存先を控える
@@ -529,7 +530,10 @@ Importing GPG key 0xCEA2757D:
 
 ### PowerShell 7 のプロファイルに開発の設定を足す / 手順 3: 補足: 補完と予測
 
-- winget の行は、Microsoft の補完の例を `Invoke-Utf8Native` で包む。補完のときにだけ `winget complete` を呼び、その間の文字コードを確実に戻す
+- winget の行は、Microsoft の補完の例を基に `Invoke-Utf8Native` で包む。補完のときにだけ `winget complete` を呼び、その間の文字コードを確実に戻す
+- 7.3 以降の `$PSNativeCommandArgumentPassing` が `Windows` のときは、引数内の `"` を PowerShell がエスケープして渡すので、二重にしない。5.1 では `"` を二重にする
+- 2026-11-07 の PowerShell 7.6.9 では、`winget show --id "Microsoft.PowerShell" --version ` の補完は、二重にするとオプション 31 個、二重にしないと版 112 個を返した。引用符の無い入力では同じ結果だった
+- 前の版の winget の行の置き換えは、プロファイルを Latin-1（28591。1 バイトを 1 文字にする）で読み書きし、ほかの行のバイトを変えない。プロファイルは BOM の無い cp932 のこともあり、7 の既定の UTF-8 で読み書きすると、その日本語が壊れた（2026-11-07、Hyper-V の VM）
 - 6 つの控えは、PSReadLine があるときだけ読み込む。`-Command`・`-File` など、対話用の PSReadLine が無い起動では読み込まない
 - 予測の表示は `ListView` にする。7 の予測の元は既定の `HistoryAndPlugin` のまま、CompletionPredictor を読み、履歴と補完から候補を出す
 - Tab の補完と、打っている間に出る予測は別の設定。Tab は、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の `MenuComplete` を使う
@@ -744,7 +748,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 |---|---|---|
 | 7 の外部コマンドの文字コード | ConsoleHost の入出力を UTF-8 にし、元の値を終了のイベントで戻す | 変更したまま終了する: 同じコンソールの親の 5.1 にも残る |
 | 5.1 の外部コマンドの文字コード | `Invoke-Utf8Native` の間だけ UTF-8 にし、`finally` で戻す | 常に UTF-8: `ipconfig`・`whoami` などが英語になり、手順書を貼る窓の出力が変わる |
-| winget の補完 | 5.1・7 とも `Invoke-Utf8Native` で `winget complete` を包む | Microsoft の例のまま文字コードを変える: 5.1 の窓にも変化が残る |
+| winget の補完 | 5.1・7 とも `Invoke-Utf8Native` で包み、引数内の `"` は 5.1 だけ二重にする。7 は PowerShell がエスケープする | 7 でも `"` を二重にする: 2026-11-07、PowerShell 7.6.9 では引用符を含む版の補完がオプションになった。Microsoft の例のまま文字コードを変える: 5.1 の窓にも変化が残る |
 | 6 つの道具の補完 | 7 で控えを生成し、7 のプロファイルで読む | 起動のたびに生成: 6 つで約 0.3 秒掛かる |
 | PSScriptAnalyzer・Pester | 7 に `Install-PSResource`、5.1 の場所へ 7 から `Save-PSResource -IncludeXml` | 5.1 の PowerShellGet と NuGet の提供者を先に更新する: 導入の手順が増える |
 | 7 の予測 | `ListView` と CompletionPredictor。元は既定の `HistoryAndPlugin` | 既定の `InlineView` のまま: 履歴と補完の候補を一覧で見たいという選択 |
