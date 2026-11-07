@@ -47,7 +47,7 @@
 
 - プロファイルの行の印は、7 の基本の設定が `# windows-setup.md`、任意のキー操作が `# shell-terminal.md`、5.1・7 の開発の設定が `# shell-terminal.md:dev`
 - Windows Terminal の控えは `settings.json.windows-setup.bak`
-- PowerShell 7 のプロファイルと Windows Terminal の資料（文書・コード）は、[Windows 11 の初期設定の参考資料の「参照」](reference/windows-setup.md#参照)にある
+- PowerShell 7 のプロファイルと Windows Terminal の資料（文書・コード）は、Windows 11 のセットアップの[この文書の補足と注意点](windows-setup.md#この文書の補足と注意点)の「参照」にある
 
 - **WezTerm の設定ファイルの場所**
 
@@ -889,7 +889,6 @@ aarch64 で降ってくるボトルは `eza--0.23.5.arm64_linux.bottle.tar.gz`�
 
 **[シェルのツール](#シェルのツール)の手順 6**
 
-
 - `Permissions Size User Date Modified Git Name` の見出しの一覧が出る
 
 **[シェルのツール](#シェルのツール)の手順 6: 出力の意味**
@@ -1624,11 +1623,9 @@ Importing GPG key 0xCEA2757D:
 
 **[WezTerm の設定を導入する](#wezterm-の設定を導入する)の手順 6**
 
-
 - 公式統合との併用は[注意点](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/extra/install.md#注意点)を参照する
 
 **[WezTerm のシェル統合を SSH 先で使う](#wezterm-のシェル統合を-ssh-先で使う)の手順 3**
-
 
 - WezTerm 本体は SSH 先のシェル統合には要らない
 
@@ -2060,7 +2057,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 **注意点**
 
-
 - **Windows Terminal で複数行を 1 つの入力にすると、全体を先に構文解析する**: [Windows Terminal で複数行を 1 つの入力として貼る](#windows-terminal-で複数行を-1-つの入力として貼る)では、1 か所の構文エラーで全体が動かない
   - 実行中に先打ちした複数のコマンドも、1 つの入力にまとまる
   - 末尾に改行がある文字を貼ると、Enter を押さなくても全体が動く
@@ -2311,7 +2307,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 2**
 
-
 - `Version` に版が出たら、もう入っている（`20260905-153129-092dcf70` など）。[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4 で今の nightly に上書きする
 
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 2: 確かめる値の意味**
@@ -2338,7 +2333,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 5**
 
 - `UninstallString` は `"C:\Program Files\WezTerm\unins000.exe"`
-
 
 - `DisplayVersion` と `wezterm --version` の版が同じ（`20260929-043349-cab25161` の形）
 
@@ -2706,6 +2700,20 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - `git version 2.56.0.windows.4` の形の行と、`True` が 2 行出ればよい
 
+**[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2: PATH と、ほかの git**
+
+- `PATH` に足されるのは `C:\Program Files\Git\cmd`（`git.exe`・`git-gui.exe` など）だけ。`bash`・`ssh`・`ls` などは足されないので、PowerShell の `ssh` は Windows のものが使われる
+- Windows の `PATH` は、PC 全体の値の後ろに自分のユーザーの値が続く。scoop の git（`…\scoop\shims\git.exe`。自分のユーザーの `PATH`）があっても、新しく開いた窓では Git for Windows の `git` が先に見つかる
+- scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（scoop のソースの `Get-HelperPath`）。そのため、`scoop update` と `scoop bucket add` は Git for Windows の `git` で動く。scoop の git が入っていると、scoop はそちらを使う
+
+**[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 2: 版**
+
+- `git version` の版は、実行した日の最新
+
+**[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 4: Windows の system の行**
+
+- Windows で出る `system` の行（インストーラが書いたもの）より、[Git](almalinux-setup.md#git)の手順 4・5 で書く `global` の値が優先される
+
 **[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5: Git for Windows の長いパス対応**
 
 - `core.longpaths=true` は Git for Windows の C で実装されたコマンドの長いパス対応を有効にする。初期設定の clone より前に、自分のユーザーの `global` に設定する
@@ -2766,6 +2774,8 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - ファイル全体は置き換えない。`~/.profile` を読む行など、Git for Windows が作った内容や利用者が足した内容を残す
 
 **参照**
+
+- 検証記録（`docs/verification/windows-setup.md`）
 
 - 検証記録（`docs/verification/shell-terminal.md`）
 
@@ -3006,7 +3016,6 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - starship は shim を作らず、`Adding ~\scoop\apps\starship\current to your path.` で自分のユーザーの `Path` に足す（この窓にも入る）
 
 - bat は `Setting user environment variable: BAT_CONFIG_DIR = …` で環境変数を足す（この窓にも入る）
-
 
 - それぞれ `'<名前>' (<版>) was installed successfully!` の形の行が出て、最後に `zoxide is now held and can not be updated anymore.` が出ればよい（zoxide は `0.9.9`）
 
@@ -3590,7 +3599,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - `if (Get-Module -Name PSReadLine)` で囲み、PSReadLine が読み込まれていない起動では何もしない
 - conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、クリップボードの文字をキー入力へ変えて入力バッファへ書く
   - [Clipboard.cpp](https://github.com/microsoft/terminal/blob/main/src/interactivity/win32/Clipboard.cpp)の `Clipboard::Paste` → `StringPaste` → `TextToKeyEvents` → `pInputBuffer->Write`
-  - キーとして届くので、Ctrl+Enter の割り当てには依る。コピーボタンの中身の LF は Ctrl+Enter として届き、Windows モードの既定の `InsertLineAbove` では行が逆順になる（[貼り付けの設定の手順 2 の補足](reference/windows-setup.md#貼り付けの設定--手順-2-補足-行を足す理由)）。EditMode を変えると、それより前に付けた `AddLine` は消えるので、この項の行は、貼り付けの設定の Ctrl+Enter の行より前に入れる
+  - キーとして届くので、Ctrl+Enter の割り当てには依る。コピーボタンの中身の LF は Ctrl+Enter として届き、Windows モードの既定の `InsertLineAbove` では行が逆順になる（[貼り付けの設定 の補足と注意点](windows-setup.md#貼り付けの設定-の補足と注意点)の「貼り付けの設定の手順 2: 行を足す理由」）。EditMode を変えると、それより前に付けた `AddLine` は消えるので、この項の行は、貼り付けの設定の Ctrl+Enter の行より前に入れる
   - Emacs モードの管理者の conhost で、右クリックと複数行の貼り付けは実機では確かめていない
 
 **[Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)の手順 4**

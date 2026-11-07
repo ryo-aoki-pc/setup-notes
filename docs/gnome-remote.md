@@ -771,7 +771,7 @@
 - **RDP のユーザー名とパスワードを変えるとき**: [GNOME のデスクトップ共有: RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 を貼り直す（上書きする）。`grdctl rdp set-credentials` は使わない（閉じたログインのキーリングに書こうとして、PC の画面に「認証が必要です」の窓を出して止まる）
   - 誤って貼ったら、Ctrl+C で止める。PC の画面の窓は残るので、RDP の画面で「キャンセル」を押して閉じる
 - **設定アプリの「リモート デスクトップ」を開かない**: 自動ログインでは、ログインのキーリングがいつも閉じている。閉じているときに開くと、RDP のパスワードが乱数に書き換えられることがある（設定アプリ 47.7 の既知の不具合）
-- **Homebrew が PATH の先頭にあると、`gsettings`・`python3` が Homebrew のものになる**（[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）。この手順書は `/usr/bin/` を付けて呼ぶ
+- **Homebrew が PATH の先頭にあると、`gsettings`・`python3` が Homebrew のものになる**（[AlmaLinux 10 のセットアップの「Homebrew の補足と注意点」](almalinux-setup.md#homebrew-の補足と注意点)）。この手順書は `/usr/bin/` を付けて呼ぶ
 - **自己署名証明書**: クライアントは初回に証明書の確認を出す。証明書を作り直したら、クライアントで保存済みの証明書を消すか、変更の警告を承認する（[GNOME のリモートログイン の補足と注意点](#gnome-のリモートログイン-の補足と注意点)の「注意点」と同じ）
 
 **[GNOME のデスクトップ共有](#gnome-のデスクトップ共有)のリード**
@@ -1579,7 +1579,7 @@
 
 **注意点**
 
-- **Homebrew が PATH の先頭にあると、`gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになる**（[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）。前提の[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)の手順は `/usr/bin/gsettings` で書いてある（Homebrew の `gsettings` は GNOME に効かない）
+- **Homebrew が PATH の先頭にあると、`gsettings`・`gdbus`・`gio`・`python3` が Homebrew のものになる**（[AlmaLinux 10 のセットアップの「Homebrew の補足と注意点」](almalinux-setup.md#homebrew-の補足と注意点)）。前提の[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)の手順は `/usr/bin/gsettings` で書いてある（Homebrew の `gsettings` は GNOME に効かない）
 - **同じユーザーの GNOME のセッションは 1 つにする**: PC の画面から同じユーザーで入るときは、先に `sudo systemctl stop gnome-headless-session@<USER>.service` でヘッドレスのセッションを止める
   - gnome-session のユーザーの unit（`gnome-session-manager@gnome.service` など）はユーザーに 1 組しか無いので、2 つ目のセッションは動かないはず
   - このセッションにつなげるのは 1 つだけ。3390 とリモートログインから同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
