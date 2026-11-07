@@ -178,6 +178,7 @@
    - 資格情報が閉じたキーリング（自動ログインのときのログインのキーリングなど）にあれば、そのパスワードを聞かれる。ログインのキーリングなら、ふつうは OS のパスワード
    - `消した:` と出ればよい。キーリングを開いたときは `閉じ直した:` も確かめる
    - キーリングを開けないときの `中断:`（`を開けない`）では、何も消していない。パスワードが違うときは、貼り直す
+   - 対象は `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録されている。ほかに無ければ `ほかのキーリングに RDP の資格情報は無い` と出る
    - **次の手順は、パスワードを聞かれたなら、入力し終えてから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 #### GNOME のデスクトップ共有: RDP を設定する
@@ -304,6 +305,7 @@
    - `中断:` が出たら、この項の手順 4 以降へ進まない
    - 起動中のデーモンを再起動するので、接続中の RDP クライアントは切れる
    - 貼り直したときの `Warning: The unit file, … changed on disk.` は、再起動されていれば正常
+   - ほかに `enable` と `screen-share-mode` の行も出る（`enable` は、[GNOME のデスクトップ共有: RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 5 で有効にするまで `false`）
 
 1. RDP の資格情報をパスワードの無いキーリングに入れ、保存先を確認する。
 
@@ -456,6 +458,7 @@
    - `sudo` は付けず、このユーザーの OS のパスワードを入れる
    - 数分待っても SSH で入れないときは、PC の前での対処が要る（[前提を確かめる](#gnome-のデスクトップ共有-前提を確かめる)の手順 2 の確認を見直す）
    - **PC が起動したら SSH で入り直し、[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)へ進む**
+   - SSH の接続が切れる。PC が起動すると、GDM がこのユーザーで自動でログインする
 
 #### GNOME のデスクトップ共有: 再起動の後に確かめてつなぐ
 
@@ -831,7 +834,6 @@
 
 - [GNOME のデスクトップ共有: RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 4 で作るキーリングの項目は消さない
 
-- 対象は `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録されている。ほかに無ければ `ほかのキーリングに RDP の資格情報は無い` と出る
 
 - `消した: <コレクションのパス>/<N>` の形の行が出ればよい。開いたキーリングは、消した後に閉じ直す（`閉じ直した:` の行）
 
@@ -873,7 +875,6 @@
 
 **[GNOME のデスクトップ共有: RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 3**
 
-- ほかに `enable` と `screen-share-mode` の行も出る（`enable` は、[GNOME のデスクトップ共有: RDP を設定する](#gnome-のデスクトップ共有-rdp-を設定する)の手順 5 で有効にするまで `false`）
 
 - 最後の行で読み戻す。`negotiate-port false`・`port uint16 <RDP_PORT>`・`tls-cert` と `tls-key` の証明書と鍵のパス・`view-only false` が出ればよい
 
@@ -950,7 +951,6 @@
 
 **[GNOME のデスクトップ共有: 自動ログインにして再起動する](#gnome-のデスクトップ共有-自動ログインにして再起動する)の手順 3**
 
-- SSH の接続が切れる。PC が起動すると、GDM がこのユーザーで自動でログインする
 
 - `sudo` は付けない。`==== AUTHENTICATING FOR org.freedesktop.login1.…` と出てパスワードを聞かれるので、このユーザーの OS のパスワードを入れる
 
@@ -990,7 +990,6 @@
 **[GNOME のデスクトップ共有: 再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 3**
 
 - 確認が済んだら `rm ~/rdp_tls_probe.py` で消してよい
-
 
 **[GNOME のデスクトップ共有: 再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 3: TLS プローブ**
 
@@ -1384,7 +1383,7 @@
    )
    ```
 
-   - `disabled` と出ればよい
+   - コマンドごとの TPM のメッセージ（`Init TPM credentials failed …`、TPM の無い PC では正常）の後に、`disabled` と出ればよい
    - `中断:` やエラーが出たら、この項の手順 2 へ進まない。共用 TLS 設定が戻る前は、証明書を削除できない
 
 1. [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 3 で生成した証明書と鍵と、TLS 設定の退避を消す（取り戻せない）。
@@ -1586,7 +1585,7 @@
   - このセッションにつなげるのは 1 つだけ。3390 とリモートログインから同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
   - PC の画面のセッションを共有する[GNOME のデスクトップ共有](#gnome-のデスクトップ共有)とは、同じユーザーでは併用できない（ヘッドレスの RDP のデーモンの unit に `Conflicts=gnome-remote-desktop.service` がある）
 - **リモートログインのセッションも、`loginctl list-sessions` の `TTY` の列は `headless` になる**: ヘッドレスのセッションと見分けるときは、`loginctl show-session` の `Service` が `gdm-autologin`（ヘッドレス）か `gdm-password`（リモートログイン）かで見る
-  - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 2](#gnome-のヘッドレスセッション) の確かめの行は `TTY` の列だけで見るので、同じユーザーのリモートログインのセッションがあると、ヘッドレスのセッションができる前に抜けるはず（確かめていない）
+  - [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 2 の確かめの行は `TTY` の列だけで見るので、同じユーザーのリモートログインのセッションがあると、ヘッドレスのセッションができる前に抜けるはず（確かめていない）
 - **起動し直すときは `stop` → 待つ → `start` を使う**。前のセッションの片付けを待ってから新しいセッションを始める
 - **GDM を再起動すると、このセッションも止まって起動し直される**（`Requires=gdm.service`）
   - GDM を再起動したら `systemctl is-active gnome-headless-session@<USER>.service` を見て、`inactive` なら `sudo systemctl start gnome-headless-session@<USER>.service` で起動する
@@ -1663,7 +1662,6 @@
 
 **[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 4**
 
-- TPM の無い PC の `Init TPM credentials failed because No TPM device found, using GKeyFile as fallback.` は正常
 
 - 初めて設定するときだけ、`[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` が 1 回ずつ出る。害は無い
 
@@ -1932,7 +1930,7 @@
    ss -lntp | grep 3389                     # *:3389 で LISTEN
    # ファイアウォールの許可を確認する
    sudo firewall-cmd --list-services        # rdp が含まれる
-   printf '\n\033[7m 確認 \033[0m\n'
+   # 2 つの grd.conf を確認する
    sudo cat /etc/gnome-remote-desktop/grd.conf
    sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
    ```
@@ -2047,7 +2045,7 @@
    ```
 
    - `RDP server started` の 1 行だけが出ればよい
-   - **注意**: `systemctl restart` にしない（[リモートログインの補足と注意点](#gnome-のリモートログイン-の補足と注意点)の「注意点」）
+   - **注意**: `systemctl restart` にしない（[GNOME のリモートログイン の補足と注意点](#gnome-のリモートログイン-の補足と注意点)の「注意点」）
 
 1. ヘッドレスのセッションがある PC では、そのユーザーのシェルで、受け渡し役のデーモンを再起動する。
 
@@ -2065,13 +2063,15 @@
 #### GNOME のリモートログイン: つながらないときに確かめる
 
 - 接続できないときに、TLS・提示証明書とサーバーのログを確かめる
-- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)を通してある。この項の手順 1・2 はサーバーに FreeRDP があるときだけ行い、先に同じ用途の手順 1 の変数を設定する
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)を通してある。この項の手順 1・2 はサーバーに FreeRDP があるときだけ行い、先に[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 1 の変数を設定する
 - 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 3・4 は別々の SSH 端末で並行して行う
 
 1. サーバーに FreeRDP があるときだけ、ループバックで TLS を確かめる。
 
    ```bash
+   # ループバックで、存在しないユーザーの認証だけを試す
    timeout 20 xfreerdp /v:127.0.0.1:3389 /u:__probe__ /p:__probe__ /cert:ignore /auth-only >/dev/null 2>&1
+   printf '\n\033[7m 確認 \033[0m\n'
    sudo journalctl -u gnome-remote-desktop --since "-1min" --no-pager \
      | grep -E "SAM database|BIO_do_handshake"
    ```
@@ -2082,6 +2082,7 @@
 1. サーバーに FreeRDP があるときだけ、提示される証明書を確かめる。
 
    ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    echo "n" | timeout 20 xfreerdp /v:${SERVER_IP}:3389 /u:__probe__ /p:__probe__ /auth-only 2>&1 \
      | grep -iE "Common Name|Subject:|Issuer:|Thumbprint|MISMATCH"
    ```
@@ -2108,7 +2109,7 @@
 #### GNOME のリモートログイン: winpr-makecert で証明書を作る
 
 - openssl の代わりに、winpr-makecert でリモートログイン用の証明書と鍵を作る
-- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)の手順 1 の変数を設定し、方式 2 では`/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates` を作ってある。ホストに freerdp を入れるなら方式 1、rootless Podman を使うなら方式 2 を選ぶ
+- 前提: [GNOME のリモートログイン](#gnome-のリモートログイン)の手順 1 の変数を設定し、方式 2 では `/var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates` を作ってある。ホストに freerdp を入れるなら方式 1、rootless Podman を使うなら方式 2 を選ぶ
 - 実行場所: サーバーの、自分のユーザーのシェル（bash）
 - 既存の `rdp-tls.crt` と `rdp-tls.key` は上書きされる。残す場合は先に別の場所へ退避する
 - `-n "CN=..."` は使わない。方式 2 の `--hostname`・`:Z` と、所有者を付ける `install -o`、鍵を 0600 にする処理は省かない
@@ -2122,8 +2123,10 @@
 1. 方式 1 を選んだときだけ、証明書と鍵を作り、鍵の権限と SELinux のコンテキストを整える。
 
    ```bash
+   # winpr-makecert で証明書と鍵を作る
    sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
    sudo -u gnome-remote-desktop winpr-makecert -silent -rdp -path /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates rdp-tls
+   # 鍵の権限と SELinux のコンテキストを整える
    sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
    sudo restorecon -Rv /var/lib/gnome-remote-desktop
    ```
@@ -2133,11 +2136,12 @@
 1. 方式 2 を選んだときだけ、Podman のコンテナで証明書と鍵を作り、ホストへ置く。
 
    ```bash
+   # コンテナの中で証明書と鍵を作る
    OUT=$(mktemp -d)
    podman run --rm --hostname "${SERVER_NAME}" -v "${OUT}:/out:Z" \
      docker.io/library/almalinux:10 \
      bash -c 'dnf install -y freerdp >/dev/null 2>&1 && winpr-makecert -silent -rdp -path /out rdp-tls'
-
+   # 所有者と権限を付けてホストへ置き、コンテキストを整える
    sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 644 "${OUT}/rdp-tls.crt" /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/
    sudo install -o gnome-remote-desktop -g gnome-remote-desktop -m 600 "${OUT}/rdp-tls.key" /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/
    sudo restorecon -Rv /var/lib/gnome-remote-desktop
@@ -2148,7 +2152,7 @@
 
 1. 証明書と鍵の権限を確かめてから、リモートログインへ設定する。
 
-   - [GNOME のリモートログイン](#gnome-のリモートログイン)の手順 3 で権限と所有者を確かめ、手順 4〜7 を行う
+   - [GNOME のリモートログイン](#gnome-のリモートログイン)の手順 3 で権限と所有者を確かめ、同じ項の手順 4〜7 を行う
 
 <details id="gnome-のリモートログイン-の補足と注意点">
   <summary>GNOME のリモートログイン の補足と注意点</summary>
@@ -2173,13 +2177,13 @@
     - クライアントには、ヘッドレスのセッションに足された仮想モニターが写る
     - 切断すると足されたモニターは消え、ヘッドレスのセッションは残った
   - ヘッドレスのセッションの RDP（[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)、3390）と同時につなぐと、後からつないだ方が残り、先の接続は切られた（どちらが先でも同じ）
-  - 起動のときと同じすれ違い（[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 5](#gnome-のリモートログイン) の補足）は、タイミングによっては起きるはず（コードからの推定）。真っ暗なまま切れるようになったら、[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 と、ヘッドレスのセッションがある場合は[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 2 で直す
+  - 起動のときと同じすれ違い（[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 5 の補足）は、タイミングによっては起きるはず（コードからの推定）。真っ暗なまま切れるようになったら、[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 と、ヘッドレスのセッションがある場合は[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 2 で直す
   - ヘッドレスのセッションは、GDM と一緒に止まって起動し直される。前のセッションの片付けとぶつかって、消えることがある（[GNOME のヘッドレスセッション の補足と注意点](#gnome-のヘッドレスセッション-の補足と注意点)の「注意点」）
   - ヘッドレスのセッションをやめてリモートログインだけにするときは、[GNOME のヘッドレスセッション: リモートログインだけにする（併用をやめる）](#gnome-のヘッドレスセッション-リモートログインだけにする併用をやめる)
 - **自己署名証明書**: クライアント側で証明書警告が出る。信頼できる CA の証明書がある場合は、[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 2〜4 でそちらのパスを指定する
 - **証明書を差し替えたとき**: 自己署名証明書が変わると、クライアントは保存済みの旧証明書と照合して警告を出す
   - **クライアント側で保存された証明書の信頼を一度削除する**か、変更の警告を承認する必要がある
-  - 差し替え後は、[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 と、ヘッドレスのセッションがある場合は[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 2 で反映する（接続中の RDP セッションは切断されるので、利用者がいないときに行う）
+  - 差し替え後は、[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 と、ヘッドレスのセッションがある場合は[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 2 で反映する（接続中の RDP セッションは切断されるので、利用者がいないときに行う）
 - **public ゾーンでの開放**: public ゾーンに属するすべての NIC で 3389/tcp が開く。接続元を制限しない場合はそのままでよい
   - LAN 限定に絞る手順は[GNOME のリモートログイン: 接続元を LAN に絞る](#gnome-のリモートログイン-接続元を-lan-に絞る)
 - **ログイン画面のまま置くと眠ることがある**: Workstation で入れた PC のログイン画面は、電源につないでいても 15 分でサスペンドする
@@ -2344,7 +2348,7 @@ RDP の TLS は接続直後ではなく X.224 のネゴシエーション後に�
 
 **[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 2**
 
-- ヘッドレスのセッションは [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション) のもの。無い PC では、この手順は飛ばす
+- ヘッドレスのセッションは [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション) のもの。無い PC では飛ばす
 
 **[GNOME のリモートログイン: デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 2: 受け渡し役のデーモン**
 
@@ -2372,13 +2376,13 @@ RHEL 10 のドキュメントは `freerdp` パッケージの `winpr-makecert` �
 
 **[GNOME のリモートログイン: winpr-makecert で証明書を作る](#gnome-のリモートログイン-winpr-makecert-で証明書を作る)の手順 2: ホストで作る場合**
 
-[GNOME のリモートログイン: winpr-makecert で証明書を作る](#gnome-のリモートログイン-winpr-makecert-で証明書を作る)の手順 1](#gnome-のリモートログイン) の変数を設定したうえで:
+[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 1 の変数を設定したうえで:
 
 以降は [GNOME のリモートログイン](#gnome-のリモートログイン)の手順 4〜7 と同じ。
 
 **[GNOME のリモートログイン: winpr-makecert で証明書を作る](#gnome-のリモートログイン-winpr-makecert-で証明書を作る)の手順 3: コンテナで作る場合**
 
-ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。[GNOME のリモートログイン: winpr-makecert で証明書を作る](#gnome-のリモートログイン-winpr-makecert-で証明書を作る)の手順 1](#gnome-のリモートログイン) の変数を設定したうえで:
+ホストにパッケージを入れずに winpr-makecert 製の証明書が必要な場合。[GNOME のリモートログイン](#gnome-のリモートログイン)の手順 1 の変数を設定したうえで:
 
 - コンテナのホスト名が CN に使われ、ホスト名を指定しなければランダム ID が CN になる
 - winpr-makecert の `-n` は解析が壊れており、subject が破損する
