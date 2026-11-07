@@ -25,7 +25,7 @@
 - クライアントの PC で、Samba の共有を cifs でマウントし、アクセスしたときに自動でマウントされるようにする（fstab と systemd の automount）
 - 前提: サーバーで[Samba サーバー](#samba-サーバー)を通してある（Windows や NAS の共有でもよい）
 - 実行場所: クライアントの PC の、自分のユーザーの bash（デスクトップの端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
+- 検証記録（`docs/verification/samba-client.md`）・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
 - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-samba-クライアントを使う)を、管理者ではない PowerShell 7 で通す
 - **手順 3 には対話入力がある**（共有のパスワード）
 - この項の手順 1 で変数を設定したシェルに貼る
@@ -114,7 +114,7 @@
 
    - `findmnt` に `//<SERVER>/<SHARE>` の `cifs` の行（`vers=3.1.1` を含む）、続いて `cifs write` が出ればよい
    - `ls -ldZ` は `drwx------ … <USER> <USER> … cifs_t …`
-   - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)）
+   - `mount error(…)` が出たら、ここで止めて原因を直す（表示と原因は検証記録: `docs/verification/samba-client.md`・[参考資料](reference/samba-client.md)）
    - `SHARE=home`（Samba サーバーの `[home]`）では、`cifs-test.txt` の書き込みが `Permission denied` になる。`findmnt` の行が出ていればよい
 
 1. `/etc/fstab` に自動マウントの行を足し、systemd に読み直させる。
@@ -250,7 +250,7 @@
 - サーバーで、自分のユーザーのホームを Samba（SMB3）で公開する
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: サーバーの、公開するユーザー自身の bash（デスクトップの端末か SSH）。手順 8 だけは、つなぐ側の別のマシン
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[注意点](extra/samba.md)
+- 検証記録・[参考資料](reference/samba.md)・[注意点](extra/samba.md)
 - **手順 6 には対話入力がある**（パスワード）
 - この項の手順 1 で変数を設定したシェルに貼る
 - この項の後に行う項:
@@ -459,7 +459,7 @@
 - 新しく作ったファイルとディレクトリの所有者は、親ディレクトリの所有者（`/home/<ユーザー>` の中なら、そのユーザー）になる（`inherit owner = yes`）。グループは `root` になる
 - `/home` の直下には、ファイルもディレクトリも作れない（SELinux が断る）
 - 読み書きは、この項の手順 2 の後に、[サーバーの上で動作を確かめる](#samba-サーバー-サーバーの上で動作を確かめる)の手順 10・11 で確かめる
-- 補足: [/home を公開するときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#home-を公開するときの補足)
+- 補足: `docs/verification/samba.md` の「/home を公開するときの補足」
 
 > [!WARNING]
 > - Samba のパスワードで、ほかのユーザーの `~/.bashrc`・`~/.ssh/authorized_keys` も読み書きできる
@@ -516,7 +516,7 @@
 - **この項の手順 2・8・10 には対話入力がある**（パスワード）
 - この項の手順 8・9 は、[root のホームも公開した](#samba-サーバー-root-のホームも公開する)ときだけ行う
 - この項の手順 10・11 は、[/home も公開した](#samba-サーバー-home-も公開する)ときだけ行う
-- サーバー自身からの接続は firewalld を通らない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)）
+- サーバー自身からの接続は firewalld を通らない（検証記録・[参考資料](reference/samba.md)）
 
 1. 変数を設定する。
 
@@ -659,7 +659,7 @@
 - 実行場所: サーバーの、自分のユーザーの bash（デスクトップの端末か SSH）
 - **接続元を制限しないなら、この項は不要**
 - [Samba サーバー](#samba-サーバー)の手順 5 は、public ゾーンに属するすべての NIC（この環境では `end0` と `wg0`）で 445/tcp を開く
-- 補足: [接続元を絞るときの補足](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#接続元を絞るときの補足)
+- 補足: `docs/verification/samba.md` の「接続元を絞るときの補足」
 
 1. 送信元サブネットを空白区切りで入れ、445/tcp の開放を rich rule に置き換える。
 
@@ -695,7 +695,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。手順 7 はサーバーの bash、手順 8 はこの PC のデスクトップ
 - パスワードは Windows の資格情報マネージャーに置く
 - Samba サーバーの `[root]`・`[home]` も割り当てるなら、この項を通した後に、この項の手順 2 の 3 つ目のブロックの `SHARE` と `DRIVE` を書き換えて貼り、この項の手順 3・5・6 を貼り直す（資格情報は同じなので、手順 4 は要らない）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
+- 検証記録（`docs/verification/samba-client.md`）・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
 
 > [!IMPORTANT]
 > **管理者の窓で割り当てたドライブは、エクスプローラーに出ない**。管理者ではない窓で行う。

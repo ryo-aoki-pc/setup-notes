@@ -1,7 +1,7 @@
 # シェルと端末のセットアップ（AlmaLinux 10・Windows 11）
 
 - 自分用の共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）と、シェルのツール（starship・zoxide・fzf・eza・bat・tmux）、端末のフォント（HackGen Console NF）、端末（WezTerm nightly と自分用の設定 [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を入れる。Windows 11 では Git Bash を主のシェルにし、Windows Terminal・PowerShell 7 のプロファイル・PowerShell の開発の設定も整える
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md)・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)
+- 検証記録・[参考資料](reference/shell-terminal.md)・[注意点](extra/shell-terminal.md)
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
@@ -874,7 +874,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - この項の手順 2 の退避の前に、WezTerm のウィンドウをすべて閉じる
 - 既存の設定の確認（この項の手順 1）と退避（手順 2）を省かない
 
-[背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/wezterm/docs/verification/install.md)
+[背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・検証記録（`repos/wezterm/docs/verification/install.md`）
 
 1. 既存の WezTerm の設定があるか確かめる。
 
@@ -1626,7 +1626,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 前提: [WezTerm](#windows-11-で-wezterm-を入れる)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 1〜6 を通し、Git と共通の bash 設定を入れてある。HackGen Console NF は任意
 - 実行場所: この項の手順 1〜5 は、WezTerm の外の、自分のユーザーの Git Bash の窓。この項の手順 6・7 は、起動し直した WezTerm の Git Bash のタブ
 - この項の手順 1 で WezTerm の窓をすべて閉じる。既存設定の確認と、この項の手順 3 の退避を省かない
-- [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/wezterm/docs/verification/install.md)
+- [背景説明](https://github.com/ryo-aoki-pc/wezterm/blob/main/docs/reference/install.md)・検証記録（`repos/wezterm/docs/verification/install.md`）
 
 1. WezTerm の窓をすべて閉じ、スタートメニューから Git Bash を開く。
 

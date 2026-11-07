@@ -1,6 +1,6 @@
 # VMware Workstation Pro の注意点
 
-[手順書](../virtual-machines.md#vmware-workstation-pro)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vmware.md)・[参考資料](../reference/vmware.md)
+[手順書](../virtual-machines.md#vmware-workstation-pro)・検証記録・[参考資料](../reference/vmware.md)
 
 - 手順書の実施手順は項（###）ごとに 1 から数える。「<項>の手順 N」は手順書のその項の手順、「本書」「この文書」は手順書を指す
 

@@ -1,6 +1,6 @@
 # AlmaLinux 10 のセットアップ
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)・[参考資料](reference/almalinux-setup.md)・[注意点](extra/almalinux-setup.md)
+- 検証記録・[参考資料](reference/almalinux-setup.md)・[注意点](extra/almalinux-setup.md)
 
 > [!IMPORTANT]
 > - 前提: AlmaLinux 10 Workstation を入れた PC と、インターネット接続。オフラインの Homebrew は[別手順](#homebrew-のオフライン導入)を使う
@@ -538,7 +538,7 @@
 - インターネットに出られないホスト（以下、オフラインのホスト）に、SSH の SOCKS トンネル越しに Homebrew を入れる。トンネルの出口は、インターネットに出られるホスト（以下、オンラインのホスト）
 - 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を、接続元をオンラインのホスト、接続先をオフラインのホストとして通してある。オフラインのホストには、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を、そのトンネルのシェルで通してある
 - 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル。Homebrew の通信にもトンネルを使う）。この項の手順 5 には、オンラインのホストで行う操作がある
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[注意点](extra/homebrew-offline.md)
+- 検証記録（`docs/verification/homebrew-offline.md`）・[参考資料](reference/homebrew-offline.md)・[注意点](extra/homebrew-offline.md)
 - この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜3（同じ項の手順 3 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
 - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
 - **この項の手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
@@ -681,7 +681,7 @@
 - Secure Boot が有効な PC（または VM）で、自分でビルドしたカーネルモジュールを読み込めるように、署名用の鍵を作って MOK に登録する
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある（bootc のシステムでは、`sudo` できるユーザーでログインしてある）
 - 実行場所: Secure Boot を使う PC（または VM）の、自分のユーザーの端末（bash）か SSH
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md)・[参考資料](reference/secure-boot-mok.md)・[注意点](extra/secure-boot-mok.md)
+- 検証記録（`docs/verification/secure-boot-mok.md`）・[参考資料](reference/secure-boot-mok.md)・[注意点](extra/secure-boot-mok.md)
 - **カーネルモジュールをビルドする項より先に通す**。この項の手順 3 で Secure Boot が無効と分かったら、この項はそこで終わり
 - bootc のシステム（AlmaLinux Atomic Desktop など）でも同じ手順になる
 - **この項の手順 4 で一時パスワードを 2 回聞かれ、この項の手順 5 で再起動する**。答えてから次の手順を貼る
@@ -758,7 +758,7 @@
    - 最初の画面の `Press any key to perform MOK management` は、`Booting in 10 seconds` から数え下げて 10 秒で消える。消える前に何かキーを押す（VM なら、VM のウィンドウで押す）
    - 続けて `Enroll MOK` → `Continue` → `Yes` → 手順 4 の一時パスワード → `Reboot` と進む
    - **何もしないで進むと登録されない**。そのときは `sudo mokutil --import /var/lib/shim-signed/mok/MOK.der`（手順 4 の最後の行）を貼り直してから、手順 5 からやり直す
-   - **注意**: MokManager でキーボードが効かない PC がある（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/secure-boot-mok.md#実施手順--手順-6-補足-画面の並びと登録できなかった-pc)の手順 6 の補足を参照）
+   - **注意**: MokManager でキーボードが効かない PC がある（検証記録: `docs/verification/secure-boot-mok.md` の「実施手順 / 手順 6: 補足: 画面の並びと、登録できなかった PC」の手順 6 の補足を参照）
    - **次の手順は、起動したらログインし、新しい端末を開いてから貼る**
 
 1. 鍵が登録されたか確かめる。
@@ -778,7 +778,7 @@
 - 自分のユーザーの linger を有効にして、ログアウトしている間も、そのユーザーのサービスが動くようにする
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: 常駐させるユーザー自身のシェル（デスクトップの端末か SSH の bash）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/linger.md)・[参考資料](reference/linger.md)・[注意点](extra/linger.md)
+- 検証記録（`docs/verification/linger.md`）・[参考資料](reference/linger.md)・[注意点](extra/linger.md)
 - 通すと使えるようになるもの（ログアウトしている間も動く）:
   - [Podman の Quadlet](containers.md#podman-quadlet-で自動起動する)で動かすコンテナ
 
@@ -2483,7 +2483,7 @@
 - シェルスクリプトの静的検査の ShellCheck と、整形の shfmt を Homebrew で入れ、検出できるか確かめる
 - 前提: [Homebrew](#homebrew)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある。`command -v brew` で何も出なければ、先に通す
 - 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shellcheck.md)・[参考資料](reference/shellcheck.md)・[注意点](extra/shellcheck.md)
+- 検証記録（`docs/verification/shellcheck.md`）・[参考資料](reference/shellcheck.md)・[注意点](extra/shellcheck.md)
 
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
@@ -2534,7 +2534,7 @@
 - Microsoft の dnf のリポジトリから VS Code（rpm 版）を入れ、起動を確かめる
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[注意点](extra/vscode.md)
+- 検証記録（`docs/verification/vscode.md`）・[参考資料](reference/vscode.md)・[注意点](extra/vscode.md)
 
 > [!IMPORTANT]
 > - **すべて対象ホスト上で実行する**。デスクトップが要るのは、この項の手順 5（GUI の起動）だけ
@@ -2670,7 +2670,7 @@
   - 同じトンネルで、[Homebrew のオフライン導入](#homebrew-のオフライン導入)と[Neovim](neovim.md#neovim)の手順 1 を通してある
   - この項の手順 1・2 で経路を設定してから、[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 8 の初回起動を含む導入を行い、この項の手順 3 へ進む。Mason の npm パッケージは未導入でよい
 - 実行場所: オフラインのホストの、`sudo` できる自分のユーザーのシェル（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 のシェル）。この項の手順 4 でトンネルを閉じてログインし直し（オンラインのホストでも操作する）、この項の手順 5 はログインし直したシェルに貼る
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/npm-offline.md)・[参考資料](reference/npm-offline.md)・[注意点](extra/npm-offline.md)
+- 検証記録（`docs/verification/npm-offline.md`）・[参考資料](reference/npm-offline.md)・[注意点](extra/npm-offline.md)
 
 > [!WARNING]
 >
@@ -2928,7 +2928,7 @@
 - 前提: [Homebrew](#homebrew)の手順 1〜2 と[Podman](containers.md#podman)の手順 7（API ソケット）までを通してある
   - `command -v brew podman` が 2 行を返さない、または `systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインしたシェル（端末の bash か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](reference/image-tools.md)・[注意点](extra/image-tools.md)
+- 検証記録（`docs/verification/image-tools.md`）・[参考資料](reference/image-tools.md)・[注意点](extra/image-tools.md)
 - **この項の手順 2 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。表示された内容を確かめて答える
 - **この項の手順 8 で dive の画面（TUI）が開く**。`q` で終了する
 
@@ -3202,7 +3202,7 @@
 
 **参照**
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)
+- 検証記録（`docs/verification/btop.md`）
 - [aristocratos/btop — README](https://github.com/aristocratos/btop) — 機能、キーバインド、設定項目、テーマの書式
 - [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 — 前提の `epel-release` の入れ方と、CRB の案内
 - `btop --help` / `btop --default-config` — 起動オプションと既定の設定
@@ -3217,7 +3217,7 @@
 - ディスクの使用量を端末の画面で調べる gdu を、Homebrew で入れる
 - 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜2 を通してある（`command -v brew` で何も出なければ、先に通す）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[注意点](extra/gdu.md)
+- 検証記録（`docs/verification/gdu.md`）・[参考資料](reference/gdu.md)・[注意点](extra/gdu.md)
 - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
 
 > [!IMPORTANT]
@@ -3362,7 +3362,7 @@
 - インターネットに出られないホストから、ssh の SOCKS の転送で、インターネットに出られるホストを通して外へ出る
 - 前提: オンラインのホストからオフラインのホストへ ssh でログインできる（LAN・VPN・VirtualBox のホストオンリーのネットワークなど）。オンラインのホストの OpenSSH は 7.6 以上
 - 実行場所: この項の手順 1・2 は、インターネットに出られるホスト（以下、オンラインのホスト）のシェル（bash）。手順 3 は、手順 2 でログインしたインターネットに出られないホスト（以下、オフラインのホスト）のシェル
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/ssh-socks-tunnel.md)・[参考資料](reference/ssh-socks-tunnel.md)・[注意点](extra/ssh-socks-tunnel.md)
+- 検証記録（`docs/verification/ssh-socks-tunnel.md`）・[参考資料](reference/ssh-socks-tunnel.md)・[注意点](extra/ssh-socks-tunnel.md)
 
 > [!IMPORTANT]
 > - **2 台のホストで行う**。この項の手順 1・2 はオンラインのホストで、手順 3 は、手順 2 でログインしたオフラインのホストのシェルで貼る

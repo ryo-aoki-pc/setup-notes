@@ -19,7 +19,7 @@
 
 ### GNOME のデスクトップ共有
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)・[参考資料](reference/gnome-desktop-sharing.md)・[注意点](extra/gnome-desktop-sharing.md)
+- 検証記録（`docs/verification/gnome-desktop-sharing.md`）・[参考資料](reference/gnome-desktop-sharing.md)・[注意点](extra/gnome-desktop-sharing.md)
 
 > [!IMPORTANT]
 > - **PC の画面・キーボード・マウスは使わない**。共有するユーザーで SSH でログインしたシェルに貼り、画面は[再起動の後に確かめてつなぐ](#gnome-のデスクトップ共有-再起動の後に確かめてつなぐ)の手順 4 で RDP のクライアントから確かめる
@@ -33,7 +33,7 @@
 > - 後からリモートログインを有効にする場合は[注意点](extra/gnome-desktop-sharing.md#注意点)を参照する
 
 - 変数のある項は、その項の手順 1 で変数を設定したシェルに貼る
-- 環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
+- 環境・実施範囲は検証記録（`docs/verification/gnome-desktop-sharing.md`）を参照する
 
 > [!WARNING]
 > - **自動ログインにするので、PC の前にいる人は誰でも、パスワード無しでこのユーザーのデスクトップを使える**（前提の画面オフ・画面ロック・自動サスペンドを止める項で、ロックもしない）
@@ -777,7 +777,7 @@
 - モニターの無い PC でも、自分の GNOME のデスクトップをヘッドレスのセッションで常駐させ、RDP でつなぐ
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)と、[画面オフ・画面ロック・自動サスペンドを止める](almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)の手順 1・2 を通してある。サスペンドできる PC は、同じ項の手順 3・4 も通してある
 - 実行場所: セッションを使うユーザー本人のシェル（bash。SSH でよい）。この項の手順 10 は、LAN 内の別のマシンで行う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-headless-session.md)・[参考資料](reference/gnome-headless-session.md)・[注意点](extra/gnome-headless-session.md)
+- 検証記録（`docs/verification/gnome-headless-session.md`）・[参考資料](reference/gnome-headless-session.md)・[注意点](extra/gnome-headless-session.md)
 - **この項の手順 5 は RDP のユーザー名とパスワードの対話入力がある**。入力し終えてから次の手順を貼る
 - [リモートログイン](#gnome-のリモートログイン)（GDM で認証し、新しいセッションを作るか既存のセッションへ引き渡す方式）と同じ PC でも使える。そのときのポートは、この項の手順 1 で自動で 3390 になる
 - この項の手順 1 で変数を設定したシェルに貼る
@@ -1271,11 +1271,11 @@
 - RDP のクライアントに GDM のログイン画面を出し、OS のアカウントでログインできるようにする（システムのデーモンで待ち受ける）
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: サーバーの、自分のユーザーのシェル（bash）。この項の手順 11 は、LAN 内の別のマシンで行う
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md)・[参考資料](reference/gnome-remote-desktop.md)・[注意点](extra/gnome-remote-desktop.md)
+- 検証記録（`docs/verification/gnome-remote-desktop.md`）・[参考資料](reference/gnome-remote-desktop.md)・[注意点](extra/gnome-remote-desktop.md)
 - **この項の手順 6 には対話入力がある**（ユーザー名とパスワード）。入力し終えてから手順 7 を貼る
 - この項の手順 1 で変数を設定したシェルに貼る
 - モニターの無い PC に自分のデスクトップを常駐させて RDP でつなぐなら、[GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)。この項と同じ PC で併用できる（ポートは 3390）
-- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有)を通す。環境・実施範囲は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md)を参照する
+- PC の画面を触らず、デスクトップをそのまま RDP で共有する場合は[デスクトップ共有](#gnome-のデスクトップ共有)を通す。環境・実施範囲は検証記録（`docs/verification/gnome-desktop-sharing.md`）を参照する
   - デスクトップ共有を 3389 で使っている PC では、この項の後に、デスクトップ共有の[注意点](extra/gnome-desktop-sharing.md#注意点)の「後からリモートログインを有効にしたとき」で共有を 3390 へ移す（共有は 3389 で待ち受けられなくなる）
 
 > [!IMPORTANT]
@@ -1373,12 +1373,12 @@
    ```
 
    - ユーザー名とパスワードを聞かれる
-   - **対話入力は TTY 必須**。スクリプト・パイプなど、対話用の端末が無い実行では、設定されずに exit 0 で終わる（[記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-1-grdctl-の対話入力は-tty-必須)）
+   - **対話入力は TTY 必須**。スクリプト・パイプなど、対話用の端末が無い実行では、設定されずに exit 0 で終わる（記録: `docs/verification/gnome-remote-desktop.md` の「落とし穴 1: grdctl の対話入力は TTY 必須」）
    - **次の手順は、ユーザー名とパスワードを入力し終えてから貼る**（続けて進むと、資格情報を設定できなかったときもデーモンを起動し直すことになる）
 
 1. 資格情報を反映させるため、デーモンを起動し直す。
 
-   - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（[落とし穴 2](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-remote-desktop.md#落とし穴-2-資格情報の変更にはデーモンの再起動が必要)）
+   - 再起動しないと `[RDP] Credentials are not set, denying client` で拒否され続ける（落とし穴 2: `docs/verification/gnome-remote-desktop.md` の「落とし穴 2: 資格情報の変更にはデーモンの再起動が必要」）
    - [デーモンを起動し直す](#gnome-のリモートログイン-デーモンを起動し直す)の手順 1 を行う。ヘッドレスのセッションがある PC では、続けて同じ項の手順 2 も行う
    - **次の手順は、デーモンと必要な受け渡し役の起動し直しが終わってから貼る**
 

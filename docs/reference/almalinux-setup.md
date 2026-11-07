@@ -58,7 +58,7 @@
 
 ### EPEL と RPM Fusion / 手順 4: 補足: localpkg_gpgcheck と free
 
-- `--setopt=localpkg_gpgcheck=1` を外さない理由は、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#rpm-fusion-実施手順--手順-3-補足-署名の確認とepel-を前提にした理由)と[RPM Fusion の選択した方針](#epel-と-rpm-fusion)
+- `--setopt=localpkg_gpgcheck=1` を外さない理由は、検証記録（`docs/verification/almalinux-setup.md` の「RPM Fusion: 実施手順 / 手順 3: 補足: 署名の確認と、EPEL を前提にした理由」）と[RPM Fusion の選択した方針](#epel-と-rpm-fusion)
 - 有効にするのは free だけ。nonfree は扱わない
 
 ### EPEL と RPM Fusion / 手順 4: 補足: 使えるようになるもの
@@ -67,7 +67,7 @@
 
 ### Flatpak と Flathub / 手順 1: 補足: flatpak と Flathub の登録
 
-検証記録は[Flatpakの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#flatpak-の記録)を参照する。
+検証記録は `docs/verification/almalinux-setup.md` の「Flatpak の記録」を参照する。
 
 - Workstation には flatpak が最初から入っている
 - `flathub` の行が既にあれば、「Flatpak と Flathub」の手順 3 は何もしない（`--if-not-exists` のため）
@@ -107,7 +107,7 @@
   - FXA のドロップインを置く前の `ibus-daemon` の PATH は、`/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/<USER>/.local/bin:/home/<USER>/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin` だった（Homebrew 本体は導入済み。`FXA/out/02-baseline-before-step4.txt`）。Homebrew 導入前のユーザーマネージャーの PATH は、今回の証跡では確かめていない
   - 検証した VM では、この設定の後に起動した `ibus-daemon` から、Anthy のエンジンは `/usr/bin/python3` で起動された。端末と `gnome-shell` の PATH は変わらない
   - GNOME 以外のセッションや、別の経路で `ibus-daemon` を起動する構成は対象の外で、確かめていない。セッションの PATH で起動される `/usr/libexec/ibus-setup-anthy`（Anthy の設定）が開くかも、確かめていない
-- 2026-10-11 の通しでは、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できなかった。直しの確かめは Hyper-V の VM に限る（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#手順書を直した所とその確かめ)）
+- 2026-10-11 の通しでは、Hyper-V・VMware・VirtualBox の VM で、この設定が無いと変換できなかった。直しの確かめは Hyper-V の VM に限る（検証記録: `docs/verification/almalinux-setup.md` の「手順書を直した所と、その確かめ」）
   - FXA では、Homebrew の `python3` が無い状態で手順 4 を置き、「yazi」の手順 2 で `python@3.15` を入れ、再起動した後に、テキストエディターで「日本語」への変換と確定を確かめた
   - FXB では、入力不能の状態から手順 4 と再起動を通し、テキストエディターと WezTerm の Neovim で日本語入力と IME 切り替えを確かめた。Neovim の整形は、初めから整形済みで、変化を見分けられなかった
   - ログインし直しだけで効くこと・VMware・VirtualBox・実機での直しは、確かめていない
@@ -152,7 +152,7 @@
 
 ### 日本語入力 / 手順 2: 補足: 入っているときと入れたとき
 
-検証記録は[日本語入力の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#日本語入力-の記録)を参照する。
+検証記録は `docs/verification/almalinux-setup.md` の「日本語入力 の記録」を参照する。
 
 - Workstation で入れた PC には、3 つとも最初から入っている
 - 入れたときに「再起動と確認」の手順 1 の再起動を待つのは、動いている IBus が、ログインし直すまで Anthy を使えないため
@@ -213,7 +213,7 @@
 
 ### 画面オフ・画面ロック・自動サスペンドを止める / 手順 1: 補足: 変数の有効な範囲
 
-検証記録は[画面オフ・ロック・サスペンドの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#画面オフロックサスペンド-の記録)を参照する。
+検証記録は `docs/verification/almalinux-setup.md` の「画面オフ・ロック・サスペンド の記録」を参照する。
 
 - 変数はそのシェルの中だけで有効なので、新しいシェルを開いたら貼り直す
 
@@ -246,7 +246,7 @@
 
 ### Git / 手順 1: 補足: 変数について
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-補足の実測)
+検証記録: `docs/verification/almalinux-setup.md` の「Git: 補足の実測」
 
 - GitHub に push するなら、メールアドレスに GitHub の noreply のアドレス（`<ID>+<GITHUB_USER>@users.noreply.github.com`）を使うと、私用のアドレスをコミットに載せずに済む。アドレスは GitHub の Settings の Emails で確かめる
 - 名前に空白を入れるときは、引用符の中に書く（引用符が無いと、空白の後ろがコマンドとして実行される）
@@ -308,7 +308,7 @@
 
 ### git-delta / 手順 1: 補足: 変数について
 
-検証記録は[git-deltaの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-delta-の記録)を参照する。
+検証記録は `docs/verification/almalinux-setup.md` の「git-delta の記録」を参照する。
 
 - 3 つとも表示の好みなので、既定のままで進められる
 - 3 つとも `~/.gitconfig` の `[delta]` に書かれる値で、後から `git config --global delta.side-by-side true` で変えられる
@@ -339,7 +339,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 
 ### GitHub CLI / 手順 1: 補足: 生成される repo ファイルと、dnf4 と dnf5 の構文の違い
 
-検証記録は[GitHub CLIの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#github-cli-の記録)を参照する。
+検証記録は `docs/verification/almalinux-setup.md` の「GitHub CLI の記録」を参照する。
 
 追加するのは公式が配っている repo ファイルで、生成される `/etc/yum.repos.d/gh-cli.repo` は次のとおり:
 
@@ -374,7 +374,7 @@ sudo dnf config-manager addrepo --from-repofile=https://cli.github.com/packages/
 
 ### lazygit / 手順 3・4: 補足: 起動時の注意
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#lazygit-実施手順--手順-3-補足-起動時の注意)
+この節の検証記録: `docs/verification/almalinux-setup.md` の「lazygit: 実施手順 / 手順 3: 補足: 起動時の注意」
 
 `lazygit --version` の `git version` 欄には、lazygit が呼ぶ git のバージョンが出る。
 
@@ -432,7 +432,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 ### yazi / 手順 2: 補足: ボトルと、依存ツールの役割
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#yazi-実施手順--手順-2-補足-ボトルと依存ツールの役割)
+この節の検証記録: `docs/verification/almalinux-setup.md` の「yazi: 実施手順 / 手順 2: 補足: ボトルと、依存ツールの役割」
 
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 
@@ -470,7 +470,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 ### Firefox / 手順 4: 補足: priority は保険
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#firefox-実施手順--手順-4-補足-priority-は保険)
+この節の検証記録: `docs/verification/almalinux-setup.md` の「Firefox: 実施手順 / 手順 4: 補足: priority は保険」
 
 Mozilla の案内する repo ファイルには `priority` が無い。`priority=10`（数字が小さいほど優先）は、将来のリポジトリ間の優先順位に備えて足している。
 
@@ -534,7 +534,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
   - `xdg-user-dirs-update --force` は空のフォルダーを作り直すだけで、中身を移さない。中身を残すために、フォルダーを `mv` してから `xdg-user-dirs-update --set` で場所を書き換える
   - Files のサイドバーのブックマーク（`~/.config/gtk-3.0/bookmarks`）も、日本語の名前の URI のままになるので書き換える
   - `~/.config/user-dirs.locale` を今のロケールに合わせる。xdg-user-dirs-gtk は、このファイルのロケールが今のロケールと違うときに、ログインで「標準フォルダーの名前を現在の言語に合わせて更新しますか?」の窓を出す（xdg-user-dirs-gtk のソース）
-- **GNOME の設定は `gsettings` の読み戻しで確かめる**: `gsettings` は書けなかったときも終了コード 0 で終わる。`/usr/bin/gsettings` で呼ぶ（Homebrew の glib の `gsettings` は dconf に書かない。[画面オフ・ロック・サスペンドの記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#画面オフロックサスペンド-実施手順--手順-2-補足-変える前の値0-にしても暗くなる理由設定アプリの項目)）
+- **GNOME の設定は `gsettings` の読み戻しで確かめる**: `gsettings` は書けなかったときも終了コード 0 で終わる。`/usr/bin/gsettings` で呼ぶ（Homebrew の glib の `gsettings` は dconf に書かない。画面オフ・ロック・サスペンドの記録: `docs/verification/almalinux-setup.md` の「画面オフ・ロック・サスペンド: 実施手順 / 手順 2: 補足: 変える前の値、0 にしても暗くなる理由、設定アプリの項目」）
   - 一覧の値（`xkb-options`・`experimental-features`・`custom-keybindings`）は、まるごと置き換えず、無ければ足す。ほかの設定で入っている値を消さないため
 - **Caps Lock を Ctrl に（「GNOME の表示と入力」の手順 4）**: XKB の `ctrl:nocaps`（xkeyboard-config の説明は「Caps Lock as Ctrl」）を `xkb-options` に足す。Caps Lock の働きは無くなる。自分のセッションの設定なので、ログイン画面と仮想コンソールは変わらない
 - **拡大率（「GNOME の表示と入力」の手順 10）**: GNOME の設定に 125%・150% などの拡大率を出すのは、mutter の実験的な機能 `scale-monitor-framebuffer`。`xwayland-native-scaling` は、X11 のアプリをぼやけさせずに拡大する（mutter 49 の gschema の説明）。AlmaLinux 10.2 の mutter 49.4 の既定は `[]`
@@ -592,7 +592,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 #### Firefox
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#firefox-選択した方針)
+この節の検証記録: `docs/verification/almalinux-setup.md` の「Firefox: 選択した方針」
 
 | 経路 | EL10 aarch64 での状況 | 採否 |
 |---|---|---|

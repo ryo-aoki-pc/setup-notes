@@ -2,7 +2,7 @@
 
 [手順書](../windows-setup.md#windows-の-openssh-クライアント)・[注意点](../extra/windows-ssh-client.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)
+検証記録
 
 ## 補足
 
@@ -66,7 +66,7 @@
   - Windows の ssh は UTF-8 の BOM を読み飛ばすが（Win32-OpenSSH のソース）、Git の ssh は読み飛ばさず、`Bad configuration option` で止まる。そのため、BOM のある config には足さずに止める
   - 改行は CR LF になる。ssh は行の末尾の CR を空白として捨てる
 - 同じ `Host` がもうあるかは、`Host <別名>` と `Host=<別名>` の両方の書き方で探す（ssh_config は `=` でも区切れる）。2 つ目の `Host` のブロックを足しても、ssh は最初のものを使い、足した値は効かない
-- `Add-Content` は、末尾に改行の無いファイルに、改行を入れずに続けて書く（このリポジトリの [Windows 11 のセットアップ の記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）。そのため、末尾に改行が無ければ、先に空の 1 行（改行）を書く
+- `Add-Content` は、末尾に改行の無いファイルに、改行を入れずに続けて書く（このリポジトリの Windows 11 のセットアップ の記録: `docs/verification/windows-setup.md`）。そのため、末尾に改行が無ければ、先に空の 1 行（改行）を書く
 - 確かめは、2 つの ssh の `-G`（config を読んだ結果の表示）で行う。Git の ssh のほうが BOM に厳しく、Windows の ssh（9.5p2）は新しい設定を知らないので、両方を必ず確かめる
 - ssh は最初に見つけた値を使うので、config の前の方の `Host *` などにある値が、足した値より先に効く
 
@@ -84,7 +84,7 @@
   - `authorized_keys` の末尾に改行が無ければ、先に改行を足す（`ssh-copy-id` と同じ）
   - Windows の PowerShell 7 も、文字列のパイプには CR LF を付けるので、`tr -d '\r'` で CR を捨てる。Windows PowerShell 5.1 のパイプも CR LF になる
   - 1 行目の先頭の UTF-8 の BOM は、`sed` で捨てる。プロファイルで `$OutputEncoding` を UTF-8 にした 5.1 は、BOM を付けて送るかもしれない（Windows では確かめていない）
-    - BOM の付いた行は、`ssh-keygen -lf` が公開鍵と認めなかった（[検証記録の模擬](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md#模擬)）。sshd もその行の鍵を使わないはず（sshd では確かめていない）
+    - BOM の付いた行は、`ssh-keygen -lf` が公開鍵と認めなかった（検証記録の模擬: `docs/verification/windows-ssh-client.md` の「模擬」）。sshd もその行の鍵を使わないはず（sshd では確かめていない）
   - `restorecon` は、あるときだけ動かし、無くても `added` の判定に入れない（`ssh-copy-id` と同じ）。ラベルは `ssh_home_t` になる
 - ホストに渡すコマンドは、単一引用符を使う今の形のまま PowerShell 7 に貼る。Windows PowerShell 5.1 はネイティブのコマンドの引数の中の二重引用符を逃がさないため、二重引用符を使わない形にしてある。PowerShell の単一引用符の文字列の中では、単一引用符を `''` と重ねて書く
 - `-o PubkeyAuthentication=no` は、鍵を試さず（パスフレーズも聞かず）にパスワードへ進むため
@@ -115,7 +115,7 @@
   - 初期設定の「Git」の、両 OS に同じ bash のブロックを貼る形を崩すことになり、ssh-agent を使わない限り得るものが無い
   - 代わりに、config は両方の ssh が読める書き方に限り、手順 7 と更新で両方の `-G` を確かめる
 - **winget や scoop の OpenSSH（新しい版の Win32-OpenSSH）は入れない**: 3 つ目の `ssh.exe` が `PATH` に加わり、`PATH` の順によっては PowerShell と WezTerm が使う ssh が変わる（どれが動くかが分かりにくくなる）。得るのは新しい版だけ
-- **鍵交換の方式は、確かめてから書く**: Windows の 9.5p2 も `sntrup761x25519-sha512@openssh.com`（耐量子のハイブリッド）を扱う。AlmaLinux 10 の既定の暗号ポリシーとの組み合わせで実際に選ばれる方式は、`ssh -v` の `kex: algorithm:` の行で測る（[検証記録の未確認事項](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md#残っている未確認事項)）
+- **鍵交換の方式は、確かめてから書く**: Windows の 9.5p2 も `sntrup761x25519-sha512@openssh.com`（耐量子のハイブリッド）を扱う。AlmaLinux 10 の既定の暗号ポリシーとの組み合わせで実際に選ばれる方式は、`ssh -v` の `kex: algorithm:` の行で測る（検証記録の未確認事項: `docs/verification/windows-ssh-client.md` の「残っている未確認事項」）
 - **WSL の AlmaLinux 10 の ssh は、別のものとして扱う**: WSL のホームの `~/.ssh` は別にあり、Windows の `%USERPROFILE%\.ssh` を共有しない。WSL から入るなら、WSL の中で鍵を作る
 
 ### 参照

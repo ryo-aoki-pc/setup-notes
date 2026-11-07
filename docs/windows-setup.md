@@ -1,6 +1,6 @@
 # Windows 11 のセットアップ
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](reference/windows-setup.md)・[注意点](extra/windows-setup.md)
+- 検証記録・[参考資料](reference/windows-setup.md)・[注意点](extra/windows-setup.md)
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
@@ -962,7 +962,7 @@
 
 - **この項の手順 3 でサインアウトしてサインインし直し、この項の手順 4 は設定の画面で行う**
 - **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
-- 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
+- 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・検証記録）
 
 1. 管理者ではない PowerShell 7 を開く。
 
@@ -1651,7 +1651,7 @@
 - 前提: [初回準備](#windows-のホットキー競合-初回準備)で Hotkey Screener を展開してある
 - 実行場所: 問題が起きるユーザー・ログインセッションのデスクトップ（Hotkey Screener）
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)・[参考資料](reference/windows-hotkey-conflict.md)
+- 検証記録（`docs/verification/windows-hotkey-conflict.md`）・[参考資料](reference/windows-hotkey-conflict.md)
 
 - 問題が起きる Windows 11 のユーザー・ログインセッションで実施する
 - 検出時には対象キーが実際に入力され、対応する操作が実行されることもある。先に作業を保存する
@@ -1697,7 +1697,7 @@
    - 日時、キー、検出されたアプリ、変更前後の設定、実操作の結果を記録する
    - 検出できなかった条件と、元に戻した設定も残す
    - `Command → Exit` またはウィンドウ右上の閉じるボタンで終了する
-   - 書き方は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)を参照する
+   - 書き方は検証記録（`docs/verification/windows-hotkey-conflict.md`）を参照する
 
 #### Windows のホットキー競合: 初回準備
 
@@ -1707,7 +1707,7 @@
 
 - ZIP の取得と展開は初回だけ行う。更新する場合はツールを終了してから行う
 
-- 検証した版とファイル構成は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-hotkey-conflict.md)を参照する
+- 検証した版とファイル構成は検証記録（`docs/verification/windows-hotkey-conflict.md`）を参照する
 - 権限要求が頻発する場合は、[Program Files への配置](#windows-のホットキー競合-権限要求を減らすために-program-files-へ配置する)も行う
 
 1. 公式サイトから Hotkey Screener の ZIP をダウンロードする。
@@ -2209,7 +2209,7 @@
 - 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している
 - 実行場所: この PC のデスクトップ（RDP 接続先）の管理者の PowerShell 7。この項の手順 1 で開く。切断後は接続先の PC の画面で確かめる
 
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[注意点](extra/windows-rdp-disconnect.md)
+- 検証記録（`docs/verification/windows-rdp-disconnect.md`）・[参考資料](reference/windows-rdp-disconnect.md)・[注意点](extra/windows-rdp-disconnect.md)
 
 - この項の手順 1〜3 は RDP のセッションの中で行う。この項の手順 3 を貼ると、その場で RDP が切れる
 - この項の手順 4 は、接続先の PC の画面で行う
@@ -2310,7 +2310,7 @@
 - Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
 - 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[注意点](extra/windows-ssh-client.md)
+- 検証記録（`docs/verification/windows-ssh-client.md`）・[参考資料](reference/windows-ssh-client.md)・[注意点](extra/windows-ssh-client.md)
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows と Git の両方の ssh で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる

@@ -2,7 +2,7 @@
 
 [手順書](../windows-setup.md)・[注意点](../extra/windows-setup.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#補足の実測)
+検証記録: `docs/verification/windows-setup.md` の「補足の実測」
 
 ## 補足
 
@@ -104,7 +104,7 @@
   - ユーザーの環境変数 `PATH` の先頭に `~\scoop\shims` を足す。変えたことを Windows 全体に知らせる（`WM_SETTINGCHANGE`）ので、この後にスタートメニューから起動したアプリにも届く
   - 設定のファイル `~\.config\scoop\config.json`
 - git があれば、本体と main のバケットを `git clone` で取る。無ければ zip で取る
-- git の無い PC では、`scoop update` が `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。この文書の後に [Git for Windows](../windows-setup.md#git-for-windows) で Git for Windows を入れれば、`scoop update` は scoop 本体と main のバケットを git の形に直して上げる（scoop 0.6.0 の `libexec/scoop-update.ps1`。scoop の `git` は入れない。[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)）
+- git の無い PC では、`scoop update` が `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。この文書の後に [Git for Windows](../windows-setup.md#git-for-windows) で Git for Windows を入れれば、`scoop update` は scoop 本体と main のバケットを git の形に直して上げる（scoop 0.6.0 の `libexec/scoop-update.ps1`。scoop の `git` は入れない。`docs/verification/windows-setup.md` の「選択した方針」）
 - 管理者で入れる方法（インストーラの `-RunAsAdmin`）は、公式の README が安全のために既定で止めているので、使わない
 
 ### アプリを入れる / 手順 3: 補足: 版
@@ -131,7 +131,7 @@
 ### アプリを入れる / 手順 5: 補足: 版と、Caps Lock を変える所
 
 - 最後の表の版は、実行した日の最新
-- Caps Lock は、PowerToys の Keyboard Manager ではなく、「サインイン・検索・キーボード」の手順 5 の Scancode Map で変える（[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)）
+- Caps Lock は、PowerToys の Keyboard Manager ではなく、「サインイン・検索・キーボード」の手順 5 の Scancode Map で変える（`docs/verification/windows-setup.md` の「選択した方針」）
 
 ### アプリを入れる / 手順 6: 補足: MSIX と MSI
 
@@ -503,7 +503,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### 再起動の後に確かめる / 手順 2: 補足: Web の結果が出たとき
 
-- スタートの検索に Web（Bing）の結果が出たら、[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)と、「サインイン・検索・キーボード」の手順 3 の補足を見る
+- スタートの検索に Web（Bing）の結果が出たら、検証記録と、「サインイン・検索・キーボード」の手順 3 の補足を見る
 
 ### 再起動の後に確かめる / 手順 3: 補足: コマンドで外さない理由
 
@@ -563,7 +563,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - `wslinfo --networking-mode` は、そのときも `nat` を出す（`wslinfo.cpp`）
 ### git-delta / 手順 2: 補足: VC++ ランタイム
 
-- scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-付録-windows-11-の配布物と資料の調査2026-10-08)）。無い PC では起動しない
+- scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（検証記録の付録: `docs/verification/windows-setup.md` の「git-delta: 付録: Windows 11 の配布物と資料の調査（2026-10-08）」）。無い PC では起動しない
 - scoop の `delta.json` は VC++ ランタイムを入れない（`depends` も `suggest` も無い）。winget の `dandavison.delta` は、依存として `Microsoft.VCRedist.2015+.x64` を持つ
 - 入れ方は新しく書かず、[Windows 11 で WezTerm を入れる](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（管理者の窓の winget。PC 全体）を指す。手順書の並びでは WezTerm を先に入れるので、ふつうはもう入っている
   - 設定の「インストールされているアプリ」では「Microsoft Visual C++ v14 Redistributable (x64)」と出る（前の版で入れた PC では「… 2015-2022 …」）
@@ -583,7 +583,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### git-delta / 手順 4: 補足: 実施手順の手順 1・3 を Git Bash で貼る
 
 - 手順 1・3 のブロックは bash と git だけを使うので、Git Bash にそのまま貼れる。PowerShell 向けに書き分けない（[Git](../almalinux-setup.md#git) と同じ考え方）
-- `git config --global` が書くのは `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `HOME`）。Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が同じファイルを示すことは、[Git の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-付録-windows-11-の-git-bash-での検証記録2026-09-30)で確かめてある
+- `git config --global` が書くのは `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `HOME`）。Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が同じファイルを示すことは、Git の検証記録（`docs/verification/windows-setup.md` の「Git: 付録: Windows 11 の Git Bash での検証記録（2026-09-30）」）で確かめてある
 - 手順 2（`brew install`）と手順 4（`brew list` を含む）は指さない。入れることと版・場所は、Windows 11 の節の手順 3 で PowerShell から確かめる
 - 手順 3 は `merge.conflictstyle zdiff3` も書く。[Git](../almalinux-setup.md#git) の手順 5 と同じ値なので、どちらを先に通してもよい（AlmaLinux 10 と同じ）
 - 手順 1 の変数はそのタブの中だけで有効なので、手順 3 も同じタブに貼る
@@ -603,7 +603,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - PowerShell で delta を直に動かす（`git diff | delta` など）と、PATH に less が無いので、delta はページャを使わずに出す（上の `output.rs` の動き）
 - `delta.navigate`（手順 1 の `DELTA_NAVIGATE`）が `true` だと、delta は less の検索履歴の写しを `%LOCALAPPDATA%\delta\delta.lesshst` に作り、`LESSHISTFILE` で less に渡す（ソースの `src/features/navigate.rs`。Linux では `~/.local/share/delta/lesshst`）。Windows で `n` / `N` が効くかは確かめていない
 - PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[注意点](../extra/almalinux-setup.md#注意点)）
-- どれも、ソースを読んだだけで、Windows では確かめていない（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-windows-11-で使う-検証状況の記録)）
+- どれも、ソースを読んだだけで、Windows では確かめていない（検証記録: `docs/verification/windows-setup.md` の「git-delta: Windows 11 で使う: 検証状況の記録」）
 
 ### GitHub CLI / 手順 2: 補足: 確かめる値の意味
 
@@ -619,11 +619,11 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### GitHub CLI / 手順 4: 補足: Git の認証に n と答える理由
 
-gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#github-cli-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）。**Windows では確かめていない**。
+gh 2.102.0 のソースを読んで決めた（検証記録の付録: `docs/verification/windows-setup.md` の「GitHub CLI: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」）。**Windows では確かめていない**。
 
 - **問いが出る条件**: `gh auth login` で HTTPS を選ぶと、github.com の Git の資格情報のヘルパーが gh でなければ、`Authenticate Git with your GitHub credentials?`（既定は Yes）を聞く
   - ヘルパーは `credential.https://github.com.helper`、無ければ `credential.helper` を、スコープを問わずに読む
-  - Git for Windows は、インストーラの既定の選択で `system`（`C:\Program Files\Git\etc\gitconfig`）に `credential.helper=manager`（Git Credential Manager）を書く（[Git の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#git-実施手順--手順-3-補足-設定の-3-つの場所)）。そのため、[Windows 11 のセットアップ](../windows-setup.md)の順に通した PC では、この問いが出る
+  - Git for Windows は、インストーラの既定の選択で `system`（`C:\Program Files\Git\etc\gitconfig`）に `credential.helper=manager`（Git Credential Manager）を書く（Git の検証記録: `docs/verification/almalinux-setup.md` の「Git: 実施手順 / 手順 3: 補足: 設定の 3 つの場所」）。そのため、[Windows 11 のセットアップ](../windows-setup.md)の順に通した PC では、この問いが出る
 - **Yes と答えたとき**（ソースからの推論）
   - ヘルパーがある（Git for Windows の既定）: `~/.gitconfig` は変えない。`git credential reject` で github.com の資格情報を消してから、`git credential approve` で gh のトークンを Git Credential Manager に入れる。以後、git の HTTPS も gh のトークン（GitHub CLI の OAuth アプリ。`workflow` の権限も付く）で GitHub につなぐ
   - ヘルパーが無い: `~/.gitconfig` の `credential.https://github.com.helper` と `credential.https://gist.github.com.helper` に、空の値（ほかのヘルパーを切る）と `!<gh の場所> auth git-credential` を書く。`gh auth setup-git` と同じ
@@ -729,7 +729,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 ### Firefox / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-で使う--手順-4-補足-windows-では-aac-と-h264-のために何も足さない理由)
+この節の検証記録: `docs/verification/windows-setup.md` の「Firefox: Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由」
 
 - Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
 - 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのはほかの OS の MediaCodec を使うものだけ）
@@ -758,7 +758,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 ### Git Bash と WezTerm の設定 / 手順 4: 補足: Windows の system の行
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)
+検証記録
 
 - Windows で出る `system` の行（インストーラが書いたもの）より、[Git](../almalinux-setup.md#git)の手順 4・5 で書く `global` の値が優先される
 
@@ -786,7 +786,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 ### Git for Windows・Firefox・WezTerm を上げる / 手順 4: 補足: winget での更新
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#firefox-windows-11-の更新--手順-2-補足-winget-での更新)
+この節の検証記録: `docs/verification/windows-setup.md` の「Firefox: Windows 11 の更新 / 手順 2: 補足: winget での更新」
 
 - winget の定義の `UpgradeBehavior` は `install`。今の Firefox を消さずに、同じ場所へ新しい版のインストーラを重ねて入れる。プロファイルと既定のブラウザーの設定はそのまま
 - winget が渡す `/PreventRebootRequired=true` は、使用中のファイルがあっても再起動が要る処理をしないスイッチ。Mozilla の文書は、動いている Firefox に重ねて入れるときにこれを付けると、入れ替えが途中で終わることがあると書いている
@@ -863,7 +863,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - ページを読み込み直すか、解除してもう一度実行すると、検索は閉じた空の状態から始める
 - GitLab の保存領域には書き込まない
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/md-table-sticky/docs/verification/readme.md)
+検証記録（`repos/md-table-sticky/docs/verification/readme.md`）
 
 ### 選択した方針
 
@@ -913,7 +913,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 | 設定の画面のスイッチ | すぐに効く。台数が少なければ足りる | この節の手順 6 で確かめに使う |
 | `PowerToys.DSC.exe`（DSC v3。0.95 から同梱） | Windows PowerShell 5.1 から JSON の文字列を渡すと、中の `"` が落ちる（`$PSNativeCommandArgumentPassing` は 7.3 から）。動いている PowerToys に伝わるかは確かめていない | 不採用 |
 | `winget configure`（PSDSC の `Microsoft.PowerToys.Configure` か dscv3） | PowerShell 7.2 以上と PowerShell Gallery のモジュールが要る | 不採用（1 台の個人の設定には大げさ） |
-| Keyboard Manager で Caps Lock を変える | 「サインイン・検索・キーボード」の手順 5 の Scancode Map を採った（[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#選択した方針)） | 不採用 |
+| Keyboard Manager で Caps Lock を変える | 「サインイン・検索・キーボード」の手順 5 の Scancode Map を採った（`docs/verification/windows-setup.md` の「選択した方針」） | 不採用 |
 | 「常に管理者として実行」 | 管理者の窓でも効く機能が増えるが、自動の起動のタスクが最上位の特権で動く | 不採用（要るときだけ「管理者として再起動」） |
 
 #### WSL のネットワークをミラーにする
@@ -938,7 +938,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 #### git-delta
 
-[Windows 11 で使う](../windows-setup.md#git-delta)の理由。**Windows の実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#git-delta-windows-11-で使う-検証状況の記録)）。
+[Windows 11 で使う](../windows-setup.md#git-delta)の理由。**Windows の実機では未検証**（検証記録: `docs/verification/windows-setup.md` の「git-delta: Windows 11 で使う: 検証状況の記録」）。
 
 - **scoop の main のバケットで入れた**（winget は採らない）
   - [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」と同じ。管理者が要らず、[Windows 11 のセットアップの更新](../windows-setup.md#更新)の `scoop update *` と UniGet UI で上がる
@@ -960,7 +960,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 #### GitHub CLI
 
-[Windows 11 で使う](../windows-setup.md#github-cli)の理由。**Windows の実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#github-cli-windows-11-で使う-検証状況の記録)）。
+[Windows 11 で使う](../windows-setup.md#github-cli)の理由。**Windows の実機では未検証**（検証記録: `docs/verification/windows-setup.md` の「GitHub CLI: Windows 11 で使う: 検証状況の記録」）。
 
 - **scoop の main のバケットの `gh`**: [README の導入の基盤](../../README.md#導入の基盤)の「CLI ツールは scoop」に合わせた
   - 管理者の権限が要らない。[Windows 11 のセットアップの更新](../windows-setup.md#更新)の `scoop update *` でほかのツールとまとめて上がり、UniGet UI にも出る
@@ -982,7 +982,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 #### lazygit
 
-[Windows 11 で使う](../windows-setup.md#lazygit)の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#lazygit-windows-11-で使う-検証状況の記録)）。
+[Windows 11 で使う](../windows-setup.md#lazygit)の理由。**Windows 実機では未検証**（検証記録: `docs/verification/windows-setup.md` の「lazygit: Windows 11 で使う: 検証状況の記録」）。
 
 - **scoop の extras の `lazygit`**（main のバケットには無い）
   - extras のバケットを足すのに git が要る（Git for Windows）。extras は、ほかのアプリ（`vcredist2022`・`neovide` など）も使う
@@ -999,13 +999,13 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 #### yazi
 
-[Windows 11 で使う](../windows-setup.md#yazi)の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-windows-11-で使う-検証状況の記録)）。
+[Windows 11 で使う](../windows-setup.md#yazi)の理由。**Windows 実機では未検証**（検証記録: `docs/verification/windows-setup.md` の「yazi: Windows 11 で使う: 検証状況の記録」）。
 
 - **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
 - **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
   - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [AlmaLinux 10 の初期設定の「シェルのツール」の手順 1](../shell-terminal.md#シェルのツール)、Windows 11 は [シェルのツールを入れる](../shell-terminal.md#シェルのツールを入れる)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
   - Homebrew の `font-symbols-only-nerd-font` の代わりは、[Windows 11 で HackGen Console NF を入れる](../shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)の HackGen Console NF
-  - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
+  - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。検証記録の付録: `docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」）
     - そのため、Windows 11 で使うの手順 4 は、同じ節の手順 2 を貼っていない窓では止める
 - **`file` は、Git for Windows の `usr\bin\file.exe` を `YAZI_FILE_ONE` で渡す**
   - yazi の文書が勧める唯一の形。scoop・Chocolatey の `file` は Unicode のファイル名を扱えない
@@ -1014,7 +1014,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
     - Lua の `Command` は、`yazi-binding/src/process/command.rs` の `tokio::process::Command::new`（シェルを挟まない）。`ya env` も `Command::new` で動かす（`yazi-cli/src/env/env.rs`）
   - PowerShell の `PATH` には `file` が無い。Git Bash には `/usr/bin/file` があるが、PowerShell や Windows Terminal から起動したときにも同じに動くよう、ユーザーの環境変数にする
   - Windows 11 で使うの手順 5 は、前の値を確かめずに上書きする。元の値は同じ節の手順 3 で控える
-- **VC++ のランタイムは、Neovim と同じく「Windows 11 で WezTerm を入れる」の手順 3 を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
+- **VC++ のランタイムは、Neovim と同じく「Windows 11 で WezTerm を入れる」の手順 3 を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。検証記録の付録: `docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」）
 - **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定の Windows の clone は、設定のリポジトリの README の例へリンクする
 - **`y` は Git Bash の共通の設定だけで使う**: 手順書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。PowerShell 版の `y` は足さず、WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
   - PowerShell 7 のプロファイル（[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
@@ -1030,7 +1030,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 ### 参照
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#補足の実測)
+検証記録: `docs/verification/windows-setup.md` の「補足の実測」
 
 プライバシーと広告・表示と入力と音とストレージ・Edge の常駐の項の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
 
@@ -1075,6 +1075,6 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - 「PC 全体の設定」の手順 7: 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
 - 「WSL の AlmaLinux 10」の手順 3: `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
 
-実施環境と再実行の結果は[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#付録-windows-11-pro-の-vm-での導入検証2026-10-06)を参照。
+実施環境と再実行の結果は検証記録（`docs/verification/windows-setup.md` の「付録: Windows 11 Pro の VM での導入検証（2026-10-06）」）を参照。
 
 ---

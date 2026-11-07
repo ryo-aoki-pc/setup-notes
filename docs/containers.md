@@ -22,7 +22,7 @@
 - AppStream の podman を入れ、自分のユーザー（rootless）でコンテナを動かせるようにする
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md)・[参考資料](reference/podman.md)・[注意点](extra/podman.md)
+- 検証記録（`docs/verification/podman.md`）・[参考資料](reference/podman.md)・[注意点](extra/podman.md)
 - 導入後は、必要な[コンテナ用ツール](tool-catalog.md#cli-コンテナ)を追加する
 
 > [!IMPORTANT]
@@ -289,7 +289,7 @@
 - 前提: [Podman](#podman)と[EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)の手順 1 を通してある
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[注意点](extra/podman-compose.md)
+- 検証記録（`docs/verification/podman-compose.md`）・[参考資料](reference/podman-compose.md)・[注意点](extra/podman-compose.md)
 - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）
 - **手順 5 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 - PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する) で動かす（[注意点](extra/podman-compose.md#注意点)）
@@ -437,10 +437,10 @@
 - 前提: [Podman](#podman)の手順 7（API ソケット）までと、[EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)の手順 1 を通してある
   - `systemctl --user is-active podman.socket` が `active` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[注意点](extra/podman-tui.md)
+- 検証記録（`docs/verification/podman-tui.md`）・[参考資料](reference/podman-tui.md)・[注意点](extra/podman-tui.md)
 - **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）
 - **手順 3 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了する（`q` では終わらない）
-- Docker の API でつなぐ TUI なら [lazydocker](#lazydocker)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#選択した方針)）
+- Docker の API でつなぐ TUI なら [lazydocker](#lazydocker)（違いは `docs/verification/podman-tui.md` の「選択した方針」）
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
@@ -537,9 +537,9 @@
   - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
   - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[注意点](extra/lazydocker.md)
+- 検証記録（`docs/verification/lazydocker.md`）・[参考資料](reference/lazydocker.md)・[注意点](extra/lazydocker.md)
 - **手順 3 で lazydocker の画面（TUI）が開く**。`q` で終了する
-- pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#選択した方針)）
+- pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)（違いは `docs/verification/lazydocker.md` の「選択した方針」）
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
@@ -690,7 +690,7 @@
   - この設定が Homebrew の PATH と root 用の `DOCKER_HOST` を読む。sudo の `secure_path` だけではこの項の前提を満たさない
   - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）。root の権限は、コマンドに付けた `sudo` で使う
-- [注意点](extra/podman.md#注意点)と[root を使う条件](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman.md#選択した方針)を先に確認する
+- [注意点](extra/podman.md#注意点)とroot を使う条件（`docs/verification/podman.md` の「選択した方針」）を先に確認する
 - root の共通設定が、システムのソケットを指す `DOCKER_HOST` を入れる。`/root/.bashrc` には追記しない
 - 起動は `sudo -i lazydocker`。`su -`・`sudo -i`・`sudo -s` で開いた root のシェルでは `lazydocker`
 - `-i` の無い `sudo lazydocker` は root の `~/.bashrc` を読まないので、root のコンテナにつながらない（[root で使うときの補足](reference/lazydocker.md#root-で使うときの補足)）
@@ -796,7 +796,7 @@
 - 前提: [Podman](#podman)と[EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)の手順 1 を通してある
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](reference/distrobox.md)・[注意点](extra/distrobox.md)
+- 検証記録（`docs/verification/distrobox.md`）・[参考資料](reference/distrobox.md)・[注意点](extra/distrobox.md)
 - この項の手順 1 で変数を設定したシェルに貼る
 - **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）
 - **手順 4 と 5 はボックスの中のコマンドになる**。手順 4 は終わってから、手順 5 は `exit` で戻ってから、次を貼る

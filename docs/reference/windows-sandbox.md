@@ -1,6 +1,6 @@
 # Windows Sandbox で配布物を試すの参考資料
 
-[手順書](../virtual-machines.md#windows-sandbox-で配布物を試す)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-sandbox.md)
+[手順書](../virtual-machines.md#windows-sandbox-で配布物を試す)・検証記録
 
 ## 補足
 

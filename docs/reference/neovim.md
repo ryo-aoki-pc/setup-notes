@@ -1,12 +1,12 @@
 # Neovim のセットアップ（AlmaLinux 10・Windows 11）の参考資料
 
-[手順書](../neovim.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md)・[注意点](../extra/neovim.md)
+[手順書](../neovim.md)・検証記録・[注意点](../extra/neovim.md)
 
 ## 補足
 
 ### Neovim / 手順 1: 補足: ボトルと依存
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md)
+検証記録（`docs/verification/almalinux-setup.md`）
 
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
@@ -20,7 +20,7 @@
 - Mason が入れた tree-sitter の CLI は、headless の Neovim では Mason を読み込むまで PATH に無いので、最初に Mason を読み込む
 - tree-sitter の CLI が無ければ、Mason が入れて CLI が使えるようになるまで最大 10 分待つ
 - nvim-treesitter は、ほかで始まった同じ言語の導入を最大 60 秒しか待たないので、パーサーの更新と導入が両方とも成功するまで最大 20 回繰り返す
-- [検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#付録-headless-の-neovim-が-treesitter-のパーサーの導入を途中で止めるのを直したとき2026-10-16)
+- 検証記録の付録（`docs/verification/neovim.md` の「付録: headless の Neovim が treesitter のパーサーの導入を途中で止めるのを直したとき（2026-10-16）」）
 
 ### LazyVim の設定を導入する / 手順 10: 補足: GitLab プレビューの公式スタイル
 
@@ -46,7 +46,7 @@
 
 ### 更新のリード: 補足: :checkhealth の読み方
 
-[この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#neovim-実施手順--手順-2-補足-checkhealth-の読み方)
+この節の検証記録: `docs/verification/neovim.md` の「Neovim: 実施手順 / 手順 2: 補足: :checkhealth の読み方」
 
 `:checkhealth` は「使っていない機能の WARNING」を大量に出す。素の状態で出るのは主に次の 3 種類:
 
@@ -60,19 +60,19 @@
 
 #### Windows 11 で Neovim を入れる
 
-[Windows 11 で使う](../neovim.md#windows-11-で-neovim-を入れる)・[既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#neovim-windows-11-で使う-検証状況の記録)）。
+[Windows 11 で使う](../neovim.md#windows-11-で-neovim-を入れる)・[既定のエディタにする](../neovim.md#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（検証記録: `docs/verification/neovim.md` の「Neovim: Windows 11 で使う: 検証状況の記録」）。
 
 - **scoop の main の `neovim` で、自分のユーザーに入れる**（管理者の権限は要らない）
   - [Windows 11 の初期設定の「アプリを入れる」](../windows-setup.md#アプリを入れる)の手順 1・2 で入れた scoop に、CLI のツールをまとめる。自分用の設定（LazyVimStarter）の Windows の導入も scoop の `neovim` を使う
   - winget の `Neovim.Neovim` は PC 全体に入る MSI（`C:\Program Files\Neovim`）。PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、両方あると winget の方が使われる。Windows 11 で使うの手順 2 で見つけたら、外してから始める
 - **VC++ のランタイムは、[Windows 11 で WezTerm を入れる](../shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を指す**（winget の `Microsoft.VCRedist.2015+.x64`。管理者の窓）
-  - scoop の `neovim` はランタイムを入れず、`extras/vcredist2022` を勧めるだけ（`neovim.json` の `suggest`）。`nvim.exe` は `VCRUNTIME140.dll` を使う（リリースの zip のインポート表。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#neovim-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
+  - scoop の `neovim` はランタイムを入れず、`extras/vcredist2022` を勧めるだけ（`neovim.json` の `suggest`）。`nvim.exe` は `VCRUNTIME140.dll` を使う（リリースの zip のインポート表。検証記録の付録: `docs/verification/neovim.md` の「Neovim: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」）
   - 無いと、`nvim.exe` は何も出さずに終わる（LazyVimStarter の検証記録の 2026-10-06 のクリーンな Windows 11 の VM の記録。ブロックは自動で流したもの）
   - デスクトップで打つと、`VCRUNTIME140.dll` が見つからない旨のシステム エラーの窓が出ることもある（読み込みに失敗したときの Windows の通常の振る舞い。確かめていない）。そのため手順書は、窓が出る場合も書いた
   - Windows で入れる手順を 1 か所にするため、この文書には入れ方を書かない。scoop の `vcredist2022` は x64 と x86 の両方を入れ、UAC の確認が出る
 - **`XDG_CONFIG_HOME` をユーザーの環境変数にしない**
   - Neovim と lazygit は追従するが、yazi は Windows では読まない（`%APPDATA%\yazi\config` のまま）
-  - WezTerm は、`~/.wezterm.lua` が無ければ、`~/.config/wezterm` の代わりに `$XDG_CONFIG_HOME/wezterm` を読む（`~/.config` の側は探さない。[WezTerm の検証記録の実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#wezterm-設定ファイルの探索順序実測)）
+  - WezTerm は、`~/.wezterm.lua` が無ければ、`~/.config/wezterm` の代わりに `$XDG_CONFIG_HOME/wezterm` を読む（`~/.config` の側は探さない。WezTerm の検証記録の実測: `docs/verification/shell-terminal.md` の「WezTerm: 設定ファイルの探索順序（実測）」）
   - git は `~/.gitconfig`（[Git](../almalinux-setup.md#git)が書く場所）を読み続け、`~/.config/git/config` の代わりに `$XDG_CONFIG_HOME/git/config` を読む
   - このように、追従するもの・読まないもの・一部だけ変わるものがあり、ツールごとに読む場所が割れる
   - LazyVimStarter の検証記録（2026-09-30）に、`XDG_CONFIG_HOME` を付けたまま Neovim が設定を見つけなかった記録がある

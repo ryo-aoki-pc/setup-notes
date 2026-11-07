@@ -2,7 +2,7 @@
 
 [手順書](../samba.md#samba-サーバー)・[注意点](../extra/samba.md)
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#補足の実測)
+検証記録: `docs/verification/samba.md` の「補足の実測」
 
 ## 補足
 
@@ -24,7 +24,7 @@
 
 - 445/tcp は public ゾーンの全 NIC で開く
 - 自ホストからの `smbclient //localhost/...` や `//${SERVER_IP}/...` は `lo` を通るため、**firewalld の設定を通らない**（`filter_INPUT` の `iifname "lo" accept` で先に受理される）
-- 開け忘れはサーバー上の検証では見つからない。[付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#network-namespace-から-firewalld-越しに到達する)
+- 開け忘れはサーバー上の検証では見つからない。付録（`docs/verification/samba.md` の「network namespace から firewalld 越しに到達する」）
 
 ### Samba サーバー / 手順 6: 補足: Samba のパスワード
 
@@ -68,7 +68,7 @@
 
 ### サーバーの上で動作を確かめる / 手順 4: 補足: 共有の一覧
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#補足の実測)
+検証記録: `docs/verification/samba.md` の「補足の実測」
 
 ### サーバーの上で動作を確かめる / 手順 5: 補足: マウントと smbstatus
 
@@ -91,7 +91,7 @@
 
 #### smb.conf の各行の根拠
 
-[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md#補足の実測)
+検証記録: `docs/verification/samba.md` の「補足の実測」
 
 ### root のホームを公開するときの補足
 

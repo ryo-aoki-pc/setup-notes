@@ -4,7 +4,7 @@
 
 ## このリポジトリは何か
 
-実機で検証した構築・設定手順の記録（日本語）。正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`・`docs/shell-terminal.md`・`docs/neovim.md`・`docs/virtual-machines.md`・`docs/samba.md`・`docs/gnome-remote.md`・`docs/containers.md`・`docs/tool-catalog.md` の 9 冊。手順書の見える部分には操作・前提・成功条件と、操作を変える短い注意だけを書く。背景・採用理由・比較・参照資料・注意点は、各用途の末尾の折りたたみに置く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md` に置く。ロールバック（取り消し・全部消す）の手順は書かない。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は非公開の `ryo-aoki-pc/setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
+実機で検証した構築・設定手順の記録（日本語）。正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`・`docs/shell-terminal.md`・`docs/neovim.md`・`docs/virtual-machines.md`・`docs/samba.md`・`docs/gnome-remote.md`・`docs/containers.md`・`docs/tool-catalog.md` の 9 冊。手順書の見える部分には操作・前提・成功条件と、操作を変える短い注意だけを書く。背景・採用理由・比較・参照資料・注意点は、各用途の末尾の折りたたみに置く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md` に置く。ロールバック（取り消し・全部消す）の手順は書かない。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
 `docs/extra/`・`docs/reference/` が残っている正本は、移すまで今の形のまま読む。新しく書く補足・注意点は折りたたみに書く。
 
@@ -38,7 +38,7 @@ AI エージェントの手順と、職場で使わない手順は、Forgejo の
 - ある文書やスクリプトを直す前に、[docs/dev/structure.md](docs/dev/structure.md) で、そのファイルの項（`` - `docs/<名前>.md` — `` などで始まる行と、その下の入れ子の行）を読む。検証の状態を変えるときは、非公開側の `docs/verification-status.md` の同じ文書の項も読む
 - 文書を足したときは、`docs/dev/structure.md` の項も直す。状態（検証範囲）を変えたときは、非公開側の `docs/verification-status.md` の同じ文書の項も直す
 
-検証記録を書く・直すときは、非公開の `ryo-aoki-pc/setup-notes-verification` を `gh repo clone ryo-aoki-pc/setup-notes-verification` で clone し、そちらへ Pull Request を作る。手順の変更で検証範囲が変わるときは、両リポジトリへ Pull Request を作る。
+検証記録を書く・直すときは、Forgejo の非公開リポジトリ `setup-notes-verification` を clone し、そちらへ Pull Request を作る。手順書・折りたたみ・参考資料・注意点から検証記録へは URL で指さず、「`docs/verification/<名前>.md` の「<見出し>」」と文字で書く（見出しを指さないときは、同じ名前の文書の記録なら「検証記録」とだけ書き、ほかの記録は「検証記録（`<パス>`）」と書く）。手順の変更で検証範囲が変わるときは、両リポジトリへ Pull Request を作る。
 
 ### 手順の並び順と完了前の点検
 
