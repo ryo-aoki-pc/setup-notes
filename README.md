@@ -94,14 +94,14 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 | 置くもの | 場所 |
 | --- | --- |
-| 理由・比較・資料 | `docs/reference/<手順書名>.md` |
-| 注意点 | `docs/extra/<手順書名>.md` |
+| 理由・比較・資料・注意点 | 正本の各用途の末尾の「補足と注意点」の折りたたみ |
+| 文書全体の補足・参照先 | 正本の冒頭のリードの直後の「この文書の補足と注意点」の折りたたみ |
 | 実施日・環境・結果 | 非公開の `setup-notes-verification` の `docs/verification/<手順書名>.md` |
 | 書き方の規則 | [AGENTS.md](AGENTS.md) と [docs/dev/writing-rules.md](docs/dev/writing-rules.md) |
 
 ## 記法
 
-- 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。注意点は `docs/extra/` で確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
+- 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。補足と注意点は、各用途の末尾の折りたたみで確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にする（[AlmaLinux 10 の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo)で設定する）
 - ブロックは、貼った全体が 1 つの入力になる窓に貼る前提で書く。bash はブラケットペーストの効く端末（bash 5.1 以降）、PowerShell は[シェルと端末のセットアップの「Windows Terminal で複数行を 1 つの入力として貼る」](docs/shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓。貼った後に Enter を押す（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)）。その前に通す項など、1 行ずつ届く窓の項は、その項のリードに書く
