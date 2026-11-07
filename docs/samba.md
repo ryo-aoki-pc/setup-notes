@@ -918,8 +918,6 @@
 - root は OS のユーザーなので、`[homes]` も `root` という名前の共有を出そうとする。同じ名前の節があれば、そちらが使われる
 - ヒアドキュメントは `${USER}` を展開するので、引用符なしの `<<EOF`。先頭の空行は、手順 3 の `[homes]` との区切り
 
-**[Samba サーバー: root のホームも公開する](#samba-サーバー-root-のホームも公開する)の手順 2**
-
 **[Samba サーバー: root のホームも公開する](#samba-サーバー-root-のホームも公開する)の手順 2: モジュールが要る理由**
 
 - 手順 4 の `samba_enable_home_dirs` が smbd に許すのは、一般ユーザーのホームのラベル（属性 `user_home_type`）だけ。`/root` とその中のファイルは `admin_home_t` で、この属性に入っていない（`seinfo -t admin_home_t -x`）
