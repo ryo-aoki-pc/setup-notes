@@ -3094,9 +3094,7 @@
 - CPU・メモリ・ディスク・ネットワーク・プロセスを端末の画面で見る btop を、EPEL から入れる
 - 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で EPEL を有効にしてある（`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す）
 - 実行場所: btop を入れるホストの、自分のユーザーの端末（bash）。**すべて、その対象ホスト上で実行する**
-- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[注意点](extra/btop.md)
-- **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。表示された内容を確かめて答える
-- **この項の手順 1 で TUI が開く**。`q` で終了すると、設定ファイルの確認が動く
+- EPEL 版と Homebrew 版は片方だけにする
 
 1. btop を導入して起動し、設定ファイルの作成を確認する。
 
@@ -3114,11 +3112,8 @@
    ls -l ~/.config/btop
    ```
 
-   - 版は `btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る
-   - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
-   - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
+   - EPEL の署名鍵の確認が出たら、fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
    - トランザクション表の `[y/N]` に答える
-   - `btop version: 1.4.7` と `/usr/bin/btop` が出てから、btop の画面が開く
    - 画面が出たら `q` で終了する
    - `btop.conf` と `themes/` があればよい
 
@@ -3127,11 +3122,6 @@
 - btop の設定ファイルとテーマの置き場所を確かめ、起動せずに既定の設定を見る
 - 前提: [btop](#btop)を通してある
 - 実行場所: btop を入れたホストの、自分のユーザーの端末（bash）
-- `~/.config/btop/btop.conf` は**初回起動時に既定値で作られる**（約 9.8 KB、項目ごとにコメント付き）
-- アプリ内では `Esc` または `m` でメニューが開き、`Options` からほとんどの項目を GUI で変えられる（保存も btop がやる）
-- テーマは 2 か所から読む。`btop.conf` の `color_theme` にファイル名を書くと切り替わる（`"Default"` と `"TTY"` は組み込み）
-  - `/usr/share/btop/themes/`: RPM が入れる既定のテーマ（`dracula` / `nord` / `gruvbox-*` / `adwaita-dark` など）
-  - `~/.config/btop/themes/`: 自分で足すテーマ
 
 1. 起動せずに、既定の設定だけを見る。
 
@@ -3152,7 +3142,73 @@
    ```
 
    - システム全体なら `sudo dnf upgrade`
-   - EPEL が新しい版を出すまでは上がらない（[注意点](extra/btop.md#注意点)）
+
+<details id="btop-の補足と注意点">
+  <summary>btop の補足と注意点</summary>
+
+**注意点**
+
+- **EPEL 版は `GPU_SUPPORT=false` でビルドされている**: `btop --version` の 3 行目にそう出る。GPU の使用率パネルは出ない
+  - Raspberry Pi では元々使えないので実害は無いが、GPU 監視が目的なら別経路を検討する
+- **EPEL が遅れると版が止まる**: 今は upstream と同じ 1.4.7 だが、EPEL の更新が止まれば古いままになる。そのときは Homebrew 版に移せる
+  - **ただし `/usr/bin/btop` と Homebrew 版を両方入れると、PATH の先頭にある Homebrew 版が勝ち、`dnf upgrade` で上がるのは使われないほうになる。片方だけにする**
+- **表示は端末の UTF-8 とカラーに依存する**: 記号が崩れるときは `--force-utf`、色がおかしいときは `-l`（256 色）や `-t`（TTY モード）を試す
+- **root で起動しなくても動く**: ただし他ユーザーのプロセスの詳細（コマンドライン全体など）は見えないことがある
+  - 全部見たいなら `sudo btop`（RPM なので、何も足さずに root の PATH にも入っている。ここが Homebrew 版との違い）
+- **設定は初回起動まで作られない**: この折りたたみの「btop: 設定ファイルのリード」と「参照」で確かめる
+- **`htop` とは別物**: 同時に入れても衝突しない
+
+**[btop](#btop)のリード**
+
+- [btop](#btop)の手順 1 には対話入力がある（トランザクション表の `[y/N]` と鍵の確認）。表示された内容を確かめて答える
+- [btop](#btop)の手順 1 で TUI が開く。`q` で終了すると、設定ファイルの確認が動く
+
+**[btop](#btop)の手順 1**
+
+- 版は `btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る
+- EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる
+- `btop version: 1.4.7` と `/usr/bin/btop` が出てから、btop の画面が開く
+
+**[btop](#btop)の手順 1: 依存**
+
+- 依存として `hicolor-icon-theme`（デスクトップエントリのアイコン用）が、まだ無ければ一緒に入る
+
+**[btop: 設定ファイル](#btop-設定ファイル)のリード**
+
+- `~/.config/btop/btop.conf` は**初回起動時に既定値で作られる**（約 9.8 KB、項目ごとにコメント付き）
+- アプリ内では `Esc` または `m` でメニューが開き、`Options` からほとんどの項目を GUI で変えられる（保存も btop がやる）
+- テーマは 2 か所から読む。`btop.conf` の `color_theme` にファイル名を書くと切り替わる（`"Default"` と `"TTY"` は組み込み）
+  - `/usr/share/btop/themes/`: RPM が入れる既定のテーマ（`dracula` / `nord` / `gruvbox-*` / `adwaita-dark` など）
+  - `~/.config/btop/themes/`: 自分で足すテーマ
+
+**[btop: 設定ファイル](#btop-設定ファイル)の手順 1: よく使う起動オプション**
+
+`btop --help` の全文より抜粋:
+
+| オプション | 意味 |
+|---|---|
+| `-p, --preset <id>` | プリセット（0-9）を指定して起動 |
+| `-t, --tty` / `--no-tty` | TTY モードの強制・強制解除（16 色と ASCII 寄りの記号になる） |
+| `-l, --low-color` | true color を使わず 256 色にする |
+| `--force-utf` | ロケール判定を無視して UTF-8 として扱う |
+| `-u, --update <ms>` | 更新間隔 |
+| `-f, --filter <filter>` | プロセスの絞り込みを指定して起動 |
+| `-c, --config <file>` | 設定ファイルを指定 |
+| `--default-config` | 既定の設定を標準出力に出す |
+
+**[btop: 更新](#btop-更新)の手順 1**
+
+- EPEL が新しい版を出すまでは上がらない
+
+**参照**
+
+- [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)
+- [aristocratos/btop — README](https://github.com/aristocratos/btop) — 機能、キーバインド、設定項目、テーマの書式
+- [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 — 前提の `epel-release` の入れ方と、CRB の案内
+- `btop --help` / `btop --default-config` — 起動オプションと既定の設定
+- `man btop` — RPM に同梱
+
+</details>
 
 ---
 
