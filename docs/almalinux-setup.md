@@ -9,6 +9,7 @@
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
 - 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
 - 対話・GUI・再起動は各手順の案内に従い、プロンプトに戻ってから次へ進む
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 は[Windows の初期設定](windows-setup.md)から指定された項だけを使う
@@ -60,7 +61,7 @@
    - `[sudo] <USER> のパスワード:` にはログインのパスワードを入れる
    - `stdin: 正しく構文解析されました`（英語では `parsed OK`）、`/etc/sudoers`・`/etc/sudoers.d/nopasswd`、最後に `sudo はパスワードを聞かない` が出ればよい
    - `中断:` が出たら、何も書いていない。インストールのときに管理者にしたユーザーでログインし直して、この項の手順 2 から
-   - **次の手順は、パスワードを入れて、プロンプトに戻ってから貼る**（続けて貼ると、パスワードとして食われる）
+   - **次の手順は、パスワードを入れて、プロンプトに戻ってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 ---
 
@@ -70,10 +71,11 @@
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 
-1. OS を最新にする。
+1. OS を更新し、ファームウェアの情報を再取得する。
 
    ```bash
    sudo dnf upgrade --refresh
+   sudo fwupdmgr refresh --force
    ```
 
    - 更新するものの一覧（トランザクション表）の後に `これでよろしいですか? [y/N]:` と聞かれる。`y`
@@ -81,38 +83,23 @@
      - `Userid : "AlmaLinux OS 10 <packager@almalinux.org>"` と `Fingerprint: EE6D B7B9 8F5B F5ED D9DA 0DE5 DEE5 C11C C2A1 E572` を確かめてから `y`（[AlmaLinux の Security のページ](https://almalinux.org/security/)の値と同じ）。違っていれば `N` で中断する
    - `行うべきことはありません。` と出たら、更新は無い（`[y/N]` も、署名鍵の確認も出ない）
      - このときは、AlmaLinux の署名鍵は、[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で取り込まれる
-   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
-
-1. ファームウェアの情報（LVFS のメタデータ）を取り直す。
-
-   ```bash
-   sudo fwupdmgr refresh --force
-   ```
-
    - 初めてのときは `現在リモートが有効になっていないため、メタデータが利用できません。` に続けて `このリモートを有効にしますか? [Y|n]:` と聞かれる。`Y`
-   - `新しいメタデータのダウンロードに成功しました:` と、更新できる機器の数が出る（VirtualBox の VM では `更新可能なデバイスはありません`。Hyper-V と VMware の VM では `N 個のデバイスが更新可能です` と出て、この項の手順 3 で `UEFI dbx` の更新を聞かれることがある）
+   - `新しいメタデータのダウンロードに成功しました:` と、更新できる機器の数が出る（VirtualBox の VM では `更新可能なデバイスはありません`。Hyper-V と VMware の VM では `N 個のデバイスが更新可能です` と出て、この項の手順 2 で `UEFI dbx` の更新を聞かれることがある）
    - `デーモンへの接続に失敗しました: … タイムアウトしました` と出たら、少し待ってから貼り直す
-   - **次の手順は、問いに答えてプロンプトに戻ってから貼る**（続けて貼ると、答えとして食われる）
+   - **次の手順は、問いに答えてプロンプトに戻ってから貼る**（続けて貼ると、リモートの有効化を断ったときや情報の取得に失敗したときも、更新の行が動く）
 
-1. ファームウェアの更新があれば、更新する。
+1. ファームウェアを更新し、OS の再起動の要否を確認する。
 
    ```bash
    sudo fwupdmgr update
-   ```
-
-   - 更新が無ければ `No updatable devices` と出て終わる
-   - 更新があれば、機器ごとに確認を聞かれる。`y`。再起動するかを聞かれたら `n`（この項の手順 5 で再起動する）
-   - **注意**: 更新の途中で電源を切らない。ノート PC は電源につないでおく
-   - **次の手順は、問いに答え終わってプロンプトに戻ってから貼る**（続けて貼ると、答えとして食われる）
-
-1. OS の再起動が要るかを確かめる。
-
-   ```bash
    dnf needs-restarting -r
    ```
 
-   - `再起動な必要ありません。`（表示のとおり）と出て、この項の手順 3 でファームウェアを更新していなければ、この項の手順 5 は飛ばす
-   - `再起動が必要です` の形の行（カーネルや systemd などを更新したとき）が出たか、この項の手順 3 でファームウェアを更新したなら、この項の手順 5 で再起動する
+   - 更新が無ければ `No updatable devices` と出て終わる
+   - 更新があれば、機器ごとに確認を聞かれる。`y`。再起動するかを聞かれたら `n`（この項の手順 3 で再起動する）
+   - **注意**: 更新の途中で電源を切らない。ノート PC は電源につないでおく
+   - `再起動な必要ありません。`（表示のとおり）と出て、この項の手順 2 でファームウェアを更新していなければ、この項の手順 3 は飛ばす
+   - `再起動が必要です` の形の行（カーネルや systemd などを更新したとき）が出たか、この項の手順 2 でファームウェアを更新したなら、この項の手順 3 で再起動する
 
 1. 再起動が要るときだけ、再起動する。
 
@@ -240,7 +227,7 @@
    ```
 
    - `削除中:` が `PackageKit-command-not-found` の 1 つだけになる。`これでよろしいですか? [y/N]:` に `y`
-   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
+   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 ---
 
@@ -289,24 +276,18 @@
    - `rpm --import` は何も表示しない
    - `gpg-pubkey-db85ddd7-67a63d8b RPM Fusion free repository for EL (10) ...` の 1 行が出れば、取り込めている
 
-1. RPM Fusion（free）のリポジトリを入れる。
+1. RPM Fusion のリポジトリを導入し、有効になったことを確認する。
 
    ```bash
    sudo dnf --setopt=localpkg_gpgcheck=1 install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm
-   ```
-
-   - `--setopt=localpkg_gpgcheck=1` を外さない（外すと、この項の手順 3 の鍵で署名を確かめずに入る）
-   - EPEL が有効なホストでは、`インストール:` が `rpmfusion-free-release` の 1 つだけになる
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. RPM Fusion（free）が有効になったか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q rpmfusion-free-release
    dnf repolist enabled | grep -E '^rpmfusion'
    ```
 
+   - `--setopt=localpkg_gpgcheck=1` を外さない（外すと、この項の手順 3 の鍵で署名を確かめずに入る）
+   - EPEL が有効なホストでは、`インストール:` が `rpmfusion-free-release` の 1 つだけになる
+   - トランザクション表を見て、`[y/N]` に答える
    - `rpmfusion-free-release` の版と、`rpmfusion-free-updates` の行が出れば有効になっている
 
 ---
@@ -349,21 +330,10 @@
 
    - `flathub` の行が出て、`Options` の列が `system` になっていればよい
 
-1. 確認用のアプリ（Flatseal）を入れる。
+1. Flatseal を導入し、サンドボックスの起動を確認する。
 
    ```bash
    sudo flatpak install flathub com.github.tchx84.Flatseal
-   ```
-
-   - **確認を 2 回聞かれる**。どちらも `y` で進める
-     - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
-     - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
-   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 1.7 GB ほどになる（runtime が GNOME 50 のとき）。要らなければ、この手順とこの項の手順 5 は飛ばしてよい
-   - **次の手順は、2 回の確認に答え、完了してから貼る**（続けて貼ると答えとして食われる）
-
-1. 確認用のアプリが入り、サンドボックスが起動できるか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    flatpak list --app --columns=application,version,branch,installation
    flatpak info com.github.tchx84.Flatseal
@@ -371,6 +341,10 @@
    ls /var/lib/flatpak/exports/share/applications/
    ```
 
+   - **確認を 2 回聞かれる**。どちらも `y` で進める
+     - 1 回目: runtime を入れるか（`Do you want to install it? [Y/n]`）
+     - 2 回目: アプリの権限と入れるものの一覧を見せたうえでの最終確認（`Proceed with these changes to the system installation? [Y/n]`）
+   - 最初の 1 本は runtime ごと落とすので、`/var/lib/flatpak` が 1.7 GB ほどになる（runtime が GNOME 50 のとき）。要らなければ、この手順は飛ばしてよい
    - `flatpak list` に `com.github.tchx84.Flatseal  2.4.1  stable  system` のように出る
    - `sandbox OK` が出れば、アプリのサンドボックスが起動できている
    - 最後の行に `com.github.tchx84.Flatseal.desktop` が出れば、デスクトップのメニューに載せるためのファイルができている
@@ -401,7 +375,7 @@
 - 前提: [ログインと sudo](#ログインと-sudo)と[共通の bash 設定](shell-terminal.md#共通の-bash-設定)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 - インターネットに出られない PC は、この項を飛ばし、[Homebrew のオフライン導入](#homebrew-のオフライン導入)を通す
-- **GNOME で日本語入力を使う PC は、この項の手順 4 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
+- **GNOME で日本語入力を使う PC は、この項の手順 3 を飛ばさない**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
 
 1. Homebrew の依存パッケージを入れる。
 
@@ -411,19 +385,10 @@
 
    - Workstation では、どれも入っている（`は既にインストールされています。` と出る）
 
-1. Homebrew の公式のインストーラを実行する。
+1. Homebrew を導入して共通の bash 設定を読み、動作を確認する。
 
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-   ```
-
-   - インストーラは続行の確認で `RETURN` を求める
-   - `==> Installation successful!` と `==> Next steps:` が出ればよい。`Next steps` の `~/.bashrc` への追記は行わない
-   - **次の手順は、インストーラが終わってから貼る**（続けて貼ると `RETURN` の確認として食われる）
-
-1. 共通の bash 設定を読み直して Homebrew の PATH を有効にし、入ったか確かめる。
-
-   ```bash
    . ~/.bashrc
    printf '\n\033[7m 確認 \033[0m\n'
    brew --version
@@ -431,6 +396,8 @@
    brew config | head -12
    ```
 
+   - インストーラは続行の確認で `RETURN` を求める
+   - `==> Installation successful!` と `==> Next steps:` が出ればよい。`Next steps` の `~/.bashrc` への追記は行わない
    - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返す
    - `brew config` の `HOMEBREW_PREFIX` が `/home/linuxbrew/.linuxbrew` ならよい
 
@@ -465,7 +432,7 @@
 - [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通しても、管理操作は一般ユーザーで行う
 - 入れたコマンドを root のシェルでも使うなら [Homebrew を root のシェルでも使う](#homebrew-を-root-のシェルでも使う)を、`sudo <コマンド>` で使うなら [Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)を通す
 - `brew install` の確認が出たら答えてから進む（[確認が出る条件](extra/almalinux-setup.md#注意点)）
-- Homebrew からツールを入れる手順は、[Homebrew](#homebrew)の手順 1〜3 を前提にする。Trivy は dnf で入れる
+- Homebrew からツールを入れる手順は、[Homebrew](#homebrew)の手順 1〜2 を前提にする。Trivy は dnf で入れる
 
 #### Homebrew を root のシェルでも使う
 
@@ -488,7 +455,7 @@
 #### Homebrew を sudo でも使う
 
 - sudo の設定に 1 行のファイル（`/etc/sudoers.d/homebrew`）を置き、sudo がコマンドを探す PATH（`secure_path`）の末尾に、Homebrew の `bin` と `sbin` を足す
-- 前提: [Homebrew](#homebrew)の手順 1〜3 を通してある
+- 前提: [Homebrew](#homebrew)の手順 1〜2 を通してある
 - 実行場所: Homebrew を入れた自分のユーザーの端末（bash）
 - **`sudo <コマンド>` で Homebrew のコマンドを使わないなら、この項は不要**
 - `sudo nvim /etc/hosts` や `sudo gdu-go /` のように、`sudo <コマンド>` で使えるようになる。`sudo -s`・`sudo -i` で開いた root のシェルでも使える
@@ -533,7 +500,7 @@
 - 前提: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1〜3 を、接続元をオンラインのホスト、接続先をオフラインのホストとして通してある。オフラインのホストには、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を、そのトンネルのシェルで通してある
 - 実行場所: トンネルを張ってログインした、オフラインのホストの自分のユーザーのシェル（`ALL_PROXY` を入れたシェル。Homebrew の通信にもトンネルを使う）。この項の手順 5 には、オンラインのホストで行う操作がある
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/homebrew-offline.md)・[参考資料](reference/homebrew-offline.md)・[注意点](extra/homebrew-offline.md)
-- この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜4（同じ項の手順 4 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
+- この項の手順 3 で貼る[Homebrew](#homebrew)の手順 1〜3（同じ項の手順 3 は、GNOME で日本語入力を使う PC だけ）も、同じシェルのまま貼る
 - **オフラインのホストには、`sudo` できる自分のユーザーでログインする**（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の `OFFLINE_USER`）。root ではログインしない（Homebrew の導入・更新は root では行わない）
 - **この項の手順 3・4 には対話入力がある**（インストーラの `RETURN`、brew の `[y/n]`）。終わってから次の手順を貼る
 - Neovim の Mason に npm のパッケージを入れるなら、この項の手順 5 でトンネルを閉じる前に、このシェルで [npm のオフライン導入](#npm-のオフライン導入) を貼る（npm は `ALL_PROXY` を読まない）
@@ -561,13 +528,13 @@
 
    - **次の手順は、その項の `Metadata cache created.` が出てから貼る**
 
-1. この項の手順 1 のシェルのまま、[Homebrew](#homebrew)の手順 1〜4 を貼る。
+1. この項の手順 1 のシェルのまま、[Homebrew](#homebrew)の手順 1〜3 を貼る。
 
-   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、[Homebrew](#homebrew)の手順 1〜3 は飛ばす
+   - `command -v brew` が `/home/linuxbrew/.linuxbrew/bin/brew` を返すなら、[Homebrew](#homebrew)の手順 1〜2 は飛ばす
    - [Homebrew](#homebrew)の手順 1 の dnf は、この項の手順 2 の設定で通る（この項の手順 1 で 4 つとも入っていたなら飛ばす）
-   - [Homebrew](#homebrew)の手順 3 は、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を入れてあるシェルで貼る
-   - [Homebrew](#homebrew)の手順 4 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
-   - **次の手順は、[Homebrew](#homebrew)の手順 3（GNOME で日本語入力を使う PC は同じ項の手順 4）まで終えてから貼る**（同じ項の手順 2 に `RETURN` の確認がある）
+   - [Homebrew](#homebrew)の手順 2 は、[共通の bash 設定](shell-terminal.md#共通の-bash-設定)の手順 1・2 を入れてあるシェルで貼る
+   - [Homebrew](#homebrew)の手順 3 は、GNOME で日本語入力を使う PC だけで貼る。Homebrew が入っていても、この手順は飛ばさない
+   - **次の手順は、[Homebrew](#homebrew)の手順 2（GNOME で日本語入力を使う PC は同じ項の手順 3）まで終えてから貼る**（導入結果と、必要な PC では IBus の PATH 固定を確かめてから、jq の導入へ進む）
 
 1. 確かめるために、brew で jq をトンネル越しに入れる。
 
@@ -578,7 +545,7 @@
    - 入れるものの一覧の後に `==> Do you want to proceed with the installation? [y/n]` と聞かれたら、`y` を押す（Enter は要らない）
    - `==> Pouring jq--…bottle…tar.gz` と出て、ソースからのビルドにならない
    - ほかの Homebrew で入れる項も、この項の手順 5 の前に、このシェルで貼る
-   - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて貼ると、後ろの行の文字が答えとして読まれる）
+   - **次の手順は、確認が出たら `y` を押し、入れ終わってから貼る**（続けて進むと、導入を断ったときや失敗したときもトンネルを閉じることになる）
 
 1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1〜4 で、トンネルを閉じて、転送を付けずにログインし直す。
 
@@ -607,7 +574,7 @@
 
    - `brew outdated` が何も出さなければ、上げるものは無いので、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 は飛ばす
    - `brew upgrade` が `[y/n]` と聞いたら、`y` を押す（[Homebrew のオフライン導入](#homebrew-のオフライン導入)の手順 4 と同じ確認）
-   - **次の手順は、上げ終わってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
+   - **次の手順は、上げ終わってから行う**（続けて進むと、更新を断ったときや失敗したときもトンネルを閉じることになる）
 
 1. [SSH の SOCKS トンネルの「トンネルを閉じる」](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1 で、トンネルを閉じる。
 
@@ -615,7 +582,7 @@
 
 ### dnf-automatic で自動で更新する
 
-- BaseOS の `dnf-automatic` のタイマーで、毎日、更新をダウンロードして入れる。再起動はしない（カーネルなどの更新は、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で再起動する）
+- BaseOS の `dnf-automatic` のタイマーで、毎日、更新をダウンロードして入れる。再起動はしない（カーネルなどの更新は、[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 2 の `dnf needs-restarting -r` で要否を確かめ、要るときだけ同じ項の手順 3 で再起動する）
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）
 - GNOME Software の自動の更新（裏でダウンロードし、再起動のときに入れる）は、この項の手順 3 で止める（二重にしない）
@@ -627,7 +594,7 @@
    ```
 
    - `インストール:` が `dnf-automatic` の 1 つだけになる。`これでよろしいですか? [y/N]:` に `y`
-   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
+   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、導入を断ったときや失敗したときもタイマーを有効にする行が動く）
 
 1. 更新を入れるタイマーを有効にする。
 
@@ -726,7 +693,7 @@
    - `中断: 鍵が既にある` と出たら、前に作った鍵がある。手順 7 へ進む
    - ホストオンリーだけの VM は、この手順の代わりに[オフラインビルド](virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 2〜5 を通す
    - 鍵はホストで作り、証明書だけを VM に置いて予約する。手順 5 からは同じ
-   - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、一時パスワードに答えてから貼る**（続けて貼ると、登録の予約に失敗したときも再起動の行が動く）
 
 1. 再起動する。
 
@@ -800,7 +767,7 @@
 - GNOME で日本語を打てるように、Anthy と日本語のフォントを入れ、入力ソースを「キーボードの配列 + Anthy」にする
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash）
-- **Homebrew を入れた（これから入れる）PC では、[Homebrew](#homebrew)の手順 4 も通す**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
+- **Homebrew を入れた（これから入れる）PC では、[Homebrew](#homebrew)の手順 3 も通す**。Homebrew が既に入っていても、IBus の PATH 固定まで行う
 
 1. 変数を設定する。
 
@@ -1016,7 +983,7 @@
    - `これでよろしいですか? [y/N]:` に `y`
    - EPEL からパッケージを入れるのが初めてなら、続けて EPEL の鍵の取り込みを聞かれる。fingerprint が[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 の値なら `y`、違っていれば `N`
    - 入るのは `gnome-shell-extension-appindicator` と、依存の 3 つ（`libappindicator-gtk3`・`libdbusmenu`・`libdbusmenu-gtk3`）
-   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、`[y/N]` の答えとして食われる）
+   - **次の手順は、`完了しました!` が出てプロンプトに戻ってから貼る**（続けて貼ると、導入や署名鍵の確認を断ったときも、拡張を有効にする設定が書かれる）
 
 1. 入れた拡張を有効にする（効くのは再起動の後）。
 
@@ -1454,7 +1421,7 @@
    brew install git-delta
    ```
 
-   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると、導入を断ったときや失敗したときも、git のページャを delta に変更する行が動く）
 
 1. `git config --global` で git の設定を書き、読み戻す。
 
@@ -1540,7 +1507,7 @@
      - `7F38 BBB5 9D06 4DBC B3D8 4D72 5612 B364 6231 3325`
    - どちらも Userid は `GitHub CLI <opensource+cli@github.com>`。違っていれば `N` で中断する
    - 1 つ目の鍵を取り込むと、`警告: Certificate 23F3D4EA75716059:` と、次の行に `The certificate is expired: …` が出る（2026-09-05 に期限が切れている）。導入は続く
-   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、答えてから貼る**（続けて貼ると、導入や署名鍵の確認を断ったときも、GitHub への認証を始める行が動く）
 
 1. GitHub へのログインを始める。
 
@@ -1557,7 +1524,7 @@
 
    - この項の手順 3 のワンタイムコードを、ブラウザの `https://github.com/login/device` に入れ、画面の案内に従う
    - SSH 越しの端末でこのホストのブラウザを開けないときは、手元のブラウザで開く
-   - **次の手順は、`gh auth login` が終わってから貼る**（続けて貼ると対話の答えとして食われる）
+   - **次の手順は、`gh auth login` が終わってから貼る**（ブラウザで認証し、端末で認証が終わったことを確かめてから進む）
 
 1. 認証できたか確かめる。
 
@@ -1585,7 +1552,7 @@
    ```
 
    - [Neovim](neovim.md#neovim)の手順 3 で入っていれば、`Warning: lazygit … is already installed and up-to-date.` と出て何も変えない
-   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
+   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて進むと、導入を断ったときや失敗したときも、自分用の設定の導入へ進む）
 
 1. 自分用の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を入れる。
 
@@ -1613,7 +1580,7 @@
    - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる（この項の手順 2 の設定を入れていれば、出ない）。ファイル・変更差分・ブランチ・コミットの一覧が出ればよい
    - **注意**: git 管理下でないディレクトリで起動すると、リポジトリを作るか聞かれる
    - `q` で終了する
-   - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazygit への操作として食われる）
+   - **次の手順は、`q` で終了してから貼る**（lazygit を開いたまま貼ると、lazygit への入力になる）
 
 #### lazygit の設定ファイル
 
@@ -2047,7 +2014,7 @@
 
    - fd・ripgrep（[LazyVim の設定を導入する](neovim.md#lazyvim-の設定を導入する)の手順 5）と fzf（[シェルのツール](shell-terminal.md#シェルのツール)の手順 1）を入れてあれば、`Warning: fd … is already installed and up-to-date.` のように出る
    - 依存を合わせて 170 個ほどが入り、数分から 10 分ほどかかる
-   - **次の手順は、確認が出たら表示された導入予定を確かめて `y` と答え、プロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる。[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
+   - **次の手順は、確認が出たら表示された導入予定を確かめて `y` と答え、プロンプトに戻ってから貼る**（続けて進むと、導入を断ったときや失敗したときも、設定の clone へ進む。[Homebrew の注意点](extra/almalinux-setup.md#注意点)）
 
 1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
 
@@ -2078,7 +2045,7 @@
    - プレビューを確かめるには、PDF・動画・画像・書庫のあるディレクトリで右ペインを見る
    - 画像プレビューは端末側の対応が要る（[注意点](extra/almalinux-setup.md#注意点)）
    - 画面が出たら `q` で終了する
-   - **ほかのコマンドは、`q` で終了してから貼る**（続けて貼ると yazi への操作として食われる）
+   - **ほかのコマンドは、`q` で終了してから貼る**（yazi を開いたまま貼ると、yazi への入力になる）
 
 #### yazi の設定ファイル
 
@@ -2377,17 +2344,10 @@
 > [!IMPORTANT]
 > - **自分のシェルで実行する**。Homebrew の導入・管理は一般ユーザーで行う
 
-1. ShellCheck と shfmt を入れる。
+1. ShellCheck と shfmt を導入し、検査の動作を確認する。
 
    ```bash
    brew install shellcheck shfmt
-   ```
-
-   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
-
-1. 2 つが入ったか確かめ、わざと欠陥のあるコードで検出できるかを見る。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    shellcheck --version
    shfmt --version
@@ -2399,6 +2359,7 @@
    echo "rc=$?"
    ```
 
+   - Homebrew の確認が出たら答える
    - `version: 0.11.0` と `3.14.1` が出る
    - ShellCheck は `SC2086 (info): Double quote to prevent globbing and word splitting.` が 1 件出て **`rc=1`** になる
    - shfmt は字下げを足す差分が出て `rc=1` になる
@@ -2416,7 +2377,7 @@
    ```
 
    - すべてまとめて上げるなら `brew upgrade`
-   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（続けて貼ると確認の答えとして食われる）
+   - **ほかのコマンドは、Homebrew の確認が出たら答え、更新が終わってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 ---
 
@@ -2428,8 +2389,8 @@
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/vscode.md)・[参考資料](reference/vscode.md)・[注意点](extra/vscode.md)
 
 > [!IMPORTANT]
-> - **すべて対象ホスト上で実行する**。デスクトップが要るのは、この項の手順 6（GUI の起動）だけ
-> - **この項の手順 6 は、デスクトップにログインした端末から実行する**。TTY やディスプレイが無いシェル（ssh や自動化）からは実行しない
+> - **すべて対象ホスト上で実行する**。デスクトップが要るのは、この項の手順 5（GUI の起動）だけ
+> - **この項の手順 5 は、デスクトップにログインした端末から実行する**。TTY やディスプレイが無いシェル（ssh や自動化）からは実行しない
 
 1. 署名鍵を落として、取り込む前に fingerprint を見る。
 
@@ -2468,22 +2429,12 @@
    cat /etc/yum.repos.d/vscode.repo
    ```
 
-1. 何が入るかを先に見てから、VS Code を入れる。
+1. VS Code を導入し、版と入手元を確認する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    sudo dnf install --assumeno code
    sudo dnf install code
-   ```
-
-   - 先に何が入るかだけ見る（`--assumeno` は必ず中断する）
-   - `code ... 343 M` と `Installed size: 1.0 G` のように容量が出る。よければ、続く `dnf install` の `[y/N]` に答えて入れる
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. VS Code が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
    code --version
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' code
    rpm -qi code | sed -n '/^Vendor/p;/^Build Date/p'
@@ -2491,6 +2442,8 @@
    rpm -ql code | grep '/applications/.*\.desktop$'
    ```
 
+   - 先に何が入るかだけ見る（`--assumeno` は必ず中断する）
+   - `code ... 343 M` と `Installed size: 1.0 G` のように容量が出る。よければ、続く `dnf install` の `[y/N]` に答えて入れる
    - バージョン / コミットハッシュ / アーキテクチャ（`x64` または `arm64`）の 3 行が出る
    - `from_repo` が `vscode`、`Vendor` が `Microsoft Corporation` になる
    - **`ldd` の `not found` が `0`** なら、必要な共有ライブラリがすべて EL10 側で解決できている
@@ -2505,7 +2458,7 @@
    - **注意**: ssh や自動化など、TTY もディスプレイも無いシェルからは起動できなかった（この項のリードのアラートと、この手順の補足）
    - ウィンドウが開き、初回は Welcome 画面と `Continue without Signing In` のボタンが表示される
    - ウィンドウが出たことを確かめる
-   - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VS Code への操作として食われる）
+   - **次の手順は、ウィンドウを閉じてから貼る**（起動したウィンドウを確認して閉じる操作を挟む）
 
 1. 初回起動で設定のディレクトリができたか確かめる。
 
@@ -2610,13 +2563,13 @@
    - npm 以外の理由（`unzip` が無い、など）で失敗したものは[注意点](extra/npm-offline.md#注意点)
    - 通知が出そろってから、`:qa` で閉じる
    - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る
-   - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
+   - **次の手順は、`:qa` で Neovim を閉じてから貼る**（必要なパッケージが入ったことを確かめてから、トンネルを閉じる）
 
 1. [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1・3 を貼り、トンネルを閉じて、転送を付けずにログインし直す。
 
    - [SSH の SOCKS トンネル: トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)の手順 1（`exit`）はオフラインのホストで、同じ項の手順 3 はオンラインのホストで貼る
    - オンラインのホストのシェルで[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 の変数が消えていたら（新しいシェルなど）、先に[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 1 を貼る
-   - **次の手順は、ログインし直してから貼る**（続けて貼るとパスワードへの答えとして食われる）
+   - **次の手順は、ログインし直してから貼る**（ssh と続けて貼ると、ssh を閉じた後のオンライン側の元のシェルで動く）
 
 1. オフラインのホストで、トンネルが無くても Mason の npm のパッケージが動き、npm が外に出られないことを確かめる。
 
@@ -2648,10 +2601,11 @@
 
    - 上げるものが無ければ `Nothing to do.`（日本語では `行うべきことはありません。`）と `Complete!`（`完了しました!`）で終わる
 
-1. Neovim でファイルを開き、Mason のパッケージを上げる。
+1. Mason のパッケージを更新し、トンネルを切断する。
 
    ```bash
    nvim -R ~/.config/nvim/init.lua
+   exit
    ```
 
    - `:MasonUpdate` で、Mason のパッケージの一覧を取り直す（`Successfully updated 1 registry.` の通知が出る）
@@ -2659,13 +2613,6 @@
    - 案内が無ければ、上げるものは無い
    - 上げ終わると `markdown-toc was successfully installed.` のような通知が出る。通知が出そろってから、`:qa` で閉じる
    - 画面の `Installing` の表示は、上げ終わっても残ることがある（`q` で閉じて `:Mason` で開き直すと、`Installed` に移っている）
-   - **次の手順は、`:qa` で Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
-
-1. オフラインのホストからログアウトして、トンネルを閉じる。
-
-   ```bash
-   exit
-   ```
 
 ---
 
@@ -2676,8 +2623,8 @@
 ### Firefox
 
 - Mozilla の dnf のリポジトリから最新版（Rapid Release）の Firefox を入れ、RPM Fusion の FFmpeg で AAC・H.264 を再生できるようにする
-- 前提: [ログインと sudo](#ログインと-sudo)を通してある。この項の手順 8〜10 には、[EPEL と RPM Fusion](#epel-と-rpm-fusion)も要る
-- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。この項の手順 7・11 は、デスクトップのセッションの Firefox
+- 前提: [ログインと sudo](#ログインと-sudo)を通してある。この項の手順 7〜9 には、[EPEL と RPM Fusion](#epel-と-rpm-fusion)も要る
+- 実行場所: GNOME にログインした自分のユーザーの端末（bash）。この項の手順 6・10 は、デスクトップのセッションの Firefox
 
 1. 変数を設定する。
 
@@ -2736,25 +2683,19 @@
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
    - `aarch64` と `x86_64` の両方の行が並ぶ
 
-1. Firefox を入れる。
+1. Firefox を導入し、Mozilla 公式のビルドか確認する。
 
    ```bash
    sudo dnf install "${FF_PKG:?「Firefox」の手順 1 の FF_PKG が空のまま。値を入れて貼り直す}" ${FF_L10N}
-   ```
-
-   - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが、`firefox` のアップグレードとして解決される（一覧の `アップグレード:` の下に `firefox` が出る。参考資料を参照）
-   - この文書を Firefox で見ているときは、入れ替わった後に Firefox を開き直す（この項の手順 7 で、新しい版で起動する）
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. Mozilla 公式のビルドが入ったか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' "${FF_PKG}" ${FF_L10N}
    firefox --version
    rpm -qi "${FF_PKG}" | sed -n '/^Vendor/p;/^Build Date/p'
    ```
 
+   - AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが、`firefox` のアップグレードとして解決される（一覧の `アップグレード:` の下に `firefox` が出る。参考資料を参照）
+   - この文書を Firefox で見ているときは、入れ替わった後に Firefox を開き直す（この項の手順 6 で、新しい版で起動する）
+   - トランザクション表を見て、`[y/N]` に答える
    - `from_repo` が `mozilla`、`Vendor` が `Mozilla` なら、Mozilla 公式のビルドが入っている
 
 1. デスクトップのセッションで Firefox を起動し、`about:support` で公式のビルドかを確かめる。
@@ -2765,7 +2706,7 @@
      - 「プログラムの実行ファイル」が `/usr/lib/firefox/firefox-bin`（AppStream 版の `/usr/lib64` ではない）
    - 日本語パックを入れた場合は、`about:preferences` の言語で日本語を選べる
 
-1. 入手できる版を見てから、RPM Fusion（[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2〜5）の FFmpeg のライブラリを入れる。
+1. 入手できる版を見てから、RPM Fusion（[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 2〜4）の FFmpeg のライブラリを入れる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
@@ -2776,10 +2717,10 @@
    - 版は `ffmpeg-libs.aarch64  7.1.5-1.el10  rpmfusion-free-updates` のように出る
    - 依存として、RPM Fusion の `x264-libs`・`x265-libs` などと、EPEL のライブラリが入る
    - EPEL の `noopenh264` も依存で入るが、H.264 の再生には影響しない（参考資料を参照）
-   - `conflicts with libswresample-free` と出て止まったら、この項の手順 9 で入れ直す。入ったときは手順 9 は飛ばす
-   - **次の手順は、トランザクション表の `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+   - `conflicts with libswresample-free` と出て止まったら、この項の手順 8 で入れ直す。入ったときは手順 8 は飛ばす
+   - **次の手順は、トランザクション表の `[y/N]` に答えてから貼る**（この項の手順 8 は、指定の衝突で止まったときだけ貼る）
 
-1. この項の手順 8 が `libavcodec-free` との衝突で止まったときだけ、それを外して入れ直す。
+1. この項の手順 7 が `libavcodec-free` との衝突で止まったときだけ、それを外して入れ直す。
 
    ```bash
    sudo dnf install --allowerasing ffmpeg-libs
@@ -2787,7 +2728,7 @@
 
    - トランザクション表の `Removing dependent packages:` に、`libavcodec-free`・`libavutil-free`・`libswresample-free` の 3 つが出る
    - この 3 つのほかにも `Removing` に出たら、`N` で止める
-   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、トランザクション表を見て `[y/N]` に答えてから貼る**（続けて貼ると、ほかのパッケージの削除を断ったときや導入に失敗したときも、後ろの確認の行が動く）
 
 1. FFmpeg のライブラリが入ったか確かめる。
 
@@ -2811,37 +2752,31 @@
 ### 画像の道具
 
 - Dockerfile とコンテナイメージの検査（hadolint・dive・Trivy）に使う
-- 前提: [Homebrew](#homebrew)の手順 1〜3 と[Podman](containers.md#podman)の手順 7（API ソケット）までを通してある
+- 前提: [Homebrew](#homebrew)の手順 1〜2 と[Podman](containers.md#podman)の手順 7（API ソケット）までを通してある
   - `command -v brew podman` が 2 行を返さない、または `systemctl --user is-active podman.socket` が `active` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインしたシェル（端末の bash か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md)・[参考資料](reference/image-tools.md)・[注意点](extra/image-tools.md)
-- **この項の手順 3 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。答えてから次の手順を貼る
-- **この項の手順 10 で dive の画面（TUI）が開く**。`q` で終了する
+- **この項の手順 2 には対話入力がある**（トランザクション表の `[y/N]` と Trivy の鍵の確認）。表示された内容を確かめて答える
+- **この項の手順 8 で dive の画面（TUI）が開く**。`q` で終了する
 
 > [!IMPORTANT]
 > - **`sudo -i` した root のシェルでは行わない**（Homebrew の導入・更新は root では行わず、イメージも自分のユーザーの podman に作るため）
 
-1. brew で hadolint と dive を入れる。
+1. hadolint と dive を導入し、結果を確認する。
 
    ```bash
    brew install hadolint dive
-   ```
-
-   - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
-
-1. hadolint と dive が入ったか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    hadolint --version
    dive --version
    command -v hadolint dive
    ```
 
+   - Homebrew の確認が出たら答える
    - `Haskell Dockerfile Linter 2.15.1` と `dive 0.13.1` が出る
    - どちらも `/home/linuxbrew/.linuxbrew/bin/` の下にある
 
-1. Trivy の公式 dnf リポジトリを登録し、ファイルと版を確かめてから Trivy を入れる。
+1. 公式のリポジトリから Trivy を導入し、結果を確認する。
 
    ```bash
    sudo tee /etc/yum.repos.d/trivy.repo >/dev/null <<'EOF'
@@ -2856,24 +2791,17 @@
    cat /etc/yum.repos.d/trivy.repo
    dnf -q list --showduplicates trivy
    sudo dnf install trivy
+   trivy --version
+   command -v trivy
+   rpm -q trivy
    ```
 
    - ファイルに `gpgcheck=1` があることを確かめる
    - 公式の候補は `trivy.x86_64  0.75.0-1  trivy` のように出る。EPEL の候補も並ぶことがある
    - 初回は署名鍵の取り込みを 1 回聞かれる
    - fingerprint が `825A D903 6F7C 850E 6A6F ED49 35B8 ACA4 4FD9 CA9F`（`trivy-repo <oss@aquasec.com>`）であることを確かめてから `y` と答える。違っていれば `N` で中断する
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. Trivy が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   trivy --version
-   command -v trivy
-   rpm -q trivy
-   ```
-
-   - 1 行目の `Version:` が、手順 3 で導入した RPM の版と一致し、`/usr/bin/trivy` とその RPM の名前が出ればよい
+   - トランザクション表の `[y/N]` に答える
+   - `trivy --version` の `Version:` が、この手順で導入した RPM の版と一致し、`/usr/bin/trivy` とその RPM の名前が出ればよい
 
 1. わざと欠陥のある Containerfile を hadolint に渡し、指摘が出ることを確かめる。
 
@@ -2936,10 +2864,10 @@
    ```
 
    - 左に `Layers` と `Image Details`、右に `Current Layer Contents` が出る
-   - `Image Details` の `Image efficiency score: 85 %` と `Potential wasted space: 59 MB` は、手順 8 と同じ値
+   - `Image Details` の `Image efficiency score: 85 %` と `Potential wasted space: 59 MB` は、手順 6 と同じ値
    - いちばん下の行に、キーの案内（`Quit`・`Tab Switch view`・`^F Filter` など）が出る
    - `q` で終了する
-   - **次のコマンドは、`q` で終了してから貼る**（続けて貼ると dive への操作として食われる）
+   - **次のコマンドは、`q` で終了してから貼る**（dive を開いたまま貼ると、dive への入力になる）
 
 #### 画像の道具: 使い方の基本
 
@@ -2989,42 +2917,28 @@
 - 前提: [EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1 で EPEL を有効にしてある（`dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に通す）
 - 実行場所: btop を入れるホストの、自分のユーザーの端末（bash）。**すべて、その対象ホスト上で実行する**
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/btop.md)・[参考資料](reference/btop.md)・[注意点](extra/btop.md)
-- **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。答えてから手順 2 を貼る
-- **この項の手順 2 で TUI が開く**。`q` で終了してから手順 3 を貼る
+- **この項の手順 1 には対話入力がある**（トランザクション表の `[y/N]` と鍵の確認）。表示された内容を確かめて答える
+- **この項の手順 1 で TUI が開く**。`q` で終了すると、設定ファイルの確認が動く
 
-1. 入手できる版を見てから、btop を入れる。
+1. btop を導入して起動し、設定ファイルの作成を確認する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    dnf -q list --showduplicates btop
    sudo dnf install btop
+   btop --version
+   command -v btop
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
+   btop
+   ls -l ~/.config/btop
    ```
 
    - 版は `btop.aarch64  1.4.7-1.el10_2  epel` のように 1 つだけ出る
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. btop が入ったか確かめ、起動する。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   btop --version
-   command -v btop
-   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
-   btop
-   ```
-
+   - トランザクション表の `[y/N]` に答える
    - `btop version: 1.4.7` と `/usr/bin/btop` が出てから、btop の画面が開く
    - 画面が出たら `q` で終了する
-   - **次の手順は、`q` で終了してから貼る**（続けて貼ると btop への操作として食われる）
-
-1. 初回の起動で `~/.config/btop/btop.conf` が作られたか確かめる。
-
-   ```bash
-   ls -l ~/.config/btop
-   ```
-
    - `btop.conf` と `themes/` があればよい
 
 #### btop: 設定ファイル
@@ -3064,7 +2978,7 @@
 ### gdu
 
 - ディスクの使用量を端末の画面で調べる gdu を、Homebrew で入れる
-- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜3 を通してある（`command -v brew` で何も出なければ、先に通す）
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)と[Homebrew](#homebrew)の手順 1〜2 を通してある（`command -v brew` で何も出なければ、先に通す）
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gdu.md)・[参考資料](reference/gdu.md)・[注意点](extra/gdu.md)
 - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
@@ -3248,7 +3162,7 @@
    - オンラインのホストが Windows なら、PowerShell か cmd に `ssh -o ExitOnForwardFailure=yes -o ControlPath=none -R 1080 <OFFLINE_USER>@<OFFLINE_HOST>` を打つ
    - `Error: remote port forwarding failed for listen port 1080` で終わったら、オフラインのホストで 1080 番がふさがっているか、sshd が転送を禁じている（参考資料を参照）
    - 初めてつなぐホストでは、ホスト鍵の確認に `yes` と答える
-   - **次の手順は、オフラインのホストにログインしてから貼る**（続けて貼るとホスト鍵の確認やパスワードへの答えとして食われる）
+   - **次の手順は、オフラインのホストにログインしてから貼る**（続けて貼ると、ssh を閉じた後のオンライン側の元のシェルで動く）
 
 1. オフラインのホストで、プロキシを環境変数に入れ、インターネットに届くか確かめる。
 
@@ -3329,7 +3243,7 @@
    ```
 
    - オンラインのホストが Windows なら、この Bash のブロックの代わりに、PowerShell か cmd に `ssh <OFFLINE_USER>@<OFFLINE_HOST>` を打つ（[SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 2 と同じユーザー・ホストを指定する）
-   - **次の手順は、ログインしてから貼る**（続けて貼るとパスワードへの答えとして食われる）
+   - **次の手順は、ログインしてから貼る**（続けて貼ると、ssh を閉じた後のオンライン側の元のシェルで動く）
 
 1. オフラインのホストで、トンネルが無く、外に出られないことを確かめる。
 
@@ -3354,7 +3268,7 @@
 - 前提: [ログインと sudo](#ログインと-sudo)を通してある。確かめるのは、次の項のうち通したもの
   - [システムの設定](#システムの設定)・[日本語入力](#日本語入力)・[GNOME の表示と入力](#gnome-の表示と入力)
   - [WezTerm と HackGen Console NF をデスクトップで使う](shell-terminal.md#wezterm-と-hackgen-console-nf-をデスクトップで使う)・[Neovim](neovim.md#neovim)
-  - [Homebrew](#homebrew)の手順 4
+  - [Homebrew](#homebrew)の手順 3
 - 実行場所: この PC の画面（GNOME）。コマンドは、GNOME にログインした自分のユーザーの端末（bash）に貼る。この項の手順 8 は、WezTerm のタブで行う
 
 1. 再起動する。
@@ -3401,8 +3315,8 @@
    - [システムの設定](#システムの設定)の手順 2 の名前が出る（名前を変えたとき）
    - `/home/<USER>/Downloads` が出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
    - `anthy - Anthy` が出る（[日本語入力](#日本語入力)を通したとき）
-   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` と `<name>anthy</name>` が出る（[日本語入力](#日本語入力)と、[Homebrew](#homebrew)の手順 4 を通したとき）
-   - PATH に `/home/linuxbrew/` が入っていたり、`ModuleNotFoundError: No module named 'gi'` が出たりしたら、[Homebrew](#homebrew)の手順 4 を貼って、この項の手順 1 の再起動からやり直す
+   - `PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin` と `<name>anthy</name>` が出る（[日本語入力](#日本語入力)と、[Homebrew](#homebrew)の手順 3 を通したとき）
+   - PATH に `/home/linuxbrew/` が入っていたり、`ModuleNotFoundError: No module named 'gi'` が出たりしたら、[Homebrew](#homebrew)の手順 3 を貼って、この項の手順 1 の再起動からやり直す
    - `ibus-daemon が動いていない` と出たら、GNOME にログインしてから、この手順を貼り直す
    - トレイアイコンの拡張が `ACTIVE` になっている（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
    - `['scale-monitor-framebuffer', 'xwayland-native-scaling']` が出る（[GNOME の表示と入力](#gnome-の表示と入力)を通したとき）
@@ -3442,8 +3356,8 @@
 
 ## 更新
 
-- OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・4・5 を、ファームウェアは同じ項の手順 2・3 を貼り直す
-- [dnf-automatic で自動で更新する](#dnf-automatic-で自動で更新する)を通したなら、OS の更新は毎日自動で入る（再起動は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 4・5 で自分で行う）
+- OS（BaseOS・AppStream・EPEL・RPM Fusion から入れたもの。`epel-release`・`rpmfusion-free-release` とトレイアイコンの拡張も）は[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 1・2・3 を、ファームウェアは同じ項の手順 1・2 を貼り直す
+- [dnf-automatic で自動で更新する](#dnf-automatic-で自動で更新する)を通したなら、OS の更新は毎日自動で入る（[OS とファームウェアの更新](#os-とファームウェアの更新)の手順 2 の `dnf needs-restarting -r` で要否を確かめ、要るときだけ同じ項の手順 3 で再起動する）
 - EPEL の鍵をまだ取り込んでいなければ、`epel-release` が上がるときに確認を求められる（fingerprint は[EPEL と RPM Fusion](#epel-と-rpm-fusion)の手順 1）
 - Flatpak のアプリは `dnf upgrade` では上がらない（[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 4）
 - Firefox・WezTerm・GitHub CLI（それぞれのベンダーの dnf のリポジトリから入れたもの）と git・Node.js も、OS の更新で上がる

@@ -6,10 +6,11 @@
 > [!IMPORTANT]
 > - **前提と実行場所（サーバーかクライアントか・どの窓か）は、各項のリードに従う**。AlmaLinux 10 の項は自分のユーザーの bash で行い、`sudo -i`・`su -` のシェルでは行わない
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
@@ -26,7 +27,7 @@
 - 実行場所: クライアントの PC の、自分のユーザーの bash（デスクトップの端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md)・[参考資料](reference/samba-client.md)・[注意点](extra/samba-client.md)
 - AlmaLinux 10 用の手順。Windows 11 は[Windows の手順](#windows-11-で-samba-クライアントを使う)を、管理者ではない PowerShell 7 で通す
-- **手順 3 には対話入力がある**（共有のパスワード）。入力し終えてから次の手順を貼る
+- **手順 3 には対話入力がある**（共有のパスワード）
 - この項の手順 1 で変数を設定したシェルに貼る
 
 > [!IMPORTANT]
@@ -41,7 +42,7 @@
    ```bash
    SMB_USER=${USER}                     # サーバーの Samba ユーザー。AlmaLinux の「Samba サーバー」の設定なら、サーバーの OS のユーザー名。<SMB_USER>
    SHARE=${SMB_USER}                    # 共有名。Samba サーバーの [homes] では、ユーザー名と同じ名前の共有になる。<SHARE>
-   MOUNT_POINT=/mnt/${SHARE}            # マウント先（無ければ手順 5 で作る）。<MOUNT_POINT>
+   MOUNT_POINT=/mnt/${SHARE}            # マウント先（無ければ手順 4 で作る）。<MOUNT_POINT>
    printf '\n\033[7m 確認 \033[0m\n'
    for v in SERVER USER SMB_USER SHARE MOUNT_POINT; do
      printf '%-11s = %s\n' "$v" "${!v}"
@@ -70,20 +71,12 @@
    - 入っていれば、`パッケージ cifs-utils-… は既にインストールされています。`（英語の環境では `Package cifs-utils-… is already installed.`）と出る
    - `cifs-utils-7.7-…` と、`…/kernel/fs/smb/client/cifs.ko.xz` のパスが出る
    - 最後に `445/tcp に届く` と出ればよい
-   - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー](#samba-サーバー)の手順 5・8）を確かめる
+   - `Connection refused` が出る、または 5 秒たっても何も出ないときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー](#samba-サーバー)の手順 5・7）を確かめる
 
-1. 資格情報ファイルを作るため、共有のパスワードを入力する。
+1. 共有のパスワードを入力し、資格情報ファイルを作成する。
 
    ```bash
    IFS= read -rsp "Samba password for ${SMB_USER}@${SERVER}: " PW; echo
-   ```
-
-   - AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー](#samba-サーバー)の手順 6 で `smbpasswd -a` に入れたパスワード
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
-
-1. 資格情報ファイルを、root だけが読めるように置く。
-
-   ```bash
    if [ -z "${SMB_USER}" ] || [ -z "${SERVER}" ]; then echo '中断: 手順 1 の SMB_USER か SERVER が空のまま。手順 1 と手順 3 を貼り直す' >&2
    elif [ -z "${PW}" ]; then echo '中断: PW が空のまま。手順 3 を貼り直す' >&2
    else
@@ -94,6 +87,7 @@
    fi; unset PW
    ```
 
+   - AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー](#samba-サーバー)の手順 6 で `smbpasswd -a` に入れたパスワード
    - `-rw------- … root root … admin_home_t … /root/smb-<SMB_USER>@<SERVER>.cred` の 1 行が出ればよい
    - 資格情報ファイルの中身は平文（[注意点](extra/samba-client.md#注意点)）
 
@@ -152,7 +146,7 @@
    ```
 
    - 通常の共有では、`active`、`findmnt` の `autofs` と `cifs` の 2 行、`automount write` が出ればよい
-   - `SHARE=home` では、手順 5 と同じく共有直下への書き込みが `Permission denied` になる。`active` と `findmnt` の 2 行が出ればマウントの確認はできている
+   - `SHARE=home` では、手順 4 と同じく共有直下への書き込みが `Permission denied` になる。`active` と `findmnt` の 2 行が出ればマウントの確認はできている
    - 最後の `ausearch` は `<no matches>`
 
 #### Samba クライアント: GNOME Files で開く
@@ -205,22 +199,10 @@
 
    - 入れた後、ログインし直さなくてよい
 
-1. 端末から共有をマウントする。
+1. 共有をマウントし、接続先と共有内の一覧を確認する。
 
    ```bash
    /usr/bin/gio mount "smb://${SMB_USER:?この項の手順 1 の SMB_USER が空のまま}@${SERVER:?この項の手順 1 の SERVER が空のまま}/${SHARE:?この項の手順 1 の SHARE が空のまま}"
-   ```
-
-   - ドメインとパスワードを聞かれる（`Domain [SAMBA]:` と `Password:`。その前に、`認証が必要です`（英語の環境では `Authentication Required`）と、パスワードの入力を求める 1 行が出る）
-   - ドメインは、Enter で既定のままでよい
-   - パスワードは、共有のパスワード（AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー](#samba-サーバー)の手順 6 で `smbpasswd -a` に入れたもの）
-   - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す
-   - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
-
-1. マウントされたことを確かめる。
-
-   ```bash
    if [ -z "${SERVER}" ] || [ -z "${SMB_USER}" ] || [ -z "${SHARE}" ]; then echo '中断: この項の手順 1 の SERVER・SMB_USER・SHARE を設定してから貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gio mount -l | grep -F "${SERVER}"
@@ -229,6 +211,11 @@
    fi
    ```
 
+   - ドメインとパスワードを聞かれる（`Domain [SAMBA]:` と `Password:`。その前に、`認証が必要です`（英語の環境では `Authentication Required`）と、パスワードの入力を求める 1 行が出る）
+   - ドメインは、Enter で既定のままでよい
+   - パスワードは、共有のパスワード（AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー](#samba-サーバー)の手順 6 で `smbpasswd -a` に入れたもの）
+   - 画面から開くときは、「ファイル」のサイドバーの「Network」を開き、「Server address」の欄に `smb://<SMB_USER>@<SERVER>/<SHARE>` を入れて「接続」を押す
+   - 画面では、認証の画面で「期限なしで記憶する」を選ぶと、パスワードが GNOME のキーリングに保存される
    - `Mount(0): <SERVER> 上の <SHARE> -> smb://<SMB_USER>@<SERVER>/<SHARE>/` の 1 行が出ればよい（英語の環境では `<SHARE> on <SERVER>`）
    - 続いて `smb-share:server=<SERVER>,share=<SHARE>,user=<SMB_USER>`（端末では、`'` で囲まれて出る）と、共有の中の一覧（隠しファイルは出ない）が出る
    - 画面では、サイドバーに共有が出る
@@ -248,9 +235,9 @@
 
 - サーバーで、自分のユーザーのホームを Samba（SMB3）で公開する
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
-- 実行場所: サーバーの、公開するユーザー自身の bash（デスクトップの端末か SSH）。手順 9 だけは、つなぐ側の別のマシン
+- 実行場所: サーバーの、公開するユーザー自身の bash（デスクトップの端末か SSH）。手順 8 だけは、つなぐ側の別のマシン
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba.md)・[参考資料](reference/samba.md)・[注意点](extra/samba.md)
-- **手順 6 には対話入力がある**（パスワード）。入力し終えてから次の手順を貼る
+- **手順 6 には対話入力がある**（パスワード）
 - この項の手順 1 で変数を設定したシェルに貼る
 - この項の後に行う項:
   - root のホーム（`/root`）も公開するなら、[root のホームも公開する](#samba-サーバー-root-のホームも公開する)を行う
@@ -333,24 +320,17 @@
    sudo firewall-cmd --list-ports               # 445/tcp が含まれる
    ```
 
-1. OS のアカウントを確かめ、Samba ユーザーを登録する。
+1. Samba ユーザーを登録し、登録結果を確認する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    id "${USER}"
    sudo smbpasswd -a "${USER}"
+   sudo pdbedit -L                              # <USER>:1000: の 1 行が出る
    ```
 
    - `id` で、OS のアカウントが存在することを確かめる
    - **端末で対話入力する**。新しいパスワードを 2 回聞かれる
-   - **次の手順は、2 回の入力を終えてから貼る**（続けて貼るとパスワードとして食われる）
-
-1. Samba ユーザーが登録されたか確かめる。
-
-   ```bash
-   sudo pdbedit -L                              # <USER>:1000: の 1 行が出る
-   ```
-
    - `<USER>:1000:` の 1 行が出ればよい
 
 1. smb.service を有効にして起動する。
@@ -440,7 +420,7 @@
 
 1. 別のマシンから、共有名 `root` でつなぐ。
 
-   - [Samba サーバー](#samba-サーバー)の手順 9 の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と[Samba サーバー](#samba-サーバー)の手順 6 のパスワードのまま
+   - [Samba サーバー](#samba-サーバー)の手順 8 の `<USER>`（共有名）を `root` に読み替える。資格情報は `<USER>` と[Samba サーバー](#samba-サーバー)の手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\root`
    - AlmaLinux 10 の PC なら、[Samba クライアント](#samba-クライアント)の手順 1 で `SHARE=root` にする（`SMB_USER` は自分のまま）
 
@@ -497,10 +477,10 @@
 
 1. 別のマシンから、共有名 `home` でつなぐ。
 
-   - [Samba サーバー](#samba-サーバー)の手順 9 の `<USER>`（共有名）を `home` に読み替える。資格情報は `<USER>` と[Samba サーバー](#samba-サーバー)の手順 6 のパスワードのまま
+   - [Samba サーバー](#samba-サーバー)の手順 8 の `<USER>`（共有名）を `home` に読み替える。資格情報は `<USER>` と[Samba サーバー](#samba-サーバー)の手順 6 のパスワードのまま
    - Windows: エクスプローラーのアドレス欄に `\\<SERVER_IP>\home`。ユーザーごとのフォルダーが並ぶ。フォルダーの外（`/home` の直下）には作れない
    - AlmaLinux 10 は[Samba クライアント](#samba-クライアント)の手順 1 で `SHARE=home` にし、`SMB_USER` は自分のままにする
-   - [Samba クライアント](#samba-クライアント)の手順 5・7 の共有直下への書き込みは `Permission denied` になる
+   - [Samba クライアント](#samba-クライアント)の手順 4・6 の共有直下への書き込みは `Permission denied` になる
 
 #### Samba サーバー: サーバーの上で動作を確かめる
 
@@ -534,7 +514,7 @@
    read -rsp "Samba password for ${USER}: " PW; echo
    ```
 
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼ると、入力を終えられなかったときも後ろの資格情報ファイル作成が動く）
 
 1. 資格情報ファイルを作る。
 
@@ -595,7 +575,7 @@
 
    - パスワードは、[Samba サーバー](#samba-サーバー)の手順 6 で登録した `<USER>` の Samba のパスワード
    - `/root` の中身（`.bashrc` や `.ssh` など）の一覧に続いて、`putting file /etc/hostname as \smb-root-test.txt` と `smb-root-test.txt` の 1 行が出ればよい
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼ると、認証や書き込みに失敗しても後ろのテスト用ファイルの削除が動く）
 
 1. root のホームも公開したときだけ、作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
 
@@ -618,7 +598,7 @@
 
    - パスワードは、[Samba サーバー](#samba-サーバー)の手順 6 で登録した `<USER>` の Samba のパスワード
    - `/home` の中のユーザーのディレクトリ（`<USER>` など）の一覧に続いて、`putting file /etc/hostname as \<USER>\smb-home-test.txt` と `smb-home-test.txt` の 1 行が出ればよい
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼ると、認証や書き込みに失敗しても後ろのテスト用ファイルの削除が動く）
 
 1. `/home` も公開したときだけ、作ったファイルの所有者とラベルを確かめて消し、AVC を確かめる。
 
@@ -732,7 +712,7 @@
 
    - `<SERVER> の 445/tcp に届く。<DRIVE> は空いている` と、`<SERVER>` の資格情報の一覧が出ればよい
    - 一覧にある `<SERVER>` の保存済み資格情報は、この項の手順 4 で置き換わる
-   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・8](#samba-サーバー)）を確かめる
+   - `445/tcp に届かない` ときは、`SERVER` の値と、サーバーの firewalld と smbd（[Samba サーバー 手順 5・7](#samba-サーバー)）を確かめる
    - `もう使われている` ときは、`DRIVE` を別の文字にして、この項の手順 2 の 3 つ目のブロックを貼り直す。前にこの項で同じ共有を割り当てたなら、この項は済んでいる
 
 1. 資格情報マネージャーに、共有のユーザー名とパスワードを登録する。
@@ -748,7 +728,7 @@
 
    - パスワードを聞かれる。AlmaLinux の「Samba サーバー」の設定なら、[Samba サーバー 手順 6](#samba-サーバー) で `smbpasswd -a` に入れたパスワード
    - 資格情報を追加した旨の 1 行が出ればよい
-   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼るとパスワードとして食われる）
+   - **次の手順は、パスワードを入力し終えてから貼る**（続けて貼ると、資格情報の登録に失敗しても永続的なドライブの割り当てが動く）
 
 1. 共有をドライブ文字に割り当て、サインインのたびにつなぎ直すようにする。
 

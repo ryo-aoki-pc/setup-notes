@@ -4,11 +4,12 @@
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
-> - PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[アプリを入れる](#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[アプリを入れる](#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows PowerShell 5.1 は[貼り付けの設定](#貼り付けの設定)、PowerShell 7 は[アプリを入れる](#アプリを入れる)の手順 7 より前は **Ctrl+V で貼る**。それぞれの設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
 - どの項も単独で通せる。リードの前提を先に満たす
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - 設定を更新するときは[更新](#更新)を使う
@@ -883,21 +884,12 @@
      - `RemoteDesktop : 0`・`LanCategory : Private`（[ネットワークとリモート](#ネットワークとリモート)を通したとき。Home の `RemoteDesktop` は確かめない）
      - `Hypervisor : True`（[WSL と再起動](#wsl-と再起動)を通したとき）
 
-1. WSL に AlmaLinux 10 を入れ、ユーザーを作る。
+1. WSL に AlmaLinux 10 を入れてユーザーを作り、WSL 2 の動作を確認する。
 
    ```powershell
    $env:WSL_UTF8 = '1'
    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
    wsl.exe --install AlmaLinux-10
-   ```
-
-   - ダウンロードの後に `Enter new UNIX username:` と聞かれるので、Linux のユーザー名を入れる。続けてパスワードを 2 回入れる
-   - AlmaLinux 10 のシェル（`[<ユーザー>@<HOSTNAME> ~]$`）になったら、`exit` で PowerShell に戻る
-   - **次の手順は、`exit` で PowerShell に戻ってから貼る**（続けて貼ると、AlmaLinux 10 のシェルへの入力として食われる）
-
-1. AlmaLinux 10 が WSL 2 で動くことを確かめる。
-
-   ```powershell
    $env:WSL_UTF8 = '1'
    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -905,6 +897,8 @@
    wsl.exe --distribution AlmaLinux-10 -- head -n 2 /etc/os-release
    ```
 
+   - ダウンロードの後に `Enter new UNIX username:` と聞かれるので、Linux のユーザー名を入れる。続けてパスワードを 2 回入れる
+   - AlmaLinux 10 のシェル（`[<ユーザー>@<HOSTNAME> ~]$`）になったら、`exit` で PowerShell に戻る
    - `AlmaLinux-10` の行の `VERSION` が `2` で、`NAME="AlmaLinux"` と `VERSION="10.2 …"` の形の行が出ればよい
 
 ---
@@ -2155,7 +2149,7 @@
 
    - RDP のクライアントの窓が閉じる（クライアントが切断を知らせる）
    - 切れずに PowerShell にエラーが出たときは、管理者の PowerShell かを確かめて、この項の手順 1 からやり直す
-   - **次の手順は、RDP が切れてから、接続先の PC の画面で行う**（この手順の後ろに行を続けて貼らない）
+   - **次の手順は、RDP が切れてから、接続先の PC の画面で行う**（切断後は、接続先の PC の画面でデスクトップを確かめる）
 
 1. 接続先の PC の画面で、デスクトップに戻ったことを確かめる。
 
@@ -2266,7 +2260,7 @@
    - 1 行目に Windows の ssh の版（`OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2` か、それより新しい版）、2 行目に Git の ssh の版（`OpenSSH_10.5p1` など）が出ればよい
    - 1 行目が「認識されません」のエラーなら、Windows の OpenSSH クライアントが無い。設定の「オプション機能」（`ms-settings:optionalfeatures`）で「OpenSSH クライアント」を追加してから始める（追加には管理者の承認が要る）
    - `core.sshCommand` の行は出ず、最後の行は `GIT_SSH= GIT_SSH_COMMAND= HOME=` であればよい
-   - どれかに値があれば、git が別の ssh か別の `.ssh` を使う。その設定を外すまで、この項の手順 7・10 の Git の ssh の確かめは、git の動きと一致しない
+   - どれかに値があれば、git が別の ssh か別の `.ssh` を使う。その設定を外すまで、この項の手順 7・9 の Git の ssh の確かめは、git の動きと一致しない
 
 1. 鍵ペアが無いときだけ、ed25519 で作る（公開鍵だけが無ければ作り直す）。
 
@@ -2295,7 +2289,7 @@
    - その表示が無ければ、パスフレーズが違う。この手順を貼り直す
    - 鍵が無ければ、`Enter passphrase (empty for no passphrase):` と `Enter same passphrase again:` でパスフレーズを 2 回聞かれ、鍵の指紋が出る
    - パスフレーズを付けると、鍵を使うたびに聞かれる。空にすると聞かれないが、秘密鍵のファイルを持つ人は誰でも入れる
-   - **次の手順は、パスフレーズを入力し終えてから貼る**（続けて貼るとパスフレーズとして食われる）
+   - **次の手順は、パスフレーズを入力し終えてから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 1. 秘密鍵のアクセス権を確かめる。
 
@@ -2358,9 +2352,9 @@
    - ホストの画面の端末か、すでにホストに入れている別の端末に貼る（`sudo` は要らない）
    - `256 SHA256:<指紋> no comment (ED25519)` の 1 行が出る。この指紋を、この項の手順 9 の初回の接続で照合する
    - 同じ LAN から `ssh-keyscan` で取った指紋は、照合に使えない
-   - **次の手順は、指紋を控えてから、この項の手順 2 の変数を設定した PowerShell に貼る**
+   - **次の手順は、指紋を控えてから、この項の手順 2 の変数を設定した PowerShell に貼る**（次のブロックは PowerShell の構文なので、ホストの bash には貼らない）
 
-1. 公開鍵をホストの authorized_keys に足す（パスワードで 1 回ログインする）。
+1. 公開鍵を登録し、Windows と Git の ssh による鍵認証を確認する。
 
    ```powershell
    $pub = "$env:USERPROFILE\.ssh\id_ed25519.pub"
@@ -2372,19 +2366,6 @@
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-Content -LiteralPath $pub -TotalCount 1 | & "$env:WINDIR\System32\OpenSSH\ssh.exe" -o PubkeyAuthentication=no $SSH_ALIAS 'umask 077; mkdir -p ~/.ssh && if [ -s ~/.ssh/authorized_keys ] && [ $(tail -c1 ~/.ssh/authorized_keys | wc -l) -eq 0 ]; then echo >> ~/.ssh/authorized_keys; fi && tr -d ''\r'' | sed ''1s/^\xEF\xBB\xBF//'' >> ~/.ssh/authorized_keys && echo added; if type restorecon >/dev/null 2>&1; then restorecon -F ~/.ssh ~/.ssh/authorized_keys; fi'
    }
-   ```
-
-   - 初回は `ED25519 key fingerprint is` の後ろに `SHA256:…` が出て、`Are you sure you want to continue connecting (yes/no/[fingerprint])?` と聞かれる
-   - その指紋がこの項の手順 8 の指紋と同じなら `yes`、違えば `no` で止める
-   - `<SSH_USER>@<SSH_HOST>'s password:` で、ホストのユーザーのパスワードを入れる
-   - `added` と出ればよい
-   - パスワードを聞かれずに `Permission denied` で終わるときは、ホストがパスワードでのログインを受け付けていない（[注意点](extra/windows-ssh-client.md#注意点)）
-   - **次の手順は、パスワードを入力し終えて `added` が出てから貼る**（続けて貼るとパスワードとして食われる）
-
-1. Windows の ssh と Git の ssh で、鍵でログインできることを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
    if (-not $SSH_ALIAS) {
      Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {
@@ -2393,6 +2374,11 @@
    }
    ```
 
+   - 初回は `ED25519 key fingerprint is` の後ろに `SHA256:…` が出て、`Are you sure you want to continue connecting (yes/no/[fingerprint])?` と聞かれる
+   - その指紋がこの項の手順 8 の指紋と同じなら `yes`、違えば `no` で止める
+   - `<SSH_USER>@<SSH_HOST>'s password:` で、ホストのユーザーのパスワードを入れる
+   - `added` と出ればよい
+   - パスワードを聞かれずに `Permission denied` で終わるときは、ホストがパスワードでのログインを受け付けていない（[注意点](extra/windows-ssh-client.md#注意点)）
    - パスワードを聞かれずに、`<SSH_USER>` と、`authorized_keys` の行、もう一度 `<SSH_USER>` が出ればよい
    - `authorized_keys` の行は、group と other に書き込みが無く（`-rw-------` など）、`ssh_home_t` が付いていればよい
    - 鍵にパスフレーズを付けたなら、2 回聞かれる
@@ -2513,7 +2499,7 @@
    - 1 画面に収まらないときは、less で止まる。`q` で閉じる
    - 素の差分（背景色の無い `+` / `-` の行）が出たら、この項の手順 4 で貼った同書の「git-delta」の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
    - `git diff | head` のようにパイプに繋ぐと、AlmaLinux 10 と同じく delta を通らない
-   - **ほかのブロックは、less を `q` で閉じてから貼る**（続けて貼ると less への入力として食われる）
+   - **ほかのブロックは、less を `q` で閉じてから貼る**（less を開いたまま貼ると、less への入力になる）
 
 ---
 
@@ -2586,7 +2572,7 @@
    - ブラウザが開かなければ（`Failed opening a web browser at …`）、`https://github.com/login/device` を自分でブラウザで開く
    - PowerShell に `Logged in as <GITHUB_USER>` が出れば、`gh auth login` は終わっている
    - `Authentication credentials saved in plain text` なら、トークンは `%APPDATA%\GitHub CLI\hosts.yml` に平文で入った（[注意点](extra/windows-setup.md#注意点)）
-   - **次の手順は、`gh auth login` が終わってから貼る**（続けて貼ると対話の答えとして食われる）
+   - **次の手順は、`gh auth login` が終わってから貼る**（ブラウザで認証を済ませ、PowerShell にログイン完了が出たことを確かめる）
 
 1. ログインできたことと、Git の資格情報のヘルパーが変わっていないことを確かめる。
 
@@ -2693,7 +2679,7 @@
    - `q` で閉じる
    - `%TEMP%\lazygit-check` は、要らなければ手で消す
      - 消す前に `Set-Location ~` で出る
-   - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると lazygit への操作として食われる）
+   - **ほかのブロックは、`q` で閉じてから貼る**（lazygit を開いたまま貼ると、lazygit への入力になる）
 
 #### lazygit の設定を導入する
 
@@ -2979,7 +2965,7 @@
    - 選んだ文字列セルのふりがなは引き継がない。未選択のセルは保持する
    - 値・数式を選んだときは、次に Excel で開いたときに再計算する。スクリプトはマクロ・外部リンク更新・数式再計算を実行しない
    - 専用画面から戻ったら、lazygit でも `q` を押して閉じる
-   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（続けて貼ると lazygit への操作として食われる）
+   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（lazygit を開いたまま貼ると、lazygit への入力になる）
 
 #### lazygit で大きな Excel の変換を待つ
 
@@ -3235,7 +3221,7 @@
    - 開いた後に対象の index・作業ファイルが変わった場合は中断する。閉じて `E` から開き直す
    - 目次・相互参照・文書内リンクの参照先が無くなると表示されたら、参照先の段落の変更も選ぶ
    - 専用画面から戻ったら、lazygit でも `q` を押して閉じる
-   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（続けて貼ると lazygit への操作として食われる）
+   - **ほかのブロックは、lazygit を閉じて PowerShell に戻ってから貼る**（lazygit を開いたまま貼ると、lazygit への入力になる）
 
 #### WinMerge で 2 つの Word の変更を取り込む
 
@@ -3435,7 +3421,7 @@
 
    - `function` が出ればよい（[AlmaLinux 10 の初期設定の「yazi」](almalinux-setup.md#yazi)の手順 4 と同じ）
    - 最後の `y` で yazi が開く。別のフォルダーへ移って `q` で閉じると、Git Bash もそのフォルダーへ移る（`Q` なら移らない）
-   - **次の手順は、yazi を閉じて、この項の手順 1 の PowerShell に戻ってから貼る**（続けて貼ると yazi への操作として食われる）
+   - **次の手順は、yazi を閉じて、この項の手順 1 の PowerShell に戻ってから貼る**（続けて貼ると、後ろの行も Git Bash で動き、PowerShell での確認にならない）
 
 1. yazi を起動して確かめる。
 
@@ -3447,7 +3433,7 @@
    - 画像のプレビューは、WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）の中で出る。conhost の窓では出ない
    - [表示と入力](#表示と入力)の手順 7 で既定の端末を Windows Terminal にした PC では、この窓も Windows Terminal で開く
    - `q` で閉じる
-   - **ほかのブロックは、`q` で閉じてから貼る**（続けて貼ると yazi への操作として食われる）
+   - **ほかのブロックは、`q` で閉じてから貼る**（yazi を開いたまま貼ると、yazi への入力になる）
 
 #### yazi の設定を導入する
 
@@ -3508,7 +3494,7 @@
    ```
 
    - 貼り終えたら Esc を押し、`:wq` を打って Enter で保存して閉じる
-   - **次の手順は、Neovim を閉じてから、この項の手順 1 の PowerShell に貼る**（続けて貼ると Neovim への入力として食われる）
+   - **次の手順は、Neovim を閉じてから、この項の手順 1 の PowerShell に貼る**（続けて貼ると、後ろの行も Neovim の本文に入る）
 
 1. yazi を起動し、選択した複数ファイルをまとめて開けるか確かめる。
 
@@ -3518,7 +3504,7 @@
 
    - 選択した複数ファイルが `l` / `<Enter>` でまとめて開けばよい
    - `q` で yazi を閉じる
-   - **ほかのブロックは、yazi を閉じてから貼る**（続けて貼ると yazi への操作として食われる）
+   - **ほかのブロックは、yazi を閉じてから貼る**（yazi を開いたまま貼ると、yazi への入力になる）
 
 #### yazi の設定を更新する
 

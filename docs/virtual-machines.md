@@ -5,10 +5,11 @@
 
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
@@ -33,7 +34,7 @@
 - Oracle の VirtualBox の dnf リポジトリを置き、その署名鍵を rpm と dnf に取り込む
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)を通してある
 - 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash）
-- この項の手順 4・5 には、**対話入力がある**（鍵の確認）。答えてから次の手順を貼る
+- この項の手順 4 には、**対話入力がある**（鍵の確認）。fingerprint を確かめて答える
 
 1. この PC に入るかを確かめる。
 
@@ -74,7 +75,7 @@
 
    - `gpg-pubkey-2980aecf-5719f4e1 Oracle Corporation (VirtualBox archive signing key) ...` が出れば入っている
 
-1. repo ファイルを置き、`sudo` の dnf でメタデータの鍵を受け入れる。
+1. リポジトリを設定し、管理者用とユーザー用の鍵を確認する。
 
    ```bash
    sudo tee /etc/yum.repos.d/virtualbox.repo >/dev/null <<'EOF'
@@ -89,22 +90,13 @@
    cat /etc/yum.repos.d/virtualbox.repo
    printf '\n\033[7m 確認 \033[0m\n'
    sudo dnf makecache --repo virtualbox
-   ```
-
-   - 最初の 1 回だけ鍵の取り込みを聞かれる
-   - 鍵の表示は `Importing GPG key 0x2980AECF:`（日本語は `GPG 鍵 0x2980AECF をインポート中:`）
-   - fingerprint が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
-   - `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）で終わる
-   - **次の手順は、鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. `sudo` を付けない dnf にも、同じ鍵の確認を 1 回だけ通す。
-
-   ```bash
    dnf makecache --repo virtualbox
    ```
 
-   - この項の手順 4 と同じ fingerprint を確かめて `y` と答える
-   - **次の手順は、答えてから貼る**（続けて貼ると答えとして食われる）
+   - `sudo` を付けた dnf と付けない dnf で、それぞれ最初の 1 回だけ鍵の取り込みを聞かれる
+   - 鍵の表示は `Importing GPG key 0x2980AECF:`（日本語は `GPG 鍵 0x2980AECF をインポート中:`）
+   - fingerprint が、この項の手順 2 と同じ `B9F8 D658 297A F3EF C18D 5CDF A2F6 83C5 2980 AECF` であることを確かめて `y` と答える
+   - `Metadata cache created.`（日本語では `メタデータキャッシュを作成しました。`）で終わる
 
 #### VirtualBox: VirtualBox を入れる
 
@@ -114,7 +106,7 @@
   - **Secure Boot が有効な PC は、VirtualBox より先に[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)で鍵を MOK に登録してある**。有効かは[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 3 で分かる
   - 署名鍵の手順で再起動し、起動途中の MokManager を操作する
 - 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、自分のユーザーの端末（bash）
-- この項の手順 4 には、**対話入力がある**（`[y/N]`・鍵の確認）。答えてから次の手順を貼る
+- この項の手順 4 には、**対話入力がある**（`[y/N]`・鍵の確認）。表示を確かめて答える
 
 1. 何が入るかを見る（`--assumeno` は必ず中断する）。
 
@@ -149,21 +141,10 @@
    - 6 つとも版が出て、最後の行がディレクトリを返せばよい
    - `No such file or directory` なら、kernel-devel の版が合っていない
 
-1. VirtualBox を入れる。
+1. VirtualBox を導入し、カーネルモジュールの動作を確認する。
 
    ```bash
    sudo dnf install VirtualBox-7.2
-   ```
-
-   - トランザクション表を見て、`[y/N]` に `y` と答える
-   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵）
-     - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
-   - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
-   - **次の手順は、`[y/N]` と鍵の確認に答え、`Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
-
-1. `Complete!`（日本語では `完了しました!`）だけでは成功とは限らないので、モジュールが動いているか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl is-enabled vboxdrv
    systemctl is-active vboxdrv
@@ -172,6 +153,11 @@
    sudo tail -n 5 /var/log/vbox-setup.log
    ```
 
+   - トランザクション表を見て、`[y/N]` に `y` と答える
+   - **EPEL の署名鍵をまだ取り込んでいなければ、続けて 1 回だけ確認を求められる**（[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵）
+     - `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`、Fedora (epel10) &lt;epel@fedoraproject.org&gt;
+   - 最後に `Creating group 'vboxusers'. VM users must be member of that group!` が出て、続けてモジュールのビルドが走る
+   - `Complete!`（日本語では `完了しました!`）だけでは成功とは限らないので、後ろのモジュールの確認結果も確かめる
    - `enabled` と `active`、`vboxnetadp` / `vboxnetflt` / `vboxdrv` の 3 行、root だけが読み書きできる `/dev/vboxdrv` が出ればよい
    - `dnf install` の途中で `There were problems setting up VirtualBox.` が出ていた、または `active` にならないときは、ログ（`/var/log/vbox-setup.log`）で原因を見る
    - 原因を直してから、`sudo /sbin/vboxconfig` を実行し直す
@@ -219,7 +205,7 @@
 - VirtualBox の版とモジュール・KVM の状態を見て、使い捨ての VM と GUI で動くか確かめる
 - 前提: [VirtualBox: KVM と USB の設定](#virtualbox-kvm-と-usb-の設定)を通し、再起動してある
 - 実行場所: 対象ホスト（x86_64 の AlmaLinux 10 の PC）の、GNOME にログインした自分のユーザーの端末（bash。再起動した後に開いたもの）
-- この項の手順 4 で **GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じてからこの項の手順 5 を貼る
+- この項の手順 4 で **GUI のウィンドウが開く**（デスクトップにログインした端末から行う）。閉じると設定ファイルの確認が続く
 
 1. VirtualBox の版と、モジュールと KVM の状態を確かめる。
 
@@ -234,7 +220,7 @@
 
    - `7.2.20r175154` のような版、`active`、vbox の 3 行、`N`（または `kvm は未ロード`）が出ればよい
    - 最後の行は、[KVM と USB の設定](#virtualbox-kvm-と-usb-の設定)の手順 2 を行ったときだけ `vboxusers` になる
-   - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 に戻る）
+   - **版の前に `WARNING: The vboxdrv kernel module is not loaded.` が出たら、モジュールが読み込まれていない**（[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 4 に戻る）
 
 1. Secure Boot が有効なときだけ、モジュールの署名を見る。
 
@@ -267,24 +253,18 @@
    - `VMState="running"` なら動いていた
    - `controlvm ... poweroff` で止まり、`unregistervm ... --delete` は `0%...10%...` と進んで、VM のファイルごと消える
 
-1. デスクトップにログインした端末から、GUI を起動する。
+1. VirtualBox を起動し、終了後に設定ファイルを確認する。
 
    ```bash
    VirtualBox
+   printf '\n\033[7m 確認 \033[0m\n'
+   ls ~/.config/VirtualBox
    ```
 
    - アプリ一覧の「Oracle VirtualBox」からでも同じ
    - VirtualBox マネージャーのウィンドウが開く（一覧は空）
    - 端末に `Qt WARNING: QObject::disconnect: wildcard call disconnects from destroyed signal of UIInvisibleWindow::unnamed` が何行か出るが、気にしなくてよい
    - ウィンドウを閉じると、端末がプロンプトに戻る
-   - **次の手順は、ウィンドウを閉じてから貼る**（続けて貼ると VirtualBox への操作として食われる）
-
-1. `~/.config/VirtualBox` に設定ができたか確かめる。
-
-   ```bash
-   ls ~/.config/VirtualBox
-   ```
-
    - `VirtualBox.xml` などが並ぶ
 
 #### VirtualBox: カーネルを更新したとき
@@ -334,8 +314,8 @@
    ```
 
    - トランザクション表を見て `[y/N]` に答える
-   - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 と同じ確認をする
-   - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 5 の確認は、**`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
+   - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 4 のブロックのうち、モジュールを確認するコマンドだけを貼る
+   - [VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 4 の確認は、**`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると、更新を断ったときや失敗したときも後ろの確認が動く）
 
 1. 系列を変えるときは（この項の手順 2 の代わりに）、今の系列のパッケージを消す。
 
@@ -343,7 +323,7 @@
    sudo dnf remove VirtualBox-7.2
    ```
 
-   - **次の手順は、`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、`[y/N]` に答えて `Complete!`（日本語では `完了しました!`）が出てから貼る**（続けて貼ると、削除を断っても後ろの新しい系列の導入へ進んでしまう）
 
 1. 系列を変えるときは、パッケージ名を新しい系列に置き換えて、[VirtualBox を入れる](#virtualbox-virtualbox-を入れる)の手順 1 の下見と同じ項の手順 4 からやり直す。
 
@@ -542,7 +522,7 @@
    - `pinging container registry quay.io` と `dial tcp: lookup quay.io` で止まったら、VM がインターネットに出られない
    - [オフラインビルド](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)でビルドする
    - **注意**: Windows のホストで Hyper-V が動いていると、途中で出力が数分止まることがある。VM のウィンドウで Shift キーを押すと動き出す（リードの WARNING）
-   - **次の手順は、`Successfully tagged` が出てから貼る**
+   - **次の手順は、`Successfully tagged` が出てから貼る**（続けて貼ると、ビルドに失敗しても後ろのイメージ切り替えと再起動が動く）
 
 1. 作ったイメージに切り替えて、再起動する。
 
@@ -683,7 +663,7 @@
    - **一時パスワードを 2 回聞かれる**（[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 6 の MokManager で 1 回だけ使う。本書には残さない）
    - 続けて、VM で [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5〜7 を行い、再起動して MokManager で登録し、`--test-key` で確かめる。ホストの端末は、開いたままにしておく
    - [Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 7 の後、この項の手順 6 はホストの端末で貼る（VM の端末を開き直したら、この項の手順 1 を貼り直す）
-   - **次の手順（[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5）は、一時パスワードに答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順（[Secure Boot の署名鍵](almalinux-setup.md#secure-boot-の署名鍵)の手順 5）は、一時パスワードに答えてから貼る**（続けて貼ると、登録予約に失敗したときも再起動が始まる）
 
 1. ホストの端末で、ビルドの材料と、署名を確かめる設定を VM から写す。
 
@@ -700,7 +680,7 @@
    - VM のユーザーのパスワードを聞かれる
    - `vbox-ga-image/Containerfile`・`vbox-ga-image/VBoxLinuxAdditions.run`・`etc/containers/policy.json` などの名前が並べばよい
    - `tar: … time stamp … is … s in the future` が混ざることがある。害は無い（参考資料を参照）
-   - **次の手順は、パスワードに答え、名前が並んでから貼る**
+   - **次の手順は、パスワードに答え、名前が並んでから貼る**（続けて貼ると、転送に失敗しても後ろの署名確認設定の作成が動く）
 
 1. ホストの端末で、ベースのイメージの署名を VM と同じ鍵で確かめるようにする。
 
@@ -749,7 +729,7 @@
    - `enabled` が 2 行、`Checks passed: 13`、`Successfully tagged localhost/vbox-ga:latest` も出ればよい
    - ホストに鍵（`~/vbox-ga-mok/MOK.priv`）があるときだけ、モジュールに署名する（3 行が `signer=Local kernel module signing key`）
    - 途中の `depmod: ERROR`・`depmod: FATAL`、`installer exit=1`、`libsemanage.semanage_rename: WARNING: … Invalid cross-device link …` は、失敗ではない（参考資料を参照）
-   - **次の手順は、`Successfully tagged` が出てから貼る**
+   - **次の手順は、`Successfully tagged` が出てから貼る**（続けて貼ると、ビルドに失敗しても既存のイメージを保存して VM に送る処理が動く）
 
 1. ホストの端末で、派生イメージとベースのイメージを 1 つのファイルにして、VM に送る。
 
@@ -781,7 +761,7 @@
    - `sudo podman images` に、この 2 つが並べばよい
    - VM の `/var` には、ファイル（約 4.8G）の分も一時的に要る（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 2 の空きの目安より多く）
    - 続けて[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 から先を行う
-   - **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 は、`Loaded image:` が出てから貼る**
+   - **[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 7 は、`Loaded image:` が出てから貼る**（続けて貼ると、取り込みに失敗しても既存のイメージへの切り替えと再起動が動く）
 
 1. 署名設定のコピーやビルドに失敗して復旧するときは、ホストの端末で変数を設定し直す。
 
@@ -902,7 +882,7 @@
 
    - 何も変わっていなければ、ビルドのキャッシュが使われて同じイメージになる（`Using cache` が 4 行並び、最後のイメージ ID が同じ）
    - Containerfile を置き直したとき（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3）は、Guest Additions の段をやり直す
-   - **次の手順は、`Successfully tagged` が出てから貼る**
+   - **次の手順は、`Successfully tagged` が出てから貼る**（続けて貼ると、ビルドに失敗しても後ろの更新適用が動く）
 
 1. 新しいイメージを取り込んで、再起動する。
 
@@ -942,7 +922,7 @@
   - VM 作成は x86_64 用
 - 実行場所: 対象ホストの一般ユーザーの bash（画面を使う場合は GNOME の端末、画面なしの場合は SSH のシェル）。root の権限は、コマンドに付けた `sudo` だけで使う
 - [仕様](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/SPEC.md)・[参照情報](https://github.com/ryo-aoki-pc/kvm-container/blob/main/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/kvm-container/docs/verification/setup.md)
-- 既に clone したリポジトリやホスト自身の libvirt がある PC では、この項の手順 4・5 の確認を省かない
+- 既に clone したリポジトリやホスト自身の libvirt がある PC では、この項の手順 3・4 の確認を省かない
 - ホストごとに 1 度だけ行う。2 回目からは[VM を使う](#kvm-container-の-vm-を使う)から始める
 
 1. 変数を設定する（既定のままでよい）。
@@ -961,23 +941,17 @@
    - **新しいシェルを開いたら** (SSH を張り直したあとも)、この手順を貼り直してから先へ進む
 
 
-1. podman と git を入れる。
+1. Podman と Git を導入し、パッケージの版を確認する。
 
    ```bash
    sudo dnf install podman git
+   printf '\n\033[7m 確認 \033[0m\n'
+   rpm -q podman git
    ```
 
    - ホストに入れるのは podman と git だけ (podman は root で使う)
    - qemu・libvirt・virt-viewer はホストに入れない
-   - **次の手順は、`[y/N]` に答えてインストールが終わってから貼る** (続けて貼ると答えとして食われる)
-
-
-1. podman と git が入ったか確かめる。
-
-   ```bash
-   rpm -q podman git
-   ```
-
+   - トランザクション表を見て、`[y/N]` に `y` と答える
    - 2 行とも `podman-…` / `git-…` の版が出ればよい
 
 1. リポジトリを clone する。
@@ -1007,7 +981,7 @@
    - **注意**: GNOME のホストで `画面なし` と出たら、SSH か `sudo -i` のシェルで貼っている。GNOME の端末を開き、この項の手順 1 から貼り直す
    - ファームウェアで SVM (AMD) / VT-x (Intel) を有効にしておく
    - ホスト自身の libvirt は停止しておく (`virbr0` / 192.168.122.0/24 の衝突を避ける)
-   - 画面があっても使わない場合は、`KVM_HOST=headless` を各 `up` の前に付け、この項の手順 7 は飛ばす
+   - 画面があっても使わない場合は、`KVM_HOST=headless` を各 `up` の前に付け、この項の手順 6 は飛ばす
 
 
 1. `kvm` のイメージをビルドする。
@@ -1019,7 +993,7 @@
    - 時間がかかる (AlmaLinux 10 minimal のイメージ取得と `microdnf` でのパッケージ導入)
    - ビルドの最後に `Successfully tagged localhost/kvm-container/kvm:latest` が出ればよい
    - ビルドが失敗したら `./kvm.sh build kvm 2>&1 | tee build.log` のように出力を残して原因を確認する
-   - **次の手順は、ビルドが終わってから貼る**
+   - **次の手順は、ビルドが終わってから貼る**（続けて貼ると、kvm のビルドに失敗しても後ろの GUI のビルドが動く）
 
 
 1. GUI のイメージをビルドする (画面の無いホストでは何もしない)。
@@ -1030,7 +1004,7 @@
 
    - 画面のあるホストでは GUI のイメージも作る
    - ビルドの最後に `Successfully tagged localhost/kvm-container/gui:latest` が出ればよい
-   - **次の手順は、ビルドが終わってから貼る**
+   - **次の手順は、ビルドが終わってから貼る**（続けて貼ると、GUI のビルドに失敗しても後ろのコンテナ起動が動く）
 
 1. コンテナを起動する。
 
@@ -1241,7 +1215,7 @@
    - 画面のあるホストでは、続けて `>> kvm-gui started. …` か `>> kvm-gui is already running` が出る
    - 再ログインの後なら `>> the host session has changed: recreating kvm-gui …` が出て、`kvm-gui` だけが作り直される
    - [VM を作る](#kvm-container-で-vm-を作る)の手順 7 で自動起動を設定した VM は、`kvm` の起動と一緒に起動する
-   - **次の手順は、`>> ready.` か `>> kvm is already running` が出てから貼る**
+   - **次の手順は、`>> ready.` か `>> kvm is already running` が出てから貼る**（続けて貼ると、コンテナの起動に失敗しても後ろの VM 起動が動く）
 
 1. VM を起動する。
 
@@ -1277,7 +1251,7 @@
 
    - `shutdown` は非同期で、コマンドはすぐ戻る
    - **注意**: 起動途中の OS は ACPI に応じないことがある。OS が起動してログイン画面になってから貼る
-   - **次の手順は、数十秒待ってから貼る**
+   - **次の手順は、数十秒待ってから貼る**（停止は非同期なので、続けて貼ると停止前の状態を確認することがある）
 
 1. VM が止まったか確かめる。
 
@@ -1430,7 +1404,7 @@
 
    - 動いている VM は ACPI でシャットダウンされる (最大 120 秒待つ)
    - `kvm` が動いたままだと、この項の手順 7 の `up` は `>> kvm is already running` で戻り、`bridged` は登録されない
-   - **次の手順は、`down` が終わってから貼る**
+   - **次の手順は、`down` が終わってから貼る**（続けて貼ると、停止に失敗しても後ろのブリッジ付き起動が動く）
 
 
 1. `KVM_BRIDGE` を付けて `kvm` を起動し、ブリッジを `bridged` として登録する。
@@ -1533,7 +1507,7 @@
 
    - 急ぐなら `shutdown` を `destroy` (強制停止) に変えて貼る
    - 止まっている VM では `domain is not running` のエラーになるが、そのまま先へ進んでよい
-   - **次の手順は、数十秒待ってから貼る**
+   - **次の手順は、数十秒待ってから貼る**（停止は非同期なので、続けて貼ると停止前の状態を確認することがある）
 
 1. VM が止まったか確かめる。
 
@@ -1588,7 +1562,7 @@
    ```
 
    - 動いている VM は ACPI でシャットダウンされる (最大 120 秒)
-   - **次の手順は、`down` が終わってから貼る**
+   - **次の手順は、`down` が終わってから貼る**（続けて貼ると、更新や停止に失敗しても後ろのビルドと起動が動く）
 
 1. イメージを作り直して起動する。
 
@@ -1597,7 +1571,7 @@
    ```
 
    - 画面の無いホストでは `gui` を作らない
-   - `>> ready.` が出れば終わり。確認は[kvm-container を導入する](#kvm-container-を導入する)の手順 9
+   - `>> ready.` が出れば終わり。確認は[kvm-container を導入する](#kvm-container-を導入する)の手順 8
 
 ---
 
@@ -2132,7 +2106,7 @@
 
    - **途中でネットワークがいったん切れる**
    - インストーラの画面は出ず、進み具合だけが出る。最後に、入れ終えた旨の行（英語の表示では `Successfully installed`）が出ればよい
-   - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、winget が何か聞いたときの答えとして食われる）
+   - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、導入に失敗しても後ろの版やドライバーの確認が動く）
 
 1. 入ったか、ドライバーとホストオンリーのアダプターができたかを確かめる。
 
@@ -2580,7 +2554,7 @@
    ```
 
    - 途中でネットワークがいったん切れるはず
-   - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、winget が何か聞いたときの答えとして食われる）
+   - **次の手順は、winget が終わってプロンプトに戻ってから貼る**（続けて貼ると、更新に失敗しても後ろの版の確認が動く）
 
 1. 新しい版にしたときだけ、新しい版になったか確かめる。
 
