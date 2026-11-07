@@ -816,7 +816,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 **[アプリを入れる](#アプリを入れる)の手順 7: 7 のプロファイルに足す行**
 
 - 管理者の PowerShell は conhost の窓で開き、右クリックの貼り付けは LF を Ctrl+Enter として送る。PowerShell 7.6 の PSReadLine 2.4.5 も Ctrl+Enter が `InsertLineAbove` なので、`AddLine` の行が無いと複数行が逆順に貼られる
-- 足す行は、[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 2の 1 行目と同じで、印も `# windows-setup.md`。後で同じ項を通すと、この行は `すでにある:` になる
+- 足す行は、[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 2 の 1 行目と同じで、印も `# windows-setup.md`。後で同じ項を通すと、この行は `すでにある:` になる
 - Windows PowerShell 5.1 の窓から書くので、`$PROFILE`（5.1 のもの）ではなく PowerShell 7 のパスを明示する
 - Windows PowerShell 5.1 の `Add-Content` は ANSI で書くが、足す行は ASCII だけなので、PowerShell 7 でも同じに読む
 - `Get-Module -Name PSReadLine` の条件は、PSReadLine を読まない窓（`-NonInteractive` など）で止めないため
@@ -2731,7 +2731,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 1. 同じ条件で問題の操作を確認する。
 
-   - 解消しなければ候補の設定を元に戻し、終了した候補を通常起動してから、この項の手順 6で次の候補を調べる
+   - 解消しなければ候補の設定を元に戻し、終了した候補を通常起動してから、この項の手順 6 で次の候補を調べる
    - 解消した場合は[Windows のホットキー競合](#windows-のホットキー競合)の手順 5 で必要な設定と保存状態を確認し、同じ項の手順 6 で結果を残して終了する
    - 特定できない場合は、[ホットキーの登録可否を確認する](#windows-のホットキー競合-ホットキーの登録可否を確認する)も使い、試した入力条件・候補・ログを追加調査用に残す
 
@@ -4033,7 +4033,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 **注意点**
 
 - **git-delta: Windows 11 の PowerShell と cmd で打つ git も、delta を通る**: `~/.gitconfig` は Git Bash と同じファイル
-  - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。この折りたたみの「git-deltaの手順 5: ページャの less と PowerShell の git」）
+  - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。この折りたたみの「git-delta の手順 5: ページャの less と PowerShell の git」）
   - そのため、scoop の less は入れていない。PowerShell で delta を直に動かす（`git diff | delta` など）ときは、PATH に less が無いので、ページャを使わずに出る
 
 **[git-delta](#git-delta)の手順 2: VC++ ランタイム**
@@ -4096,15 +4096,15 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
   - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）
   - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)）
-- **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（この折りたたみの「git-deltaの手順 4: 実施手順の手順 1・3 を Git Bash で貼る」）
+- **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（この折りたたみの「git-delta の手順 4: 実施手順の手順 1・3 を Git Bash で貼る」）
 - **シェルとの組み込み方**
   - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[git-delta](almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
   - **PowerShell 7 には補完を足す**。[PowerShell 7 のプロファイルに開発の設定を足す](shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)で、`delta --generate-completion powershell` の出力を控えたファイルから読む。delta を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
   - **Windows PowerShell 5.1 には delta の補完を足さない**。git が読む `~/.gitconfig` の設定は、5.1 から使う git にも効く
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[git-delta](almalinux-setup.md#git-delta)を WSL の中で通す
-- **VC++ ランタイムは前提にした**: この折りたたみの「git-deltaの手順 2: VC++ ランタイム」
-- **scoop の less は入れない**: この折りたたみの「git-deltaの手順 5: ページャの less と PowerShell の git」
+- **VC++ ランタイムは前提にした**: この折りたたみの「git-delta の手順 2: VC++ ランタイム」
+- **scoop の less は入れない**: この折りたたみの「git-delta の手順 5: ページャの less と PowerShell の git」
 - **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
 - **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
 
@@ -4211,7 +4211,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - **GitHub CLI: Windows 11 のトークンの置き場所**: 資格情報マネージャー（Windows 資格情報の汎用資格情報）を優先し、使えない場合は `%APPDATA%\GitHub CLI\hosts.yml` に平文で保存する
 
 - **GitHub CLI: Windows 11 では、gh と git が別々に GitHub にログインする**: git の HTTPS は、Git for Windows の Git Credential Manager が自分のサインインで行う
-  - [GitHub CLI](#github-cli)の手順 4で、Git の認証に `n` と答えるため
+  - [GitHub CLI](#github-cli)の手順 4 で、Git の認証に `n` と答えるため
   - `gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことは、git の HTTPS の認証に影響しない
 
 **[GitHub CLI](#github-cli)の手順 2: 確かめる値の意味**
@@ -4280,7 +4280,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - **`XDG_CONFIG_HOME` は設定しない**: 設定すると、gh の設定の場所が `%XDG_CONFIG_HOME%\gh` に変わり、設定した窓と設定していない窓で、gh が別のログインの一覧を読む
   - Git for Windows の起動スクリプト、自分用の bash 設定、WezTerm の設定は、どれも `XDG_CONFIG_HOME` を設定しない。そのため、Git Bash・PowerShell・cmd の gh は、同じ `%APPDATA%\GitHub CLI` を読む（ソースと設定を読んだだけ）
   - トークンは資格情報マネージャー（ユーザーごと）にあるので、どのシェルからも同じ
-- **git の HTTPS の認証は Git Credential Manager のまま**: この折りたたみの「GitHub CLIの手順 4: Git の認証に n と答える理由」
+- **git の HTTPS の認証は Git Credential Manager のまま**: この折りたたみの「GitHub CLI の手順 4: Git の認証に n と答える理由」
 - **シェルとの組み込み方**
   - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
@@ -5706,7 +5706,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    ```
 
    - ブックに記録した Markdown に書き戻す（`--md` で変更）
-   - 書き出した後に Markdown の表を変えていたら、衝突として書き戻さない
+   - 書き出した後に Markdown の表を変えていたら、衝突として書き戻さない（`--force` を付けると、ブックの内容で Markdown を上書きする）
    - 同じブックを再度取り込むと「適用済み」になる。取り込み後はブックを消してよい
 
 <details id="mdtable-の補足と注意点">
@@ -5726,7 +5726,6 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 **[mdtable で Markdown の表を Excel と往復する](#mdtable-で-markdown-の表を-excel-と往復する)の手順 8**
 
-- `--force` を付けると、ブックの内容で Markdown を上書きする
 
 **参照**
 
@@ -6165,10 +6164,9 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - ページを読み込み直すか、解除してもう一度実行すると、検索は閉じた空の状態から始める
 - GitLab の保存領域には書き込まない
 
-検証記録（`repos/md-table-sticky/docs/verification/readme.md`）
-
 **参照**
 
+- 検証記録（`repos/md-table-sticky/docs/verification/readme.md`）
 - 検証記録（`docs/verification/windows-setup.md`）
 
 </details>
@@ -6184,6 +6182,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - 日本語版の Firefox を PC 全体に入れ、既定のブラウザーにする
 - 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Firefox の起動と設定は、この PC のデスクトップ
+- 言語パックは足さない。足すと、閉じている間の更新（Background Update）が止まる
 
 1. 管理者の PowerShell 7 を開く。
 
@@ -6222,7 +6221,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
    - `winget list` に `Mozilla Firefox (x64 ja)` と `Mozilla.Firefox.ja`、版が出ればよい
    - `FileName` が `C:\Program Files\Mozilla Firefox\firefox.exe` で、`ProductVersion` が同じ版
-   - `MozillaMaintenance`（Mozilla Maintenance Service）の行が出ればよい
+   - `MozillaMaintenance`（Mozilla Maintenance Service）の行が出ればよい（`Status` は `Stopped` でもよい。更新のときだけ動く）
    - タスクの一覧に `Firefox Default Browser Agent <番号>` が出る
    - `winget` が見つからないと出たら、Microsoft Store で「アプリ インストーラー」を更新してから貼り直す
 
@@ -6251,7 +6250,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 **注意点**
 
-- **Firefox: AAC と H.264 のために足すものは無い**: Windows の Media Foundation で復号する（[Firefox](#firefox)の手順 4の補足）。N エディションの Windows では、Media Feature Pack が要るはず
+- **Firefox: AAC と H.264 のために足すものは無い**: Windows の Media Foundation で復号する（この折りたたみの「Firefox の手順 4: Windows では AAC と H.264 のために何も足さない理由」）。N エディションの Windows では、Media Feature Pack が要るはず
 
 - 管理者の権限で起動した Firefox では、プロファイルに管理者の持ち物のファイルができうる
 
@@ -6273,7 +6272,6 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 - `winget list` の表示は `Mozilla Firefox (x64 ja)  Mozilla.Firefox.ja  157.0` の形
 
-- Mozilla Maintenance Service は、ふだんは止まっていて、更新のときだけ動く
 
 **[Firefox](#firefox)の手順 3: 入れ方と版**
 
@@ -6282,7 +6280,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 **[Firefox](#firefox)の手順 4: Windows では AAC と H.264 のために何も足さない理由**
 
-この方針の検証記録（`docs/verification/windows-setup.md` の「Firefox: Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由」）
+- この方針の検証記録（`docs/verification/windows-setup.md` の「Firefox: Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由」）
 
 - Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
 - 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのはほかの OS の MediaCodec を使うものだけ）
@@ -6315,6 +6313,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - scoop・winget で入れたアプリは、入れた方法で上げる
   - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 7 で修正版を確かめ、同じ項の手順 8 で上げる
 - Firefox は、自分で新しい版に上がる。待たずに上げるときだけ、その手順を行う
+- WezTerm は自分では更新しない
   - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 5・6 で、設定を残して `C:\Program Files\WezTerm` に上書きする
 - フォントは[シェルと端末のセットアップの「HackGen Console NF を上げる」](shell-terminal.md#hackgen-console-nf-を上げる)に従い、その文書の版と sha256 を確かめて直してから入れ直す
 - 共通の bash 設定は、[シェルと端末のセットアップの「Windows 11 で共通の bash 設定を更新する」](shell-terminal.md#windows-11-で共通の-bash-設定を更新する)を通して上げる
@@ -6543,7 +6542,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 **注意点**
 
 - **Git: Git for Windows を上げるときは、Git の bash を使うものを閉じる**
-  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の検証記録（`docs/verification/almalinux-setup.md` の「Git の記録」）・[Git の補足と注意点](almalinux-setup.md#git-の補足と注意点)の「Gitの手順 1: 変数について」）
+  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（この折りたたみの「Git for Windows・Firefox・WezTerm を上げるの手順 4: winget での更新」）
 
 - **Firefox: Firefox を開いたまま `winget upgrade` しない**: 入れ替えが途中で終わることがある（[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 4 の補足）
 
