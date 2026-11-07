@@ -199,6 +199,7 @@
    - `Do you want to proceed with the installation? [y/n]` と聞かれたら、入るものの一覧 (依存を含む) を見て `y` と答える
    - Homebrew 版の ripgrep・fd と EPEL 版は二重に入れない
    - Neovim の版と、`/home/linuxbrew/.linuxbrew/bin/` の各コマンドが出ればよい
+   - `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
 
 1. 入力ソースを「英語 (US)」と Anthy の 2 つにする。
 
@@ -214,6 +215,7 @@
    - 最後の行が `[('xkb', 'us'), ('ibus', 'anthy')]` になればよい
    - 最初の行は変える前の値。ほかの入力ソースは消える
    - JIS 配列でも `us` にする
+   - 日本語と英数の切り替えは Super+Space になる
 
 1. Anthy の `on_off` のキーから `Ctrl+J` と `Ctrl+space` を外した値を作る。
 
@@ -237,6 +239,7 @@
 
    - `'on_off': <['Zenkaku_Hankaku']>` と出ればよい
    - 導入後の[再起動と確認](almalinux-setup.md#再起動と確認)で Anthy と入力ソースを読み直す。日本語検索・IME 連携は[LazyVim の日本語検索・整形・IME 連携を確かめる](#lazyvim-の日本語検索整形ime-連携を確かめる)で行う
+   - 以後、日本語と英数の切り替えは Super+Space と、Neovim の中の `<C-j>` になる
 
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
@@ -254,6 +257,7 @@
    - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - `Lock file '…' appears stale` が出たら、[この文書の補足と注意点](#この文書の補足と注意点)の「注意点」で鍵を消してから、この項の手順 8 のブロックを貼り直す
+   - treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
 
 1. Mason の導入を待ち、外部コマンドの健全性を確認する。
@@ -275,6 +279,7 @@
    - 待ったら `:qa` で閉じる
    - `grep` が何も出さないか、`` WARNING `fzf` is not installed `` の 1 行だけならよい (無視してよい。fzf が入っていれば出ない)
    - `ERROR` が出たら[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)
+   - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる。tree-sitter の CLI を別に入れてあれば 10 個)
 
 1. GitLab プレビューの公式スタイルを取得する。
 
@@ -383,7 +388,7 @@
    - `<summary>` の行が 2 スペース字下げになる。空行と `本文` はそのまま
    - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
    - `<leader>cf` はビジュアル選択した範囲にも使える
-   - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
+   - 一部の lint 診断は残ることがある
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
    - 貼り終えたら Esc を押し、ノーマルモードに戻る
    - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
@@ -419,6 +424,7 @@
 
    - `terminal-overrides[0] "*:Cs=\\E]12;%p1%s\\007:Cr=\\E]112\\007"` のような行が出ればよい
    - Neovim を起動し直すと、挿入モードで `<C-j>` を押したときにカーソルの色が変わる
+   - `-ga` は足すたびに同じ値を増やすので、起動時と読み直しの分で 2 行出ることがある。害は無い
 
 #### LazyVim の IME 連携に GNOME の上部バーを合わせる
 
@@ -562,6 +568,8 @@
    nvim --version | head -1
    ```
 
+   - 最新なら `Warning: neovim 0.12.5_1 already installed` のように出て、何も上げない
+
 1. AlmaLinux 10 では、プラグインを上げて `lazy-lock.json` の差分を見る。
 
    ```bash
@@ -640,29 +648,21 @@
 - lazygit は任意 (無ければ `<leader>gg` が定義されないだけ)
 - ripgrep (`rg`) と fd は、ピッカーと Migemo の候補が使う。EPEL の `ripgrep` / `fd-find` と二重に入れない (実行ファイルの名前が同じで、PATH の先頭の Homebrew 版が使われる)
 - 4 つとも `/home/linuxbrew/.linuxbrew/bin/…` と出る
-- `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
 
 **[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 5**
 
-- 日本語と英数の切り替えは Super+Space になる
 - **注意**: JIS 配列のキーボードでも `us` にする。IME 連携が英数を `xkb:us::eng` に固定しているため
 - `gsettings` は `/usr/bin/gsettings` と場所まで書く。Homebrew の `gsettings` は GNOME の設定 (dconf) に書かない
-
-**[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 7**
-
-- 以後、日本語と英数の切り替えは Super+Space と、Neovim の中の `<C-j>` になる
 
 **[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 8**
 
 - 2 行目で lazy.nvim が自分を clone し、プラグイン 38 個を入れる
 - Mason の未完了の導入は、この項の手順 9 で補う
-- treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
 - tree-sitter の CLI が無ければ、先に Mason が入れる（``Installed `tree-sitter-cli` with `mason.nvim`.`` が出る）
 
 **[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 9**
 
 - `Error running markdownlint-cli2: ENOENT` が 1 回出てもよい (Mason が入れ終わる前に lint が走っただけ)
-- `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる。tree-sitter の CLI を別に入れてあれば 10 個)
 - `mason/bin` に `markdownlint-cli2` / `marksman` / `stylua` / `tree-sitter` などが並ぶ
 
 **[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の手順 10**
@@ -698,10 +698,6 @@
 
 - `tmux-256color` には `Cs` / `Cr` が無く、Neovim がカーソル色の OSC 12 を出さないため
 
-**[LazyVim のカーソル色を tmux で使う](#lazyvim-のカーソル色を-tmux-で使う)の手順 2**
-
-- `-ga` は足すたびに同じ値を増やすので、起動時と読み直しの分で 2 行出ることがある。害は無い
-
 **[LazyVim の IME 連携に GNOME の上部バーを合わせる](#lazyvim-の-ime-連携に-gnome-の上部バーを合わせる)のリード**
 
 - GNOME Shell は ibus の engine が外から変わっても、上部バーと Super+Space が基準にする「今の入力ソース」を更新しない。そのため、この項を行わないと Neovim を開いた時点で上部バーがずれ、最初の Super+Space が空振りする
@@ -726,7 +722,6 @@
 
 **[LazyVim の本体・外部コマンド・プラグインを更新する](#lazyvim-の本体外部コマンドプラグインを更新する)の手順 1**
 
-- 最新なら `Warning: neovim 0.12.5_1 already installed` のように出て、何も上げない
 - dnf で入れたもの (git・node など) は、OS の更新 (`sudo dnf upgrade`) で上がる
 
 **[LazyVim の本体・外部コマンド・プラグインを更新する](#lazyvim-の本体外部コマンドプラグインを更新する)の手順 2**
@@ -809,6 +804,7 @@
    - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 2 で確かめる
      - 窓が出たら、OK で閉じる
    - 2 つ目は `C:\Users\<WIN_USER>\scoop\shims\nvim.exe` の 1 行だけならよい
+   - 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[この文書の補足と注意点](#この文書の補足と注意点)の「設定ファイルの場所」）
 
 #### Neovim を既定のエディタにする
 
@@ -919,6 +915,7 @@
 
    - Neovim の版と、各コマンドの場所が出ればよい
    - 端末のフォントは[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)にする
+   - `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
 
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
@@ -936,6 +933,7 @@
    - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - `Lock file '…' appears stale` が出たら、[この文書の補足と注意点](#この文書の補足と注意点)の「注意点」で鍵を消してから、この項の手順 7 のブロックを貼り直す
+   - treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
    - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
 
 1. Mason の導入を待ち、外部コマンドの健全性を確認する。
@@ -954,6 +952,7 @@
    - 待ったら `:qa` で閉じる
    - `` WARNING `fzf` is not installed `` の 1 行だけならよい (無視してよい)
    - `ERROR` が出たら[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)
+   - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる)
 
 1. 試験用の Markdown を開き、日本語検索・整形・IME 連携を確かめる。
 
@@ -1061,7 +1060,7 @@
    - `<summary>` の行が 2 スペース字下げになる。空行と `本文` はそのまま
    - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
    - `<leader>cf` はビジュアル選択した範囲にも使える
-   - 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
+   - 一部の lint 診断は残ることがある
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
    - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
    - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
@@ -1183,7 +1182,6 @@
 **[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 5**
 
 - `NVIM v0.12.5`・`Build type: Release`・`LuaJIT 2.1.…` の 3 行が出ればよい
-- 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[この文書の補足と注意点](#この文書の補足と注意点)の「設定ファイルの場所」）
 
 **[Neovim を既定のエディタにする](#neovim-を既定のエディタにする)の手順 2**
 
@@ -1220,19 +1218,13 @@
 
 **[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 6**
 
-- `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
 - 7 つのコマンドの場所が並ぶ
 
 **[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 7**
 
-- treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
 - tree-sitter の CLI が無ければ、先に Mason が入れる（``Installed `tree-sitter-cli` with `mason.nvim`.`` が出る）
 - Mason の未完了の導入は、この項の手順 8 で補う
 - 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazyvim-の設定を導入する--手順-10-補足-lazy-lockjson-を戻してから-restore-する理由)を参照する
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 8**
-
-- `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる)
 
 **[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 9**
 
@@ -1282,11 +1274,7 @@
 
 **選択した方針**
 
-
-
-**Windows 11 で Neovim を入れる**
-
-[Windows 11 で使う](#windows-11-で-neovim-を入れる)・[既定のエディタにする](#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（検証記録（`docs/verification/neovim.md` の「Neovim: Windows 11 で使う: 検証状況の記録」））。
+[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)・[既定のエディタにする](#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（検証記録（`docs/verification/neovim.md` の「Neovim: Windows 11 で使う: 検証状況の記録」））。
 
 - **scoop の main の `neovim` で、自分のユーザーに入れる**（管理者の権限は要らない）
   - [Windows 11 の初期設定の「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 1・2 で入れた scoop に、CLI のツールをまとめる。自分用の設定（LazyVimStarter）の Windows の導入も scoop の `neovim` を使う
