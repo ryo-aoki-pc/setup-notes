@@ -15,6 +15,7 @@
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。7 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・再起動の後の確認・更新）に置き、項ごとに前提・実行場所を書いて、変数を項の中に持たせる。実行するホストを区別する
   - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、lazygit での 2 つのブックの取り込みを扱う
     - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「lazygit で 2 つの Word の変更を取り込む」を置く
+  - 各用途は、検証記録・参考資料・注意点・選択した方針と、リードや手順の説明を、用途末尾の「補足と注意点」に置く。文書全体の補足と「省略できない初期設定」は、冒頭の「この文書の補足と注意点」に置く
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox
   - 検証記録は、用途ごとに `virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`・`windows-sandbox` を使う。参考資料・注意点・選択した方針と、リード・手順から外した説明は、kvm-container 以外の 6 用途それぞれの末尾の折りたたみに置く。VirtualBox の参考資料と注意点は、AlmaLinux 10 と Windows 11 の項に分ける。kvm-container には折りたたみを作らず、仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「Windows 11 で VirtualBox を入れる」は、AlmaLinux 10 の「VirtualBox」と区別する

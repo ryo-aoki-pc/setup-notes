@@ -1081,7 +1081,7 @@ podman.sock: connect: connection refused
 - **`DOCKER_HOST` が無いか API ソケットが止まっていると、枠が空のまま**: 接続先が無い場合は `Cannot connect to the Docker daemon at unix:///var/run/docker.sock` と出る
 - **pod とシークレットは出ない**: Docker の API に無いため。pod は [podman-tui](#podman-tui) で見る
 - **設定ファイルの同じキーを重ねない**: `cat >>` で同じトップレベルのキーを 2 回書くと、後ろだけが効く（この折りたたみの「lazydocker: podman exec でシェルを開くの手順 2: 足した設定と、キーが重なったとき」）
-- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）
+- **`sudo lazydocker` は root のコンテナにつながらない**: `sudo` が `DOCKER_HOST` を消す（Homebrew の lazydocker は、そのままでは `sudo` の PATH にも無い。[Homebrew の補足と注意点](almalinux-setup.md#homebrew-の補足と注意点)の「注意点」）
   - root のコンテナは、[root でも使う](#lazydocker-root-でも使う)の節を通して `sudo -i lazydocker` で見る
 - `r` は確認なしでコンテナを再起動する。操作前に右の `Config` タブの `ID` を `podman ps` と見比べ、対象を確かめる
 - [lazydocker: compose のプロジェクトを見る](#lazydocker-compose-のプロジェクトを見る)の手順 2 の `r` は、確認なしで `web` を再起動する。対象の行を確かめてから押す
