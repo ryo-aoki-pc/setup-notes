@@ -1470,12 +1470,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 1 行目の一番上に `C:\Program Files\Git\cmd\git.exe` が出ればよい
-   - `git version 2.55.0.windows.5` の形の行と、`True` が 2 行出ればよい
+   - `git version 2.56.0.windows.4` の形の行と、`True` が 2 行出ればよい
 
 1. スタートメニューから Git Bash を開く。
 
    - スタートメニューで「Git Bash」を探して開く（管理者でなくてよい）
-   - `<WIN_USER>@<HOSTNAME> MINGW64 ~` のような行と、`$` のプロンプトの窓が開く
+   - `<WIN_USER>@<HOSTNAME> UCRT64 ~` のような行と、`$` のプロンプトの窓が開く（Git for Windows 2.55 までは `MINGW64`）
    - Git Bash の窓に貼るときは、窓の中を右クリックして出るメニューの「Paste」を選ぶ。最後の行は、貼った後に Enter を押す
    - **次の手順は、この Git Bash に貼る**
 
@@ -1536,7 +1536,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
 
    - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
-   - `MINGW64` と `$` のプロンプトが出ればよい
+   - `UCRT64` と `$` のプロンプトが出ればよい（Git for Windows 2.55 までは `MINGW64`）
    - **次の手順は、この Git Bash のタブに貼る**
 
 1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
@@ -1565,7 +1565,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. WezTerm の窓をすべて閉じ、スタートメニューから Git Bash を開く。
 
    - スタートメニューで「Git Bash」を探して開く（管理者として実行しない）
-   - `MINGW64` と `$` のプロンプトが出ればよい
+   - `UCRT64` と `$` のプロンプトが出ればよい（Git for Windows 2.55 までは `MINGW64`）
    - **次の手順は、この Git Bash の窓に貼る**
 
 1. 既存の WezTerm の設定があるか確かめる。
@@ -1707,7 +1707,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. スタートメニューから WezTerm を開き、Git Bash の新しいタブを用意する。
 
    - スタートメニューで「WezTerm」を探して開く（管理者として実行しない）。開いていれば Ctrl+Shift+T で新しいタブを開く
-   - `MINGW64` と `$` のプロンプトが出ればよい
+   - `UCRT64` と `$` のプロンプトが出ればよい（Git for Windows 2.55 までは `MINGW64`）
    - **次の手順は、この Git Bash のタブに貼る**
 
 1. 設定のリポジトリを pull する。
@@ -2350,6 +2350,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```powershell
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     New-Item -ItemType Directory -Force -Path $dir | Out-Null
      Save-PSResource -Name PSScriptAnalyzer,Pester -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-PSResource -Name PSScriptAnalyzer,Pester -Path $dir | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
@@ -2473,7 +2474,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $lines = @(
        'if ($Host.Name -eq ''ConsoleHost'') { $global:DevConsoleEncoding = @([Console]::InputEncoding, [Console]::OutputEncoding); $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action { [Console]::InputEncoding = $global:DevConsoleEncoding[0]; [Console]::OutputEncoding = $global:DevConsoleEncoding[1] }; [Console]::InputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) }  # shell-terminal.md:dev'
        'function Invoke-Utf8Native { param([Parameter(Mandatory)][scriptblock]$ScriptBlock) $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding; try { $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false); & $ScriptBlock } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out } }  # shell-terminal.md:dev'
-       'if (Get-Command -Name winget -CommandType Application -ErrorAction Ignore) { Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock { param($wordToComplete, $commandAst, $cursorPosition) $w = $wordToComplete.Replace(''"'', ''""''); $a = $commandAst.ToString().Replace(''"'', ''""''); Invoke-Utf8Native { winget complete --word="$w" --commandline "$a" --position $cursorPosition } | ForEach-Object { [Management.Automation.CompletionResult]::new($_, $_, ''ParameterValue'', $_) } } }  # shell-terminal.md:dev'
+       'if (Get-Command -Name winget -CommandType Application -ErrorAction Ignore) { Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock { param($wordToComplete, $commandAst, $cursorPosition) $w = $wordToComplete; $a = $commandAst.ToString(); Invoke-Utf8Native { winget complete --word="$w" --commandline "$a" --position $cursorPosition } | ForEach-Object { [Management.Automation.CompletionResult]::new($_, $_, ''ParameterValue'', $_) } } }  # shell-terminal.md:dev'
        'if (Get-Module -Name PSReadLine) { foreach ($devCompletion in Get-ChildItem -Path "$env:LOCALAPPDATA\PowerShell\completions\*.ps1" -ErrorAction Ignore) { . $devCompletion.FullName } }  # shell-terminal.md:dev'
        'if (Get-Module -Name PSReadLine) { Set-PSReadLineOption -PredictionViewStyle ListView }  # shell-terminal.md:dev'
        'if (Get-Module -Name PSReadLine) { Import-Module -Name CompletionPredictor -ErrorAction Ignore }  # shell-terminal.md:dev'
@@ -2481,8 +2482,18 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        'if (Get-Command -Name eza -CommandType Application -ErrorAction Ignore) { function ll { eza --long --group-directories-first @args } }  # shell-terminal.md:dev'
        'function err { Get-Error -Newest 1 }  # shell-terminal.md:dev'
      )
+     $oldWinget = 'if (Get-Command -Name winget -CommandType Application -ErrorAction Ignore) { Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock { param($wordToComplete, $commandAst, $cursorPosition) $w = $wordToComplete.Replace(''"'', ''""''); $a = $commandAst.ToString().Replace(''"'', ''""''); Invoke-Utf8Native { winget complete --word="$w" --commandline "$a" --position $cursorPosition } | ForEach-Object { [Management.Automation.CompletionResult]::new($_, $_, ''ParameterValue'', $_) } } }  # shell-terminal.md:dev'
      if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     $latin1 = [Text.Encoding]::GetEncoding(28591)
+     $raw = $latin1.GetString([IO.File]::ReadAllBytes($p))
+     $updated = ($raw -split '(?<=\n)' | ForEach-Object {
+       if ($_.TrimEnd("`r", "`n") -ceq $oldWinget) { $_.Replace($oldWinget, $lines[2]) } else { $_ }
+     }) -join ''
+     if ($updated -cne $raw) {
+       [IO.File]::WriteAllBytes($p, $latin1.GetBytes($updated))
+       "置き換えた: $($lines[2])"
+     }
      foreach ($line in $lines) {
        $text = Get-Content -LiteralPath $p -Raw
        if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
@@ -2498,6 +2509,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - 9 行それぞれに `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
+   - 前の版の winget の行があれば、`置き換えた: <新しい行>` も出る
    - 開いている窓ではプロファイルを読み直さず、この項の手順 4 で新しい窓を開く
 
 1. スタートメニューから、新しい PowerShell 7 を開く。
@@ -2627,6 +2639,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```powershell
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     New-Item -ItemType Directory -Force -Path $dir | Out-Null
      $saved = Test-Path -LiteralPath (Join-Path $dir 'PSReadLine\2.4.5')
      if (-not $saved) { Save-PSResource -Name PSReadLine -Version 2.4.5 -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2756,6 +2769,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```powershell
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
+     New-Item -ItemType Directory -Force -Path $dir | Out-Null
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($n in 'PSScriptAnalyzer','Pester') {
        $saved = @(Get-PSResource -Name $n -Path $dir -ErrorAction SilentlyContinue)
