@@ -99,8 +99,6 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 | 実施日・環境・結果 | Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/verification/<手順書名>.md` |
 | 書き方の規則 | [AGENTS.md](AGENTS.md) と [docs/dev/writing-rules.md](docs/dev/writing-rules.md) |
 
-まだ折りたたみへ移していない正本は、移すまで、理由・比較・資料を `docs/reference/<手順書名>.md`、注意点を `docs/extra/<手順書名>.md` に置いている。
-
 ## 記法
 
 - 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。補足と注意点は、各用途の末尾の折りたたみで確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）

@@ -6,8 +6,6 @@
 
 実機で検証した構築・設定手順の記録（日本語）。正本は `docs/windows-setup.md`・`docs/almalinux-setup.md`・`docs/shell-terminal.md`・`docs/neovim.md`・`docs/virtual-machines.md`・`docs/samba.md`・`docs/gnome-remote.md`・`docs/containers.md`・`docs/tool-catalog.md` の 9 冊。手順書の見える部分には操作・前提・成功条件と、操作を変える短い注意だけを書く。背景・採用理由・比較・参照資料・注意点は、各用途の末尾の折りたたみに置く。実施日・対象版・環境・結果・失敗の記録は `docs/verification/<手順書名>.md` に置く。ロールバック（取り消し・全部消す）の手順は書かない。手順書の本体には、ふだん見る項（導入・設定・使い方・更新）を残す。どの項も単独で通せるようにする。検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスにある。検証していないことを「動く」と書かず、状態と検証範囲は検証記録で管理する。
 
-`docs/extra/`・`docs/reference/` が残っている正本は、移すまで今の形のまま読む。新しく書く補足・注意点は折りたたみに書く。
-
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
 共通の bash 設定は、`docs/shell-terminal.md` の「共通の bash 設定」、Windows では同じ文書の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリで扱う。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは各手順書で扱う。

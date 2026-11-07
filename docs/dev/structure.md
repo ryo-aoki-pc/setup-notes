@@ -6,7 +6,7 @@
 
 この文書の `docs/verification/…`・`docs/almalinux-vm-verification.md`・`docs/hypervisor-verification.md` と検証で撮った画像のパスは、非公開側の同じパスを指す。
 
-補足・参照資料・注意点は、正本の各用途の末尾の折りたたみに置く。`docs/extra/`・`docs/reference/` が残っている正本は、移すまで今の形のまま読む。新しく書く補足・注意点は折りたたみに書く。
+補足・参照資料・注意点は、正本の各用途の末尾の折りたたみに置く。
 
 - `docs/windows-setup.md` — Windows 11 の手順書。7 のカテゴリ（基本の設定・デスクトップ・ネットワークとリモート操作・SSH・Git と開発の道具・アプリ・更新）に置き、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせる
   - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、WinMerge での 2 つのブックの取り込みを扱う
