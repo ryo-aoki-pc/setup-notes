@@ -879,7 +879,7 @@
 
    - 必要な機能（仮想マシン プラットフォーム）を入れた旨と、再起動を求める旨の行が出ればよい
    - もう入っていれば、何もしない
-   - **注意**: この後、VirtualBox の VM は Hyper-V の上で動く。遅ければ[VirtualBox の注意点](extra/virtualbox.md#注意点)を読む
+   - **注意**: この後、VirtualBox の VM は Hyper-V の上で動く。遅ければ[Windows 11 で VirtualBox を入れる の補足と注意点](virtual-machines.md#windows-11-で-virtualbox-を入れる-の補足と注意点)の「注意点」を読む
 
 1. 再起動する。
 

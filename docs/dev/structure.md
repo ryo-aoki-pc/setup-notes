@@ -16,7 +16,7 @@
   - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、lazygit での 2 つのブックの取り込みを扱う
     - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「lazygit で 2 つの Word の変更を取り込む」を置く
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox
-  - 検証記録は、用途ごとに `virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`・`windows-sandbox` を使う。補足と注意点は、各用途の末尾の折りたたみに置く。kvm-container の仕様・参照情報・検証記録は、kvm-container のリポジトリにある
+  - 検証記録は、用途ごとに `virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`・`windows-sandbox` を使う。参考資料・注意点・選択した方針と、リード・手順から外した説明は、kvm-container 以外の 6 用途それぞれの末尾の折りたたみに置く。VirtualBox の参考資料と注意点は、AlmaLinux 10 と Windows 11 の項に分ける。kvm-container には折りたたみを作らず、仕様・参照情報・検証記録は、kvm-container のリポジトリにある
   - Windows 11 の「Windows 11 で VirtualBox を入れる」は、AlmaLinux 10 の「VirtualBox」と区別する
 - `docs/gnome-remote.md`・`docs/neovim.md`・`docs/samba.md` — virtual-machines.md と同じく、`## AlmaLinux 10 で使う`・`## Windows 11 で使う` の下に用途の項を置く（gnome-remote.md は AlmaLinux 10 だけ）
   - gnome-remote.md は「GNOME のデスクトップ共有」「GNOME のヘッドレスセッション」「GNOME のリモートログイン」、samba.md は「Samba クライアント」「Samba サーバー」と「Windows 11 で Samba クライアントを使う」、neovim.md は両 OS の項を扱う
