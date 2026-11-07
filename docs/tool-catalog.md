@@ -47,14 +47,14 @@ AlmaLinux 10 で使える便利な CLI・GUI ツールを、**どこから入れ
 | EPEL 10 | [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](almalinux-setup.md#epel-と-rpm-fusion)。`sudo dnf install -y epel-release`（`extras` にある） | Homebrew より古いことが多い（fzf 0.58.0 など）。同じ版のものもある | 調べた範囲（AppStream なども含む）はすべて x86_64 と同じ版 | Chromium・KeePassXC などの GUI もある。**Homebrew と同じ名前の実行ファイルは二重に入れない**（`fd-find` は `/usr/bin/fd`） | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
 | RPM Fusion（EL10） | 本書では有効にしていない。free は [AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 2〜4](almalinux-setup.md#epel-と-rpm-fusion) で、鍵を照合してから `rpmfusion-free-release` を入れる（EPEL が前提） | — | free はある | EL10 向けは中身が少ない。調べた範囲では free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）。mpv は無い。`rpmfusion-free-release` は `epel-release` を要求する | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[初期設定の「Firefox」](almalinux-setup.md#firefox)（`ffmpeg-libs`） |
 | ベンダーの dnf リポジトリ | `.repo` を置く | 上流の最新 | ベンダー次第（Chrome・mise・Trivy は両方、Edge と VirtualBox は x86_64 のみ） | **EL10 の rpm は、自己署名が SHA-1 の古い鍵を取り込まない** | [ベンダーの dnf リポジトリ](#ベンダーの-dnf-リポジトリ)、[注意点](#注意点)、[初期設定の「Firefox」](almalinux-setup.md#firefox)、[初期設定の「GitHub CLI」](almalinux-setup.md#github-cli)、[VS Code](almalinux-setup.md#vs-code)、[VirtualBox](virtual-machines.md#virtualbox)、[画像の道具](almalinux-setup.md#画像の道具)（Trivy） |
-| COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit の注意点](extra/almalinux-setup.md#注意点)（COPR の経路）、[シェルと端末のセットアップの「WezTerm」](shell-terminal.md#wezterm)、シェルと端末のセットアップの検証記録（zoxide の外した dnf の経路の記録。`docs/verification/shell-terminal.md` の「zoxide: 付録: dnf の経路のコンテナでの検証記録（2026-09-29）」） |
+| COPR | `dnf copr enable` | 上流に近い | プロジェクト次第 | EL10 向けの chroot が無い、または repomd が 403 になる例がある | [lazygit の補足と注意点](almalinux-setup.md#lazygit-の補足と注意点)の「注意点」（COPR の経路）、[シェルと端末のセットアップの「WezTerm」](shell-terminal.md#wezterm)、シェルと端末のセットアップの検証記録（zoxide の外した dnf の経路の記録。`docs/verification/shell-terminal.md` の「zoxide: 付録: dnf の経路のコンテナでの検証記録（2026-09-29）」） |
 | Homebrew | 公式インストーラ | 上流の最新 | 調べた CLI はすべてボトルがある（`arm64_linux`。distrobox だけはアーキ共通の `all`） | 導入・更新などの管理操作は一般ユーザーで行う。**依存がシステムのコマンドを隠すことがある**（podman-compose で実測） | [AlmaLinux 10 の初期設定](almalinux-setup.md)、[注意点](#注意点) |
 | Flathub | [AlmaLinux 10 の初期設定の「Flatpak と Flathub」の手順 1〜3](almalinux-setup.md#flatpak-と-flathub) | 上流の最新 | アプリ次第。Microsoft Edge は x86_64 のみ（[aarch64 で使えないもの](#aarch64-で使えないもの)） | 公開元が「検証済み」かどうかを見る。runtime の分だけ容量を食う | [AlmaLinux 10 の初期設定](almalinux-setup.md) |
 | AppImage | ダウンロードして実行 | 上流の最新 | 配布次第 | FUSE2（`fuse-libs`）と glibc 2.39 の制約がある | [シェルと端末のセットアップの「WezTerm」](shell-terminal.md#wezterm) |
 
 ## 選び方
 
-**CLI** は、既存の手順書と同じ規則で選んだ（[Homebrew](reference/almalinux-setup.md#homebrew)と btop（検証記録の `docs/verification/btop.md`）の「選択した方針」）。
+**CLI** は、既存の手順書と同じ規則で選んだ（[Homebrew の補足と注意点](almalinux-setup.md#homebrew-の補足と注意点)の「選択した方針」と btop（検証記録の `docs/verification/btop.md`）の「選択した方針」）。
 
 1. RPM（AppStream / BaseOS / EPEL / ベンダーのリポジトリ）が **Homebrew と同じ版か新しい**なら RPM にする。root でも使え、`dnf upgrade` に乗る
 1. RPM が古いか無ければ Homebrew にする
@@ -304,7 +304,7 @@ sudo flatpak update
 - **Homebrew の依存がシステムのコマンドを隠す**: `brew install podman-compose` は podman 6.1.2 に加えて `util-linux`・`python@3.14`・`gnupg`・`sqlite` など 41 個を依存として入れる（すべてボトル）
   - その結果、PATH の先頭で `podman`・`mount`・`gpg`・`python3` が Homebrew のものに置き換わった（`command -v` で確認）
   - **依存の多い formula を入れた後は、`command -v` で主要なコマンドの場所を確かめる**
-- **同じ名前の実行ファイルを RPM と Homebrew で二重に入れない**: EPEL の `fd-find` も Homebrew の `fd` も実行ファイルは `fd` で、両方入れると PATH の先頭にある Homebrew 版が勝つ（bat と同じ問題。[AlmaLinux 10 の初期設定の注意点](extra/almalinux-setup.md#注意点)）
+- **同じ名前の実行ファイルを RPM と Homebrew で二重に入れない**: EPEL の `fd-find` も Homebrew の `fd` も実行ファイルは `fd` で、両方入れると PATH の先頭にある Homebrew 版が勝つ（bat と同じ問題。[Homebrew の補足と注意点](almalinux-setup.md#homebrew-の補足と注意点)の「注意点」）
 - **Flathub の「検証済み」はアプリの公開元の確認**で、中身の審査ではない
   - 未検証のもの（Chrome・Chromium・Edge など）は、上流ではない第三者が包んでいる場合がある
 - **Flathub は aarch64 の appstream を配っていない**（`flatpak update --appstream --arch=aarch64` が `No such ref 'appstream2/aarch64'` で失敗する）
