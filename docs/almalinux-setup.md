@@ -2856,6 +2856,7 @@ AlmaLinux 10.2 の dnf は **4.20.0**（`dnf5` パッケージは未導入）な
    - 1 行目が `## HEAD (no branch)` なら（`Could not apply` と出て止まった。`UU` の行も出る）、この項の手順 3 を貼る。手順 4 へ進むかは、手順 3 の `status` で決める
    - 1 行目が `## HEAD (no branch)` でなければ、この項の手順 3 は飛ばす
    - 1 行目が `## custom...origin/custom` で始まり、2 行目から `UU` で始まる行があれば（`resulted in conflicts` と出た）、この項の手順 4 を貼る。無ければ、この項の手順 4 は飛ばす
+   - 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
 
 1. この項の手順 2 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
 
@@ -2965,7 +2966,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 **[lazygit の設定を更新する](#lazygit-の設定を更新する)の手順 2**
 
-- 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
 
 - `[ahead 1]` などが残ったら、この clone でコミットしたものが新しい `custom` の上に載っている
 
@@ -3490,6 +3490,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
    - 1 行目が `## HEAD (no branch)` なら（`Could not apply` と出て止まった。`UU` の行も出る）、この項の手順 3 を貼る。手順 4 へ進むかは、手順 3 の `status` で決める
    - 1 行目が `## HEAD (no branch)` でなければ、この項の手順 3 は飛ばす
    - 1 行目が `## custom...origin/custom` で始まり、2 行目から `UU` で始まる行があれば（`resulted in conflicts` と出た）、この項の手順 4 を貼る。無ければ、この項の手順 4 は飛ばす
+   - 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
 
 1. この項の手順 2 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
 
@@ -3623,7 +3624,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 **[yazi の設定を更新する](#yazi-の設定を更新する)の手順 2**
 
-- 書き換わった `custom` を取り込んだときは、`(forced update)` の行が出る
 
 - `[ahead 1]` などが残ったら、この clone でコミットしたものが新しい `custom` の上に載っている
 
@@ -3742,6 +3742,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
    - ブックに記録した Markdown に書き戻す
    - 書き出し後に Markdown の表を変えていたら、衝突として書き戻さない。**`--force` はブックの内容で上書きする**
+   - 取り込み済みのブックは「適用済み」になる。取り込み後のブックは消してよい
 
 <details id="mdtable-の補足と注意点">
   <summary>mdtable の補足と注意点</summary>
@@ -3756,7 +3757,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 **[mdtable で Markdown の表を Excel と往復する](#mdtable-で-markdown-の表を-excel-と往復する)の手順 3**
 
-- 取り込み済みのブックは「適用済み」になる。取り込み後のブックは消してよい
 
 - ブックに記録した Markdown に書き戻す。書き戻す先は `--md` で変えられる
 
@@ -3807,6 +3807,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
    - `問題:` で始まる行が出たら、その案内に従って直してから `(`〜`)` を貼り直す（`~/.local/bin` が PATH に無いときは、PATH に加えてから端末を開き直す）
    - 更新時は `git -C ~/md-format pull --ff-only` し、この手順の `(`〜`)` の導入・確認を再実行する
    - `ほかの導入が動いています` で止まったら、表示のプロセスが終わるのを待って、`(`〜`)` を貼り直す
+   - 古い整形器の依存が残っていると、`注意:` に `~/.local/share/nvim/glfm-format` が出る。LazyVim の設定を md-format を使う版に揃えた後なら、`rm -rf ~/.local/share/nvim/glfm-format` で消してよい
 
 #### mdfmt で Markdown を整形する
 
@@ -3852,8 +3853,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - 起動コマンド `mdfmt` は `~/.local/bin`
 
 - `--check` は何も変更せず状態を確かめる
-
-- 古い整形器の依存が残っていると、`注意:` に `~/.local/share/nvim/glfm-format` が出る。LazyVim の設定を md-format を使う版に揃えた後なら、`rm -rf ~/.local/share/nvim/glfm-format` で消してよい
 
 **[mdfmt で Markdown を整形する](#mdfmt-で-markdown-を整形する)の手順 3**
 
@@ -4055,6 +4054,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
    ```
 
    - ウィンドウが出たことを確かめる
+   - アプリ一覧の「Visual Studio Code」からでも同じ
    - **次の手順は、ウィンドウを閉じてから貼る**（起動したウィンドウを確認して閉じる操作を挟む）
 
 1. 初回起動で設定のディレクトリができたか確かめる。
@@ -4149,7 +4149,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 **[VS Code](#vs-code)の手順 5**
 
-- アプリ一覧の「Visual Studio Code」からでも同じ
 
 - ウィンドウが開き、初回は Welcome 画面と `Continue without Signing In` のボタンが表示される
 
@@ -4235,7 +4234,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
    ```
 
    - Node.js と npm の版、`/usr/bin/node`、`/usr/bin/npm` が出ればよい
-   - `/home/linuxbrew/.linuxbrew/bin/npm` が出たら、Homebrew の node が PATH で先に来ていて、Mason もそちらを使う（この折りたたみの「注意点」）
+   - `/home/linuxbrew/.linuxbrew/bin/npm` が出たら、Homebrew の node が PATH で先に来ていて、Mason もそちらを使う（[npm のオフライン導入 の補足と注意点](#npm-のオフライン導入-の補足と注意点)の「注意点」）
    - `npm config get` の 2 行は、どちらも `null`
    - ほかの値が出たら、`~/.npmrc` などの設定が `https_proxy` より優先される
    - `PONG` が出れば、レジストリに届いている
@@ -4251,7 +4250,7 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
    - npm のパッケージ（`markdownlint-cli2`・`json-lsp` など）が `Installed` に並べばよい
    - この項の手順 5 で使う `markdownlint-cli2` が設定に無ければ、`:MasonInstall markdownlint-cli2` で入れる。ほかの npm のパッケージも、同じように名前で入れられる
    - 失敗は通知が出ないことがある。`Installed` に並ばないものは、`:MasonLog` の `Installation failed for Package(name=…)` の行で理由を見る
-   - npm 以外の理由（`unzip` が無い、など）で失敗したものはこの折りたたみの「注意点」
+   - npm 以外の理由（`unzip` が無い、など）で失敗したものは[npm のオフライン導入 の補足と注意点](#npm-のオフライン導入-の補足と注意点)の「注意点」
    - 通知が出そろってから、`:qa` で閉じる
    - LSP サーバーが 1 つも入らなかったら、`:qa` で閉じて、この手順をもう一度貼る
    - **次の手順は、`:qa` で Neovim を閉じてから貼る**（必要なパッケージが入ったことを確かめてから、トンネルを閉じる）
@@ -4509,6 +4508,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
    ```
 
    - 一覧の下のほうに、`mozilla` リポジトリ提供の版が出る
+   - `aarch64` と `x86_64` の両方の行が並ぶ
 
 1. Firefox を導入し、Mozilla 公式のビルドか確認する。
 
@@ -4543,7 +4543,7 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
    ```
 
    - `ffmpeg-libs` の候補が `rpmfusion-free-updates` から出ればよい
-   - EPEL の `noopenh264` も依存で入るが、H.264 の再生には影響しない（参考資料を参照）
+   - EPEL の `noopenh264` も依存で入るが、H.264 の再生には影響しない（[Firefox の補足と注意点](#firefox-の補足と注意点)）
    - `conflicts with libswresample-free` と出て止まったら、この項の手順 8 で入れ直す。入ったときは手順 8 は飛ばす
    - **次の手順は、トランザクション表の `[y/N]` に答えてから貼る**（この項の手順 8 は、指定の衝突で止まったときだけ貼る）
 
@@ -4620,10 +4620,6 @@ const PROXY_ENV_KEYS = new Set(['https_proxy', 'http_proxy', 'proxy', 'no_proxy'
 
 - `rpm --import` が出す期限切れの副鍵についての warning は、署名に使う副鍵が別にあるので問題ない
 
-**[Firefox](#firefox)の手順 4**
-
-- `aarch64` と `x86_64` の両方の行が並ぶ
-
 **[Firefox](#firefox)の手順 4: priority は保険**
 
 検証記録（`docs/verification/almalinux-setup.md` の「Firefox: 実施手順 / 手順 4: 補足: priority は保険」）
@@ -4638,7 +4634,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 **[Firefox](#firefox)の手順 5**
 
-- AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが、`firefox` のアップグレードとして解決される（一覧の `アップグレード:` の下に `firefox` が出る。参考資料を参照）
+- AppStream の Firefox（ESR）が既に入っているホストでは、この 1 コマンドが、`firefox` のアップグレードとして解決される（一覧の `アップグレード:` の下に `firefox` が出る）
 
 **[Firefox](#firefox)の手順 7**
 
@@ -4858,7 +4854,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 **注意点**
 
-- **dive の `--ci` の既定の基準は厳しい**: ベースイメージの層の無駄も数えるので、よく使われるイメージを元にしただけで `FAIL` になる（参考資料を参照）。CI で使うなら、基準を自分で決めて `.dive-ci` に書く
+- **dive の `--ci` の既定の基準は厳しい**: ベースイメージの層の無駄も数えるので、よく使われるイメージを元にしただけで `FAIL` になる。CI で使うなら、基準を自分で決めて `.dive-ci` に書く
 - **Trivy の結果は日によって変わる**: データベースは新しい脆弱性が見つかるたびに更新される。同じイメージでも、後日の結果は変わりうる
 - **Trivy の `--image-src podman` は API ソケットが要る**: [Podman](containers.md#podman)の手順 7 のソケットが止まっていると、[画像の道具](#画像の道具)の手順 7 の Trivy がソケットへの接続に失敗する
 - **hadolint と Trivy の設定の検査は、見るところが違う**: 確認用の Containerfile は hadolint では指摘が無く、`trivy config` では `USER` と `HEALTHCHECK` が無いことを指摘された（[画像の道具: 使い方の基本](#画像の道具-使い方の基本)）
@@ -5125,6 +5121,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
    ```
 
    - **入るコマンドは `gdu` ではなく `gdu-go`**
+   - `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る
 
 1. `gdu-go` が入ったことと、TUI を起動せずに走査できることを確かめる。
 
@@ -5196,10 +5193,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - **エイリアスは対話シェルだけ**: スクリプトや `sudo` からは `gdu-go`。スクリプトからも揃えたいならシンボリックリンク（`sudo` には効かない）
 - **走査は I/O が重い**: Raspberry Pi の microSD で `/` 全体を走らせると時間がかかる。`-x`（ファイルシステムを跨がない）や対象ディレクトリの限定を併用する
 - **TUI からファイルを消せる**: `d` で削除できるので、root 権限で起動するときは特に注意する（`sudo gdu-go` は、[Homebrew を sudo でも使う](#homebrew-を-sudo-でも使う)の節を通さないと、フルパスが要る。[Homebrew の補足と注意点](#homebrew-の補足と注意点)の「注意点」）
-
-**[gdu](#gdu)の手順 1**
-
-- `brew install` の最後に ``To avoid a conflict with `coreutils`, `gdu` has been installed as `gdu-go`.`` という caveat が出る
 
 **[gdu](#gdu)の手順 1: ボトルと依存**
 
@@ -5335,7 +5328,6 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - オンラインのホストが Windows なら、この項の手順 1 は飛ばし、手順 2 の箇条書きのとおり 1 行を打つ
 
-
 > [!WARNING]
 > **トンネルを張っている間は、オフラインのホストのどのユーザーも `127.0.0.1:1080` を通ってインターネットに出られる**（出口はオンラインのホスト）。使い終わったら[トンネルを閉じる](#ssh-の-socks-トンネル-トンネルを閉じる)。
 >
@@ -5368,7 +5360,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
    - ログインすると、オフラインのホストの `127.0.0.1:1080` が SOCKS プロキシになる。そこへの接続は、オンラインのホストから外へ出る
    - 転送は、この ssh のセッションが続く間だけ有効。このウィンドウは開いたままにする
    - オンラインのホストが Windows なら、PowerShell か cmd に `ssh -o ExitOnForwardFailure=yes -o ControlPath=none -R 1080 <OFFLINE_USER>@<OFFLINE_HOST>` を打つ
-   - `Error: remote port forwarding failed for listen port 1080` で終わったら、オフラインのホストで 1080 番がふさがっているか、sshd が転送を禁じている（参考資料を参照）
+   - `Error: remote port forwarding failed for listen port 1080` で終わったら、オフラインのホストで 1080 番がふさがっているか、sshd が転送を禁じている（[SSH の SOCKS トンネル の補足と注意点](#ssh-の-socks-トンネル-の補足と注意点)）
    - 初めてつなぐホストでは、ホスト鍵の確認に `yes` と答える
    - **次の手順は、オフラインのホストにログインしてから貼る**（続けて貼ると、ssh を閉じた後のオンライン側の元のシェルで動く）
 
@@ -5385,11 +5377,11 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
    ```
 
    - `ss` の行は `127.0.0.1:1080`（IPv6 があれば `[::1]:1080` も）だけ
-   - `0.0.0.0:1080` や `*:1080` が出たら、LAN 全体にプロキシが開いている。`exit` で抜けて、ここで止める（参考資料を参照）
+   - `0.0.0.0:1080` や `*:1080` が出たら、LAN 全体にプロキシが開いている。`exit` で抜けて、ここで止める（[SSH の SOCKS トンネル の補足と注意点](#ssh-の-socks-トンネル-の補足と注意点)）
    - 最後の行が `200` なら届いている
    - `000` と `Failed to connect to 127.0.0.1 port 1080` が出たら、この項の手順 2 の転送が無い
    - **ssh を張り直したら、この項の手順 2 からやり直す**
-   - `sudo` を付けたコマンド・podman・npm は `ALL_PROXY` を読まない（参考資料を参照）。dnf には[dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)で設定する
+   - `sudo` を付けたコマンド・podman・npm は `ALL_PROXY` を読まない（[SSH の SOCKS トンネル の補足と注意点](#ssh-の-socks-トンネル-の補足と注意点)）。dnf には[dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)で設定する
 
 #### SSH の SOCKS トンネル: dnf にもトンネルを使わせる
 
@@ -5478,7 +5470,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 
 - 待ち受けが loopback だけでも、ユーザーを区別しない
 - **外への通信の出口はオンラインのホスト**: オンラインのホストのネットワークの規則（社内のプロキシ、ファイアウォール）に従う。オンラインのホストの ssh が知るのは宛先の名前とポートで、HTTPS の中身は暗号化されたまま通る
-- **`socks5h` の `h` を落とさない**: 落とすと名前を引けない（参考資料を参照）
+- **`socks5h` の `h` を落とさない**: 落とすと名前を引けない
 - **`https_proxy` や git の `http.proxy` が入っていると、そちらが勝つ**: [SSH の SOCKS トンネル](#ssh-の-socks-トンネル)の手順 3 の補足
 - **`sudo` は `ALL_PROXY` を渡さない**: dnf は[SSH の SOCKS トンネル: dnf にもトンネルを使わせる](#ssh-の-socks-トンネル-dnf-にもトンネルを使わせる)の設定で、podman はコマンドの前の `https_proxy` で通す
 - **npm は `ALL_PROXY` を読まない**: `https_proxy` を足す（[npm のオフライン導入](#npm-のオフライン導入)の手順 2）
