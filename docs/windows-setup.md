@@ -4,8 +4,8 @@
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
-> - PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常（管理者ではない）の窓は、各項の窓を開く手順に従う
-> - [貼り付けの設定](#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+> - PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[アプリを入れる](#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - Windows PowerShell 5.1 は[貼り付けの設定](#貼り付けの設定)、PowerShell 7 は[アプリを入れる](#アプリを入れる)の手順 7 より前は **Ctrl+V で貼る**。それぞれの設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
 - どの項も単独で通せる。リードの前提を先に満たす
@@ -404,9 +404,9 @@
 
 ### アプリを入れる
 
-- scoop・UniGet UI・PowerToys・PowerShell 7 を入れる
+- scoop・UniGet UI・PowerToys・PowerShell 7 を入れ、7 の貼り付けの設定を足す
 - 前提: [Microsoft Store の更新](#microsoft-store-の更新)と[貼り付けの設定](#貼り付けの設定)を通してある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 9 は、この項の手順 8 で開く PowerShell 7
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -471,7 +471,51 @@
 
    - 最後の表に `PowerShell` と `Microsoft.PowerShell` の行が出ればよい
    - 管理者の確認（UAC）は出ないはず
-   - この文書とほかの手順書のブロックは、引き続き Windows PowerShell 5.1 に貼る
+
+1. PowerShell 7 のプロファイルに、貼り付けの行を足す。
+
+   ```powershell
+   & {
+     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
+     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
+     $text = Get-Content -LiteralPath $p -Raw
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
+       $add = $line
+       if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
+       Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
+       "足した: $line"
+     }
+     "--- $p"
+     Get-Content -LiteralPath $p
+   }
+   ```
+
+   - `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
+   - プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）
+   - 何度貼ってもよい
+
+1. スタートメニューから、管理者ではない PowerShell 7 を開く。
+
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 一覧の名前は「PowerShell」。検索の最も一致する候補に「Windows PowerShell」が出ることがあるので、名前で選ぶ
+   - 「PowerShell」が無ければ、この項の手順 6 を確かめる
+   - 窓の名前に「管理者:」が付いていないことを確かめる
+   - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
+
+1. PowerShell 7 で、版・Ctrl+Enter の割り当て・実行ポリシーを確かめる。
+
+   ```powershell
+   "`n$([char]27)[7m 確認 $([char]27)[0m"
+   $PSVersionTable.PSVersion.ToString()
+   Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Ctrl+Enter' | Format-Table Key, Function -AutoSize
+   Get-ExecutionPolicy
+   ```
+
+   - 版が `7.` で始まればよい。`5.1.` なら、「Windows PowerShell」を開いている。閉じて、この項の手順 8 から
+   - `Ctrl+Enter` の `Function` が `AddLine` ならよい。`InsertLineAbove` なら、この項の手順 7 を確かめ、新しい窓で開き直す
+   - 実行ポリシーが `RemoteSigned`（`Unrestricted`・`Bypass` でもよい）ならよい。`Restricted` などでプロファイルを読めないときは、[shell-terminal.md の「PowerShell 7 のプロファイルを設定する」の手順 4・5](shell-terminal.md#powershell-7-のプロファイルを設定する)で確かめる
 
 ---
 
@@ -479,11 +523,12 @@
 
 - Git for Windows を PC 全体に入れる
 - 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - ユーザーアカウント制御（UAC）の確認は「はい」
 
 1. Git for Windows がまだ入っていないことを確かめる。
@@ -518,13 +563,15 @@
 ### PC 全体の設定
 
 - PC の名前・長いパス・電源・ロック・LAN の省電力を設定する
-- 前提: [貼り付けの設定](#貼り付けの設定)を通してある。設定する LAN が接続されている
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 前提: 設定する LAN が接続されている
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
-   - 開いたときに、プロファイルを読めないという赤い字のエラーが出たら、実行ポリシーが `Restricted` のまま。[貼り付けの設定](#貼り付けの設定)の手順 4 を、この窓で貼り直す
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す
+   - 開いたときにプロファイルを読めないエラーが出たら、[アプリを入れる](#アプリを入れる)の手順 9 で PowerShell 7 の実行ポリシーを確かめる
 
 1. 変数を設定する（PC の名前を変えるなら、`PC_NAME` に値を入れる）。
 
@@ -568,7 +615,7 @@
 
    - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
    - `Admin` が `False` なら、管理者ではない窓に貼っている。この項の手順 1 から
-   - `CtrlEnter : InsertLineAbove` なら、[貼り付けの設定](#貼り付けの設定)の手順 2・4・5 をこの順で貼り直し、窓を開き直してこの項の手順 2 から
+   - `CtrlEnter : InsertLineAbove` なら、[アプリを入れる](#アプリを入れる)の手順 7〜9 を通し、この項の手順 1 から
    - 次の値を控える
      - `ComputerName`（PC の名前）と `LanCategory`（LAN の種類）
      - `RemoteDesktop`（1 なら無効、0 ならもう有効）と `RemoteAssistance`（1 なら有効、0 なら無効）
@@ -672,12 +719,13 @@
 
 - サインイン・検索・ショートカット・キー配列を設定する
 - 前提: 無し
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
-   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
 
 1. 「Windows Hello サインインのみを許可する」を切る。
 
@@ -765,12 +813,13 @@
 
 - WSL の機能を有効にして、この PC を再起動する
 - 前提: 無し
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
-   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
 
 1. WSL を使えるように、Windows の機能を入れる（ディストリビューションは再起動の後に入れる）。
 
@@ -798,11 +847,12 @@
 
 - WSL に AlmaLinux 10 を入れる
 - 前提: [WSL と再起動](#wsl-と再起動)で機能を入れて再起動してある。状態確認は、通した項の値だけを確かめる
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - 複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
 
 1. 再起動の後の状態を確かめる。
@@ -827,7 +877,7 @@
 
    - 次の値が出ればよい（行わなかった手順の値は、元のまま）
      - `ComputerName` が設定した名前（大文字）、`LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`（[PC 全体の設定](#pc-全体の設定)を通したとき）
-     - `CtrlEnter : AddLine`（[貼り付けの設定](#貼り付けの設定)を通したとき）
+     - `CtrlEnter : AddLine`（[アプリを入れる](#アプリを入れる)の手順 7〜9 を通したとき）
      - `ScancodeMap : 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00`（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
      - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら `kbd101.dll`
      - `RemoteDesktop : 0`・`LanCategory : Private`（[ネットワークとリモート](#ネットワークとリモート)を通したとき。Home の `RemoteDesktop` は確かめない）
@@ -863,15 +913,16 @@
 
 - 自分のユーザーの広告・プライバシー・検索の設定を変える
 - 前提: 無し
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - **この項の手順 3 でサインアウトしてサインインし直し、この項の手順 4 は設定の画面で行う**
 - **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**。ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
 - 値の多くは Microsoft の文書に無く、広く使われているもの（[参考資料](reference/windows-setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)）
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 自分のユーザーで、プライバシーと広告の設定を切る（元の値はファイルに控える）。
 
@@ -895,7 +946,7 @@
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
-       $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
+       $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding utf8BOM
        "控えた: $rec"
      }
      for ($i = 0; $i -lt $set.Count; $i++) {
@@ -937,15 +988,17 @@
 
 - Edge のスタートアップ ブーストとバックグラウンドの実行を切る
 - 前提: 無し
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
 - **この項の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この項の手順 2 の代わりにこの項の手順 3（画面だけで切る）を行う
 - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
 - **この項の手順 3・4 は Edge の画面で行う**
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を右クリックし、「管理者として実行」で開く。UAC の確認が出たら「はい」
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す
 
 1. Edge のスタートアップ ブーストとバックグラウンドの実行を、ポリシーで切る。
 
@@ -985,11 +1038,12 @@
 
 - エクスプローラー・タスクバー・テーマ・既定の端末・IME を設定する
 - 前提: Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. エクスプローラーで、拡張子と隠しファイルを表示し、「PC」で開き、最近使ったものを出さないようにする。
@@ -1084,7 +1138,7 @@
 
    - `DelegationConsole : {2EACA947-…}` と `DelegationTerminal : {E12CFF52-…}` が出ればよい
    - 次に起動したコンソールのアプリから効く
-   - **注意**: 管理者の PowerShell は conhost で開く。右クリックで貼るには[貼り付けの設定](#貼り付けの設定)の手順 1〜5 が必要
+   - **注意**: 管理者の PowerShell は conhost で開く。右クリックで貼るには、5.1 は[貼り付けの設定](#貼り付けの設定)の手順 5、7 は[アプリを入れる](#アプリを入れる)の手順 7 が必要
 
 1. Microsoft IME の設定を開き、Ctrl+Space で IME をオン・オフするようにする。
 
@@ -1115,11 +1169,12 @@
 
 - キーの切り替え・表示・効果音・ストレージ センサーの値を控えて変える
 - 前提: 無し
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。「Windows PowerShell (x86)」は使わない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 今の値を表示し、ファイルに控える。
 
@@ -1149,7 +1204,7 @@
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
-       $rows | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding UTF8
+       $rows | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding utf8BOM
        "控えた: $rec"
      }
      $rows | Format-Table -AutoSize
@@ -1223,7 +1278,6 @@
    - キーごと（`{e88865ea-…}` がギャラリー、`{f874310e-…}` がホーム）に、`既にあった` の行と、成功の 1 行と、`System.IsPinnedToNameSpaceTree    REG_DWORD    0x0` が出ればよい
    - 効くのは、エクスプローラーの窓をすべて閉じて開き直した後
    - 左の一覧を右クリックして「すべてのフォルダーを表示」をオンにすると、どちらも出る
-   - 「Windows PowerShell (x86)」で貼ると、別の場所に書かれて効かない
 
 1. タスクバーのアプリの右クリックに「タスクの終了」を出す。
 
@@ -1360,11 +1414,12 @@
 
 - 不要な自動起動・標準アプリ・ウィジェットを外す
 - 前提: [表示と入力](#表示と入力)を通してある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 自動で起動するアプリのうち、OneDrive・Edge・Teams を止める。
@@ -1422,7 +1477,7 @@
 
 - PowerToys の使わないユーティリティを、設定ファイルで切る
 - 前提: [アプリを入れる](#アプリを入れる)で PowerToys を入れてある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - **この項の手順 4 は通知領域で PowerToys を終了し、この項の手順 6 は PowerToys の設定の画面で行う**
 - PowerToys は起動のときにだけ設定ファイルを読むので、終了してから書き、起動し直す
@@ -1430,9 +1485,10 @@
 - 「起動時に実行」はオン、「常に管理者として実行」はオフのまま変えない。自動の更新の取得も変えない
 - Keyboard Manager は使わない（既定でオフ。Caps Lock は[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で変える）
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する。
 
@@ -1627,14 +1683,15 @@
 
 - 入力条件と候補アプリを一つずつ変えて、ホットキーの問題を切り分ける
 - 前提: [Windows のホットキー競合](#windows-のホットキー競合)で検出を試してある
-- 実行場所: 問題が起きるユーザー・ログインセッションのデスクトップと、通常権限の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7 と、問題が起きるユーザー・ログインセッションのデスクトップ。この項の手順 1 で開く
 
 - 対象キーが一覧にない場合、検出でアプリが表示されない場合、設定変更で解消しない場合に行う
 - 表示がない理由と、入力フック・アプリ内ショートカットの検出範囲は[参考資料](reference/windows-hotkey-conflict.md)を参照する
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 対象キーと、メニューからの操作結果を記録する。
@@ -1688,15 +1745,16 @@
 
 - 対象キーを一時登録して、登録できるかを確かめる
 - 前提: [使用アプリが分からない場合の切り分け](#windows-のホットキー競合-使用アプリが分からない場合の切り分け)で対象キーを絞ってある
-- 実行場所: 問題が起きるユーザー・ログインセッションの、新しい通常権限の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの、問題が起きるユーザー・ログインセッションの新しい管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - アプリ名を返す試験ではない。登録成功でも、IME や入力フックによる処理は除外できない
 
 - 試験中だけ対象キーを一時登録し、直ちに解除する。コードの実行中は対象キーを押さない
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 試験する修飾キーと仮想キーコードを設定する。
@@ -1842,12 +1900,13 @@
 
 - LAN をプライベートにし、RDP・ping・配信の最適化を設定する
 - 前提: 設定する LAN が接続されている
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」を選ぶ
-   - UAC の確認で「はい」を押す。窓の名前が「管理者: Windows PowerShell」になる
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
 
 1. 変数を設定する。
 
@@ -1935,7 +1994,7 @@
 
 - WSL 2 のネットワークを、Windows と同じ IP を使うミラーに変える
 - 前提: [WSL と再起動](#wsl-と再起動)と[WSL の AlmaLinux 10](#wsl-の-almalinux-10)で WSL 2 の AlmaLinux 10 を導入済み
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - **この項の手順 4・6 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
 - ミラーにして変わること
@@ -1945,9 +2004,10 @@
 - 書くのは `networkingMode` だけ。DNS・ファイアウォール・プロキシ・メモリの値は既定のまま。LAN から WSL の中のサーバーに入るための Hyper-V のファイアウォールの規則は、この項では作らない
 - 画面で変えるなら、スタートメニューの「Linux 用 Windows サブシステム設定」→「ネットワーク」→「ネットワーク モード」（同じファイルに書く）
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 今の `.wslconfig` と、WSL の版と、動いているディストリビューションを確かめる。
 
@@ -2057,7 +2117,7 @@
 
 - RDP のセッションをこの PC の画面へ移し、ロックせずに切断する
 - 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している
-- 実行場所: RDP 接続先の管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。切断後は接続先の PC の画面で確かめる
+- 実行場所: この PC のデスクトップ（RDP 接続先）の管理者の PowerShell 7。この項の手順 1 で開く。切断後は接続先の PC の画面で確かめる
 
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-rdp-disconnect.md)・[参考資料](reference/windows-rdp-disconnect.md)・[注意点](extra/windows-rdp-disconnect.md)
 
@@ -2067,11 +2127,12 @@
 > [!WARNING]
 > - **切断した後の PC の画面はロックされない**。PC の前にいる人が、このユーザー（Administrators の一員）としてそのまま操作できる。人が触れる場所にある PC では使わない
 
-1. RDP でつないだセッションの中で、管理者の Windows PowerShell（5.1）を開く。
+1. RDP でつないだセッションの中で、管理者の PowerShell 7 を開く。
 
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」を選ぶ。UAC の確認で「はい」
-   - ウィンドウのタイトルが「管理者: Windows PowerShell」になる
-   - 「Windows PowerShell (x86)」（32 ビット）は使わない
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す
+   - ウィンドウのタイトルが「管理者:」で始まる
    - **次の手順は、このウィンドウが開いてから、そこに貼る**
 
 1. 今のセッションが RDP であることと、その ID を確かめる。
@@ -2104,14 +2165,15 @@
 
 - RDP をロックせずに切断するショートカットを作る
 - 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。切断の注意は[RDP をロックせずに切断](#rdp-をロックせずに切断)を先に読む
-- 実行場所: RDP 接続先の通常権限の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップ（RDP 接続先）の管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - UAC の確認は毎回出る。ショートカットは、管理者として実行する Windows PowerShell で `tscon` を動かす
 - **切断した後の画面はロックされない**。人が触れる場所にある PC では使わない
 
-1. RDP でつないだセッションの中で、管理者ではない Windows PowerShell（5.1）を開く。
+1. RDP でつないだセッションの中で、管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. デスクトップに、管理者として実行するショートカットを作る。
@@ -2155,15 +2217,16 @@
 
 - Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
 - 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-ssh-client.md)・[参考資料](reference/windows-ssh-client.md)・[注意点](extra/windows-ssh-client.md)
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
 - 鍵・config・known_hosts は `%USERPROFILE%\.ssh` に置き、Windows と Git の両方の ssh で使う
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる
 
-1. Windows で、管理者ではない Windows PowerShell（5.1）を開く。
+1. Windows で、管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`SSH_HOST` と `SSH_ALIAS` は必ず値を入れる）。
 
@@ -2346,12 +2409,13 @@
 
 - 更新後や config の変更後に、Windows と Git の ssh の版と設定を確かめる
 - 前提: [Windows の OpenSSH クライアント](#windows-の-openssh-クライアント)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`SSH_ALIAS` は必ず値を入れる）。
 
@@ -2394,11 +2458,12 @@
 
 - scoop で delta を入れ、Git の差分表示を設定する
 - 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
 
@@ -2414,10 +2479,10 @@
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
+   - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行い、この窓でこのブロックを貼り直す
+   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行い、この窓でこのブロックを貼り直す
    - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。中断し、既存の導入元と設定を確かめる
 
 1. scoop で delta を入れ、版と場所を確かめる。
@@ -2456,11 +2521,12 @@
 
 - scoop で GitHub CLI を入れ、GitHub にログインする
 - 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 管理者ではないことと、scoop・git・Git の資格情報のヘルパー・ほかの gh を確かめる。
 
@@ -2476,7 +2542,7 @@
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
+   - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
    - `GitCred` が `credential.helper manager` ならよい
@@ -2542,11 +2608,12 @@
 
 - scoop で lazygit を入れ、自分用の設定と起動を確かめる
 - 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 管理者ではないことと、scoop・git・extras のバケット・ほかの lazygit を確かめる。
 
@@ -2562,7 +2629,7 @@
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
+   - `PowerShell : 7.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
    - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、中断し、既存の導入元と設定を確かめる
@@ -2620,7 +2687,7 @@
    - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる
    - Status・Files・Branches・Commits などの欄が出ればよい（空のリポジトリなので、一覧は空）
    - ほかのリポジトリで確かめるなら、そのフォルダーに `Set-Location` してから `lazygit` を打つ（git 管理外のフォルダーで起動すると、リポジトリを作るか聞かれる）
-   - **注意**: Windows PowerShell から起動した lazygit の `e` キーは、git の `core.editor` と環境変数 `VISUAL`・`EDITOR` などが無いと `vim` で開こうとして失敗する
+   - **注意**: PowerShell 7 から起動した lazygit の `e` キーは、git の `core.editor` と環境変数 `VISUAL`・`EDITOR` などが無いと `vim` で開こうとして失敗する
      - [Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で `nvim` にし、新しい窓で lazygit を起動し直す
      - Git Bash から起動したときは、共通の bash 設定が `nvim` にしてある
    - `q` で閉じる
@@ -2632,12 +2699,13 @@
 
 - Windows の lazygit の既存設定を退避し、自分用の設定を入れる
 - 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)も通し、Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - lazygit をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 既存設定を退避して、設定ディレクトリへ clone する。
 
@@ -2662,16 +2730,17 @@
 
 - 自分用の lazygit の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
 - 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
 - lazygit 本体は[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 - 更新方法と分岐の補足は[参考資料](reference/windows-setup.md#lazygit-の設定を更新する--手順-3-補足-force-push-と分岐点)
 
 > [!WARNING]
 > この項の手順 4 では、この clone でコミットしたものは新しい `custom` に載らない（前の位置は `git -C "$env:LOCALAPPDATA\lazygit" reflog` で見られる）。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 手元の変更を確かめる。
 
@@ -2748,14 +2817,15 @@
 
 - Excel のブックと Word の文書の差分をテキストで出す textconv と、`git excel-stage`・`git excel-merge`・`git word-stage`・`git word-merge` を Git 全体に入れ、導入状態を確かめる
 - 前提: [Git for Windows](#git-for-windows)と[アプリを入れる](#アプリを入れる)の手順 2・3 を通してある。部分ステージと lazygit での取り込みには lazygit 0.66.0 以上・delta 0.20.1 以上が要る
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - WinMerge での取り込みには WinMerge が要る。[WinMerge で 2 つの Excel のセルの変更を取り込む](#winmerge-で-2-つの-excel-のセルの変更を取り込む)の手順 2 か、[WinMerge で 2 つの Word の変更を取り込む](#winmerge-で-2-つの-word-の変更を取り込む)の手順 3 で、無ければ入れる
 - 更新時は `git -C "$env:USERPROFILE\excel-diff" status` で既存の変更を確かめてから進む
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. Python が無ければ scoop で入れ、版を確かめる。
 
@@ -2796,7 +2866,7 @@
 
 - 対象の Git リポジトリの Excel の属性と差分を確かめる
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象の Excel が Git のリポジトリにある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 例の `売上表.xlsx` は実際のファイル名に置き換える
 - 表示する内容は[Excel 差分の仕様](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#表示する内容)、属性の優先順位と制限は[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を参照する
 
@@ -2805,9 +2875,10 @@
 > - `diff.excel.binary=true` はバイナリ扱いを保つだけで、これらの操作を禁止しない
 > - 全体をステージするならファイル一覧で `Space`、部分ステージは[lazygit で Excel のセル変更を部分ステージする](#lazygit-で-excel-のセル変更を部分ステージする)の `E` を使う
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
 
@@ -2854,12 +2925,13 @@
 
 - 対象の Git リポジトリで、Excel の値・通常の数式・セルの書式の変更を専用画面から部分ステージする
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象は HEAD と index の両方にある既存 `.xlsx` / `.xlsm` / `.xltx` / `.xltm` / `.xlam` / `.xlsb`。新規ファイルは全体をコミットしてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
 - 例の `売上表.xlsx` は実際のファイル名に置き換える
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
 
@@ -2913,13 +2985,14 @@
 
 - 大きい Excel の全セルの変換を待ち、差分を表示する
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象の Excel が Git のリポジトリにある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 例の `売上表.xlsx` は実際のファイル名に置き換える
 - lazygit で変換中のブックは、完了後にファイルを選び直すか `R` で表示する
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 作業場所の変数を設定する（`EXCEL_REPO` は必ず値を入れる）。
 
@@ -2959,16 +3032,17 @@
 
 - 2 つのブックを比べ、取り込み元のセルの値・通常の数式・セルの書式を選んで取り込み先へ書き込む
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。WinMerge が要る。この項の手順 2 で、無ければ入れる
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
 - 書き換えるのは最初に指定する取り込み先。`.bak` は作らない。取り込み先を Excel などで開いていたら、始める前に閉じておく
 - 対象は両方とも `.xlsx` / `.xlsm` / `.xltx` / `.xltm` / `.xlam` / `.xlsb` で、シートの構成が同じブック
 - xlsb 同士、または xlsx 系（`.xlsx` / `.xlsm` / `.xltx` / `.xltm` / `.xlam`）同士を指定する
 - 対応条件と制限は excel-diff の[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)を参照する
 - この項の手順 5 の画像は、Windows 11 の実機の WinMerge 2.16.58.2 で撮った。ブック（`見積.xlsx`・`見積-更新.xlsx`）と値は試験用
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. WinMerge が無ければ winget で入れ、版を確かめる。
 
@@ -3038,7 +3112,7 @@
 
 - 対象の Git リポジトリの Word の属性と差分を確かめる
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象の Word が Git のリポジトリにある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 例の `仕様書.docx` は実際のファイル名に置き換える
 - 対象は Transitional の OOXML の `.docx` / `.docm` / `.dotx` / `.dotm`。暗号化・`.doc`・Strict は表示しない
 - 表示する内容は[Word の表示の仕様](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#word-の表示)、属性の優先順位は[注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#注意点)、Word の制限は[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
@@ -3048,9 +3122,10 @@
 > - `diff.word.binary=true` はバイナリ扱いを保つだけで、これらの操作を禁止しない
 > - 全体をステージするならファイル一覧で `Space`、部分ステージは[lazygit で Word の変更を部分ステージする](#lazygit-で-word-の変更を部分ステージする)の `E` を使う
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 作業場所の変数を設定する（`WORD_REPO` は必ず値を入れる）。
 
@@ -3098,14 +3173,15 @@
 
 - 対象の Git リポジトリで、Word の段落・表・書式などの変更を専用画面から部分ステージする
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。対象は HEAD と index の両方にある既存 `.docx` / `.docm` / `.dotx` / `.dotm`。新規ファイルは全体をコミットしてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。その窓から起動する lazygit の画面も使う
 - 例の `仕様書.docx` は実際のファイル名に置き換える
 - 対象は Transitional の OOXML。暗号化・`.doc`・Strict・電子署名付きの文書は部分ステージしない
 - 選べる単位と選べない違いは excel-diff の[Word の部分ステージ](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/reference/readme.md#word-の部分ステージ)、制限は[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 作業場所の変数を設定する（`WORD_REPO` は必ず値を入れる）。
 
@@ -3165,14 +3241,15 @@
 
 - 2 つの文書を比べ、取り込み元の段落・表・書式などの変更を選んで取り込み先へ書き込む
 - 前提: [excel-diff を導入・更新する](#excel-diff-を導入更新する)を通してある。WinMerge が要る。この項の手順 3 で、無ければ入れる
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。WinMerge の操作も、この PC のデスクトップで行う
 - 書き換えるのは最初に指定する取り込み先。`.bak` は作らない。取り込み先を Word などで開いていたら、始める前に閉じておく
 - 対象は両方とも Transitional の OOXML の `.docx` / `.docm` / `.dotx` / `.dotm`。暗号化・`.doc`・Strict・電子署名付きの文書は取り込まない。対応条件と制限は excel-diff の[Word の注意点](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/extra/readme.md#word-の注意点)を参照する
 - この項の手順 5 の画像は、Windows 11 の実機の WinMerge 2.16.58.2 で撮った。文書（`仕様書.docx`・`仕様書-更新.docx`）と値は試験用
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する（`WORD_TARGET`・`WORD_SOURCE` は必ず値を入れる）。
 
@@ -3247,11 +3324,12 @@
 
 - scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
 - 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 変数を設定する。
 
@@ -3284,10 +3362,10 @@
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
+   - `PowerShell : 7.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
-   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、この手順を貼り直す
    - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、中断し、既存の導入元と設定を確かめる
    - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きする
 
@@ -3375,12 +3453,13 @@
 
 - Windows の yazi の既存設定を退避し、自分用の設定を入れる
 - 前提: [yazi](#yazi)の手順 1〜5 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](#git-for-windows)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - yazi をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. yazi を終了し、自分用の設定を clone する。
 
@@ -3404,13 +3483,14 @@
 
 - yazi で選択した複数ファイルを、`l` / `<Enter>` でまとめて開く設定を足す
 - 前提: [yazi](#yazi)と[Neovim](neovim.md#windows-11-で-neovim-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2・3 は Neovim、手順 4 は yazi の画面
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2・3 は Neovim、手順 4 は yazi の画面
 - 既存の `init.lua` の変更を確かめ、yazi をすべて閉じてから始める
 - `l` / `<Enter>` は既定でホバー中の 1 ファイルだけを開く。選択した複数ファイルをまとめて開くときだけ行う
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. yazi の `init.lua` を Neovim で開く。
 
@@ -3444,16 +3524,17 @@
 
 - 自分用の yazi の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
 - 前提: [yazi の設定を導入する](#yazi-の設定を導入する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
 - yazi 本体は[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 - 更新方法と分岐の補足は[参考資料](reference/windows-setup.md#yazi-の設定を更新する--手順-3-補足-force-push-と分岐点)
 
 > [!WARNING]
 > この項の手順 4 では、この clone でコミットしたものは新しい `custom` に載らない（前の位置は `git -C "$env:APPDATA\yazi\config" reflog` で見られる）。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 手元の変更を確かめる。
 
@@ -3532,13 +3613,14 @@
 
 - Markdown と Excel を往復する mdtable を入れ、導入状態を確かめる
 - 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Python 3.9 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-table-excel" status` で既存の変更を確かめてから進む
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. Python が無ければ scoop で入れ、版を確かめる。
 
@@ -3590,15 +3672,16 @@
 
 - 自分の Markdown の表を Excel で編集し、Markdown に書き戻す
 - 前提: [mdtable を導入・更新する](#mdtable-を導入更新する)を通してある。Excel が入っている。対象の Markdown を編集できる
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。Excel の編集は、この PC のデスクトップで行う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。Excel の編集は、この PC のデスクトップで行う
 - 例の `README.md` と `README.tables.xlsx` は、対象の文書名と対応するブック名に置き換える
 
 > [!CAUTION]
 > この項の手順 4・6 で Excel を編集する前に、[mdtable のブックを Excel で編集するときの注意](#mdtable-のブックを-excel-で編集するときの注意)を必ず読む。日付化・小数の桁落ちなどで、元の文字列を失うことがある。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. 作業場所の変数を設定する（`MDTABLE_DIR` は必ず値を入れる）。
 
@@ -3682,14 +3765,15 @@
 #### md-format を導入・更新する
 
 - Markdown を整形する mdfmt を入れ、導入状態を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と、[貼り付けの設定](#貼り付けの設定)（実行ポリシーを RemoteSigned にする）を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 を通し、同じ項の手順 9 で PowerShell 7 の実行ポリシーが `RemoteSigned`（`Unrestricted`・`Bypass` でもよい）であることを確かめてある
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Node.js 22 以上が要る。この項の手順 2 で、無ければ scoop で入れる
 - 更新時は `git -C "$env:USERPROFILE\md-format" status` で既存の変更を確かめてから進む
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
 
 1. Node.js が無ければ scoop で入れ、版を確かめる。
 
@@ -3721,7 +3805,7 @@
    - 最後に `導入済み: mdfmt` と版、起動コマンドのパスが出ればよい
    - 依存はリポジトリ外の `%LOCALAPPDATA%\md-format` へ入る
    - 起動コマンドは `%USERPROFILE%\.local\bin` の `mdfmt.ps1`（PowerShell）・`mdfmt.cmd`（cmd）・`mdfmt`（Git Bash）
-   - `問題:` で始まる行が出たら、その案内に従って直してから `& { ... }` 部分を貼り直す（`%USERPROFILE%\.local\bin` が PATH に無いときは、PATH に加えてから Windows PowerShell を開き直す）
+   - `問題:` で始まる行が出たら、その案内に従って直してから `& { ... }` 部分を貼り直す（`%USERPROFILE%\.local\bin` が PATH に無いときは、PATH に加えてから PowerShell 7 を開き直す）
    - `--check` は何も変更せず状態を確かめる
    - 更新時は `git -C "$env:USERPROFILE\md-format" pull --ff-only` を実行し、この項の手順 3 の `& { ... }` 部分（導入・確認）を貼り直す。`git clone` は再実行しない
    - `導入先を入れ替えられません` で止まったら、Neovim をすべて閉じてから `& { ... }` 部分を貼り直す
@@ -3732,14 +3816,15 @@
 
 - 文書を整形し、整形の要るファイルを確かめる
 - 前提: [md-format を導入・更新する](#md-format-を導入更新する)を通し、`mdfmt` が PATH にある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開き、整形する文書のあるフォルダーへ移る
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開き、整形する文書のあるフォルダーへ移る
 - 方言の既定は GLFM。GitHub 向けの文書のリポジトリでは、この項の手順 2 で GFM にする
 - PowerShell では、パイプやリダイレクトで文書を渡さない（文字コードや改行が変わる）。ファイルとフォルダーを渡す
 - `docs` と `README.md` は、整形するフォルダーとファイルに置き換える
 
-1. 管理者ではない Windows PowerShell（5.1）を開き、整形する文書のあるフォルダーへ移る。
+1. 管理者ではない PowerShell 7 を開き、整形する文書のあるフォルダーへ移る。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - `Set-Location` で、文書のリポジトリの直下へ移る
 
 1. GitHub 向けの文書のリポジトリなら、そのリポジトリの直下で方言を GFM にする。
@@ -4008,11 +4093,12 @@
 
 - 日本語版の Firefox を PC 全体に入れ、既定のブラウザーにする
 - 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。Firefox の起動と設定は、この PC のデスクトップ
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Firefox の起動と設定は、この PC のデスクトップ
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
    - ユーザーアカウント制御（UAC）の確認は「はい」
 
 1. Firefox がまだ入っていないことを確かめる。
@@ -4197,11 +4283,13 @@
 
 - Git for Windows・Firefox・WezTerm を、設定を残して上げる
 - 前提: [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - UAC の確認で「はい」を押す
 
 1. Git Bash と WezTerm を閉じてから、winget で Git for Windows を上げる。
 

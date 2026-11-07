@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - AlmaLinux 10 の項は、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常の窓と Git Bash は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓と Git Bash は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
@@ -1013,11 +1013,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - HackGen Console NF を自分のユーザーのフォントに入れる
 - 前提: 無し
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. HackGen がまだ入っていないことを確かめる。
@@ -1074,11 +1075,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - HackGen Console NF の新しい版を確かめ、必要なときに入れ直す
 - 前提: [HackGen Console NF](#windows-11-で-hackgen-console-nf-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。削除・再導入・確認は、リンク先の項に指定した窓で行う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。削除・再導入・確認は、リンク先の項に指定した窓で行う
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. HackGen の新しい版が出ているかを確かめる。
 
@@ -1104,7 +1106,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 新しい版にするときだけ、この PC でサインアウトし、サインインし直す。
 
    - 再起動でもよい
-   - **次の手順は、サインインし直して Windows PowerShell（5.1）を開いてから貼る**
+   - **次の手順は、サインインし直して PowerShell 7 を開いてから貼る**
 
 1. 新しい版にするときだけ、フォントのファイルを消す。
 
@@ -1128,11 +1130,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - Windows Terminal のフォントを HackGen にし、必要なら複数行の貼り付けの警告を切る
 - 前提: [HackGen Console NF](#windows-11-で-hackgen-console-nf-を入れる)を通し、サインインし直してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）
-- 実行場所: 管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブ。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない Windows Terminal の PowerShell 7 のタブ。この項の手順 1 で開く
 
 - **この項の手順 5 は Windows Terminal の設定の画面で行う**
 - 効くのは Windows Terminal で開く窓（管理者ではない窓と、Win+X の「ターミナル」・「ターミナル (管理者)」）だけ。スタートメニューから管理者として開いた PowerShell（conhost の窓）には効かない
-- 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（Windows PowerShell 5.1 は、角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
+- 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（PSReadLine は、5.1・7 とも角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
 - この項の手順 2〜5 は `settings.json` だけを読み書きし、既定のプロファイル（Windows PowerShell）と `copyOnSelect` は変えない
 - 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す
 - 貼った複数行が行ごとに動かないようにするなら、[Windows Terminal で複数行を 1 つの入力として貼る](#windows-terminal-で複数行を-1-つの入力として貼る)を通す
@@ -1140,9 +1142,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 > [!WARNING]
 > - この項の手順 4 で警告を切ると、信用できない複数行の文字も、確かめずにそのまま貼られて動く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない Windows Terminal の PowerShell 7 のタブを開く。
 
-   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「Windows PowerShell」を選ぶ（Windows PowerShell 5.1 のタブ）
+   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「PowerShell」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Windows Terminal の設定ファイルを控え、今のフォントと警告の値を確かめる。
 
@@ -1229,16 +1232,17 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - 任意で、Windows Terminal の選択した文字を自動でコピーする `copyOnSelect` を `true` にする
 - 前提: [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 1・2 を通し、`settings.json.windows-setup.bak` がある
-- 実行場所: この PC のデスクトップの管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブ。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない Windows Terminal の PowerShell 7 のタブ。この項の手順 1 で開く
 - コメントや末尾のカンマがあるファイルには書かない。控えは上書きしない（[補足](reference/shell-terminal.md#windows-terminal-で選択した文字をコピーする--手順-2-補足-copyonselect-と貼り付け)）
 
 > [!WARNING]
 > - この項の手順 2 の後は、文字を選ぶだけでクリップボードが置き換わり、手順書からコピーしたブロックも消える。右クリックは貼り付けになる。
 > - [Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4 で複数行の警告を切っていると、管理者の窓でも複数行が確かめずに動く。
 
-1. 管理者ではない Windows Terminal の Windows PowerShell（5.1）のタブを開く。
+1. 管理者ではない Windows Terminal の PowerShell 7 のタブを開く。
 
-   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「Windows PowerShell」を選ぶ
+   - スタートメニューで「Windows Terminal」を開き、タブのメニューから「PowerShell」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 設定ファイルの最上位の `copyOnSelect` を `true` にする。
 
@@ -1264,25 +1268,28 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### Windows Terminal で複数行を 1 つの入力として貼る
 
 - 任意で、Windows Terminal に貼った複数行が行ごとに動かないように、Enter の割り当てをプロファイルに足す
-- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）。PowerShell 7 でも使うなら、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 2 を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は、Windows Terminal の新しいタブ
+- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3・4 は、Windows Terminal の新しいタブ
 - 足す行は ASCII の文字だけで、行末の印は `# shell-terminal.md:paste`。プロファイルのほかの行は変えない
 - 同じプロファイルを読む窓すべてに効く（管理者の窓も）。貼った全体を先に構文解析するので、1 か所の構文エラーで全体が動かない（[注意点](extra/shell-terminal.md)・[補足](reference/shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る--手順-2-補足-enter-の割り当て)）
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
-1. 5.1 と、既にある 7 のプロファイルの末尾に Enter の割り当てを足す。
+1. 7 と、既にある 5.1 のプロファイルの末尾に Enter の割り当てを足す。
 
    ```powershell
    & {
      $line = 'if ((Get-Module -Name PSReadLine) -and $ExecutionContext.SessionState.LanguageMode -eq ''FullLanguage'') { Set-PSReadLineKeyHandler -Chord Enter -BriefDescription PasteAwareEnter -Description ''Keep pasted lines in one input'' -ScriptBlock { $rl = [Microsoft.PowerShell.PSConsoleReadLine]; $queue = $null; try { $queue = $rl.GetField(''_queuedKeys'', [Reflection.BindingFlags]''NonPublic,Instance'').GetValue($rl.GetField(''_singleton'', [Reflection.BindingFlags]''NonPublic,Static'').GetValue($null)) } catch {}; $more = $false; $clock = [Diagnostics.Stopwatch]::StartNew(); do { if ((($null -ne $queue) -and ($queue.Count -gt 0)) -or [Console]::KeyAvailable) { $more = $true; break }; [Threading.Thread]::Sleep(2) } while ($clock.ElapsedMilliseconds -lt 30); if ($more) { $rl::AddLine() } else { $rl::AcceptLine() } } }  # shell-terminal.md:paste'
-     $paths = @($PROFILE, (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'))
+     $p51 = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
+     $p7 = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
+     $paths = @($p7, $p51)
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($p in $paths) {
        if (-not (Test-Path -LiteralPath $p)) {
-         if ($p -ne $PROFILE) { "飛ばした: 7 のプロファイルが無い: $p"; continue }
+         if ($p -eq $p51) { "飛ばした: 5.1 のプロファイルが無い: $p"; continue }
          New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null
        }
        $text = Get-Content -LiteralPath $p -Raw
@@ -1296,19 +1303,20 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    }
    ```
 
-   - プロファイルごとに `足した:` か `すでにある:` が出ればよい。7 のプロファイルが無ければ `飛ばした:` が出る
+   - プロファイルごとに `足した:` か `すでにある:` が出ればよい。5.1 のプロファイルが無ければ `飛ばした:` が出る
    - 何度貼ってもよい
    - 開いているタブには効かない。次の手順は新しいタブで行う
 
-1. Windows Terminal で Windows PowerShell（5.1）の新しいタブを開き、Enter の割り当てを確かめる。
+1. Windows Terminal で PowerShell 7 の新しいタブを開き、Enter の割り当てを確かめる。
 
    ```powershell
    Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Enter' | Format-Table Key, Function -AutoSize
    ```
 
    - `Enter` の行に `PasteAwareEnter` が出ればよい
-   - 出なければ、この項の手順 2 と、実行ポリシー（[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 4）を確かめる
-   - PowerShell 7 でも使うなら、新しい「PowerShell」のタブでも同じ 1 行を貼る
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 出なければ、この項の手順 2 と、7 の実行ポリシー（[アプリを入れる](windows-setup.md#アプリを入れる)の手順 9）を確かめる
+   - 5.1 でも使うなら、新しい「Windows PowerShell」のタブでも同じ 1 行を貼る。出なければ、5.1 のプロファイルと実行ポリシー（[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 4）を確かめる
 
 1. 同じタブに右クリックで貼って Enter を押し、1 つの入力として動くことを確かめる。
 
@@ -1328,11 +1336,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - WezTerm nightly と、必要な Visual C++ ランタイムを PC 全体に入れる
 - 前提: [Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)を通し、winget が使える
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-1. 管理者の Windows PowerShell（5.1）を開く。
+1. 管理者の PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - ユーザーアカウント制御（UAC）の確認は「はい」
 
 1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
@@ -1444,11 +1453,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - Git の共通設定・共通の bash 設定と、自分用の WezTerm の設定を入れる
 - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[WezTerm](#windows-11-で-wezterm-を入れる)を通してある。導入後に Windows を再起動するか、サインアウトしてサインインし直し、PATH を読み直してある。GitHub のアカウントがある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3 からは Git Bash の窓、最後は WezTerm の Git Bash のタブ
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3 からは Git Bash の窓、最後は WezTerm の Git Bash のタブ
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Git for Windows の git の場所と版と、Git Bash があることを確かめる。
 
@@ -1777,11 +1787,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - scoop で fzf・zoxide・starship・eza・bat を入れ、Git Bash で確かめる
 - 前提: [アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[WezTerm](#windows-11-で-wezterm-を入れる)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 7・8 は WezTerm の新しい Git Bash のタブ
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 7・8 は WezTerm の新しい Git Bash のタブ
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
 
@@ -1799,11 +1810,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
+   - `PowerShell : 7.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` が空なら、先に[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 を通す
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](windows-setup.md#git-for-windows)を通す
    - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 を通す
-   - `VCRuntime : False` なら、[WezTerm](#windows-11-で-wezterm-を入れる)の手順 3 を管理者の窓で行ってから、このブロックを貼り直す
+   - `VCRuntime : False` なら、[WezTerm](#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 4 は、入っているものを飛ばす）
    - ほかの場所（winget の `…\WinGet\Links\` など）が出たら、ほかの方法で入れたものがある。中断し、既存の導入元と設定を確かめる
    - `Zoxide` が空か `zoxide 0.9.9` なら、この項の手順 3 は飛ばす
@@ -1891,7 +1902,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      - 「シェルのツール」の手順 7 で `/etc/os-release` が無い旨のエラーが出たら、そのコマンドを `~/.bashrc` に変えて打つ。`MANPAGER` は `bat -plman` と出るが、Git Bash に `man` は無い
      - 「シェルのツール」の手順 9 の `cd /usr/share` は、Git for Windows の `C:\Program Files\Git\usr\share` に移る。「シェルのツール」の手順 10 の一覧には、その形（`C:\…`）で出る
    - 「シェルのツール」の手順 8（tmux）は行わない
-   - `~/.bashrc` には追記しない。Windows PowerShell 5.1 には読み込まない
+   - `~/.bashrc` には追記しない。PowerShell には読み込まない
 
 1. 同じタブで、[キー操作を試す](#キー操作を試す)の手順 2〜5 のキーを押して、fzf を確かめる。
 
@@ -1899,7 +1910,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 「キー操作を試す」の手順 3 をホーム（`C:\Users\<WIN_USER>`）で行うと、`AppData` の下のファイルも一覧に入る
    - 「キー操作を試す」の手順 4 の `doc/bash` が一覧に無ければ、一覧にある別の語で絞る（`/usr/share` は Git for Windows のもの）
    - 日本語など ASCII 以外の文字では、絞り込めないことがある（Windows の fzf は、画面の一部に開いた一覧では ASCII 以外の文字を読めない）
-   - [fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd` は、通常の PowerShell で `scoop install fd` にする。導入済みなら省く
+   - [fzf で fd と bat を候補とプレビューに使う](#fzf-で-fd-と-bat-を候補とプレビューに使う)も通せる。そちらの `brew install fd` は、管理者ではない PowerShell 7 で `scoop install fd` にする。導入済みなら省く
    - bat の設定にはこの項の手順 6を使う
 
 #### Windows 11 で starship の表示を変える
@@ -1982,15 +1993,16 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - PowerShell 7 に貼り付け・↑/↓ の履歴検索と、導入済みの zoxide・starship を読む設定を足す
 - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 6 は PowerShell 7 の窓
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 6 は PowerShell 7 の窓
 - 対象は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1`。Windows PowerShell 5.1 のプロファイルとは別
 - 足す行は ASCII の文字だけで、行末に印 `# windows-setup.md` を付ける
 - zoxide と starship は、入れていなければ読まない。入れた後に PowerShell 7 を開き直せば読む
 - Windows Terminal の既定のプロファイルは Windows PowerShell のまま変えない
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. PowerShell 7 のプロファイルに、貼り付けと履歴の検索のキーと、zoxide・starship を読む行を足す。
 
@@ -2070,6 +2082,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. スタートメニューから PowerShell 7 を開き、キーとプロンプトを確かめる。
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く（一覧の名前に 7 は付かないことがある）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - 何か打ってから ↑ を押すと、打った文字で始まる履歴だけが出る
    - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）。[開発の設定](#powershell-7-のプロファイルに開発の設定を足す)を通してあれば一覧で出る
    - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
@@ -2079,16 +2092,17 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - 任意で、PowerShell 7 のキー操作を Emacs モードにし、Ctrl+V の貼り付けを割り当て直す
 - 前提: [PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 2 を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は、新しい PowerShell 7 の窓
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3・4 は、新しい PowerShell 7 の窓
 - 足す行は ASCII の文字だけで、行末の印は `# shell-terminal.md`。キーの割り当てより前、先頭の `using`・`param`・`#Requires` などの宣言より後に入れる
 - [設定する行と挿入位置の補足](reference/shell-terminal.md#powershell-7-で-emacs-モードを使う--手順-2-補足-設定する行と挿入位置)
 
 > [!WARNING]
 > この項の手順 2 はファイルだけを変える。今開いている窓で `Set-PSReadLineOption -EditMode` を実行すると、それまでのキーの割り当てが消えるので、貼り付けを続ける窓では実行しない。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. PowerShell 7 のプロファイルに、モードとキーの 2 行を入れる。
 
@@ -2107,7 +2121,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $text = [regex]::Replace($original, '(?m)^(\uFEFF|\u00EF\u00BB\u00BF)?[^\r\n]*  # shell-terminal\.md\r?(\n|$)', '$1')
      if ($wide) { $parseText = $text; $parseEnc = $enc } else {
        $parseEnc = New-Object Text.UTF8Encoding($false, $true)
-       try { $parseText = $parseEnc.GetString($enc.GetBytes($text)) } catch { $parseEnc = [Text.Encoding]::Default; $parseText = $parseEnc.GetString($enc.GetBytes($text)) }
+       try { $parseText = $parseEnc.GetString($enc.GetBytes($text)) } catch { $parseEnc = [Text.Encoding]::GetEncoding([Globalization.CultureInfo]::CurrentCulture.TextInfo.ANSICodePage); $parseText = $parseEnc.GetString($enc.GetBytes($text)) }
      }
      $bomLength = 0
      if ($parseText.Length -gt 0 -and $parseText[0] -eq [char]0xFEFF) {
@@ -2158,6 +2172,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
    - 「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
 1. 新しい PowerShell 7 で、モードとキーを確かめる。
@@ -2179,12 +2194,13 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は新しい Windows PowerShell（5.1）の窓
 - 対象は `[Environment]::GetFolderPath('MyDocuments')` の下の `WindowsPowerShell\Microsoft.PowerShell_profile.ps1`（Windows PowerShell 5.1 の `$PROFILE`）
+- [5.1 にする理由](reference/shell-terminal.md#windows-powershell-51-のキー操作を変える--手順-1-補足-51-にする理由)
 - 足す 4 行は ASCII の文字だけで、行末の印は `# shell-terminal.md`。Ctrl+Enter などのキーの割り当てより前、先頭の宣言より後に入れる
 - Ctrl+V は `Paste` を割り当て直す。複数行を作る Ctrl+Enter は、貼り付けの設定の `AddLine` のまま
 - conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、文字をキーとして送る。LF は Ctrl+Enter として届くので、[貼り付けの設定](windows-setup.md#貼り付けの設定)の Ctrl+Enter の `AddLine` の行が、この項の EditMode の行より後に残っている必要がある（この項の手順 2 は、その順に入れる）。Emacs モードの窓に右クリックで貼ることは、実機では確かめていない（[補足](reference/shell-terminal.md#windows-powershell-51-のキー操作を変える--手順-2-補足-適用範囲と貼り付け)）
 
 > [!WARNING]
-> - この項の手順 2 で変えるプロファイルは、手順書を貼る管理者の conhost の窓や、プロファイルを読む SSH のセッションにも効く。
+> - この項の手順 2 で変えるプロファイルは、5.1 に貼る項で使う管理者の conhost の窓や、プロファイルを読む 5.1 の SSH のセッションにも効く。
 > - 全ユーザーの `$PSHOME\profile.ps1` などは先に読まれる。そこで付けたキーも `EditMode` で消えるので、必要な割り当てはこの項の行より後で付け直す。
 > - この項の手順 2 はファイルだけを変える。今開いている窓で `Set-PSReadLineOption -EditMode` を実行しない。
 
@@ -2283,24 +2299,24 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - PowerShell 7 と Windows PowerShell 5.1 に開発用の検査・テストのモジュールを入れ、7 のテレメトリと更新の通知を止める
 - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6（PowerShell 7）を通してある。外部コマンドは[シェルのツールを入れる](#シェルのツールを入れる)（fzf・eza・bat・starship）・[git-delta](windows-setup.md#git-delta)・[GitHub CLI](windows-setup.md#github-cli)で入れる
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。7 の操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う。確認は新しい 7 と 5.1 の窓
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。7 の操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う。この項の手順 8・9 の確認は新しい Windows PowerShell（5.1）の窓
 - 無い外部コマンドの補完と関数は飛ばす。rg・fd は、[Windows 11 で LazyVim の設定を導入する](neovim.md#windows-11-で-lazyvim-の設定を導入する)で入れてあれば対象にする
 - エディターは [Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で設定する
-- [モジュールの補足](reference/shell-terminal.md#powershell-を開発に使う--手順-3-補足-モジュールの導入元)・[選択した方針](reference/shell-terminal.md#powershell-を開発に使う)・[注意点](extra/shell-terminal.md#注意点)
+- [モジュールの補足](reference/shell-terminal.md#powershell-を開発に使う--手順-3-補足-モジュールの導入元)・[手順 8・9 を 5.1 にする理由](reference/shell-terminal.md#powershell-を開発に使う--手順-8-補足-51-にする理由)・[選択した方針](reference/shell-terminal.md#powershell-を開発に使う)・[注意点](extra/shell-terminal.md#注意点)
 - プロファイルは子の項で設定する
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 版・モジュール・環境変数と、補完の控えの有無を確かめる。
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
-   $PSVersionTable.PSVersion
+   powershell.exe -NoProfile -Command { $PSVersionTable.PSVersion; Get-Module -ListAvailable -Name PSScriptAnalyzer,Pester,PSReadLine | Select-Object Name,Version,ModuleBase | Out-String -Width 160 }
    Get-Command pwsh.exe -ErrorAction SilentlyContinue | Select-Object Source | Format-Table -AutoSize
    Get-Command winget,git,fzf,eza,gh,rg,fd,delta,bat,starship -CommandType Application -ErrorAction SilentlyContinue | Select-Object Name,Source | Format-Table -AutoSize
-   Get-Module -ListAvailable -Name PSScriptAnalyzer,Pester,PSReadLine | Select-Object Name,Version,ModuleBase | Format-Table -AutoSize
    pwsh.exe -NoLogo -NoProfile -Command {
      $PSVersionTable.PSVersion
      Get-Command Install-PSResource,Save-PSResource,Get-PSResource | Select-Object Name,Source | Out-String -Width 120
@@ -2366,6 +2382,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
 1. 新しい PowerShell 7 で、モジュールと環境変数を確かめる。
@@ -2404,7 +2421,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - PowerShell 7 に UTF-8・補完・予測の一覧・PSFzf・短縮の関数を設定する
 - 前提: [PowerShell を開発に使う](#powershell-を開発に使う)と[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)を通してある。Tab の一覧は同じ項の手順 3
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4・5 は新しい PowerShell 7 の窓
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 4・5 は新しい PowerShell 7 の窓
 - プロファイルに足す 9 行は ASCII だけで、印は `# shell-terminal.md:dev`。`$PROFILE` の読み直しはせず、新しい窓で確かめる
 - 補完の控えは `%LOCALAPPDATA%\PowerShell\completions`。無い道具は飛ばす。道具を上げた後は[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)を通す
 - [設定する行の補足](reference/shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す--手順-3-補足-utf-8-と終了時の復元)・[注意点](extra/shell-terminal.md#注意点)
@@ -2413,9 +2430,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 > - この項の手順 3 の UTF-8 の行を読む 7 の窓では、`ipconfig`・`whoami` などの出力が英語になる。
 > - この項の手順 3 の PSFzf の行は、Emacs モードの Ctrl+T（文字の入れ替え）・Ctrl+R（履歴の検索）を置き換える。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 入っている道具の補完を生成し、UTF-8 の控えのファイルに保存する。
 
@@ -2485,6 +2503,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - 日本語のコミットがあるローカルの Git リポジトリへ `Set-Location` で移る
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
@@ -2515,7 +2534,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は新しい 5.1 の窓
 - 対象は `Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`。足すのは ASCII の 3 行で、印は `# shell-terminal.md:dev`
 - 5.1 のコード ページは常には変えない。starship・zoxide と、6 つの道具の補完の控えは読まない
-- [設定する行の補足](reference/shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す--手順-2-補足-必要なときだけ-utf-8-にする)・[注意点](extra/shell-terminal.md#注意点)
+- [設定する行の補足](reference/shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す--手順-2-補足-必要なときだけ-utf-8-にする)・[5.1 にする理由](reference/shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す--手順-1-補足-51-にする理由)・[注意点](extra/shell-terminal.md#注意点)
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -2578,11 +2597,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - Windows PowerShell 5.1 の PSReadLine を、自分のユーザーのモジュールとして 2.4.5 に上げる
 - 前提: [PowerShell を開発に使う](#powershell-を開発に使う)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。保存は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う。この項の手順 4・5 は新しい 5.1 の窓、この項の手順 7 は 5.1 の窓をすべて閉じた後の新しい PowerShell 7 の窓
-- [版と貼り付けの補足](reference/shell-terminal.md#windows-powershell-51-の-psreadline-を上げる--手順-3-補足-版を指定して保存する理由)・[注意点](extra/shell-terminal.md#注意点)
+- [版と貼り付けの補足](reference/shell-terminal.md#windows-powershell-51-の-psreadline-を上げる--手順-3-補足-版を指定して保存する理由)・[5.1 にする理由](reference/shell-terminal.md#windows-powershell-51-の-psreadline-を上げる--手順-1-補足-51-にする理由)・[注意点](extra/shell-terminal.md#注意点)
 - 元から `Documents\WindowsPowerShell\Modules\PSReadLine\2.4.5` がある場合は、この項の手順 3・6・7 は行わない
 
 > [!WARNING]
-> - この項の手順 3 で保存すると、手順書を貼る管理者の窓と SSH のセッションも、次に開いた窓から 2.4.5 を読む。
+> - この項の手順 3 で保存すると、5.1 に貼る項で使う管理者の窓と 5.1 の SSH のセッションも、次に開いた窓から 2.4.5 を読む。
 > - 予測の候補として、共有の履歴が入力と同じ行に出る。起動は 0.2 秒ほど延びる目安で、環境により異なる。
 > - この項の手順 6・7 で戻す前に、[PowerShell の開発の設定を更新する](#powershell-の開発の設定を更新する)で保存した PSReadLine の新版も消す。同じ項の手順 6 の要領で、この手順書で追加した版だけを対象にする。
 
@@ -2643,12 +2662,13 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - [PC 全体の設定](windows-setup.md#pc-全体の設定)の手順 4 と同じく、GitHub のコピーボタンでコピーし、右クリックで貼る。最後の `}` で Enter を押す
    - `1 行目`・`2 行目`・`3 行目`・`入れ子の行` の順に出て、版が `2.4.5`、`Ctrl+Enter` が `AddLine`、予測の元が `History` ならよい
    - [Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)を通してあれば、`Ctrl+v` が `Paste`、↑/↓ が `HistorySearchBackward`・`HistorySearchForward` のままであることも確かめる
-   - 手順書を貼る管理者の窓と SSH を使う場合は、それぞれ新しい窓・セッションでも版と貼り付けを確かめる。うまく貼れなければ、この項の手順 6・7 で戻す
+   - 5.1 に貼る項で使う管理者の窓と 5.1 の SSH を使う場合は、それぞれ新しい窓・セッションでも版と貼り付けを確かめる。うまく貼れなければ、この項の手順 6・7 で戻す
 
 1. この項の手順 5 でうまく貼れなかったときだけ、Windows PowerShell（5.1）の窓をすべて閉じ、新しい PowerShell 7 を開く。
 
    - この項の手順 1 の窓、管理者の窓、5.1 の SSH のセッションも閉じる。5.1 の窓は、開いている間 2.4.5 の DLL を使い続けるので、その版のフォルダーを消せない
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
 1. この項の手順 6 を行ったときだけ、新しい PowerShell 7 で、この項で保存した PSReadLine 2.4.5 の版のフォルダーだけを、名前を変えてから消す。
@@ -2675,7 +2695,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - 外部コマンドの補完の控えと、7・5.1 の開発用モジュールを上げる
 - 前提: [PowerShell を開発に使う](#powershell-を開発に使う)を通してある。補完は [PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)を通してあるときだけ
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。モジュールの操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。モジュールの操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う
 - 外部コマンドは、先に [scoop・winget・WSL を上げる](windows-setup.md#scoopwingetwsl-を上げる)で上げる
 - PSReadLine は [Windows PowerShell 5.1 の PSReadLine を上げる](#windows-powershell-51-の-psreadline-を上げる)を通したときだけ、この項の手順 5 で対象にする
 - [更新の補足](reference/shell-terminal.md#powershell-の開発の設定を更新する--手順-4-補足-51-のモジュールを上げる)・[注意点](extra/shell-terminal.md#注意点)
@@ -2683,9 +2703,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 > [!WARNING]
 > この項の手順 5 で保存する PSReadLine の最新版は、2.4.5 と同じ動作とは限らない。新しい管理者の窓・SSH のセッションにも効くので、保存した後は [Windows PowerShell 5.1 の PSReadLine を上げる](#windows-powershell-51-の-psreadline-を上げる)の手順 5 で版・キー・貼り付けを確かめる。
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 補完の設定を行ったときは、入っている道具の補完の控えを作り直す。
 

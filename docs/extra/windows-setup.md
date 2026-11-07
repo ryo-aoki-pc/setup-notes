@@ -17,16 +17,19 @@
 - **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
 - **Ctrl+Space はアプリでは使えなくなる**: IME が受け取るので、PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などの Ctrl+Space は効かなくなるはず（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md)・[参考資料](../reference/windows-setup.md)）
   - PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 3）
-- **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](../windows-setup.md#表示と入力)の手順 7）、管理者として開いた PowerShell は conhost の窓になる。右クリックで貼れるのは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5 のプロファイルの設定による
+- **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](../windows-setup.md#表示と入力)の手順 7）、管理者として開いた PowerShell は conhost の窓になる
+  - Windows PowerShell 5.1 で右クリックで貼れるのは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5 のプロファイルの設定による
+  - PowerShell 7 では、[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 7 のプロファイルの設定による
 - **外したアプリと提案は、機能の更新で戻ることがある**: 自分のユーザーから外したアプリ（[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 3・4）は、PC に置かれた元が残るので、Windows の大きな更新の後に戻ってくることがある。[表示と入力](../windows-setup.md#表示と入力)の手順 4 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 1〜4 を貼り直す
 - **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](../windows-setup.md#表示と入力)の手順 3）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 3 の `ClassicMenu` と[表示と入力](../windows-setup.md#表示と入力)の手順 3 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](../windows-setup.md#表示と入力)の手順 2・4 と[自動起動と標準アプリ](../windows-setup.md#自動起動と標準アプリ)の手順 2 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 - **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
-- **PowerShell 7 のプロファイルは別**: [貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 5 の行は Windows PowerShell 5.1 のプロファイルにだけ書く。PowerShell 7（[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 6）は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の手順書群は、Windows PowerShell 5.1 に貼る
-  - 同じ貼り付けの設定を PowerShell 7 にも足すなら、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)
+- **PowerShell 7 のプロファイルは別**: PowerShell 7 のプロファイルには、[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 7 で貼り付けの行を書く
+  - PowerShell 7 は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く
+  - 履歴検索や zoxide・starship の設定も足すなら、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
-- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5 の後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く。Windows Terminal の窓で同じにするなら、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)
+- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。Windows PowerShell 5.1 は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5、PowerShell 7 は[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 7 の設定後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く。Windows Terminal の窓で同じにするなら、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
-- **このユーザーの Windows PowerShell のコンソールの窓すべてに効く**: 管理者の窓も同じプロファイルを読む
+- **設定した版のコンソールの窓すべてに効く**: 同じユーザーなら、管理者の窓も同じプロファイルを読む。Windows PowerShell 5.1 と PowerShell 7 のプロファイルは別なので、それぞれに貼り付けの行を置く
 - **ほかの項にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 6）は、[表示と入力](../windows-setup.md#表示と入力)の手順 3 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの
 - **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める](../windows-setup.md#edge-の常駐をポリシーで止める)の手順 2 のポリシーで出る。[サインイン・検索・キーボード](../windows-setup.md#サインイン検索キーボード)の手順 4 の `EdgeUpdate` だけで出るかは、確かめていない
 - **ストレージ センサーはファイルを消す**: [表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 11 は、ごみ箱に 30 日を超えて置いたファイルと一時ファイルを毎月消す（取り戻せない）。OneDrive のファイルは、[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 12 で外さないと、オンラインだけにされうる

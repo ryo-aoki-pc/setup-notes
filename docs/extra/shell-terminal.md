@@ -67,7 +67,7 @@
   - 無効化は `WEZTERM_SHELL_SKIP_ALL=1`。自分用の WezTerm の設定（「WezTerm」の手順 5）を使うなら、止めない（その docs/install.md の注意点）
 - **WezTerm: 既存の `_copr:...yazi.repo` など EL10 向け COPR と混在させても問題ない。** repo ごとに `baseurl` の chroot が違うだけ
 - **PSReadLine の Emacs モードは、それより前に付けたキーを既定に戻す**: EditMode の行を、キーの割り当てより前に置く。Ctrl+V は `Paste` を割り当て直す。開いている窓では切り替えず、新しい窓で確かめる
-- **Windows PowerShell 5.1 のキーは、手順書を貼る管理者の conhost の窓にも効く**: 任意の[キー操作の設定](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で変える。先に全ユーザーのプロファイルが付けたキーも EditMode で既定に戻る
+- **Windows PowerShell 5.1 のキーは、5.1 に貼る項で使う管理者の conhost の窓にも効く**: 任意の[キー操作の設定](../shell-terminal.md#windows-powershell-51-のキー操作を変える)で変える。先に全ユーザーのプロファイルが付けたキーも EditMode で既定に戻る
   - Ctrl+V は `Paste`、Ctrl+Enter は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の `AddLine` を使う
   - conhost の右クリックの貼り付けは、LF を Ctrl+Enter として送る。貼り付けの設定の `AddLine` の行が、EditMode の行より後に残っている必要がある（任意の項の手順 2 は、その順に入れる）。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
 - **PowerShell 7 の開発の設定は、外部コマンドの表示の言語も変える**: コンソールを UTF-8 にすると、`ipconfig`・`whoami` などが英語になる。5.1 は常には変えず、[開発の設定](../shell-terminal.md#windows-powershell-51-のプロファイルに開発の設定を足す)の `Invoke-Utf8Native` の間だけ変える

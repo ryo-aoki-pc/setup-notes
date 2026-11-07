@@ -90,6 +90,11 @@
 
 - 系列を変えても、repo ファイル・鍵・EPEL・ビルドの道具・MOK・KVM の設定はそのまま使える
 
+### Windows 11 で VirtualBox を入れる / 手順 1: 補足: 5.1 にする理由
+
+- 手順 2 は Dism モジュールの `Get-WindowsOptionalFeature` を使うため、管理者の窓で行う手順 1〜4 は Windows PowerShell 5.1 に貼る。手順 5 で開く管理者ではない窓は PowerShell 7 にする
+- Microsoft Store 版の PowerShell 7 で、同じ Dism モジュールの `Add-WindowsCapability` が「クラスが登録されていません」で失敗した。`*-WindowsOptionalFeature` も、VM で確かめるまでは 5.1 にする
+
 ### Windows 11 の VirtualBox / 手順 2: 補足: 確かめる値の意味
 
 - `Hypervisor` が `True` なら、Hyper-V のハイパーバイザーが動いている（WSL 2 を使う PC など）。VirtualBox の VM は Hyper-V の上で動き、遅くなる（[注意点](../extra/virtualbox.md#注意点)）

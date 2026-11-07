@@ -4,6 +4,12 @@
 
 ## 補足
 
+### Windows Sandbox で配布物を試す / 手順 1: 補足: 5.1 にする理由
+
+- 状態確認と有効化は Dism モジュールの `Get-WindowsOptionalFeature`・`Enable-WindowsOptionalFeature` を使うため、手順 1〜5 は管理者の Windows PowerShell 5.1 に貼る
+- Microsoft Store 版の PowerShell 7 で、同じ Dism モジュールの `Add-WindowsCapability` が「クラスが登録されていません」で失敗した。`*-WindowsOptionalFeature` も、VM で確かめるまでは 5.1 にする
+- 手順 6 からは管理者の窓を閉じ、通常のデスクトップから Sandbox を開く
+
 ### Windows Sandbox で配布物を試す / 手順 2: 補足: 対応環境
 
 - クリーンな Windows で配布物を起動し、開発用 PC に既にあるツールや依存ライブラリに頼っていないかを確かめるため、初期設定の後に、要るときだけ通す項にした

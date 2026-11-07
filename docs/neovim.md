@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 >
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **Windows PowerShell 5.1** に貼る。管理者・通常の窓は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
@@ -558,11 +558,12 @@
 
 - scoop で Neovim を入れ、自分用の LazyVim の設定を導入する
 - 前提: [アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 管理者ではないことと、scoop・git・VC++ のランタイム・ほかの Neovim を確かめる。
 
@@ -578,10 +579,10 @@
    } | Format-List
    ```
 
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
+   - `PowerShell` が `7.` で始まり、`Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 で入れる
    - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](windows-setup.md#git-for-windows)
-   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の Windows PowerShell で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、この手順を貼り直す
    - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。中断し、既存の導入元と設定を確かめる
 
 1. scoop で Neovim を入れる。
@@ -618,15 +619,16 @@
 
 #### Neovim を既定のエディタにする
 
-- Windows PowerShell や Windows Terminal から起動するツールにも Neovim を使わせる
+- PowerShell 7 や Windows Terminal から起動するツールにも Neovim を使わせる
 - 前提: [Neovim](#windows-11-で-neovim-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Git Bash では、[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)で入れた共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にするので、この項は要らない
 - Git Bash の値は WezTerm の新しいタブで、[AlmaLinux 10 の「Neovim」](#neovim)の手順 4 のブロックを貼って確かめる（`. ~/.bashrc` は読み直さない）
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Windows の PowerShell でも使うように、`EDITOR`・`VISUAL` を `nvim` にする。
 
@@ -649,15 +651,16 @@
 
 - Windows の Neovim に自分用の LazyVim の設定と外部コマンド・プラグインを入れる
 - 前提: [Git for Windows](windows-setup.md#git-for-windows)・[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)と、[Neovim](#windows-11-で-neovim-を入れる)で本体を先に入れてある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
 - この項の手順 11 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 - [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. git が無ければ入れ、scoop に `extras` のバケットを足す。
 
@@ -798,15 +801,16 @@
 
 - 設定と lazy-lock.json を取り込み、プラグインをその版に揃える
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)の手順 3 で上げる
 - 外したプラグインは `:Lazy clean`、外した Mason ツールは `:MasonUninstall <名前>` で消す
 - この項の手順 3 は、まだ入れていない版の公式スタイルを取得するときに約 785 MB をダウンロードする
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Windows 11 では、設定を最新にしてプラグインを揃える。
 
@@ -840,12 +844,13 @@
 
 - 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、保存と手動整形を確かめる
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 2 からは、その窓で起動する Neovim
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 からは、その窓で起動する Neovim
 - 整形器と依存は md-format の導入先（`%LOCALAPPDATA%\md-format`）にある。Neovim からは入れない。lint の診断用の markdownlint-cli2 は Mason で入る
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. 試験用の Markdown を Neovim で開く。
 
@@ -892,13 +897,14 @@
 
 - GitLab プレビュー用のトークンと、送り先の GitLab を自分のユーザーの環境変数に設定する
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある。GitLab でスコープ `read_api` の個人アクセストークンを用意してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 4 で通常の窓を開き直し、手順 5 で Neovim を起動する
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 4 で通常の窓を開き直し、手順 5 で Neovim を起動する
 - 編集中の内容とトークンは設定した GitLab（空なら gitlab.com）に送る
 - 設定しなくても近似プレビューは使える
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Windows 11 では、トークンを入力して、ユーザーの環境変数にする。
 
@@ -922,9 +928,10 @@
    - Enter の後、プロンプトが戻るまで 2 秒ほどかかる
    - **次の手順は、URL を入力し、プロンプトが戻ってから貼る**
 
-1. 管理者ではない Windows PowerShell（5.1）を開き直す。
+1. 管理者ではない PowerShell 7 を開き直す。
 
-   - この項の手順 1 の窓を閉じ、スタートメニューで「Windows PowerShell」をクリックして開く（管理者として実行しない）
+   - この項の手順 1 の窓を閉じ、スタートメニューで「PowerShell」をクリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
    - **次の手順は、開き直した PowerShell に貼る**
 
 1. Windows 11 では、新しい端末でこの設定の README を開き、プレビューで確かめる。
@@ -943,14 +950,15 @@
 
 - scoop で入れた本体と外部コマンド・LazyVim のプラグインを更新する
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - 設定の取り込みは[LazyVim の設定とプラグインの版を揃える](#windows-11-で-lazyvim-の設定とプラグインの版を揃える)で行う
 - 更新後は動作を確認し、`lazy-lock.json` の差分をコミット・push する
 
-1. 管理者ではない Windows PowerShell（5.1）を開く。
+1. 管理者ではない PowerShell 7 を開く。
 
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない。PowerShell 7 の「PowerShell」ではない）
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
 
 1. Windows 11 では、scoop で入れたものを上げる。
 

@@ -11,6 +11,11 @@
 - インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（「PC 全体の設定」の手順 6 の sudo は 24H2 以降、「表示と入力」の手順 5 の時計の秒など）
 - この後の「WSL と再起動」の手順 3 の再起動より前に、Windows Update の再起動を済ませておく。途中で更新の再起動が入ると、「PC 全体の設定」の手順 2 から「WSL と再起動」の手順 2 までの設定が効く時期が読みにくくなる
 
+### Windows Update / 手順 1: 補足: 5.1 にする理由
+
+- PowerShell 7 を入れる前に通す項なので、Windows に含まれる Windows PowerShell 5.1 を使う
+- PSWindowsUpdate は Windows PowerShell 5.1 だけで動くため、PowerShell 7 を入れた後も 5.1 で通す
+
 ### Windows Update / 手順 2: 補足: 今の窓だけにする理由
 
 - `Process` の実行ポリシーと TLS 1.2 の追加は、この窓を閉じると無くなる。「貼り付けの設定」の手順 3 で控える `CurrentUser` の実行ポリシーは変えない
@@ -37,6 +42,7 @@
 
 ### Microsoft Store の更新 / 手順 1: 補足: 5.1 にする理由
 
+- PowerShell 7 を入れる前に通す項なので、Windows に含まれる Windows PowerShell 5.1 を使う
 - 実行ポリシーとプロファイルは、5.1 と 7 で別々に持つ
 
 ### Microsoft Store の更新 / 手順 3: 補足: インストール直後の winget
@@ -54,6 +60,10 @@
 ### Microsoft Store の更新 / 手順 6: 補足: 対象
 
 - 名前や発行元のフィルターは付けず、すべての Store アプリを対象にする
+
+### 貼り付けの設定 / 手順 1: 補足: 5.1 にする理由
+
+- PowerShell 7 を入れる前に通す項なので、Windows に含まれる Windows PowerShell 5.1 を使う。7 の貼り付けの設定は「アプリを入れる」の手順 7 で別に足す
 
 ### 貼り付けの設定 / 手順 2: 補足: 行を足す理由
 
@@ -78,7 +88,11 @@
 ### 貼り付けの設定 / 手順 5: 補足: ほかの行と、この行を読む窓
 
 - プロファイルにほかの行があれば、そのまま残る
-- これより後に開く Windows PowerShell の窓（「PC 全体の設定」の手順 1 の管理者の窓も）は、この行を読む
+- これより後に開く Windows PowerShell 5.1 の窓は、この行を読む。PowerShell 7 は「アプリを入れる」の手順 7 で別のプロファイルに書く行を読む
+
+### アプリを入れる / 手順 1: 補足: 5.1 にする理由
+
+- 手順 1〜7 は、PowerShell 7 を入れて貼り付けの設定を足すまでの操作なので、Windows PowerShell 5.1 で通す。手順 8 で PowerShell 7 を開き、手順 9 を 7 に貼る
 
 ### アプリを入れる / 手順 2: 補足: インストーラのすること
 
@@ -123,8 +137,9 @@
 
 - Microsoft の文書は、winget のパッケージは 7.6.0 から既定で MSIX を入れると書いている。winget の定義（`Microsoft.PowerShell` 7.6.6.0）も、MSIX（自分のユーザー）を先に、MSI（PC 全体。`elevatesSelf`）を後に並べている
 - MSIX は自分のユーザーだけに入り、更新は winget かストアで行う。PC 全体の実行ポリシーやリモートの受け口は設定できない（Microsoft の文書）。このリポジトリの使い方では足りる
+  - Store 版の PowerShell 7 の実行ポリシーの既定は `RemoteSigned`
 - PC 全体の MSI（`$Env:ProgramFiles\PowerShell\7`、Microsoft Update で更新）にするなら `--installer-type wix` を付ける。ただし Microsoft の文書では、7.7.0 から MSI は無くなる
-- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。PowerShell 7 の窓に右クリックで貼ると、同じように逆順になるはず（「貼り付けの設定」の手順 5 は PowerShell 7 のプロファイルには書かない。[注意点](../extra/windows-setup.md#注意点)）
+- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。「アプリを入れる」の手順 7 で、PowerShell 7 のプロファイルにも `AddLine` の行を書く（[注意点](../extra/windows-setup.md#注意点)）
 - winget の既定の範囲: 設定（`settings.json`）の `installBehavior.preferences.scope` は、書かなくても `user`（winget の `UserSettings.h`）で、user のインストーラが無ければ machine を選ぶ。そのため、範囲を変える設定は足さない
   - PowerShell 7 の MSIX（範囲の宣言が無い）と MSI（machine）は、どちらも user に当たらない。インストーラの種類の順（MSIX が MSI より先）で MSIX が選ばれる
   - `installBehavior.requirements.scope` は絞り込みで、machine だけのパッケージと、範囲を宣言しないインストーラ（MSIX・Store・持ち運び版・フォントを除く）が外れるので書かない。UniGet UI のスコープも「デフォルト」のまま（「ユーザー | ローカル」は `--scope user` を付ける）
@@ -133,7 +148,15 @@
 ### アプリを入れる / 手順 6: 補足: 版とスタートメニュー
 
 - 最後の表の版は、実行した日の最新
-- スタートメニューに「PowerShell 7」ができる
+- スタートメニューの一覧の名前は「PowerShell」（7 は付かない）
+
+### アプリを入れる / 手順 7: 補足: 7 のプロファイルに足す行
+
+- 管理者の PowerShell は conhost の窓で開き、右クリックの貼り付けは LF を Ctrl+Enter として送る。PowerShell 7.6 の PSReadLine 2.4.5 も Ctrl+Enter が `InsertLineAbove` なので、`AddLine` の行が無いと複数行が逆順に貼られる
+- 足す行は、[shell-terminal.md の「PowerShell 7 のプロファイルを設定する」の手順 2](../shell-terminal.md#powershell-7-のプロファイルを設定する)の 1 行目と同じで、印も `# windows-setup.md`。後で同じ項を通すと、この行は `すでにある:` になる
+- Windows PowerShell 5.1 の窓から書くので、`$PROFILE`（5.1 のもの）ではなく PowerShell 7 のパスを明示する
+- Windows PowerShell 5.1 の `Add-Content` は ANSI で書くが、足す行は ASCII だけなので、PowerShell 7 でも同じに読む
+- `Get-Module -Name PSReadLine` の条件は、PSReadLine を読まない窓（`-NonInteractive` など）で止めないため
 
 ### Git for Windows / 手順 2: 補足: 確かめていること
 
@@ -149,7 +172,7 @@
 
 ### PC 全体の設定 / 手順 1: 補足: プロファイルの行
 
-- この窓は、「貼り付けの設定」の手順 5 でプロファイルに書いた行を読む（「PC 全体の設定」の手順 3 で確かめる）
+- この窓は、「アプリを入れる」の手順 7 で PowerShell 7 のプロファイルに書いた行を読む（「PC 全体の設定」の手順 3 で確かめる）
 
 ### PC 全体の設定 / 手順 2: 補足: 変数について
 
@@ -159,7 +182,7 @@
 
 ### PC 全体の設定 / 手順 3: 補足: 見ているもの
 
-- `CtrlEnter` は、この窓の PSReadLine の Ctrl+Enter の働き。「貼り付けの設定」の手順 5 のプロファイルを読んでいれば `AddLine`、読んでいなければ既定の `InsertLineAbove`
+- `CtrlEnter` は、この窓の PSReadLine の Ctrl+Enter の働き。「アプリを入れる」の手順 7 のプロファイルを読んでいれば `AddLine`、読んでいなければ既定の `InsertLineAbove`
 - `Edition` は `HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion` の `EditionID`。`Core`・`CoreN`・`CoreSingleLanguage`・`CoreCountrySpecific` が Home、`Professional` などが Pro。Microsoft の文書では、Home はリモート デスクトップでつながれる側になれない
 - `Sudo` は、Windows に入っている `sudo.exe` の場所。Microsoft の文書では、sudo は 24H2 以降
 - `Hypervisor` は、Windows のハイパーバイザー（Hyper-V）が動いているか。WSL 2（「WSL と再起動」の手順 2）・メモリ整合性・Credential Guard などで動く
@@ -277,6 +300,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - 既定では、`HttpAcceptLanguageOptOut`・`Siuf\Rules` の 2 つ・`HasAccepted`・`SearchSettings` の 3 つ・`ShowSyncProviderNotifications` は値が無い（広く）。`AdvertisingInfo\Enabled`・`TailoredExperiences…`・`TIPC\Enabled` は、OOBE の選び方で 1 か 0
 - キーが無いときだけ `New-Item -Force` で作る。PowerShell 5.1 の `New-Item` の文書のとおり、既にあるレジストリのキーに `-Force` を付けると、値の無い空のキーで上書きされる
+- CSV は PowerShell 7 の `-Encoding utf8BOM` で書き、Windows PowerShell 5.1 でも文字コードを見分けられる BOM 付きの UTF-8 にする
 - 元の値と型（DWORD か QWORD）を `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控える。初めて貼ったときだけ作るので、2 回目に貼っても元の値は失われない
 - 「フィードバックの頻度」を「1 日 1 回」などにしていると、`PeriodInNanoSeconds` は 864000000000 などの 32 ビットに収まらない数になる（18.16）。型は QWORD のはず（推測。文書は REG_DWORD と書く）なので、型も控える
 - 広告 ID を切っても、広告の数は減らない。オンに戻すと、ID は作り直される（サポートの記事）
@@ -326,6 +350,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### 表示・入力・音・ストレージを控えて変える / 手順 2: 補足: 控えのファイル
 
+- CSV は PowerShell 7 の `-Encoding utf8BOM` で書き、Windows PowerShell 5.1 でも文字コードを見分けられる BOM 付きの UTF-8 にする
 - `%LOCALAPPDATA%\setup-notes\display-before.csv` に、この節で変える値の、変える前の値を `Name`・`Value` の 2 列で書く。初めて貼ったときだけ作り、2 回目からは書き換えない（機能の更新の後に貼り直しても、元の値が残る）
 - 固定キーなどの `Flags`・`MinAnimate`・効果音のスキームは、確かめるために並べるだけ
 - 読者が値を控えて手で入れる形にしなかったのは、値が多く、打ち間違えやすいため
@@ -737,6 +762,11 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 
 - Windows で出る `system` の行（インストーラが書いたもの）より、[Git](../almalinux-setup.md#git)の手順 4・5 で書く `global` の値が優先される
 
+### scoop・winget・WSL を上げる / 手順 1: 補足: 5.1 にする理由
+
+- 手順 4 の更新の対象に PowerShell 7 自身（`Microsoft.PowerShell`）があるので、更新される 7 の窓からは動かさない
+- 手順 6 で案内する Windows Update の PSWindowsUpdate は Windows PowerShell 5.1 だけで動く
+
 ### scoop・winget・WSL を上げる / 手順 5: 補足: wsl.exe --update
 
 - `wsl.exe --update` は WSL のパッケージ（とカーネル）を上げる
@@ -965,7 +995,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
 - **確かめの起動は `%TEMP%\lazygit-check` の空のリポジトリで行う**
   - 読者のリポジトリの場所を決め打ちできないため。git 管理外で起動すると、リポジトリを作るか聞かれる
   - `git init` が失敗したまま起動すると、元のフォルダーでリポジトリを作るか聞かれるので、`.git` ができたことを確かめてから起動する
-- **`e` キーのエディタ**: Windows PowerShell から起動したときは、ユーザーの環境変数 `EDITOR` で決まる（[Neovim の参考資料](neovim.md#windows-11-で-neovim-を入れる)）。自分用の設定は `os.editInTerminal` を `true` にした（`false` を明示すると、lazygit 0.66.0 ではプリセットより優先され、端末のエディタに端末が渡らない。ryo-aoki-pc/lazygit#10）
+- **`e` キーのエディタ**: PowerShell 7 から起動したときは、ユーザーの環境変数 `EDITOR` で決まる（[Neovim の参考資料](neovim.md#windows-11-で-neovim-を入れる)）。自分用の設定は `os.editInTerminal` を `true` にした（`false` を明示すると、lazygit 0.66.0 ではプリセットより優先され、端末のエディタに端末が渡らない。ryo-aoki-pc/lazygit#10）
 
 #### yazi
 
@@ -986,7 +1016,7 @@ gh 2.102.0 のソースを読んで決めた（[検証記録の付録](https://g
   - Windows 11 で使うの手順 5 は、前の値を確かめずに上書きする。元の値は同じ節の手順 3 で控える
 - **VC++ のランタイムは、Neovim と同じく「Windows 11 で WezTerm を入れる」の手順 3 を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。[検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/windows-setup.md#yazi-付録-windows-11-の節の資料と-linux-での確認2026-10-08)）
 - **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定の Windows の clone は、設定のリポジトリの README の例へリンクする
-- **`y` は Git Bash の共通の設定だけで使う**: Windows PowerShell 5.1 は手順書を貼る窓なので、ツールの初期化（PowerShell 版の `y`）は足さない。WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
+- **`y` は Git Bash の共通の設定だけで使う**: 手順書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。PowerShell 版の `y` は足さず、WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
   - PowerShell 7 のプロファイル（[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
 - **ファイルを開くエディタは、自分用の設定の Neovim を前提にした**（Windows 11 で使うのリードで、先に Neovim を通すよう案内する）
   - 上流の既定（yazi 26.9.1 の `yazi-config/preset/yazi-default.toml`）の `[opener]` の `edit` は、Windows では `code %s` と `code -w %s`（VS Code）

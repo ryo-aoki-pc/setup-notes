@@ -77,7 +77,7 @@
   - このように、追従するもの・読まないもの・一部だけ変わるものがあり、ツールごとに読む場所が割れる
   - LazyVimStarter の検証記録（2026-09-30）に、`XDG_CONFIG_HOME` を付けたまま Neovim が設定を見つけなかった記録がある
 - **`EDITOR`・`VISUAL` は、任意のユーザーの環境変数にする**
-  - WezTerm の Git Bash は、共通の bash 設定が `nvim` にするので要らない。Windows PowerShell・Windows Terminal から起動したツールにだけ効かせる
+  - WezTerm の Git Bash は、共通の bash 設定が `nvim` にするので要らない。PowerShell 7・Windows Terminal から起動したツールにだけ効かせる
   - lazygit 0.66.0 は、`os.edit` などが無いと、git の `core.editor` → `GIT_EDITOR` → `VISUAL` → `EDITOR` の順に探し、最初の語のファイル名で既知のプリセットを選ぶ。どれも無いと `vim` のプリセットになる。Windows の lazygit はエディタを `cmd.exe` で動かすので、Git for Windows の `usr\bin\vim` は見つからない
   - 値を `nvim` だけにするのは、`nvim.exe` やフルパスでは `nvim` のプリセットに合わないため
   - Git for Windows のインストーラで Vim を選ぶと、`core.editor` は書かれず、git は `EDITOR` を使う。そのため PowerShell の `git commit` も Neovim になる
