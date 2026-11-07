@@ -11,10 +11,10 @@
 - `SMB_USER` を `USER`（この PC のユーザー名）と分けてあるのは、NAS や Windows ではサーバー側のアカウント名が違うことがあるため
 - samba.md のサーバーは OS のアカウント名で Samba ユーザーを登録するので、この PC と同じ名前なら既定のままでよい
 - samba.md の `[homes]` は、Samba ユーザーと同じ名前の共有を見せる。ほかの共有につなぐなら `SHARE` を書き換える
-- samba.md の `[root]` は、自分の Samba ユーザーのまま入る共有。`SHARE=root` だけを変えれば、資格情報ファイル（手順 4）は自分の共有と同じものになり、マウント先は `/mnt/root` になる
+- samba.md の `[root]` は、自分の Samba ユーザーのまま入る共有。`SHARE=root` だけを変えれば、資格情報ファイル（手順 3）は自分の共有と同じものになり、マウント先は `/mnt/root` になる
 - samba.md の `[home]` も同じで、`SHARE=home` だけを変える。マウント先は `/mnt/home` になり、その下にユーザーごとのディレクトリが並ぶ
 - `SERVER` に NetBIOS 名は使えない。samba.md のサーバーは NetBIOS（nmbd）を動かさない。IP アドレスか、DNS（または `/etc/hosts`）で引ける名前にする
-- `SMB_USER`・`SHARE`・`MOUNT_POINT` に空白を入れない。fstab の欄は空白で区切るので、手順 6 で中断する
+- `SMB_USER`・`SHARE`・`MOUNT_POINT` に空白を入れない。fstab の欄は空白で区切るので、手順 5 で中断する
 - `SERVER` は既定値のままでもエラーにならないので、書き換えたかを手順 1 で確かめる
 - 変数はそのシェルの中だけで有効
 
@@ -22,17 +22,17 @@
 
 - Workstation で入れた PC には、cifs-utils が最初から入っている
 
-### Samba クライアント / 手順 4: 補足: パスワードの扱い
+### Samba クライアント / 手順 3: 補足: パスワードの扱い
 
 - パスワードは、コマンドラインにもシェルの履歴にも残らない
 - 最後の `unset PW` で、シェルの変数からもパスワードを消す
 
-### Samba クライアント / 手順 5: 補足: 出力の意味
+### Samba クライアント / 手順 4: 補足: 出力の意味
 
 - `ls -ldZ` の `drwx------ … <USER> <USER>` は、自分の所有で、ほかのユーザーは入れないこと
 - `SHARE=home` で `cifs-test.txt` の書き込みが `Permission denied` になるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため
 
-### Samba クライアント / 手順 7: 補足: 自動マウントの動き
+### Samba クライアント / 手順 6: 補足: 自動マウントの動き
 
 - `SHARE=home` の `Permission denied` は、サーバーの SELinux による拒否
 - 以後は `<MOUNT_POINT>` をふつうのディレクトリとして使う
@@ -52,12 +52,12 @@
 
 - `/usr/bin/gio mount` は、パスワードを保存しない
 
-### GNOME Files で開く / 手順 5: 補足: 使い方
+### GNOME Files で開く / 手順 4: 補足: 使い方
 
 - GIO を使わないアプリからは、`/run/user/<UID>/gvfs/smb-share:…/` の下で読み書きできる
 - サーバーで変えたものは、「ファイル」には自動では出ない。F5 で出る（[注意点](../extra/samba-client.md#注意点)）
 
-### GNOME Files で開く / 手順 6: 補足: 外した後
+### GNOME Files で開く / 手順 5: 補足: 外した後
 
 - 外した共有は、`/usr/bin/gio mount -l` からも `/run/user/<UID>/gvfs/` からも消える
 
@@ -90,7 +90,7 @@
 
 ### Windows 11 の Samba クライアント / 手順 6: 補足: [home] の書き込み
 
-- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[Samba クライアント](../samba.md#samba-クライアント)の手順 5 と同じ）
+- `SHARE=home` で書き込みが拒否されるのは、共有の直下が `/home` で、サーバーの SELinux が作るのを断るため（[Samba クライアント](../samba.md#samba-クライアント)の手順 4 と同じ）
 
 ### Windows 11 の Samba クライアント / 手順 7: 補足: 署名と、サーバーの設定を変えない理由
 

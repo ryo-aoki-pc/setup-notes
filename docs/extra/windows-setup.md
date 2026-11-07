@@ -27,7 +27,7 @@
   - PowerShell 7 は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く
   - 履歴検索や zoxide・starship の設定も足すなら、[PowerShell 7 のプロファイルを設定する](../shell-terminal.md#powershell-7-のプロファイルを設定する)
 - **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
-- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。Windows PowerShell 5.1 は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5、PowerShell 7 は[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 7 の設定後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く。Windows Terminal の窓で同じにするなら、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)
+- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。Windows PowerShell 5.1 は[貼り付けの設定](../windows-setup.md#貼り付けの設定)の手順 1〜5、PowerShell 7 は[アプリを入れる](../windows-setup.md#アプリを入れる)の手順 7 の設定後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く。Windows Terminal の窓は、[Windows Terminal で複数行を 1 つの入力として貼る](../shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)の Enter の割り当て設定後、貼った全体が 1 つの入力になる
 - **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
 - **設定した版のコンソールの窓すべてに効く**: 同じユーザーなら、管理者の窓も同じプロファイルを読む。Windows PowerShell 5.1 と PowerShell 7 のプロファイルは別なので、それぞれに貼り付けの行を置く
 - **ほかの項にもサポート外の設定がある**: ギャラリーとホームを消す値（[表示・入力・音・ストレージを控えて変える](../windows-setup.md#表示入力音ストレージを控えて変える)の手順 6）は、[表示と入力](../windows-setup.md#表示と入力)の手順 3 と同じく Microsoft が説明していない方法で、更新で効かなくなることがある。任意節のほかの値の多くも、Microsoft の文書には無く、広く使われているもの

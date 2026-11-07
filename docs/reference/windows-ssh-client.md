@@ -92,13 +92,13 @@
 - AlmaLinux 10 の既定では、一般のユーザーはパスワードで SSH に入れ、root はパスワードでは入れない（`PermitRootLogin prohibit-password`）。ホストを固くして `PasswordAuthentication no` にしているときは、この手順は使えない（[注意点](../extra/windows-ssh-client.md#注意点)）
 - 貼り直すと、同じ行がもう 1 行足される（害は無い）
 
-### Windows の OpenSSH クライアント / 手順 10: 補足: 鍵でのログインの確かめ方
+### Windows の OpenSSH クライアント / 手順 9: 補足: 鍵でのログインの確かめ方
 
 - `-o PreferredAuthentications=publickey` は、鍵が通らなかったときにパスワードへ移らず、そこで失敗させるため
 - 2 つの ssh で確かめるのは、Git の ssh が同じ鍵・config・known_hosts を使っていること（ホスト鍵を聞かれないこと）も見るため
 - 鍵にパスフレーズを付けたなら 2 回聞かれるのは、`ssh` が 2 つあるため
 
-### Windows の OpenSSH クライアント / 手順 11: 補足: WezTerm の起動メニュー
+### Windows の OpenSSH クライアント / 手順 10: 補足: WezTerm の起動メニュー
 
 - 自分用の設定（ryo-aoki-pc/wezterm）は、`~/.ssh/config` の `Host`（ワイルドカードを含むものと、github.com などの git のホストは除く）を、起動メニューに `ssh <Host>` として並べる。起動するのは `ssh.exe` で、パスは決めていない
 - WezTerm の設定の読み直し（Ctrl+Shift+R）で、config に足した `Host` が並ぶ

@@ -6,11 +6,12 @@
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - AlmaLinux 10 の項は、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓と Git Bash は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓と Git Bash は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
 - ほかの手順書の項を前提にする項がある（各項のリードの前提からリンクで開く）。AlmaLinux 10 は[Homebrew](almalinux-setup.md#homebrew)（オフラインのホストは[Homebrew のオフライン導入](almalinux-setup.md#homebrew-のオフライン導入)）、Windows 11 は[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)・[アプリを入れる](windows-setup.md#アプリを入れる)（scoop・PowerShell 7）・[Git for Windows](windows-setup.md#git-for-windows)
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
@@ -45,9 +46,12 @@
 1. 共通の bash 設定を今の端末に読み込み、履歴と shopt の値を確かめる。
 
    ```bash
+   # 共通の bash 設定を読み込む
    . ~/.bashrc
    printf '\n\033[7m 確認 \033[0m\n'
+   # 共通設定の読み込みを確かめる
    echo "${__bash_config_loaded-読まれていない}"
+   # 履歴とシェルの設定を確かめる
    printf '%s\n' "$HISTSIZE" "$HISTFILESIZE" "$HISTCONTROL"
    shopt histappend autocd cdspell dirspell globstar
    ```
@@ -66,6 +70,7 @@
 1. `~/.inputrc` を書き、今のシェルにも読ませる。
 
    ```bash
+   # readline の設定を用意する
    if [ -e ~/.inputrc ]; then
      echo '中断: ~/.inputrc がすでにある。中身を見て、この手順の set と矢印の行を手で足す' >&2
    else
@@ -85,7 +90,9 @@
    EOF
      bind -f ~/.inputrc
      printf '\n\033[7m 確認 \033[0m\n'
+     # 補完の設定を確かめる
      bind -v | grep -E 'completion-ignore-case|show-all-if-ambiguous|colored-stats|colored-completion-prefix'
+     # キーの割り当てを確かめる
      bind -q history-search-backward
      bind -q beginning-of-line
    fi
@@ -109,11 +116,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    sudo -i
    ```
 
-   - **次の手順は、root のシェルで貼る**
+   - **次の手順は、root のシェルで貼る**（続けて貼ると、root のシェルの中ではなく、root のシェルを閉じた後の元のシェルで動く）
 
 1. root 自身の clone を作り、読み込み口を設定する。
 
    ```bash
+   # root 用の共通 bash 設定を導入する
    git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
      bash ~/.config/bash/install.sh
    ```
@@ -125,13 +133,15 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 1. `exit` で抜け、自分のユーザーから `sudo -i` で入り直す。
 
-   - **次の手順は、入り直した root のシェルで貼る**
+   - **次の手順は、入り直した root のシェルで貼る**（確認は、設定を読み込んだ新しい root のシェルで行う）
 
 1. 読み込みと非対話時の無出力を確かめる。
 
    ```bash
+   # 共通設定の読み込みと接続先を確かめる
    echo "${__bash_config_loaded-読まれていない}"
    echo "DOCKER_HOST=${DOCKER_HOST-}"
+   # 非対話のシェルで出力がないか確かめる
    bash -c '. ~/.bashrc' 2>&1 | wc -c
    ```
 
@@ -149,7 +159,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
 
    ```bash
+   # 共通設定の取得元を HTTPS にする
    git -C ~/.config/bash remote set-url origin https://github.com/ryo-aoki-pc/bash.git
+   # 共通設定を更新してコミットを確かめる
    git -C ~/.config/bash pull --ff-only
    git -C ~/.config/bash log -1 --oneline
    ```
@@ -170,7 +182,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### シェルのツール
 
 - starship・zoxide・fzf・eza・bat・tmux を Homebrew で入れ、共通の bash 設定が読み込んだことを確かめる
-- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](almalinux-setup.md#homebrew)の手順 1〜3 を通してある
+- 前提: [共通の bash 設定](#共通の-bash-設定)と[Homebrew](almalinux-setup.md#homebrew)の手順 1〜2 を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
 
 1. brew で starship・zoxide・fzf・eza・bat・tmux を入れる。
@@ -182,23 +194,25 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    - 入れるものの一覧の後に `Do you want to proceed with the installation? [y/n]` と聞かれる。`y`（Enter は要らない）
    - `Warning: Landlock ABI 10 or later is required to deny all network access; found ABI 6.` の行は、気にしなくてよい
    - 要らないツールは、名前を外してから貼る
-   - **次の手順は、`y` と答えて、プロンプトに戻ってから行う**（続けて貼ると、後ろの行の文字が答えとして読まれる）
 
 1. 開いている端末を閉じて、開き直す。
 
    - Ctrl+Alt+T（[GNOME の表示と入力](almalinux-setup.md#gnome-の表示と入力)の手順 13）でも開ける
    - 開き直した端末から、プロンプトが starship に変わり、zoxide・fzf・eza のエイリアス・bat の `MANPAGER` も効く
    - 今の端末で `. ~/.bashrc` を読み直さず、端末を開き直す
-   - **次の手順は、開き直した端末で貼る**
+   - **次の手順は、開き直した端末で貼る**（この項の手順 3 以降は、ツールの設定を読んだ新しい端末で行う）
 
 1. bash の履歴・補完・キー操作の設定が効いていることを確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 履歴とシェルの設定を確かめる
    printf '%s\n' "${HISTSIZE}" "${HISTFILESIZE}" "${HISTCONTROL}"
    shopt histappend autocd cdspell dirspell globstar
+   # 補完の登録を確かめる
    complete -p -D
    complete -p brew
+   # 入力と履歴検索の設定を確かめる
    bind -v | grep -E 'completion-ignore-case|show-all-if-ambiguous|colored-stats|colored-completion-prefix'
    bind -q history-search-backward
    ```
@@ -211,9 +225,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # プロンプトの読み込み設定を確かめる
    grep -n -e 'starship init' -e 'WEZTERM_SHELL_INTEGRATION' -e 'zoxide init' ~/.config/bash/bashrc
+   # starship の版と実行ファイルを確かめる
    starship --version
    command -v starship
+   # プロンプトの表示を確かめる
    starship module directory
    starship explain
    ```
@@ -225,8 +242,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # fzf の版と実行ファイルを確かめる
    fzf --version
    command -v fzf
+   # fzf のキー操作と補完を確かめる
    bind -X
    bind -s | grep -F '"\ec"'
    complete -p cd vi ssh
@@ -240,8 +259,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # eza の版と実行ファイルを確かめる
    eza --version
    command -v eza
+   # Git の列と別名の設定を確かめる
    eza -l --git --header ~/.config/bash
    alias ll la lt
    ```
@@ -254,9 +275,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # bat の版と実行ファイルを確かめる
    bat --version
    command -v bat
+   # 色と行番号の表示を確かめる
    bat --color=always --style=numbers /etc/os-release | head -5
+   # man のページャの設定を確かめる
    printf '%s\n' "$MANPAGER"
    ```
 
@@ -284,6 +308,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    type -t z zi
    zoxide --version
    command -v zoxide
+   # 移動先を履歴に記録する
    cd /usr/share
    ```
 
@@ -296,6 +321,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    zoxide query --list
+   # ホームディレクトリに移動する
    cd ~
    ```
 
@@ -365,6 +391,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    ```bash
+   # プリセットを設定ファイルに書き出す
    if [ -z "${STARSHIP_PRESET}" ]; then echo '中断: STARSHIP_PRESET が空のまま。値を入れて貼り直す' >&2; else
      mkdir -p ~/.config
      starship preset "${STARSHIP_PRESET}" -o ~/.config/starship.toml --force &&
@@ -388,6 +415,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. `~/.config/starship.toml` に、設定を手で書く。
 
    ```bash
+   # starship の設定ファイルを作成する
    mkdir -p ~/.config
    cat > ~/.config/starship.toml <<'EOF'
    add_newline = false
@@ -396,6 +424,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    truncation_length = 3
    truncate_to_repo = false
    EOF
+   # 設定したプロンプトを表示する
    starship prompt
    ```
 
@@ -410,6 +439,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. ユーザー名とホスト名を常に表示する設定を入れる。
 
    ```bash
+   # ユーザー名とホスト名の表示を設定する
    mkdir -p ~/.config
    starship config username.show_always true
    starship config hostname.ssh_only false
@@ -461,7 +491,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）。この項の手順 2 で端末を開き直し、手順 3 からは開き直した端末で貼る
 - 共通の bash 設定が、fd があるときに候補の `FZF_*` の 3 つの変数を入れる。Ctrl+T の右側の bat のプレビュー（`FZF_CTRL_T_OPTS`）は、bat があれば入るので、[シェルのツール](#シェルのツール)の手順 1 の後から出ている。`~/.bashrc` への追記は要らない
 - `**<Tab>` の候補は変わらない（`find` のまま）
-- fd は[Neovim](neovim.md#neovim)の手順 3（自分用の Neovim の設定の導入）と[yazi](almalinux-setup.md#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
+- fd は[Neovim](neovim.md#neovim)の手順 2（自分用の Neovim の設定の導入）と[yazi](almalinux-setup.md#yazi)の手順 2 でも入る。fd が入っていれば、この項の手順 1・2 は飛ばす
 
 1. brew で fd を入れる。
 
@@ -471,17 +501,18 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    - 確認が出たら `y`（Enter は要らない）
    - EPEL の `fd-find` と二重に入れない
-   - **次の手順は、プロンプトに戻ってから行う**
 
 1. 開いている端末を閉じて、開き直す。
 
-   - **次の手順は、開き直した端末で貼る**
+   - **次の手順は、開き直した端末で貼る**（続きは、fd を検出して設定を読んだ新しい端末で行う）
 
 1. fd と bat があり、変数が入ったか確かめる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 候補とプレビューのコマンドを確かめる
    command -v fd bat
+   # fzf の候補とプレビューの設定を確かめる
    printf '%s\n' "${FZF_DEFAULT_COMMAND-}" "${FZF_CTRL_T_COMMAND-}" "${FZF_ALT_C_COMMAND-}" "${FZF_CTRL_T_OPTS-}"
    ```
 
@@ -525,6 +556,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    ```bash
+   # bat の設定ファイルを作成する
    if [ -z "${BAT_THEME_NAME}" ]; then echo '中断: BAT_THEME_NAME が空のまま。値を入れて貼り直す' >&2; else
      mkdir -p ~/.config/bat
      cat > ~/.config/bat/config <<EOF
@@ -533,7 +565,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    --paging=never
    EOF
      printf '\n\033[7m 確認 \033[0m\n'
+     # 書き込んだ設定を確かめる
      cat ~/.config/bat/config
+     # bat が読む設定ファイルを確かめる
      bat --config-file
    fi
    ```
@@ -547,35 +581,24 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 前提: [シェルのツール](#シェルのツール)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 
-1. tmux のセッションを作って入る。
+1. tmux のセッションを作って入り直し、終了を確認する。
 
    ```bash
+   # 作業用の tmux セッションを作成する
    tmux new-session -s work
+   printf '\n\033[7m 確認 \033[0m\n'
+   # 切り離したセッションを確かめる
+   tmux ls
+   # セッションに入り直して終了を確かめる
+   tmux attach -t work
+   tmux ls
    ```
 
    - 画面の下に緑の帯（ステータス行）が出て、左端に `[work]` が出る
    - **`Ctrl+b` を押して離してから `d`** で抜ける（デタッチ）。シェルに戻って `[detached (from session work)]` と出る
-   - **次の手順は、デタッチしてシェルに戻ってから貼る**（続けて貼ると、tmux の中のシェルへの入力になる）
-
-1. セッションの一覧を見て、もう一度入る。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   tmux ls
-   tmux attach -t work
-   ```
-
    - `tmux ls` の `work: 1 windows (created …)` は、tmux の画面を出た後のシェルに見える
    - `tmux attach -t work` で、この項の手順 1 の画面に戻る
    - 中で `exit` と打つと、シェルが終わってセッションも終わる。`[exited]` と出てシェルに戻る
-   - **次の手順は、`exit` でシェルに戻ってから貼る**（続けて貼ると、tmux の中のシェルへの入力になる）
-
-1. tmux のセッションが残っていないことを確かめる。
-
-   ```bash
-   tmux ls
-   ```
-
    - `no server running on /tmp/tmux-<UID>/default` と出る
 
 #### tmux の使い方の基本
@@ -623,6 +646,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 設定ファイルを書く。
 
    ```bash
+   # tmux の設定ファイルを作成する
    if [ -e ~/.tmux.conf ] || [ -e ~/.config/tmux/tmux.conf ]; then
      echo '中断: tmux の設定ファイルがすでにある。中身を見て、この項の set の 2 行を手で足す' >&2
    else
@@ -644,6 +668,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 動いている tmux にも読ませて、効いたか確かめる。
 
    ```bash
+   # 確認用のセッションで設定を読み込む
    if TMUX_CHECK_ID=$(tmux new-session -d -P -F '#{session_id}' -s "conf-check-$$"); then
      for conf in ~/.tmux.conf ~/.config/tmux/tmux.conf; do
        if [ -f "${conf}" ]; then tmux source-file "${conf}"; fi
@@ -651,6 +676,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      printf '\n\033[7m 確認 \033[0m\n'
      tmux show -g mouse
      tmux show -g history-limit
+     # 確認用のセッションを終了する
      tmux kill-session -t "${TMUX_CHECK_ID}"
    else
      echo '中断: 確認用のセッションを作れなかった。既存セッションは終了しない' >&2
@@ -664,7 +690,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 ### HackGen Console NF
 
 - 日本語と Nerd Fonts のアイコンを含む等幅のフォント HackGen Console NF を、Homebrew の cask で入れる
-- 前提: [Homebrew](almalinux-setup.md#homebrew)の手順 1〜3 を通してある
+- 前提: [Homebrew](almalinux-setup.md#homebrew)の手順 1〜2 を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。PATH に Homebrew が入った端末）
 
 1. 変数を設定する。
@@ -707,9 +733,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # フォントの導入と配置を確かめる
    brew list --cask --versions font-hackgen-nerd
    ls ~/.local/share/fonts/
    fc-list : family style file | grep HackGen
+   # フォントの選択と収録文字を確かめる
    fc-match "${HACKGEN_FAMILY:?「HackGen Console NF」の手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"
    for cp in 3042 6f22 e0b0 f09b; do printf 'U+%s: ' "${cp}"; fc-list ":charset=${cp}" family | grep -c -x -F "${HACKGEN_FAMILY:?「HackGen Console NF」の手順 1 の HACKGEN_FAMILY が空のまま。値を入れて貼り直す}"; done
    ```
@@ -725,46 +753,39 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 - 端末のアプリ WezTerm（nightly）を COPR から入れ、自分用の設定を入れて起動し直す
 - 前提: [ログインと sudo](almalinux-setup.md#ログインと-sudo)と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意（通してあれば、自分用の設定がそのフォントで描く）
-- 実行場所: GNOME にログインした自分のユーザーの、WezTerm の外の端末（bash。Ptyxis など）。この項の手順 5 の中で、起動し直した WezTerm のタブへ移る
+- 実行場所: GNOME にログインした自分のユーザーの、WezTerm の外の端末（bash。Ptyxis など）。この項の手順 3 の中で、起動し直した WezTerm のタブへ移る
 
-1. chroot を明示して、COPR を有効化する。
+1. chroot を明示して WezTerm の COPR を有効化し、repo ファイルを確認する。
 
    ```bash
+   # WezTerm の COPR を登録する
    sudo dnf copr enable wezfurlong/wezterm-nightly "rhel-9-$(uname -m)"
-   ```
-
-   - 有効化してよいか `[y/N]` で聞かれる
-   - **次の手順は、`[y/N]` に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. できた repo ファイルを確かめる。
-
-   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    cat /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:wezfurlong:wezterm-nightly.repo
    ```
 
+   - 有効化してよいか `[y/N]` で聞かれるので答える
    - `baseurl` が `.../wezterm-nightly/rhel-9-$basearch/`、`gpgcheck=1` になっていればよい
 
-1. WezTerm を入れる。
+1. WezTerm を導入し、版・依存ライブラリ・フォントを確認する。
 
    ```bash
+   # WezTerm を導入する
    sudo dnf install wezterm
+   printf '\n\033[7m 確認 \033[0m\n'
+   # WezTerm のパッケージと版を確かめる
+   rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
+   dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
+   wezterm --version
+   # 共有ライブラリの依存を確かめる
+   ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
+   # WezTerm が選ぶフォントを確かめる
+   wezterm ls-fonts | sed -n '1,5p'
    ```
 
    - 途中で COPR の GPG 鍵の取り込みを聞かれる
    - fingerprint は `FD90 9B62 88A8 4250 AD58 020F A698 91C5 CEA2 757D`（`wezfurlong_wezterm-nightly`）
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. WezTerm が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   rpm -q wezterm wezterm-common wezterm-gui wezterm-mux-server
-   dnf -q repoquery --installed --qf '%{name} %{from_repo}\n' 'wezterm*'
-   wezterm --version
-   ldd /usr/bin/wezterm-gui /usr/bin/wezterm /usr/bin/wezterm-mux-server | grep -c 'not found'   # 0 なら OK
-   wezterm ls-fonts | sed -n '1,5p'
-   ```
-
+   - トランザクション表の `[y/N]` と鍵の確認に答える
    - GUI は、**GNOME にログイン済みの実セッションの端末から** `wezterm` を起動すれば開く
    - アプリ一覧には「WezTerm」が出る
 
@@ -786,6 +807,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    ```bash
+   # GNOME の等幅フォントを設定する
    if [ -z "${MONO_FONT}" ]; then echo '中断: MONO_FONT が空のまま。値を入れて貼り直す' >&2; else
      /usr/bin/gsettings get org.gnome.desktop.interface monospace-font-name
      /usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name "${MONO_FONT}"
@@ -799,10 +821,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. Ctrl+Alt+T と Dash のお気に入りの端末を WezTerm にする。
 
    ```bash
+   # 端末の起動コマンドを WezTerm にする
    kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'wezterm start'
    printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command
+   # お気に入りの端末を WezTerm にする
    fav=$(/usr/bin/gsettings get org.gnome.shell favorite-apps)
    /usr/bin/gsettings set org.gnome.shell favorite-apps "${fav//org.gnome.Ptyxis.desktop/org.wezfurlong.wezterm.desktop}"
    /usr/bin/gsettings get org.gnome.shell favorite-apps
@@ -819,7 +843,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 #### WezTerm の設定ファイル
 
 - パッケージ（Windows 11 ではインストーラ）は設定ファイルを置かない。無ければ組み込みの既定値で動く
-- [WezTerm](#wezterm)の手順 5 で入れた自分用の設定は、`~/.config/wezterm/wezterm.lua`（下の表の 5）
+- [WezTerm](#wezterm)の手順 3 で入れた自分用の設定は、`~/.config/wezterm/wezterm.lua`（下の表の 5）
 
 | 優先 | 場所 | 用途 |
 |---|---|---|
@@ -832,7 +856,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - **Windows 11 では**、`~` は `%USERPROFILE%`（`C:\Users\<WIN_USER>`）。置くのは `%USERPROFILE%\.wezterm.lua` か `%USERPROFILE%\.config\wezterm\wezterm.lua`
   - 表の 2 と 3 の間に、`wezterm.exe` と同じフォルダーの `wezterm.lua`（`C:\Program Files\WezTerm\wezterm.lua`）が入る。USB メモリで持ち運ぶとき用で、公式は勧めていない
 - **自分用の設定**は [ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm) にある（Tokyo Night 系の配色・ピル型タブ・ステータスバー・シェル統合の設定）
-  - 導入は[WezTerm](#wezterm)の手順 5。[設定を導入する](#wezterm-の設定を導入する)の手順 5 で端末を開き直す
+  - 導入は[WezTerm](#wezterm)の手順 3。[設定を導入する](#wezterm-の設定を導入する)の手順 5 で端末を開き直す
   - Windows 11 では、同じブロックを Git for Windows の Git Bash に貼る（[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)）
   - どこを変えればよいかは [README の「カスタマイズの勘所」](https://github.com/ryo-aoki-pc/wezterm#カスタマイズの勘所)
   - nightly が前提（stable では未知のオプションで設定エラーになる）。本書で入れるのは、AlmaLinux 10 も Windows 11 も nightly
@@ -845,7 +869,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 自分用の WezTerm の設定（[ryo-aoki-pc/wezterm](https://github.com/ryo-aoki-pc/wezterm)）を `~/.config/wezterm` に clone し、WezTerm を起動し直して読ませる。シェル統合は共通 bash 設定が読む。
 
-- 前提: [WezTerm](#wezterm)の手順 1〜4（WezTerm nightly）と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意
+- 前提: [WezTerm](#wezterm)の手順 1・2（WezTerm nightly）と[共通の bash 設定](#共通の-bash-設定)を通してある。[HackGen Console NF](#hackgen-console-nf)は任意
 - 実行場所: GNOME にログインした自分のユーザーの bash（Windows 11 は Git Bash）。この項の手順 1〜4 は WezTerm の外の端末、手順 6 は手順 5 で起動し直した WezTerm のタブ
 - この項の手順 2 の退避の前に、WezTerm のウィンドウをすべて閉じる
 - 既存の設定の確認（この項の手順 1）と退避（手順 2）を省かない
@@ -865,6 +889,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
 
    ```bash
+   # 設定ファイルの退避先を調べる
    (
      for f in ~/.wezterm.lua ~/.config/wezterm; do
        if [ -e "$f.bak" ] || [ -L "$f.bak" ]; then
@@ -872,9 +897,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
          exit 1
        fi
      done
+     # 既存の設定ファイルを退避する
      for f in ~/.wezterm.lua ~/.config/wezterm; do
        if [ -e "$f" ] || [ -L "$f" ]; then mv -v "$f" "$f.bak" || exit 1; fi
      done
+     # 退避後の配置を確かめる
      ls -ld ~/.wezterm.lua ~/.config/wezterm
    )
    ```
@@ -887,6 +914,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. この設定を `~/.config/wezterm` に clone する。
 
    ```bash
+   # WezTerm の設定を取得して版を確かめる
    git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
    git -C ~/.config/wezterm log -1 --oneline
    ```
@@ -915,6 +943,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 起動し直した WezTerm のタブで、シェル統合が読まれたか確かめる。
 
    ```bash
+   # WezTerm のシェル統合を確かめる
    echo "$TERM_PROGRAM"
    echo "$WEZTERM_SHELL_INTEGRATION"
    declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
@@ -944,22 +973,25 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. ssh 先で、sshd が `TERM_PROGRAM` を受け取るようにする。
 
    ```bash
-   {
-     echo 'AcceptEnv TERM_PROGRAM' | sudo tee /etc/ssh/sshd_config.d/50-wezterm.conf
-     sudo sshd -t && sudo systemctl reload sshd
-     sudo sshd -T | grep -i '^acceptenv'
-   }
+   # sshd の受け取る環境変数を設定する
+   echo 'AcceptEnv TERM_PROGRAM' | sudo tee /etc/ssh/sshd_config.d/50-wezterm.conf
+   # sshd の設定を検査して読み直す
+   sudo sshd -t && sudo systemctl reload sshd
+   # 環境変数の受け取り設定を確かめる
+   sudo sshd -T | grep -i '^acceptenv'
    ```
 
    - 最後に `acceptenv TERM_PROGRAM` と出ればよい
    - `sshd -t` が設定の誤りを出したら、`reload` はされない
-   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、`sudo` のパスワードを聞かれたら答えてから貼る**（続けて貼ると、sudo が失敗しても後ろの共通 bash 設定の導入と clone が動く）
 
 1. SSH 先に共通 bash 設定と WezTerm のシェル統合を置く。
 
    ```bash
+   # SSH 先に共通 bash 設定を導入する
    git clone https://github.com/ryo-aoki-pc/bash.git ~/.config/bash &&
      bash ~/.config/bash/install.sh
+   # WezTerm のシェル統合を取得する
    git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
    ```
 
@@ -971,11 +1003,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 手元の WezTerm の新しいタブから、ssh し直す。
 
    - `ssh <HOST>` を打つか、起動メニュー（`Ctrl+Shift+M`）の「ssh <HOST>」を選ぶ
-   - **次の手順は、ssh 先のシェルで貼る**
+   - **次の手順は、ssh 先のシェルで貼る**（続けて貼ると、ssh 先のシェルの中ではなく、ssh を閉じた後の手元のシェルで動く）
 
 1. ssh 先のシェルで、`TERM_PROGRAM` が届き、シェル統合が読まれたか確かめる。
 
    ```bash
+   # 環境変数とシェル統合の読み込みを確かめる
    echo "$TERM_PROGRAM"
    declare -F __wezterm_set_user_var __wezterm_notify_done __wz_mouse_off
    ```
@@ -994,6 +1027,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 設定のリポジトリを pull する。
 
    ```bash
+   # WezTerm の設定を更新して版を確かめる
    git -C ~/.config/wezterm pull
    git -C ~/.config/wezterm log -1 --oneline
    ```
@@ -1025,7 +1059,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # フォントの登録を調べる
    Get-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts' -ErrorAction SilentlyContinue | ForEach-Object { $_.Property -like 'HackGen*' }
+   # フォントのファイルを調べる
    Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts", "$env:WINDIR\Fonts" -Filter 'HackGen*' -ErrorAction SilentlyContinue | Format-Table Name, DirectoryName
    ```
 
@@ -1036,20 +1072,24 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # フォントの取得先と登録先を用意する
      $ver = '2.10.0'
      $sha256 = 'F8ABD483D5EDFAD88A78ED511978F43C83B43C48E364AA29EBE4A68217474428'
      $fonts = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
      $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
      $tmp = "$env:TEMP\hackgen-setup"
      $zip = "$tmp\HackGen_NF_v$ver.zip"
+     # 配布ファイルを取得して照合する
      Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
      New-Item -ItemType Directory -Path $tmp | Out-Null
      & "$env:WINDIR\System32\curl.exe" -fsSL -o $zip "https://github.com/yuru7/HackGen/releases/download/v$ver/HackGen_NF_v$ver.zip"
      if ($LASTEXITCODE -ne 0) { Write-Error "中断: HackGen_NF_v$ver.zip を取れない"; return }
      if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sha256) { Write-Error "中断: HackGen_NF_v$ver.zip の sha256 が一致しない"; return }
+     # フォントのファイルを展開する
      Expand-Archive -LiteralPath $zip -DestinationPath $tmp -Force
      $ttf = @(Get-ChildItem -LiteralPath "$tmp\HackGen_NF_v$ver" -Filter '*.ttf')
      if ($ttf.Count -ne 4) { Write-Error "中断: zip の中の ttf が 4 つではない（$($ttf.Count)）"; return }
+     # フォントを配置して登録する
      New-Item -ItemType Directory -Force -Path $fonts | Out-Null
      icacls.exe $fonts /grant '*S-1-15-2-1:(OI)(CI)(RX)' '*S-1-15-2-2:(OI)(CI)(RX)' | Out-Null
      if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key | Out-Null }
@@ -1060,6 +1100,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        }
        New-ItemProperty -Path $key -Name "$($f.BaseName) (TrueType)" -Value $dst -PropertyType String -Force | Out-Null
      }
+     # 作業用のファイルを消去する
      Remove-Item -LiteralPath $tmp -Recurse -Force
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-ItemProperty -LiteralPath $key | Select-Object -Property 'HackGen*' | Format-List
@@ -1094,6 +1135,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 新しい版にするときだけ、HackGen の登録を消す。
 
    ```powershell
+   # HackGen の登録を削除する
    $key = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts'
    (Get-Item -LiteralPath $key).Property -like 'HackGen*ConsoleNF-* (TrueType)' | ForEach-Object { Remove-ItemProperty -LiteralPath $key -Name $_ }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1111,6 +1153,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 新しい版にするときだけ、フォントのファイルを消す。
 
    ```powershell
+   # HackGen のフォントファイルを削除する
    Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts\HackGen*ConsoleNF-*.ttf"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Windows\Fonts" -Filter 'HackGen*'
@@ -1137,7 +1180,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 - 管理者ではない窓に複数行のブロックを貼ると、「警告」の窓が出ることがある（PSReadLine は、5.1・7 とも角かっこで囲む貼り付けを使わないため）。「強制的に貼り付け」を押す（出さないなら、この項の手順 4）
 - この項の手順 2〜5 は `settings.json` だけを読み書きし、既定のプロファイル（Windows PowerShell）と `copyOnSelect` は変えない
 - 選んだらコピーするときは、[Windows Terminal で選択した文字をコピーする](#windows-terminal-で選択した文字をコピーする)を通す
-- 貼った複数行が行ごとに動かないようにするなら、[Windows Terminal で複数行を 1 つの入力として貼る](#windows-terminal-で複数行を-1-つの入力として貼る)を通す
+- 複数行を 1 つの入力として貼るため、先に[Windows Terminal で複数行を 1 つの入力として貼る](#windows-terminal-で複数行を-1-つの入力として貼る)を通す
 
 > [!WARNING]
 > - この項の手順 4 で警告を切ると、信用できない複数行の文字も、確かめずにそのまま貼られて動く
@@ -1151,15 +1194,19 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 設定ファイルと控えの場所を指定する
      $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
      $bak = "$path.windows-setup.bak"
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 設定ファイルの形式を調べる
      if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い。Windows Terminal を 1 度開いてから貼り直す: $path"; return }
      $text = [IO.File]::ReadAllText($path)
      if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある。この項の手順 5 の画面で変える: $path"; return }
      try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない。この項の手順 5 の画面で変える: $path"; return }
      if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）。この項の手順 5 の画面で変える'; return }
+     # 設定ファイルの控えを保存する
      if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+     # 端末とプロファイルの設定を確かめる
      [pscustomobject]@{
        Version          = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
        DefaultsFontFace = $s.profiles.defaults.font.face
@@ -1181,12 +1228,14 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 設定ファイルと控えを調べる
      $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
      if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。この項の手順 2 を先に貼る'; return }
      $text = [IO.File]::ReadAllText($path)
      if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
      try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
      if (-not $s.profiles -or $s.profiles -is [array]) { Write-Error '中断: profiles が無いか古い形式（配列）'; return }
+     # 全プロファイルのフォントを設定する
      if (-not $s.profiles.PSObject.Properties['defaults']) { $s.profiles | Add-Member -NotePropertyName defaults -NotePropertyValue ([pscustomobject]@{}) }
      if (-not $s.profiles.defaults.PSObject.Properties['font']) { $s.profiles.defaults | Add-Member -NotePropertyName font -NotePropertyValue ([pscustomobject]@{}) }
      $s.profiles.defaults.font | Add-Member -NotePropertyName face -NotePropertyValue 'HackGen Console NF' -Force
@@ -1204,6 +1253,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 端末の版と設定ファイルを調べる
      $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
      $ver = (Get-AppxPackage -Name Microsoft.WindowsTerminal | Select-Object -First 1).Version
      if (-not $ver -or [version]$ver -lt [version]'1.24') { Write-Error "中断: Windows Terminal の版が 1.24 より前: $ver"; return }
@@ -1211,6 +1261,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $text = [IO.File]::ReadAllText($path)
      if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
      try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
+     # 複数行を貼るときの警告を設定する
      $s | Add-Member -NotePropertyName 'warning.multiLinePaste' -NotePropertyValue 'never' -Force
      [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1248,6 +1299,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 設定ファイルと控えを調べる
      $path = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
      if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
      if (-not (Test-Path -LiteralPath "$path.windows-setup.bak")) { Write-Error '中断: 控えが無い。shell-terminal.md の「Windows Terminal のフォントと貼り付けの警告を変える」の手順 2 を先に通す'; return }
@@ -1255,6 +1307,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      if (($text -replace '"(?:[^"\\]|\\.)*"', '""') -match '/[/*]|,\s*[}\]]') { Write-Error "中断: コメントか末尾のカンマがある: $path"; return }
      try { $s = $text | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 読めない: $path"; return }
      if (-not $text.TrimStart().StartsWith('{')) { Write-Error '中断: 最上位がオブジェクトではない'; return }
+     # 選択した文字のコピーを有効にする
      $s | Add-Member -NotePropertyName copyOnSelect -NotePropertyValue $true -Force
      [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1267,7 +1320,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
 #### Windows Terminal で複数行を 1 つの入力として貼る
 
-- 任意で、Windows Terminal に貼った複数行が行ごとに動かないように、Enter の割り当てをプロファイルに足す
+- Windows Terminal に貼った複数行を 1 つの入力にするため、Enter の割り当てをプロファイルに足す。ほかの手順書の PowerShell のブロックは、この項を通した窓に貼る前提で書いてある
 - 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3・4 は、Windows Terminal の新しいタブ
 - 足す行は ASCII の文字だけで、行末の印は `# shell-terminal.md:paste`。プロファイルのほかの行は変えない
@@ -1282,6 +1335,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # Enter の割り当てと追記先を用意する
      $line = 'if ((Get-Module -Name PSReadLine) -and $ExecutionContext.SessionState.LanguageMode -eq ''FullLanguage'') { Set-PSReadLineKeyHandler -Chord Enter -BriefDescription PasteAwareEnter -Description ''Keep pasted lines in one input'' -ScriptBlock { $rl = [Microsoft.PowerShell.PSConsoleReadLine]; $queue = $null; try { $queue = $rl.GetField(''_queuedKeys'', [Reflection.BindingFlags]''NonPublic,Instance'').GetValue($rl.GetField(''_singleton'', [Reflection.BindingFlags]''NonPublic,Static'').GetValue($null)) } catch {}; $more = $false; $clock = [Diagnostics.Stopwatch]::StartNew(); do { if ((($null -ne $queue) -and ($queue.Count -gt 0)) -or [Console]::KeyAvailable) { $more = $true; break }; [Threading.Thread]::Sleep(2) } while ($clock.ElapsedMilliseconds -lt 30); if ($more) { $rl::AddLine() } else { $rl::AcceptLine() } } }  # shell-terminal.md:paste'
      $p51 = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
      $p7 = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
@@ -1327,7 +1381,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```
 
    - `入力の数: 1` が出ればよい
-   - `入力の数: 3` なら、行ごとに動いている。新しいタブで開いたかと、この項の手順 3 の割り当てを確かめる
+   - `入力の数: 3` なら、行ごとに動いている。以降の手順を続けず、新しいタブで開いたかと、この項の手順 3 の割り当てを確かめる
    - 「警告」の窓が出たら「強制的に貼り付け」を押す。この項の設定では警告は変わらない（出さないなら、[Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 4）
 
 ---
@@ -1347,6 +1401,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
 
    ```powershell
+   # WezTerm の登録情報を取得する
    $u = Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' -ErrorAction SilentlyContinue
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    [pscustomobject]@{
@@ -1384,6 +1439,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 導入先と取得先を設定し、実行条件を確かめる
      $dir = 'C:\Program Files\WezTerm'
      $curl = "$env:WINDIR\System32\curl.exe"
      $url = 'https://github.com/wezterm/wezterm/releases/download/nightly/WezTerm-nightly-setup.exe'
@@ -1393,6 +1449,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない'; return }
      if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { Write-Error '中断: VCRUNTIME140.dll が無い（この項の手順 3）'; return }
      if (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue) { Write-Error '中断: WezTerm が動いている（窓をすべて閉じる）'; return }
+     # 配布物を取得し、ハッシュ値を照合する
      Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
      New-Item -ItemType Directory -Path $tmp | Out-Null
      & $curl -fsSL -o "$setup.sha256" "$url.sha256"
@@ -1402,6 +1459,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $m = Select-String -LiteralPath "$setup.sha256" -Pattern '^([0-9a-f]{64})  WezTerm-nightly-setup\.exe$' | Select-Object -First 1
      if (-not $m) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 に sha256 の行が無い'; return }
      if ((Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash -ne $m.Matches[0].Groups[1].Value) { Write-Error '中断: WezTerm-nightly-setup.exe の sha256 が一致しない'; return }
+     # WezTerm を導入し、一時ファイルを削除する
      $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /LOG=`"$tmp\setup.log`"" -Wait -PassThru
      if ($p.ExitCode -ne 0) { Write-Error "中断: インストーラが終了コード $($p.ExitCode) で終わった（ログは $tmp\setup.log）"; return }
      Remove-Item -LiteralPath $tmp -Recurse -Force
@@ -1421,10 +1479,13 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # WezTerm の登録情報と版を確かめる
    Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1' | Format-List DisplayName, DisplayVersion, InstallLocation, UninstallString
    & 'C:\Program Files\WezTerm\wezterm.exe' --version
+   # PATH とスタートメニューへの登録を確かめる
    [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' | Where-Object { $_ -like '*\WezTerm*' }
    Test-Path -LiteralPath "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\WezTerm.lnk"
+   # 導入先のファイルを確かめる
    Get-ChildItem -LiteralPath 'C:\Program Files\WezTerm' -Name
    ```
 
@@ -1464,8 +1525,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # git の場所と版を確かめる
    Get-Command git -All | Format-Table Source
    git --version
+   # Git Bash の実行ファイルを確かめる
    Test-Path 'C:\Program Files\Git\bin\bash.exe', 'C:\Program Files\Git\git-bash.exe'
    ```
 
@@ -1489,8 +1552,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 同じ Git Bash で、元の設定を表示し、Git for Windows の長いパス対応を有効にする。
 
    ```bash
+   # 長いパス対応の現在の設定を表示する
    printf '変更前の core.longpaths（スコープ・ファイル・値）:\n'
    git config --show-scope --show-origin --get-all core.longpaths
+   # 長いパスへの対応を有効にする
    if [ "$(git config --global --includes --type=bool --get core.longpaths)" != true ]; then
      git config --global core.longpaths true
    fi
@@ -1542,6 +1607,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. origin を HTTPS にそろえて、設定のリポジトリを pull する。
 
    ```bash
+   # 取得先を設定し、共通の bash 設定を更新する
    git -C ~/.config/bash remote set-url origin https://github.com/ryo-aoki-pc/bash.git
    git -C ~/.config/bash pull --ff-only
    printf '\n\033[7m 確認 \033[0m\n'
@@ -1581,6 +1647,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 既存の設定があるときだけ、名前の後ろに `.bak` を付けて退避する。
 
    ```bash
+   # 退避先に既存の控えがないか確かめる
    (
      for f in ~/.wezterm.lua ~/.config/wezterm; do
        if [ -e "$f.bak" ] || [ -L "$f.bak" ]; then
@@ -1588,6 +1655,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
          exit 1
        fi
      done
+     # 既存の WezTerm 設定を退避する
      for f in ~/.wezterm.lua ~/.config/wezterm; do
        if [ -e "$f" ] || [ -L "$f" ]; then mv -v "$f" "$f.bak" || exit 1; fi
      done
@@ -1602,6 +1670,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. この設定を `~/.config/wezterm` に clone する。
 
    ```bash
+   # WezTerm の設定を取得する
    git clone https://github.com/ryo-aoki-pc/wezterm.git ~/.config/wezterm
    printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/wezterm log -1 --oneline
@@ -1660,6 +1729,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. WSL のシェルで、Windows のホームを調べ、シェル統合のスクリプトが見えるか確かめる。
 
    ```bash
+   # Windows のホームディレクトリを取得する
    WIN_HOME=$(wslpath "$(cd /mnt/c && cmd.exe /c 'echo %USERPROFILE%' | tr -d '\r')")
    printf '\n\033[7m 確認 \033[0m\n'
    ls -l "$WIN_HOME/.config/wezterm/shell/wezterm.sh"
@@ -1671,6 +1741,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. この項の手順 2 と同じシェルで、WSL の `~/.bashrc` に読み込む行を足す。
 
    ```bash
+   # Windows のシェル統合を読む設定を追加する
    if [ -z "${WIN_HOME}" ]; then echo '中断: この項の手順 2 の WIN_HOME が空のまま' >&2; else
      echo "[ -r '$WIN_HOME/.config/wezterm/shell/wezterm.sh' ] && . '$WIN_HOME/.config/wezterm/shell/wezterm.sh'" >> ~/.bashrc
      printf '\n\033[7m 確認 \033[0m\n'
@@ -1713,6 +1784,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 設定のリポジトリを pull する。
 
    ```bash
+   # WezTerm の設定を更新する
    git -C ~/.config/wezterm pull
    printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/wezterm log -1 --oneline
@@ -1740,6 +1812,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. ログインシェルが読むファイルの名前と構文と、`~/.bashrc` を読む行を確かめる。
 
    ```bash
+   # ログイン用の設定ファイルを探す
    (
      f=
      for x in ~/.bash_profile ~/.bash_login ~/.profile; do
@@ -1759,6 +1832,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. この項の手順 2 で読む行が無かったときだけ、そのファイルの末尾に 1 行足す。
 
    ```bash
+   # ログイン用の設定ファイルと構文を確かめる
    (
      f=
      for x in ~/.bash_profile ~/.bash_login ~/.profile; do
@@ -1766,6 +1840,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      done
      if [ -z "$f" ]; then echo '中断: ~/.bash_profile・~/.bash_login・~/.profile のどれも無い。ファイルは作らない' >&2; exit 1; fi
      bash -n "$f" || exit 1
+     # bashrc を読み込む行を追加する
      line='test -f ~/.bashrc && . ~/.bashrc  # shell-terminal.md'
      if ! grep -Fqx "$line" "$f"; then
        if [ -s "$f" ] && [ -n "$(tail -c 1 "$f")" ]; then printf '\n' >> "$f" || exit 1; fi
@@ -1831,8 +1906,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # scoop の一覧を更新する
    scoop update
+   # シェルのツールを導入する
    scoop install fzf starship eza bat
+   # zoxide の版を指定して導入し、固定する
    scoop install zoxide@0.9.9
    scoop hold zoxide
    ```
@@ -1852,12 +1930,15 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # シェルのツールの版を確かめる
    fzf --version
    zoxide --version
    starship --version
    eza --version
    bat --version
+   # 実行ファイルの場所を確かめる
    (Get-Command fzf, zoxide, starship, eza, bat -All).Source
+   # zoxide の版の固定を確かめる
    scoop list zoxide
    ```
 
@@ -1933,6 +2014,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 既存ファイルがあれば控えを取り、Windows で共有する starship の設定を書く。
 
    ```bash
+   # 設定ファイルと控えの状態を確かめる
    (
      if [ -n "${STARSHIP_CONFIG:-}" ]; then echo '中断: STARSHIP_CONFIG がある。標準の設定ファイルを使う状態にしてから始める' >&2; exit 1; fi
      mkdir -p ~/.config || exit 1
@@ -1940,6 +2022,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        if [ -L "$f" ] || { [ -e "$f" ] && [ ! -f "$f" ]; }; then echo "中断: 通常のファイルではない: $f" >&2; exit 1; fi
      done
      if [ -e ~/.config/starship.toml.shell-terminal.bak ] && [ -e ~/.config/starship.toml.shell-terminal.new ]; then echo '中断: 控えと新規作成の印が両方ある' >&2; exit 1; fi
+     # 既存の設定を控え、新規作成の印を残す
      if [ ! -e ~/.config/starship.toml.shell-terminal.bak ] && [ ! -e ~/.config/starship.toml.shell-terminal.new ]; then
        if [ -e ~/.config/starship.toml ]; then
          cp -p ~/.config/starship.toml ~/.config/starship.toml.shell-terminal.bak || exit 1
@@ -1947,6 +2030,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
          touch ~/.config/starship.toml.shell-terminal.new || exit 1
        fi
      fi
+     # starship の表示設定を書き込む
      cat > ~/.config/starship.toml <<'EOF'
    add_newline = false
 
@@ -1979,7 +2063,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # starship の設定内容を確かめる
    cat ~/.config/starship.toml
+   # プロンプトの表示を確かめる
    starship prompt
    ```
 
@@ -2008,6 +2094,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # プロファイルに足す基本設定を用意する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
      $lines = @(
        'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
@@ -2041,6 +2128,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # Tab の補完設定と対象ファイルを用意する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
      $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete }  # windows-setup.md'
      if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。この項の手順 2 を先に貼る: $p"; return }
@@ -2108,12 +2196,14 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # プロファイルに入れるキー設定を用意する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
      $lines = @(
        'if (Get-Module -Name PSReadLine) { Set-PSReadLineOption -EditMode Emacs }  # shell-terminal.md'
        'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+v -Function Paste }  # shell-terminal.md'
      )
      if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。前提の手順を先に通す: $p"; return }
+     # 既存のキー設定を除き、プロファイルを解析する
      $bytes = [IO.File]::ReadAllBytes($p)
      $wide = $bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE
      $enc = if ($wide) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
@@ -2131,6 +2221,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $tokens = $null; $errors = $null
      $ast = [Management.Automation.Language.Parser]::ParseInput($parseText, [ref]$tokens, [ref]$errors)
      if ($errors.Count) { Write-Error '中断: プロファイルに構文エラーがある。何も書いていない'; return }
+     # キー設定と宣言の位置を調べる
      $commands = @($ast.FindAll({ param($a) $a -is [Management.Automation.Language.CommandAst] }, $true))
      $modes = @($commands | Where-Object {
        $_.GetCommandName() -match '(^|\\)Set-PSReadLineOption$' -and
@@ -2153,6 +2244,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      if (@($modes | Where-Object { $_.Extent.StartOffset -ge $pos }).Count) { Write-Error '中断: 挿入位置より後に印の無い EditMode がある。複合文からモードとキーの設定を別の行へ分け、モードを先に置く。何も書いていない'; return }
      $declarations = @($ast.UsingStatements) + @($ast.ParamBlock)
      if (@($declarations | Where-Object { $_ -and $_.Extent.EndOffset -gt $pos }).Count) { Write-Error '中断: 宣言より後の位置を決められない。何も書いていない'; return }
+     # 設定を挿入した内容を組み立てる
      $offset = if ($wide) { $pos } else { $parseEnc.GetByteCount($parseText.Substring(0, $pos)) }
      $offset += $bomLength
      $nl = if ($text.Contains("`r`n") -or -not $text.Contains("`n")) { "`r`n" } else { "`n" }
@@ -2179,7 +2271,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # キー操作のモードを確かめる
    (Get-PSReadLineOption).EditMode
+   # キーの割り当てを確かめる
    Get-PSReadLineKeyHandler -Chord Ctrl+v,Ctrl+Enter,UpArrow | Format-Table Key, Function -AutoSize
    ```
 
@@ -2212,6 +2306,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # プロファイルに入れるキー設定を用意する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
      $lines = @(
        'if (Get-Module -Name PSReadLine) { Set-PSReadLineOption -EditMode Emacs }  # shell-terminal.md'
@@ -2220,6 +2315,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward }  # shell-terminal.md'
      )
      if (-not (Test-Path -LiteralPath $p)) { Write-Error "中断: プロファイルが無い。前提の手順を先に通す: $p"; return }
+     # 既存のキー設定を除き、プロファイルを解析する
      $bytes = [IO.File]::ReadAllBytes($p)
      $wide = $bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE
      $enc = if ($wide) { [Text.Encoding]::Unicode } else { [Text.Encoding]::GetEncoding(28591) }
@@ -2237,6 +2333,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $tokens = $null; $errors = $null
      $ast = [Management.Automation.Language.Parser]::ParseInput($parseText, [ref]$tokens, [ref]$errors)
      if ($errors.Count) { Write-Error '中断: プロファイルに構文エラーがある。何も書いていない'; return }
+     # キー設定と宣言の位置を調べる
      $commands = @($ast.FindAll({ param($a) $a -is [Management.Automation.Language.CommandAst] }, $true))
      $modes = @($commands | Where-Object {
        $_.GetCommandName() -match '(^|\\)Set-PSReadLineOption$' -and
@@ -2259,6 +2356,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      if (@($modes | Where-Object { $_.Extent.StartOffset -ge $pos }).Count) { Write-Error '中断: 挿入位置より後に印の無い EditMode がある。複合文からモードとキーの設定を別の行へ分け、モードを先に置く。何も書いていない'; return }
      $declarations = @($ast.UsingStatements) + @($ast.ParamBlock)
      if (@($declarations | Where-Object { $_ -and $_.Extent.EndOffset -gt $pos }).Count) { Write-Error '中断: 宣言より後の位置を決められない。何も書いていない'; return }
+     # 設定を挿入した内容を組み立てる
      $offset = if ($wide) { $pos } else { $parseEnc.GetByteCount($parseText.Substring(0, $pos)) }
      $offset += $bomLength
      $nl = if ($text.Contains("`r`n") -or -not $text.Contains("`n")) { "`r`n" } else { "`n" }
@@ -2284,7 +2382,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # キー操作のモードを確かめる
    (Get-PSReadLineOption).EditMode
+   # キーの割り当てを確かめる
    Get-PSReadLineKeyHandler -Bound | Where-Object { $_.Key -in 'Ctrl+v', 'Ctrl+Enter', 'UpArrow', 'DownArrow' } | Format-Table Key, Function -AutoSize
    ```
 
@@ -2314,15 +2414,20 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Windows PowerShell の版とモジュールを確かめる
    powershell.exe -NoProfile -Command { $PSVersionTable.PSVersion; Get-Module -ListAvailable -Name PSScriptAnalyzer,Pester,PSReadLine | Select-Object Name,Version,ModuleBase | Out-String -Width 160 }
+   # PowerShell 7 と外部コマンドの場所を確かめる
    Get-Command pwsh.exe -ErrorAction SilentlyContinue | Select-Object Source | Format-Table -AutoSize
    Get-Command winget,git,fzf,eza,gh,rg,fd,delta,bat,starship -CommandType Application -ErrorAction SilentlyContinue | Select-Object Name,Source | Format-Table -AutoSize
+   # PowerShell 7 の版とモジュールを確かめる
    pwsh.exe -NoLogo -NoProfile -Command {
      $PSVersionTable.PSVersion
      Get-Command Install-PSResource,Save-PSResource,Get-PSResource | Select-Object Name,Source | Out-String -Width 120
      Get-Module -ListAvailable -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf | Select-Object Name,Version,ModuleBase | Out-String -Width 160
    }
+   # PowerShell の環境変数を確かめる
    foreach ($n in 'POWERSHELL_TELEMETRY_OPTOUT','POWERSHELL_UPDATECHECK') { '{0} = {1}' -f $n,[Environment]::GetEnvironmentVariable($n,'User') }
+   # 保存済みの補完ファイルを確かめる
    Get-ChildItem -Path "$env:LOCALAPPDATA\PowerShell\completions\*.ps1" -ErrorAction SilentlyContinue | Select-Object Name,Length,FullName | Format-Table -AutoSize
    ```
 
@@ -2334,6 +2439,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. PowerShell 7 に、検査・テスト・予測・fzf のモジュールを入れる。
 
    ```powershell
+   # PowerShell 7 用の開発モジュールを導入する
    pwsh.exe -NoLogo -NoProfile -Command {
      Install-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Repository PSGallery -Scope CurrentUser -TrustRepository -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2348,9 +2454,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. PowerShell 7 から、5.1 用の検査・テストのモジュールを保存する。
 
    ```powershell
+   # 5.1 用のモジュールの保存先を用意する
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
      New-Item -ItemType Directory -Force -Path $dir | Out-Null
+     # PSScriptAnalyzer と Pester を保存する
      Save-PSResource -Name PSScriptAnalyzer,Pester -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-PSResource -Name PSScriptAnalyzer,Pester -Path $dir | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
@@ -2364,12 +2472,14 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 環境変数の設定値と既存の値を照合する
      $wanted = [ordered]@{ POWERSHELL_TELEMETRY_OPTOUT = '1'; POWERSHELL_UPDATECHECK = 'Off' }
      $other = @(foreach ($n in $wanted.Keys) {
        $v = [Environment]::GetEnvironmentVariable($n,'User')
        if ($v -and $v -cne $wanted[$n]) { $n }
      })
      if ($other.Count) { Write-Error "中断: 別の値がある: $($other -join ', ')。何も変えていない"; return }
+     # PowerShell の環境変数を設定する
      foreach ($n in $wanted.Keys) { [Environment]::SetEnvironmentVariable($n,$wanted[$n],'User') }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($n in $wanted.Keys) { '{0} = {1}' -f $n,[Environment]::GetEnvironmentVariable($n,'User') }
@@ -2390,9 +2500,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 開発モジュールとコマンドを読み込む
    Import-Module PSScriptAnalyzer,Pester -PassThru | Select-Object Name,Version,ModuleBase | Format-Table -AutoSize
    Get-Command Invoke-ScriptAnalyzer,Invoke-Pester | Select-Object Name,Source | Format-Table -AutoSize
+   # 解析ツールの動作を確かめる
    Invoke-ScriptAnalyzer -ScriptDefinition 'gci; $x = 1' | Select-Object RuleName | Format-Table -AutoSize
+   # PowerShell の環境変数を確かめる
    "POWERSHELL_TELEMETRY_OPTOUT = $env:POWERSHELL_TELEMETRY_OPTOUT"
    "POWERSHELL_UPDATECHECK = $env:POWERSHELL_UPDATECHECK"
    ```
@@ -2410,8 +2523,10 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 開発モジュールとコマンドを読み込む
    Import-Module PSScriptAnalyzer,Pester -PassThru | Select-Object Name,Version,ModuleBase | Format-Table -AutoSize
    Get-Command Invoke-ScriptAnalyzer,Invoke-Pester | Select-Object Name,Source | Format-Table -AutoSize
+   # 解析ツールの動作を確かめる
    Invoke-ScriptAnalyzer -ScriptDefinition 'gci; $x = 1' | Select-Object RuleName | Format-Table -AutoSize
    ```
 
@@ -2440,10 +2555,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 保存先を用意し、入出力の設定を控える
      $dir = Join-Path $env:LOCALAPPDATA 'PowerShell\completions'
      New-Item -ItemType Directory -Path $dir -Force | Out-Null
      $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding
      $log = @()
+     # 各コマンドの補完ファイルを生成する
      try {
        [Console]::InputEncoding = [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
        foreach ($t in @(@('gh', 'completion', '-s', 'powershell'), @('rg', '--generate', 'complete-powershell'), @('fd', '--gen-completions', 'powershell'), @('delta', '--generate-completion', 'powershell'), @('bat', '--completion', 'ps1'), @('starship', 'completions', 'powershell'))) {
@@ -2455,7 +2572,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        }
      } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 補完ファイルの生成結果を確かめる
      $log
+     # 保存したファイルの名前と大きさを確かめる
      $log = @()
      $log += (Get-ChildItem -LiteralPath $dir | ForEach-Object { '{0} {1}' -f $_.Name, $_.Length })
      $log
@@ -2470,6 +2589,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # プロファイルに足す開発設定を用意する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
      $lines = @(
        'if ($Host.Name -eq ''ConsoleHost'') { $global:DevConsoleEncoding = @([Console]::InputEncoding, [Console]::OutputEncoding); $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action { [Console]::InputEncoding = $global:DevConsoleEncoding[0]; [Console]::OutputEncoding = $global:DevConsoleEncoding[1] }; [Console]::InputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) }  # shell-terminal.md:dev'
@@ -2485,6 +2605,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
      $oldWinget = 'if (Get-Command -Name winget -CommandType Application -ErrorAction Ignore) { Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock { param($wordToComplete, $commandAst, $cursorPosition) $w = $wordToComplete.Replace(''"'', ''""''); $a = $commandAst.ToString().Replace(''"'', ''""''); Invoke-Utf8Native { winget complete --word="$w" --commandline "$a" --position $cursorPosition } | ForEach-Object { [Management.Automation.CompletionResult]::new($_, $_, ''ParameterValue'', $_) } } }  # shell-terminal.md:dev'
      if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # winget の古い補完設定を置き換える
      $latin1 = [Text.Encoding]::GetEncoding(28591)
      $raw = $latin1.GetString([IO.File]::ReadAllBytes($p))
      $updated = ($raw -split '(?<=\n)' | ForEach-Object {
@@ -2494,6 +2615,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        [IO.File]::WriteAllBytes($p, $latin1.GetBytes($updated))
        "置き換えた: $($lines[2])"
      }
+     # 開発の設定をプロファイルに足し、読み戻す
      foreach ($line in $lines) {
        $text = Get-Content -LiteralPath $p -Raw
        if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
@@ -2523,12 +2645,16 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 端末の文字コードと Git の日本語出力を確かめる
    [Console]::InputEncoding.CodePage
    [Console]::OutputEncoding.CodePage
    $s = git log -10 --format=%s
    $s
+   # 予測の表示設定を確かめる
    Get-PSReadLineOption | Select-Object PredictionSource,PredictionViewStyle
+   # fzf のキー割り当てを確かめる
    Get-PSReadLineKeyHandler -Chord Ctrl+t,Ctrl+r | Format-Table Key,Function,Description -AutoSize
+   # 開発用の関数を確かめる
    Get-Command Invoke-Utf8Native,ll,err -ErrorAction SilentlyContinue | Select-Object Name,CommandType
    ```
 
@@ -2556,6 +2682,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # プロファイルに足す開発設定を用意する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
      $lines = @(
        'function Invoke-Utf8Native { param([Parameter(Mandatory)][scriptblock]$ScriptBlock) $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding; try { $OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false); & $ScriptBlock } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out } }  # shell-terminal.md:dev'
@@ -2591,12 +2718,16 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 実行前の文字コードを確かめる
    [Console]::InputEncoding.CodePage
    [Console]::OutputEncoding.CodePage
+   # UTF-8 の関数で Git の日本語出力を確かめる
    $s = Invoke-Utf8Native { git log -10 --format=%s }
    $s
+   # 実行後の文字コードを確かめる
    [Console]::InputEncoding.CodePage
    [Console]::OutputEncoding.CodePage
+   # 開発用の関数を確かめる
    Get-Command Invoke-Utf8Native,ll -ErrorAction SilentlyContinue | Select-Object Name,CommandType
    ```
 
@@ -2637,9 +2768,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. PowerShell 7 から、5.1 用の PSReadLine 2.4.5 を保存する。
 
    ```powershell
+   # 5.1 用のモジュールの保存先を用意する
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
      New-Item -ItemType Directory -Force -Path $dir | Out-Null
+     # PSReadLine 2.4.5 を保存する
      $saved = Test-Path -LiteralPath (Join-Path $dir 'PSReadLine\2.4.5')
      if (-not $saved) { Save-PSResource -Name PSReadLine -Version 2.4.5 -Repository PSGallery -TrustRepository -IncludeXml -Path $dir -ErrorAction Stop }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2662,11 +2795,14 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 複数行と入れ子の出力を確かめる
      '1 行目'
      '2 行目'
      '3 行目'
      if ($true) { '入れ子の行' }
+     # PSReadLine の版を確かめる
      Get-Module PSReadLine | Select-Object Name,Version,ModuleBase
+     # キーの割り当てと予測の設定を確かめる
      Get-PSReadLineKeyHandler -Bound | Where-Object { $_.Key -in 'Ctrl+Enter','Ctrl+v','UpArrow','DownArrow' } | Format-Table Key,Function -AutoSize
      (Get-PSReadLineOption).PredictionSource
    }
@@ -2688,6 +2824,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 削除する版と作業用のパスを設定する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules\PSReadLine\2.4.5'
      $q = "$p.remove"
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2725,10 +2862,12 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 
    ```powershell
    & {
+     # 保存先を用意し、入出力の設定を控える
      $dir = Join-Path $env:LOCALAPPDATA 'PowerShell\completions'
      New-Item -ItemType Directory -Path $dir -Force | Out-Null
      $u8in = [Console]::InputEncoding; $u8out = [Console]::OutputEncoding
      $log = @()
+     # 各コマンドの補完ファイルを生成する
      try {
        [Console]::InputEncoding = [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
        foreach ($t in @(@('gh', 'completion', '-s', 'powershell'), @('rg', '--generate', 'complete-powershell'), @('fd', '--gen-completions', 'powershell'), @('delta', '--generate-completion', 'powershell'), @('bat', '--completion', 'ps1'), @('starship', 'completions', 'powershell'))) {
@@ -2740,7 +2879,9 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
        }
      } finally { [Console]::InputEncoding = $u8in; [Console]::OutputEncoding = $u8out }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 補完ファイルの生成結果を確かめる
      $log
+     # 保存したファイルの名前と大きさを確かめる
      $log = @()
      $log += (Get-ChildItem -LiteralPath $dir | ForEach-Object { '{0} {1}' -f $_.Name, $_.Length })
      $log
@@ -2755,8 +2896,11 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
    ```powershell
    pwsh.exe -NoLogo -NoProfile -Command {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 更新前のモジュールの版を確かめる
      Get-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Scope CurrentUser | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
+     # PowerShell 7 の開発モジュールを更新する
      Update-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Repository PSGallery -Scope CurrentUser -TrustRepository -ErrorAction Stop
+     # 更新後のモジュールの版を確かめる
      Get-PSResource -Name PSScriptAnalyzer,Pester,CompletionPredictor,PSFzf -Scope CurrentUser | Select-Object Name,Version,InstalledLocation | Out-String -Width 160
    }
    ```
@@ -2767,6 +2911,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 5.1 用の 2 つのモジュールを、公開されている版と比べて保存する。
 
    ```powershell
+   # 5.1 用のモジュールの保存先を用意する
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
      New-Item -ItemType Directory -Force -Path $dir | Out-Null
@@ -2791,6 +2936,7 @@ root のシェルにも、共通の bash 設定を入れる。一般ユーザー
 1. 5.1 の PSReadLine を上げる項を通したときだけ、公開されている版と比べて保存する。
 
    ```powershell
+   # 保存済みの版と公開版を取得する
    pwsh.exe -NoLogo -NoProfile -Command {
      $dir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'
      $saved = @(Get-PSResource -Name PSReadLine -Path $dir -ErrorAction SilentlyContinue)

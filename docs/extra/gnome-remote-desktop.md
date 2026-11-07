@@ -18,11 +18,9 @@
   確認方法:
 
   ```bash
-  {
-    printf '\n\033[7m 確認 \033[0m\n'
-    sudo cat /etc/gnome-remote-desktop/grd.conf
-    sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
-  }
+  printf '\n\033[7m 確認 \033[0m\n'
+  sudo cat /etc/gnome-remote-desktop/grd.conf
+  sudo cat /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/grd.conf   # 通常は存在しない
   ```
 
 - **リモートログインのセッション**: そのユーザーのセッションが無ければ、ログインで新しいセッションができる

@@ -11,7 +11,7 @@
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - 依存（`libuv` / `lpeg` / `luajit` / `luv` / `tree-sitter` / `unibilium` / `utf8proc`）も一緒に入る
 
-### LazyVim の設定を導入する / 手順 10: 補足: treesitter のパーサーの導入を待つ理由
+### LazyVim の設定を導入する / 手順 8: 補足: treesitter のパーサーの導入を待つ理由
 
 - 両 OS の「LazyVim の設定を導入する」「LazyVim の設定とプラグインの版を揃える」「LazyVim の本体・外部コマンド・プラグインを更新する」の計 6 手順に当てはまる
 - `+qa` だけでは、LazyVim が非同期で始めたパーサーの導入・更新を待たずに Neovim が閉じる
@@ -22,9 +22,9 @@
 - nvim-treesitter は、ほかで始まった同じ言語の導入を最大 60 秒しか待たないので、パーサーの更新と導入が両方とも成功するまで最大 20 回繰り返す
 - [検証記録の付録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/neovim.md#付録-headless-の-neovim-が-treesitter-のパーサーの導入を途中で止めるのを直したとき2026-10-16)
 
-### LazyVim の設定を導入する / 手順 13: 補足: GitLab プレビューの公式スタイル
+### LazyVim の設定を導入する / 手順 10: 補足: GitLab プレビューの公式スタイル
 
-- Windows 11 の「LazyVim の設定を導入する」の手順 11、両 OS の「LazyVim の設定とプラグインの版を揃える」の最後の手順も同じ取得処理を使う
+- Windows 11 の「LazyVim の設定を導入する」の手順 10、両 OS の「LazyVim の設定とプラグインの版を揃える」の最後の手順も同じ取得処理を使う
 - CSS・フォント・SVG は設定リポジトリに含めず、GitLab CE の公式資産イメージから取得する。初回の取得量は約 785 MB で、GitLab サーバーや Docker・Python は入れない
 - Node.js で必要なファイルだけを取り出し、Neovim のデータ領域の `gitlab-preview/assets/` に保存する。ライセンス原文・著作権表示も保存する
 - 指定した版・ハッシュと導入済みの資産が一致すれば取得を省く。設定だけを pull しても資産は自動更新せず、版を揃える手順で明示的に取得する
@@ -91,7 +91,7 @@
 - [Install Neovim](https://neovim.io/doc/install/) — 公式が案内する各経路（tarball / AppImage / パッケージマネージャ）
 - [neovim/neovim — INSTALL.md](https://github.com/neovim/neovim/blob/master/INSTALL.md) — tarball の展開先と PATH の通し方、glibc の要件
 - `:help nvim-defaults` / `:help checkhealth` — 既定値と健全性チェックの読み方
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜3 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md) — 「Homebrew」の手順 1〜2 が Homebrew 本体の導入手順。`/home/linuxbrew/.linuxbrew` に入れる理由、ボトルの条件は参考資料、`brew` の基本操作は同書の「Homebrew の使い方の基本」
 - [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) — 自分用の設定（LazyVim ベース）。導入の手順は[LazyVim の設定を導入する](../neovim.md#lazyvim-の設定を導入する)、何ができるかはその README
 - [ScoopInstaller/Main — neovim.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/neovim.json) — Windows 11 の scoop の定義（版・`bin`・`suggest`）
 - [neovim/neovim — runtime/doc/starting.txt（v0.12.5）](https://github.com/neovim/neovim/blob/v0.12.5/runtime/doc/starting.txt) — `base-directories`（Windows の設定・データ・キャッシュの場所）

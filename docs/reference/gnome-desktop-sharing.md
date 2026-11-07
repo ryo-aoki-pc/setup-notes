@@ -72,14 +72,14 @@
 - dconf への書き込みなので、PC の画面のセッションが無くても（SSH だけでも）設定できる
 - 既定は `view-only=true`（見るだけ）・`negotiate-port=true`・`port=3389`・`screen-share-mode='mirror-primary'`
 - `disable-view-only` は、クライアントからのキーボードとマウスを受け付ける設定
-- `disable-port-negotiation` は、指定したポートが使われていたときに次のポートを順に試すのを止める。ポートが勝手に変わって、「RDP を設定する」の手順 7 で開けたポートと食い違うのを防ぐ。代わりに、ポートが使われていると待ち受けに失敗し、再試行しない
+- `disable-port-negotiation` は、指定したポートが使われていたときに次のポートを順に試すのを止める。ポートが勝手に変わって、「RDP を設定する」の手順 6 で開けたポートと食い違うのを防ぐ。代わりに、ポートが使われていると待ち受けに失敗し、再試行しない
 - `set-tls-cert` と `set-tls-key` は絶対パスだけを受け付ける（`~` はシェルが展開する）
 - 初めて設定するときの `[x509_utils_from_pem]: BIO_new failed for certificate` と `RDP server certificate is invalid.` は、`grdctl` が設定を読み込むとき（49.3 の `src/grd-settings.c` の `update_rdp_server_fingerprint`）に、まだ空の `tls-cert` で証明書を読もうとして出すもの
   - 最初の `set-tls-cert` だけが出し、後の `grdctl` は設定済みのパスを読むので出さない（[AlmaLinux 10 の「GNOME のヘッドレスセッション」の手順 4](../gnome-remote.md#gnome-のヘッドレスセッション) と同じ）
 - `port` と `negotiate-port` は、次に待ち受けるときに効く。「RDP を設定する」の手順 3 は、既に起動しているデーモンを再起動してポートと TLS の設定を反映する。`view-only` 自体は、つないでいるクライアントにもすぐ効く
 - 読み戻しの `gsettings list-recursively` は、このスキーマのキーを全部出す。手順書の箇条書きの 5 つのほかに、`enable` と `screen-share-mode` の行も並ぶ
   - 2026-10-11 の Hyper-V の VM では、`enable false`・`negotiate-port false`・`port uint16 3389`・`screen-share-mode 'mirror-primary'`・`tls-cert`・`tls-key`・`view-only false` の 7 行だった（[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/gnome-desktop-sharing.md#付録-hyper-v-の-vm-で通した記録2026-10-11)）
-  - `enable` が `true` になるのは、「RDP を設定する」の手順 6 の後（同じ VM で、手順 5 の後の dconf は `enable=true`）
+  - `enable` が `true` になるのは、「RDP を設定する」の手順 5 の後（同じ VM で、手順 5 の後の dconf は `enable=true`）
 
 ### RDP を設定する / 手順 4: 補足: パスワードの無いキーリングに直接入れる
 
@@ -100,7 +100,7 @@
 - パスワードの無いキーリングも、gnome-keyring を起こした直後は閉じている。開くように頼まれると、パスワードを聞かずに開く（コンテナでの模擬と、VM の再起動の後の最初の RDP の認証）
 - 作ったコレクションの実際の D-Bus パスは `~/.local/state/gnome-desktop-sharing-setup/autologin-keyring` に記録する。名前が `rdp` でも、記録と一致しない既存コレクションは再利用しない
 
-### RDP を設定する / 手順 6: 補足: grdctl rdp enable
+### RDP を設定する / 手順 5: 補足: grdctl rdp enable
 
 - `grdctl rdp enable` は、`/usr/libexec/gnome-remote-desktop-enable-service` を通して、セッションの systemd にユーザーの unit `gnome-remote-desktop.service` の StartUnit と EnableUnitFiles を頼む。`systemctl --user enable --now` は要らない
 - unit は `WantedBy=gnome-session.target` なので、PC の画面のセッションが始まるたびに起動する
@@ -189,7 +189,7 @@
   - VM では 2 回とも、同じ秒に共有のデーモンが `RDP server stopped` を出した
   - 約 3 秒後に `Failed to start RDP server: Error binding to address [::]:3389: Address already in use` を出して、待ち受けをやめた。ユーザーの unit は `active` のまま
   - 共有のデーモンが待ち受けをいったん止める仕組みは確かめていない
-- firewalld は、ポート（`--add-port`）とサービス（`--add-service`）を別々に持つ。この手順書が「RDP を設定する」の手順 7 で開けた `3389/tcp` は、リモートログインが開けた `rdp` のサービスとは別に残る
+- firewalld は、ポート（`--add-port`）とサービス（`--add-service`）を別々に持つ。この手順書が「RDP を設定する」の手順 6 で開けた `3389/tcp` は、リモートログインが開けた `rdp` のサービスとは別に残る
   - リモートログインの「接続元を LAN に絞る」は、`rdp` のサービスを外して、LAN だけを通す rich rule にする。ゾーンに `3389/tcp` が残っていると、LAN の外からも 3389 に届く
 - そのため、[リモートログインと併用する](../gnome-remote.md#gnome-のデスクトップ共有-リモートログインと併用する)では、古いポートの開放を閉じてから、3390 へ移す。閉じても、リモートログインは `rdp` のサービスか、同書の rich rule で届く
 

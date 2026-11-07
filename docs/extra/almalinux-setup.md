@@ -18,7 +18,7 @@
 - **EPEL・RPM Fusion は AlmaLinux の配布物ではない**: EPEL は Fedora のプロジェクトが作るリポジトリ。AppStream / BaseOS にあるパッケージは、そちらを使う
   - RPM Fusion の free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）。鍵は「EPEL と RPM Fusion」の手順 2 で照合し、`rpmfusion-free-release` の署名も同じ項の手順 4 で確かめる
   - EL10 向けの RPM Fusion は中身が少ない。調べた範囲では、free に `ffmpeg` 7.1.5 と `gstreamer1-plugins-bad-freeworld`、nonfree に `steam`（i686）がある（[導入元一覧](../tool-catalog.md#導入経路と-el10-での注意)）
-  - RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[「Firefox」の手順 9](../almalinux-setup.md#firefox)）
+  - RPM Fusion の `ffmpeg-libs` は、EPEL の `libavcodec-free` と衝突する（[「Firefox」の手順 8](../almalinux-setup.md#firefox)）
 - **Homebrew と同じ名前の実行ファイルを、EPEL から二重に入れない**: 例えば EPEL の `fd-find` は `/usr/bin/fd` を置く。両方入れると、PATH の先頭の Homebrew 版が使われ、`dnf upgrade` で上がるのは使われないほうになる（[btop の注意点](btop.md#注意点)）
 - **Flatpak は容量が大きい**: アプリ本体に加え、runtime・翻訳・GL ドライバ・コーデックの拡張の容量も確保する。`sudo flatpak uninstall --unused` で、使われなくなった runtime を消せる
 - **Flatpak のアプリは `dnf upgrade` では上がらない**: [更新](../almalinux-setup.md#更新)の `sudo flatpak update` を別に実行する
@@ -28,7 +28,7 @@
   - [Firefox](../almalinux-setup.md#firefox) のように RPM で入れたものを Flathub からも入れると、メニューに同じ名前が 2 つ並ぶと見込まれる
 - **`gsettings` は、書けなかったときも終了コード 0 で終わる**: 読み戻しで確かめる。この文書の `gsettings` は `/usr/bin/gsettings` で呼ぶ（Homebrew の `gsettings` は、dconf ではなくファイルに書き、読み戻しでは変わったように見える）
 - **ほかの入力ソースは消える**: 「日本語入力」の手順 3 の `set` は一覧をまるごと置き換える
-- **Anthy はひらがなで始まる**: RHEL のパッチで既定の入力モードがひらがなになっている。英字を打つなら、Super+Space で配列（Neovim のセットアップの「Neovim」の手順 3 の後は「英語 (US)」）に戻す。Anthy の中の切り替えのキー（Ctrl+Space・Ctrl+J）は、Neovim のセットアップの「Neovim」の手順 3 で外れる
+- **Anthy はひらがなで始まる**: RHEL のパッチで既定の入力モードがひらがなになっている。英字を打つなら、Super+Space で配列（Neovim のセットアップの「Neovim」の手順 2 の後は「英語 (US)」）に戻す。Anthy の中の切り替えのキー（Ctrl+Space・Ctrl+J）は、Neovim のセットアップの「Neovim」の手順 2 で外れる
   - 変換は Mozc に比べて弱いと言われる（本書では比べていない）。よく使う語は、一緒に入る辞書のツール `kasumi-unicode` で登録する
   - 入力モードやキーの割り当ての設定画面は `/usr/libexec/ibus-setup-anthy`（アプリの一覧には出ない）
 - **Caps Lock の働きは無くなる**: 「GNOME の表示と入力」の手順 4 は Caps Lock を Ctrl にするだけ。大文字を続けて打つときは Shift を押す。JIS 配列では「英数」（Caps Lock）のキーが Ctrl になる
@@ -45,16 +45,16 @@
 - **Homebrew の導入・更新は一般ユーザーで行う**: 通常のホストでは、インストーラや `brew install` などの管理操作は root を拒否する。ただし**実行するユーザーが `sudo` できる必要がある**（`/home/linuxbrew` を作るため）
 - **Homebrew の導入先を変えるとすべてソースビルドになる**: [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/almalinux-setup.md#homebrew-の記録)
 - **PATH の先頭が Homebrew になる**: `brew shellenv` は `/home/linuxbrew/.linuxbrew/bin` を `PATH` の**先頭**に足す。同じ名前の RPM が入っていると Homebrew 版が勝つ（bat・[gdu](../almalinux-setup.md#gdu) で実際に問題になる）
-  - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 4 を通す
+  - `python3` も Homebrew 版が先に見つかる。この版には `gi` が無いので、PyGObject を使う処理は `/usr/bin/python3` で呼ぶ。GNOME の日本語入力には、[Homebrew](../almalinux-setup.md#homebrew)の手順 3 を通す
 - **`sudo <tool>` は、そのままでは使えない**: sudo の PATH（`secure_path`）にも root の `PATH` にも、Homebrew は入っていない
   - `sudo <tool>` で使うなら、[Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通す（`sudo -s`・`sudo -i` のシェルでも使えるようになる）
   - root のシェル（`su -`、root のログイン、`sudo -i`）で使うなら、[Homebrew を root のシェルでも使う](../almalinux-setup.md#homebrew-を-root-のシェルでも使う)の節を通す
   - どちらも通さないなら、RPM で入れるか、フルパス（`/home/linuxbrew/.linuxbrew/bin/<tool>`）を渡す。bat で root のファイルを読むなら、`sudo cat` か、フルパスの `sudo /home/linuxbrew/.linuxbrew/bin/bat`
 - **`brew install` は、依存や依存先も含む計画なら端末で `[y/n]` を聞く**（Homebrew 7.0.7 の既定の ask mode）
-  - 同じブロックに後ろの行があると、その文字が答えとして読まれ、`n` で中止になる。`brew install` は、`[y/n]` に答えてから次の手順を貼る
+  - ブラケットペーストが効く bash 5.1 以降では、同じ入力の後ろの行は確認の答えとして読まれず、`[y/n]` に答えた後に動く
   - 7.0.7 のヘルプでは、指定した formula / cask だけを入れる計画と、TTY が無い実行では確認を省く。端末では表示に従い、確認を求められたら答える
   - `brew upgrade` も 7.0.7 では ask mode が既定。名前を指定した場合はその名前以外も更新する計画、名前を省略した場合は更新対象があるときに、TTY で確認する
-  - 導入・更新が終わり、プロンプトに戻ってから次の手順を貼る。確認を省く指定は `HOMEBREW_NO_ASK=1`、または `brew install` / `brew upgrade` の `--no-ask` / `--yes` / `-y`
+  - 確認が出たら導入・更新の計画を確かめ、表示に従って答える。確認を省く指定は `HOMEBREW_NO_ASK=1`、または `brew install` / `brew upgrade` の `--no-ask` / `--yes` / `-y`
 - **不要な依存は自動で消えることがある**: Homebrew 7.0.7 の `brew uninstall` と `brew cleanup` は、不要になった依存を既定で自動削除する
   - 自動削除を止めるときは、そのコマンドに `HOMEBREW_NO_AUTOREMOVE=1` を付ける。明示的な `brew autoremove` は、残った不要な依存を消すための操作
 - **`~/.bashrc` を読まない文脈では見えない**: cron や一部の非対話シェルでは `brew shellenv` が走らないので、Homebrew で入れたコマンドが見つからない。スクリプトからはフルパスで呼ぶ
@@ -80,9 +80,9 @@
 - **Firefox: 言語パックは本体と同時に上げる**: バージョンが食い違うと UI が英語に戻る。`dnf upgrade` 全体を流していれば自動で揃う
 - Firefox: パッケージの導入・削除が終わったことを確かめる
 - **Firefox: RPM Fusion は Fedora の外のリポジトリ**: free は「Fedora がライセンス以外の理由で配れないオープンソースのソフト」を配る（RPM Fusion の Configuration の説明）
-  - 鍵の照合と、`rpmfusion-free-release` の署名の確かめ方は [「EPEL と RPM Fusion」の手順 2〜5](../almalinux-setup.md#epel-と-rpm-fusion) にある
-- **Firefox: FFmpeg を入れたら Firefox を起動し直す**: 起動中の Firefox は読み直さない（[「Firefox」の手順 11](../almalinux-setup.md#firefox)）
-- **Firefox: EPEL の `libavcodec-free` とは同居できない**: 入っていると「Firefox」の手順 8 が止まる。残したままだと H.264 が再生できない（同じ項の手順 9）
+  - 鍵の照合と、`rpmfusion-free-release` の署名の確かめ方は [「EPEL と RPM Fusion」の手順 2〜4](../almalinux-setup.md#epel-と-rpm-fusion) にある
+- **Firefox: FFmpeg を入れたら Firefox を起動し直す**: 起動中の Firefox は読み直さない（[「Firefox」の手順 10](../almalinux-setup.md#firefox)）
+- **Firefox: EPEL の `libavcodec-free` とは同居できない**: 入っていると「Firefox」の手順 7 が止まる。残したままだと H.264 が再生できない（同じ項の手順 8）
 - **Firefox: aarch64 では Widevine を必要とするコンテンツの再生を前提にしない**
 - **git-delta: `core.pager` は PATH に `delta` がある文脈でしか動かない**
   - Homebrew の PATH は `~/.bashrc` の `brew shellenv` で通っているので、`~/.bashrc` を読まない文脈（cron、一部の非対話シェル、他ユーザー、`sudo -i` しない root）で `git diff` を打つと `delta: command not found` になる

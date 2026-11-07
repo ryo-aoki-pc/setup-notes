@@ -6,10 +6,11 @@
 > [!IMPORTANT]
 >
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - Windows 11 で GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
@@ -24,39 +25,34 @@
 
 - Neovim を Homebrew で入れ、自分用の設定（LazyVim をもとにした設定）を入れて、既定のエディタになったことを確かめる
 - 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[WezTerm](shell-terminal.md#wezterm)を通し、PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
-  - この項の手順 3 は、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の前提も要る
+  - この項の手順 2 は、[LazyVim の設定を導入する](#lazyvim-の設定を導入する)の前提も要る
   - インターネットに出られないホストは、[Homebrew](almalinux-setup.md#homebrew)の代わりに[Homebrew のオフライン導入](almalinux-setup.md#homebrew-のオフライン導入)を通し、そのトンネルのシェルで行う
-- 実行場所: WezTerm のタブ（前提の、PATH に Homebrew が入った端末。GNOME にログインした自分のユーザーの bash）。この項の手順 4 で新しいタブを開く
+- 実行場所: WezTerm のタブ（前提の、PATH に Homebrew が入った端末。GNOME にログインした自分のユーザーの bash）。この項の手順 3 で新しいタブを開く
 
-1. brew で Neovim を入れる。
+1. Neovim を導入し、版と実行ファイルの場所を確認する。
 
    ```bash
+   # Neovim を Homebrew から入れる
    brew install neovim
-   ```
-
-   - **次の手順は、Homebrew の確認が出たら答え、導入が成功してプロンプトに戻ってから貼る**（続けて貼ると確認の答えとして食われる）
-
-1. Neovim が入ったか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    nvim --version | head -3
    brew list --versions neovim
    command -v nvim
    ```
 
+   - Homebrew の確認が出たら答える
    - `NVIM v0.12.…` と `LuaJIT 2.1...` が出れば入っている
-   - ここでは `nvim` を起動しない（この項の手順 3 の退避より前に起動すると、`~/.local/state/nvim` などができて、それも退避される）
-     - この手順の `nvim --version` だけでも、空の `~/.local/state/nvim/nvim.log` ができる。この項の手順 3 で、`~/.local/state/nvim.bak` に退避される
+   - ここでは `nvim` を起動しない（この項の手順 2 の退避より前に起動すると、`~/.local/state/nvim` などができて、それも退避される）
+     - この手順の `nvim --version` だけでも、空の `~/.local/state/nvim/nvim.log` ができる。この項の手順 2 で、`~/.local/state/nvim.bak` に退避される
 
 1. オフラインでは npm の経路を先に設定し、[自分用の設定](https://github.com/ryo-aoki-pc/LazyVimStarter)を入れる。
 
-   - オフラインのホストでは、先に [npm のオフライン導入](almalinux-setup.md#npm-のオフライン導入)の手順 1・2 を同じトンネルのシェルで通す。参照先の「LazyVim の設定を導入する」の手順 10 の初回起動より前に行う
+   - オフラインのホストでは、先に [npm のオフライン導入](almalinux-setup.md#npm-のオフライン導入)の手順 1・2 を同じトンネルのシェルで通す。参照先の「LazyVim の設定を導入する」の手順 8 の初回起動より前に行う
    - [LazyVim の設定を導入する](#lazyvim-の設定を導入する)の全項を、この項で指定した端末で通す
-   - 参照先の手順 1 で Node.js・ibus-anthy・wl-clipboard、手順 5 で lazygit・ripgrep・fd を入れる
-   - 参照先の手順 7〜9 で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
-   - 参照先の手順 9 の後はログインし直さず、[再起動と確認](almalinux-setup.md#再起動と確認)の手順 1 の再起動で読み直す
-   - 参照先の手順 11 で Neovim が開く。Mason の導入を待ち、`:qa` で閉じてから次を貼る（参照先の手順 12 は画面を開かない）
+   - 参照先の手順 1 で Node.js・ibus-anthy・wl-clipboard、手順 4 で lazygit・ripgrep・fd を入れる
+   - 参照先の手順 5〜7 で入力ソースを「英語 (US)」と Anthy にし、Ctrl+Space・Ctrl+J を Anthy の切り替えから外す。JIS 配列でも US にする
+   - 参照先の手順 7 の後はログインし直さず、[再起動と確認](almalinux-setup.md#再起動と確認)の手順 1 の再起動で読み直す
+   - 参照先の手順 9 で Neovim が開く。Mason の導入を待ち、`:qa` で閉じると、同じブロックの `checkhealth` が動く
    - [日本語検索・整形・IME 連携の確認](#lazyvim-の日本語検索整形ime-連携を確かめる)は、[再起動と確認](almalinux-setup.md#再起動と確認)の手順 8 で行う
 
 1. WezTerm で新しいタブを開き、既定のエディタを確かめる。
@@ -80,7 +76,7 @@
 - Windows 11 の場所は[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 5 で確かめる
   - Windows 11 では `XDG_CONFIG_HOME` を設定しない（[理由](reference/neovim.md#windows-11-で-neovim-を入れる)）
 - **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
-  - 導入は[Neovim](#neovim)の手順 3
+  - 導入は[Neovim](#neovim)の手順 2
   - Windows 11 では既存の設定とデータを `.bak` に退避し、外部コマンドと設定を入れる
   - Windows 11 は、[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 4 で通す
   - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
@@ -89,31 +85,27 @@
 #### LazyVim の設定を導入する
 
 - 自分用の Neovim の設定（[ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)）を `~/.config/nvim` に入れる。外部コマンドと日本語入力の設定を全部入れてから、Neovim を初回起動する
-- 前提: [EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)・[共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[HackGen Console NF](shell-terminal.md#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1・2 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
-- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 3 の既存の設定の退避を省かない
+- 前提: [EPEL と RPM Fusion](almalinux-setup.md#epel-と-rpm-fusion)・[共通の bash 設定](shell-terminal.md#共通の-bash-設定)・[Homebrew](almalinux-setup.md#homebrew)・[HackGen Console NF](shell-terminal.md#hackgen-console-nf)を通し、[Neovim](#neovim)の手順 1 で Neovim を入れてある。PATH に Homebrew が入った端末（[シェルのツール](shell-terminal.md#シェルのツール)の手順 2 で開き直した端末）を開いてある
+- 実行場所: 前提の端末（GNOME にログインした自分のユーザーの bash）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。`sudo` は、この項の手順 1 だけで使う。この項の手順 2 の既存の設定の退避を省かない
 - [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
-- この項の手順 13 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
+- この項の手順 10 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 
-1. 外部コマンドと日本語入力 (ibus-anthy) を dnf で入れる。
+1. 外部コマンドと日本語入力を導入し、導入結果を確認する。
 
    ```bash
+   # 外部コマンドと日本語入力のパッケージを入れる
    sudo dnf install git gcc curl tar gzip unzip nodejs nodejs-npm file procps-ng ibus-anthy wl-clipboard
-   ```
-
-   - 何に使うかは[必要なもの一覧](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#必要なもの一覧)
-   - ripgrep と fd は、この項の手順 5 で Homebrew から入れる (EPEL の `ripgrep` / `fd-find` は入れない)
-   - EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる
-   - 鍵の fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158` (`Fedora (epel10)`) であることを確かめてから `y` と答える
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る** (続けて貼ると答えとして食われる)
-
-1. dnf で入ったか確かめる。
-
-   ```bash
+   printf '\n\033[7m 確認 \033[0m\n'
    rpm -q git gcc curl tar gzip unzip nodejs nodejs-npm file procps-ng ibus-anthy wl-clipboard
    node --version
    command -v gdbus busctl wl-paste
    ```
 
+   - 何に使うかは[必要なもの一覧](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#必要なもの一覧)
+   - ripgrep と fd は、この項の手順 4 で Homebrew から入れる (EPEL の `ripgrep` / `fd-find` は入れない)
+   - EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる
+   - 鍵の fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158` (`Fedora (epel10)`) であることを確かめてから `y` と答える
+   - トランザクション表の `[y/N]` に `y` と答える
    - どの行も `package … is not installed` にならなければよい
    - `node --version` が `v22.…` と出る
    - `gdbus` / `busctl` / `wl-paste` の 3 つの場所が出る (`gdbus` と `busctl` は IME 連携が ibus と話すのに使う)
@@ -121,6 +113,7 @@
 1. 既存の Neovim の設定とデータがあれば、`.bak` を付けて退避する。
 
    ```bash
+   # Neovim の既存のディレクトリを退避する
    for d in ~/.config/nvim ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim; do
      [ ! -e "${d}" ] || mv -vT "${d}" "${d}.bak"
    done
@@ -132,6 +125,7 @@
 1. この設定を `~/.config/nvim` に clone する。
 
    ```bash
+   # 設定リポジトリを取得し、ブランチを確かめる
    [ -e ~/.config/nvim/init.lua ] || git clone https://github.com/ryo-aoki-pc/LazyVimStarter.git ~/.config/nvim
    git -C ~/.config/nvim branch --show-current
    ```
@@ -139,32 +133,29 @@
    - `custom` と出ればよい (実運用の設定のブランチで、このリポジトリの既定のブランチ)
    - すでに clone してあれば、`git clone` は飛ばされる
 
-1. lazygit・ripgrep・fd を Homebrew で入れる。
+1. lazygit・ripgrep・fd を導入し、版と場所を確認する。
 
    ```bash
+   # 検索と Git 操作に使う外部コマンドを入れる
    brew install lazygit ripgrep fd
+   printf '\n\033[7m 確認 \033[0m\n'
+   nvim --version | head -1
+   command -v nvim lazygit rg fd
    ```
 
    - `Do you want to proceed with the installation? [y/n]` と聞かれたら、入るものの一覧 (依存を含む) を見て `y` と答える
    - lazygit は任意 (無ければ `<leader>gg` が定義されないだけ)
    - ripgrep (`rg`) と fd は、ピッカーと Migemo の候補が使う。EPEL の `ripgrep` / `fd-find` と二重に入れない (実行ファイルの名前が同じで、PATH の先頭の Homebrew 版が使われる)
-   - **次の手順は、確認が出たら答え、インストールが成功してプロンプトに戻ってから貼る** (確認に答える前に続けて貼ると、答えとして食われる)
-
-1. Neovim・lazygit・ripgrep・fd が入ったか確かめる。
-
-   ```bash
-   nvim --version | head -1
-   command -v nvim lazygit rg fd
-   ```
-
    - `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
    - 4 つとも `/home/linuxbrew/.linuxbrew/bin/…` と出る
 
 1. 入力ソースを「英語 (US)」と Anthy の 2 つにする。
 
    ```bash
+   # 入力ソースの現在の値を取得する
    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
    /usr/bin/gsettings get org.gnome.desktop.input-sources sources
+   # 入力ソースを設定して読み戻す
    /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'anthy')]"
    /usr/bin/gsettings get org.gnome.desktop.input-sources sources
    ```
@@ -178,18 +169,20 @@
 1. Anthy の `on_off` のキーから `Ctrl+J` と `Ctrl+space` を外した値を作る。
 
    ```bash
+   # Anthy の切り替えキーを編集して表示する
    ANTHY_SHORTCUT=$(/usr/bin/gsettings get org.freedesktop.ibus.engine.anthy.shortcut default | sed "s/'on_off': <\['Zenkaku_Hankaku', 'Ctrl+space', 'Ctrl+J'\]>/'on_off': <['Zenkaku_Hankaku']>/")
    printf '%s\n' "${ANTHY_SHORTCUT}" | grep -o "'on_off': <\[[^]]*\]>"
    ```
 
    - `'on_off': <['Zenkaku_Hankaku']>` と出ればよい
-   - `Ctrl+J` が残っている・何も出ないときは、この項の手順 9 は飛ばす。代わりに `ibus-setup-anthy` の「キー割り当て」で `on_off` から `Ctrl+J` と `Ctrl+space` を消す
+   - `Ctrl+J` が残っている・何も出ないときは、この項の手順 7 は飛ばす。代わりに `ibus-setup-anthy` の「キー割り当て」で `on_off` から `Ctrl+J` と `Ctrl+space` を消す
    - **次の手順は、出た行を目で確かめてから貼る**
 
 1. 作った値を Anthy の設定に書き戻す。
 
    ```bash
-   /usr/bin/gsettings set org.freedesktop.ibus.engine.anthy.shortcut default "${ANTHY_SHORTCUT:?この項の手順 8 の ANTHY_SHORTCUT が空のまま。この項の手順 8 を貼り直す}"
+   # Anthy の切り替えキーを保存して読み戻す
+   /usr/bin/gsettings set org.freedesktop.ibus.engine.anthy.shortcut default "${ANTHY_SHORTCUT:?この項の手順 6 の ANTHY_SHORTCUT が空のまま。この項の手順 6 を貼り直す}"
    /usr/bin/gsettings get org.freedesktop.ibus.engine.anthy.shortcut default | grep -o "'on_off': <\[[^]]*\]>"
    ```
 
@@ -200,8 +193,10 @@
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
    ```bash
+   # パーサーの導入を待ちながらプラグインを入れる
    ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+$ts_wait" +qa
+   # lock ファイルを戻してプラグインの版を揃える
    git -C ~/.config/nvim checkout -- lazy-lock.json
    nvim --headless "+Lazy! restore" "+$ts_wait" +qa
    printf '\n\033[7m 確認 \033[0m\n'
@@ -212,32 +207,29 @@
    - treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
    - tree-sitter の CLI が無ければ、先に Mason が入れる（``Installed `tree-sitter-cli` with `mason.nvim`.`` が出る）
    - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
-   - Mason の未完了の導入は、この項の手順 11 で補う
+   - Mason の未完了の導入は、この項の手順 9 で補う
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
-   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 10 のブロックを貼り直す
-   - **次の手順は、プロンプトが戻ってから貼る** (最後のメッセージの行末に続けて出ることがある)
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 8 のブロックを貼り直す
+   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
 
-1. 試験用の Markdown を開いて、Mason の導入を待つ。
+1. Mason の導入を待ち、外部コマンドの健全性を確認する。
 
    ```bash
+   # 確認用の Markdown を作って Neovim で開く
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
+   printf '\n\033[7m 確認 \033[0m\n'
+   # Mason が入れた外部コマンドを一覧にする
+   ls ~/.local/share/nvim/mason/bin
+   # 健全性の検査を実行し、警告とエラーを抽出する
+   nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! /tmp/lazyvim-health.txt" +qa
+   grep -E 'ERROR|WARNING' /tmp/lazyvim-health.txt
    ```
 
    - `Error running markdownlint-cli2: ENOENT` が 1 回出てもよい (Mason が入れ終わる前に lint が走っただけ)
    - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる。tree-sitter の CLI を別に入れてあれば 10 個)
    - 待ったら `:qa` で閉じる
-   - **次の手順は、`:qa` で閉じてから貼る** (続けて貼ると Neovim への入力として食われる)
-
-1. 外部コマンドと Mason のツールが揃ったかを、`checkhealth` で確かめる。
-
-   ```bash
-   ls ~/.local/share/nvim/mason/bin
-   nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! /tmp/lazyvim-health.txt" +qa
-   grep -E 'ERROR|WARNING' /tmp/lazyvim-health.txt
-   ```
-
    - `mason/bin` に `markdownlint-cli2` / `marksman` / `stylua` / `tree-sitter` などが並ぶ
    - `grep` が何も出さないか、`` WARNING `fzf` is not installed `` の 1 行だけならよい (無視してよい。fzf が入っていれば出ない)
    - `ERROR` が出たら[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)
@@ -249,7 +241,7 @@
    ```
 
    - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
-   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 13 を貼り直す
+   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 10 を貼り直す
    - この手順を通せないときも、プレビューは独自のスタイルで表示できる
 
 #### LazyVim の日本語検索・整形・IME 連携を確かめる
@@ -261,6 +253,7 @@
 1. 試験用の Markdown を作って開き、日本語検索・整形・IME 連携を確かめる。
 
    ```bash
+   # 日本語の検索と整形を試すファイルを作って開く
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
@@ -289,6 +282,7 @@
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
    ```bash
+   # 設定を取り込み、プラグインの版を揃える
    ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    git -C ~/.config/nvim pull --ff-only && nvim --headless "+Lazy! restore" "+$ts_wait" +qa
    printf '\n\033[7m 確認 \033[0m\n'
@@ -302,7 +296,7 @@
    - `pull` が `Not possible to fast-forward` で止まったら、このマシンに push していないコミットがある。先に push するか、`git -C ~/.config/nvim log --oneline '@{u}..'` で中身を見る
    - `pull` が `Your local changes to the following files would be overwritten by merge:` と `lazy-lock.json` を出して止まったら、lock の変更を確認する
    - `:Lazy update` の結果として残すのでなければ、`git -C ~/.config/nvim checkout -- lazy-lock.json` で戻して、この手順を貼り直す
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 1 のブロックを貼り直す
 
 1. GitLab プレビューの公式スタイルを、設定が指定する版に揃える。
@@ -372,6 +366,7 @@
 1. tmux の設定ファイルに `terminal-overrides` を 1 行足す。
 
    ```bash
+   # カーソル色の設定を tmux の設定ファイルに足す
    mkdir -p ~/.config/tmux
    grep -qF 'Cs=\E]12' ~/.config/tmux/tmux.conf 2>/dev/null || cat >> ~/.config/tmux/tmux.conf <<'EOF'
    set -ga terminal-overrides ',*:Cs=\E]12;%p1%s\007:Cr=\E]112\007'
@@ -384,6 +379,7 @@
 1. tmux の中で、設定を読み直して確かめる。
 
    ```bash
+   # tmux の設定を読み込み、適用した値を確かめる
    tmux source-file ~/.config/tmux/tmux.conf
    tmux show-options -g terminal-overrides | grep -F 'Cs='
    ```
@@ -405,6 +401,7 @@
 1. 拡張を、GNOME Shell が拡張を探す場所につなぐ。
 
    ```bash
+   # GNOME Shell の拡張を配置して確かめる
    mkdir -p ~/.local/share/gnome-shell/extensions
    ln -sfn ~/.config/nvim/gnome-shell/ibus-engine-follow@ryo-aoki-pc.github.com ~/.local/share/gnome-shell/extensions/
    ls -l ~/.local/share/gnome-shell/extensions/
@@ -421,6 +418,7 @@
 1. 拡張を有効にする。
 
    ```bash
+   # GNOME Shell の拡張を有効にして状態を調べる
    gnome-extensions enable ibus-engine-follow@ryo-aoki-pc.github.com
    gnome-extensions info ibus-engine-follow@ryo-aoki-pc.github.com | grep -E 'Enabled|State'
    ```
@@ -432,6 +430,7 @@
 1. Neovim を開き、上部バーが Neovim の IME の状態に付いてくることを確かめる。
 
    ```bash
+   # IME の切り替えを試すファイルを作って開く
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
@@ -453,7 +452,9 @@
 1. SSH のシェルで、この設定が OSC 52 を使うことを確かめる。
 
    ```bash
+   # SSH の接続情報を表示する
    printf 'SSH_CONNECTION=%s\n' "${SSH_CONNECTION:-(無い)}"
+   # Neovim のクリップボード設定を確かめる
    nvim --headless "+lua io.stdout:write((vim.g.clipboard or {}).name or '(無い)', '\n')" +qa
    ```
 
@@ -465,6 +466,7 @@
 1. 試験用のテキストを開き、ヤンクした行が手元のクリップボードに入ることを確かめる。
 
    ```bash
+   # ヤンクを試すテキストファイルを作って開く
    printf '%s\n' 'SSH 越しのヤンクを試す。' > /tmp/lazyvim-ssh.txt
    nvim /tmp/lazyvim-ssh.txt
    ```
@@ -489,7 +491,7 @@
 
    - `GitLab のトークン: ` と出るので、トークンを貼って Enter を押す (画面には出ない)
    - 前に書いた `GITLAB_TOKEN` の行があれば、書き直す
-   - **次の手順は、トークンを入力してから貼る**
+   - **次の手順は、トークンを入力してから貼る**（続けて貼ると、トークン入力を中断しても後ろの URL の設定が動く）
 
 1. AlmaLinux 10 で、gitlab.com 以外の GitLab (社内の GitLab など) を使うときは、その URL を入力して `~/.bashrc` に書く。
 
@@ -499,7 +501,7 @@
 
    - `https://gitlab.example.com` のように入力する (ホスト名だけでもよい)
    - 空のまま Enter を押すと、`GITLAB_HOST` を書かない (前に書いた行も消す)。送り先は gitlab.com になる
-   - **次の手順は、URL を入力してから貼る**
+   - **次の手順は、URL を入力してから貼る**（次の手順は環境変数を読み込んだ新しい端末で行うため、同じ端末には続けて貼らない）
 
 1. AlmaLinux 10 では、新しい端末でこの設定の README を開き、プレビューで確かめる。
 
@@ -525,8 +527,10 @@
 1. AlmaLinux 10 では、Homebrew で入れたものを上げる。
 
    ```bash
+   # Neovim・外部コマンド・フォントを更新する
    brew upgrade neovim lazygit ripgrep fd
    brew upgrade --cask font-hackgen-nerd
+   # 更新後の Neovim の版を確かめる
    nvim --version | head -1
    ```
 
@@ -536,6 +540,7 @@
 1. AlmaLinux 10 では、プラグインを上げて `lazy-lock.json` の差分を見る。
 
    ```bash
+   # パーサーの導入を待ちながらプラグインを更新する
    ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+Lazy! update" "+$ts_wait" +qa
    printf '\n\033[7m 確認 \033[0m\n'
@@ -544,7 +549,7 @@
 
    - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `lazy-lock.json` だけが変わっていればよい
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
    - 上げた後は、Neovim を起動して使えることを確かめてから、`lazy-lock.json` をコミットして push する
 
@@ -606,8 +611,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Neovim の版と実行ファイルを確かめる
    nvim --version | Select-Object -First 3
    (Get-Command nvim -All).Source
+   # 設定とデータの保存先を確かめる
    nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
    ```
 
@@ -623,7 +630,7 @@
 - 前提: [Neovim](#windows-11-で-neovim-を入れる)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - Git Bash では、[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)で入れた共通の bash 設定が `EDITOR`・`VISUAL` を `nvim` にするので、この項は要らない
-- Git Bash の値は WezTerm の新しいタブで、[AlmaLinux 10 の「Neovim」](#neovim)の手順 4 のブロックを貼って確かめる（`. ~/.bashrc` は読み直さない）
+- Git Bash の値は WezTerm の新しいタブで、[AlmaLinux 10 の「Neovim」](#neovim)の手順 3 のブロックを貼って確かめる（`. ~/.bashrc` は読み直さない）
 
 1. 管理者ではない PowerShell 7 を開く。
 
@@ -634,8 +641,10 @@
 
    ```powershell
    & {
+     # エディタの環境変数にある既存の値を調べる
      $other = @(foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::GetEnvironmentVariable($n, 'User') }) | Where-Object { $_ -and $_ -ne 'nvim' }
      if ($other) { Write-Error "中断: ユーザーの環境変数 EDITOR か VISUAL に、nvim ではない値がある（$($other -join ', ')）" } else {
+       # EDITOR と VISUAL をユーザーの環境変数に設定する
        foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::SetEnvironmentVariable($n, 'nvim', 'User') }
        "`n$([char]27)[7m 確認 $([char]27)[0m"
        foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
@@ -654,7 +663,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
-- この項の手順 11 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
+- この項の手順 10 は、GitLab プレビューの公式スタイルを初めて取得するときに約 785 MB をダウンロードする
 - [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・[検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/repos/LazyVimStarter/docs/verification/setup.md)
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -665,7 +674,9 @@
 1. git が無ければ入れ、scoop に `extras` のバケットを足す。
 
    ```powershell
+   # Git が無ければ scoop から入れる
    if (-not (Get-Command git -ErrorAction SilentlyContinue)) { scoop install git }
+   # scoop に extras の導入元を登録する
    scoop bucket add extras
    ```
 
@@ -676,10 +687,12 @@
 
    ```powershell
    & {
+     # 退避する場所と既存の控えの有無を調べる
      $nvimPaths = @("$env:LOCALAPPDATA\nvim", "$env:LOCALAPPDATA\nvim-data")
      foreach ($d in $nvimPaths) {
        if (Test-Path -LiteralPath "${d}.bak") { throw "中断: ${d}.bak がすでにある。何も退避していない" }
      }
+     # 既存の設定とデータを控えの場所へ移す
      foreach ($d in $nvimPaths) {
        if (Test-Path -LiteralPath $d) {
          Move-Item -LiteralPath $d -Destination "${d}.bak" -ErrorAction Stop
@@ -698,6 +711,7 @@
 1. この設定を `%LOCALAPPDATA%\nvim` に clone する。
 
    ```powershell
+   # Neovim の設定リポジトリを取得する
    if (-not (Test-Path "$env:LOCALAPPDATA\nvim\init.lua")) { git clone https://github.com/ryo-aoki-pc/LazyVimStarter.git "$env:LOCALAPPDATA\nvim" }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" branch --show-current
@@ -709,6 +723,7 @@
 1. Visual C++ のランタイムが無いときだけ入れ、外部コマンド・zenhan・lazygit を scoop で入れる。
 
    ```powershell
+   # ランタイムと Neovim の外部コマンドを入れる
    if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { scoop install vcredist2022 }
    scoop install ripgrep fd gcc nodejs zenhan lazygit
    ```
@@ -734,8 +749,10 @@
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
    ```powershell
+   # パーサーの導入を待ちながらプラグインを入れる
    $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+$tsWait" +qa
+   # lock ファイルを戻してプラグインの版を揃える
    git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json
    nvim --headless "+Lazy! restore" "+$tsWait" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -748,29 +765,24 @@
    - Mason の未完了の導入は、この項の手順 8 で補う
    - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
    - 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazyvim-の設定を導入する--手順-10-補足-lazy-lockjson-を戻してから-restore-する理由)を参照する
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 7 のブロックを貼り直す
-   - **次の手順は、プロンプトが戻ってから貼る**
+   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
 
-1. 試験用の Markdown を開いて、Mason の導入を待つ。
+1. Mason の導入を待ち、外部コマンドの健全性を確認する。
 
    ```powershell
+   # 確認用の Markdown を作って Neovim で開く
    Set-Content -Path "$env:TEMP\lazyvim-check.md" -Value '#  動作確認', '', '日本語の検索を試す。' -Encoding UTF8
    nvim "$env:TEMP\lazyvim-check.md"
-   ```
-
-   - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる)
-   - 待ったら `:qa` で閉じる
-   - **次の手順は、`:qa` で閉じてから貼る** (続けて貼ると Neovim への入力として食われる)
-
-1. 外部コマンドと Mason のツールが揃ったかを、`checkhealth` で確かめる。
-
-   ```powershell
+   # 外部コマンドの健全性を検査して結果を保存する
    nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! $env:TEMP\lazyvim-health.txt" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Select-String -Path "$env:TEMP\lazyvim-health.txt" -Pattern 'ERROR|WARNING'
    ```
 
+   - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる)
+   - 待ったら `:qa` で閉じる
    - `` WARNING `fzf` is not installed `` の 1 行だけならよい (無視してよい)
    - `ERROR` が出たら[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)
 
@@ -785,7 +797,7 @@
    - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
    - OS 側で IME を切り替えると、lualine の `あ` / `A` がずれることがある（[README](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#日本語入力検索)）
    - `:qa!` で閉じる
-   - **次の手順は、`:qa!` で閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
+   - **次の手順は、`:qa!` で閉じてから貼る**（続けて貼ると、検索・整形・IME の確認を終える前でも後ろの公式スタイルの取得が動く）
 
 1. Windows 11 で、GitLab プレビューの公式スタイルを取得する。
 
@@ -794,7 +806,7 @@
    ```
 
    - `GitLab プレビューの公式スタイル: 導入済み` と出ればよい
-   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 11 を貼り直す
+   - 取得に失敗したら、通信と Node.js 22 以上を確かめて、この項の手順 10 を貼り直す
    - この手順を通せないときも、プレビューは独自のスタイルで表示できる
 
 #### Windows 11 で LazyVim の設定とプラグインの版を揃える
@@ -815,6 +827,7 @@
 1. Windows 11 では、設定を最新にしてプラグインを揃える。
 
    ```powershell
+   # 設定を取り込み、プラグインの版を揃える
    $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    git -C "$env:LOCALAPPDATA\nvim" pull --ff-only; if ($?) { nvim --headless "+Lazy! restore" "+$tsWait" +qa }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -828,7 +841,7 @@
    - `Not possible to fast-forward` なら、`restore` も状態表示も走らない。push していないコミットを先に push するか、`git -C "$env:LOCALAPPDATA\nvim" log --oneline '@{u}..'` で見る
    - `Your local changes to the following files would be overwritten by merge:` が `lazy-lock.json` を挙げたら、手元で lock が変わっている
    - `:Lazy update` の結果として残すのでなければ、`git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json` で戻してから、この手順を貼り直す
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 2 のブロックを貼り直す
 
 1. Windows 11 で、GitLab プレビューの公式スタイルを設定が指定する版に揃える。
@@ -891,7 +904,7 @@
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
    - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
    - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
-   - **ほかのブロックは、Neovim を閉じてから貼る**（続けて貼ると Neovim への入力として食われる）
+   - **ほかのブロックは、Neovim を閉じてから貼る**（Neovim を開いたまま貼ると、Neovim への入力になる）
 
 #### Windows 11 で LazyVim の GitLab プレビューを設定する
 
@@ -915,7 +928,7 @@
    - `GitLab のトークン: ` と出るので、トークンを貼って Enter を押す (画面には `*` で出る)
    - Enter の後、プロンプトが戻るまで 2 秒ほどかかる
    - 前に設定した値があれば、置き換わる
-   - **次の手順は、トークンを入力し、プロンプトが戻ってから貼る**
+   - **次の手順は、トークンを入力し、プロンプトが戻ってから貼る**（続けて貼ると、トークン入力を中断しても後ろの URL の設定が動く）
 
 1. Windows 11 で、gitlab.com 以外の GitLab を使うときは、その URL を入力して、ユーザーの環境変数にする。
 
@@ -926,7 +939,7 @@
    - `https://gitlab.example.com` のように入力する (ホスト名だけでもよい)
    - 空のまま Enter を押すと、`GITLAB_HOST` を消す。送り先は gitlab.com になる
    - Enter の後、プロンプトが戻るまで 2 秒ほどかかる
-   - **次の手順は、URL を入力し、プロンプトが戻ってから貼る**
+   - **次の手順は、URL を入力し、プロンプトが戻ってから貼る**（次は環境変数を読み込むために PowerShell を開き直す操作を行う）
 
 1. 管理者ではない PowerShell 7 を開き直す。
 
@@ -964,8 +977,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # scoop と Neovim・外部コマンドを更新する
    scoop update
    scoop update neovim ripgrep fd gcc nodejs zenhan lazygit
+   # 更新後の Neovim の版を確かめる
    nvim --version | Select-Object -First 1
    ```
 
@@ -974,6 +989,7 @@
 1. Windows 11 では、プラグインを上げて差分を見る。
 
    ```powershell
+   # パーサーの導入を待ちながらプラグインを更新する
    $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+Lazy! update" "+$tsWait" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -982,7 +998,7 @@
 
    - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
    - `lazy-lock.json` だけが変わっていればよい
-   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-10-補足-treesitter-のパーサーの導入を待つ理由)を参照する
+   - パーサーを待つ理由は[参考資料の補足](reference/neovim.md#lazyvim-の設定を導入する--手順-8-補足-treesitter-のパーサーの導入を待つ理由)を参照する
    - `Lock file '…' appears stale` が出たら、[注意点](extra/neovim.md#注意点)で鍵を消してから、この項の手順 3 のブロックを貼り直す
 
 ---

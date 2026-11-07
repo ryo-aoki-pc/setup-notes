@@ -8,6 +8,7 @@
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
+- bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
 - 入れたものは、[Podman: 更新](#podman-更新)・[podman-compose: 更新](#podman-compose-更新)・[podman-tui: 更新](#podman-tui-更新)・[lazydocker: 更新](#lazydocker-更新)・[Distrobox: 更新](#distrobox-更新)で上げる
@@ -58,8 +59,10 @@
 1. 片方でも割り当てが無いときだけ、不足する側に範囲を割り当て、podman に読み直させる。
 
    ```bash
+   # ユーザーと割り当ての範囲を確認する
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: 自分のユーザーのシェルで貼る' >&2
    elif SUBID_START=$(awk -F: '{ e = $2 + $3; if (e > m) m = e } END { print (m > 524288 ? m : 524288) }' /etc/subuid /etc/subgid); then
+     # 不足する UID・GID の割り当てを組み立てる
      SUBID_ARGS=()
      if ! grep -q "^${USER}:" /etc/subuid; then
        SUBID_ARGS+=(--add-subuids "${SUBID_START}-$((SUBID_START + 65535))")
@@ -84,8 +87,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 版と実行ファイルの場所を確認する
    podman version --format '{{.Client.Version}}'
    command -v podman
+   # rootless の動作設定と保存先を確認する
    podman info --format '{{.Host.Security.Rootless}} {{.Store.GraphDriverName}} {{.Host.OCIRuntime.Name}} {{.Host.NetworkBackend}} {{.Host.RootlessNetworkCmd}} {{.Host.CgroupsVersion}}'
    podman info --format '{{.Store.GraphRoot}}'
    ```
@@ -98,7 +103,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナを実行する
    podman run --rm quay.io/podman/hello
+   # 取得したイメージを確認する
    podman images
    ```
 
@@ -110,8 +117,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # API ソケットを有効にして稼働状態を確認する
    systemctl --user enable --now podman.socket
    systemctl --user is-active podman.socket
+   # API の応答とサーバーの版を確認する
    curl -s --unix-socket "${XDG_RUNTIME_DIR}/podman/podman.sock" http://d/_ping; echo
    podman --remote version --format '{{.Server.Version}}'
    ```
@@ -131,6 +140,7 @@
 1. 共通設定を読み直し、ソケットが Docker の API に答えるか確かめる。
 
    ```bash
+   # 共通の bash 設定を再読込する
    . ~/.bashrc
    printf '\n\033[7m 確認 \033[0m\n'
    printf '%s\n' "${DOCKER_HOST-}"
@@ -154,8 +164,10 @@
 1. 確認用の Web サーバーの定義とページを置く。
 
    ```bash
+   # Web ページを作成する
    mkdir -p ~/hello-web ~/.config/containers/systemd
    echo 'hello from quadlet' > ~/hello-web/index.html
+   # Quadlet の定義を作成する
    cat > ~/.config/containers/systemd/hello-web.container <<'EOF'
    [Unit]
    Description=Quadlet の確認用の Web サーバー
@@ -178,11 +190,14 @@
 1. systemd に定義を読み直させ、サービスを起動して応答を確かめる。
 
    ```bash
+   # 定義を再読込してサービスを起動する
    systemctl --user daemon-reload
    systemctl --user start hello-web.service
    printf '\n\033[7m 確認 \033[0m\n'
+   # サービスの稼働状態と登録状態を確認する
    systemctl --user is-active hello-web.service
    systemctl --user is-enabled hello-web.service
+   # Web サーバーの応答を確認する
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8080/
    ```
 
@@ -203,8 +218,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # サービスの起動時刻とログイン時刻を確認する
    systemctl --user show hello-web.service -p ActiveEnterTimestamp
    loginctl show-session "${XDG_SESSION_ID}" -p Timestamp
+   # Web サーバーの応答を確認する
    curl -s http://127.0.0.1:8080/
    ```
 
@@ -245,13 +262,15 @@
 
    - システム全体なら `sudo dnf upgrade`
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
-   - **次の手順は、答えて完了してから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、答えて完了してから貼る**（続けて貼ると、更新を断っても後ろのイメージ更新が動く）
 
 1. [Quadlet で自動起動する](#podman-quadlet-で自動起動する)を通したときだけ、新しいイメージがあるか見てから当てる。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 更新されるイメージを確認する
    podman auto-update --dry-run
+   # イメージを更新する
    podman auto-update
    ```
 
@@ -267,36 +286,34 @@
   - `podman info --format '{{.Host.Security.Rootless}}'` が `true` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-compose.md)・[参考資料](reference/podman-compose.md)・[注意点](extra/podman-compose.md)
-- **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
-- **手順 6 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
+- **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）
+- **手順 5 の `podman-compose exec` は、動いている間に貼った行をコンテナへの入力として取り込む**。プロンプトが戻ってから次を貼る
 - PC を再起動しても動かしておきたいものは、compose ではなく [Podman の Quadlet](#podman-quadlet-で自動起動する) で動かす（[注意点](extra/podman-compose.md#注意点)）
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（コンテナを自分のユーザーの rootless の podman で動かすため）
 
-1. 入手できる版を見てから、podman-compose を入れる。
+1. podman-compose を導入し、版と呼び出し先を確認する。
 
    ```bash
+   # 配布されている版を確認する
    dnf -q list --showduplicates podman-compose
+   # podman-compose を導入する
    sudo dnf install podman-compose
+   printf '\n\033[7m 確認 \033[0m\n'
+   # 導入した版と実行ファイルの場所を確認する
+   podman-compose version
+   command -v podman-compose
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-compose
+   # podman compose の呼び出し先を確認する
+   podman compose version
    ```
 
    - 版は `podman-compose.noarch  1.5.0-1.el10_1  epel` のように 1 つだけ出る
    - 一緒に入るのは未導入の Python のライブラリで、最大 4 つ（`python3-click`・`python3-dotenv`・`python3-dotenv+cli`・`python3-pyyaml`）
+   - トランザクション表の内容を確かめ、`[y/N]` に `y` と答える
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. podman-compose が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   podman-compose version
-   command -v podman-compose
-   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-compose
-   podman compose version
-   ```
-
    - `podman-compose version 1.5.0` と `podman version 5.8.2` の 2 行が出る
    - `/usr/bin/podman-compose`、`podman-compose 1.5.0-1.el10_1 epel` が出る
    - 最後の `podman compose` は、`Executing external compose provider "/usr/bin/podman-compose"` と出してから、同じ 2 行を出す
@@ -304,8 +321,10 @@
 1. 確認用の compose ファイルとページを置く。
 
    ```bash
+   # 確認用の Web ページを作成する
    mkdir -p ~/compose-sample/html
    echo 'hello from compose' > ~/compose-sample/html/index.html
+   # compose ファイルを作成して確認する
    cat > ~/compose-sample/compose.yaml <<'EOF'
    services:
      web:
@@ -325,6 +344,7 @@
 1. compose ファイルのあるディレクトリで、コンテナを起動する。
 
    ```bash
+   # compose の作業ディレクトリへ移動する
    cd ~/compose-sample
    printf '\n\033[7m 確認 \033[0m\n'
    podman-compose up -d
@@ -335,10 +355,13 @@
 1. 起動したコンテナと、公開したポートを確かめる。
 
    ```bash
+   # compose の作業ディレクトリへ移動する
    cd ~/compose-sample
    printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナと pod の稼働状態を確認する
    podman-compose ps
    podman pod ps
+   # Web サーバーの応答を確認する
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8081/
    ```
 
@@ -349,13 +372,14 @@
 1. `check` のコンテナから、サービス名 `web` でつながるか確かめる。
 
    ```bash
+   # compose の作業ディレクトリへ移動する
    cd ~/compose-sample
    printf '\n\033[7m 確認 \033[0m\n'
    podman-compose exec check curl -s http://web:8080/
    ```
 
    - `hello from compose` が出ればよい
-   - **ほかの項の手順は、プロンプトが戻ってから貼る**（続けて貼るとコンテナの中のコマンドへの入力として食われる）
+   - **ほかの項の手順は、プロンプトが戻ってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 #### podman-compose: 使い方の基本
 
@@ -387,11 +411,12 @@
 
    - システム全体なら `sudo dnf upgrade`
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
-   - **次の手順は、答えて完了してから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、答えて完了してから貼る**（続けて貼ると、更新を断ってもイメージの取得とコンテナの起動し直しが動く）
 
 1. イメージを取り直し、新しいイメージでコンテナを起動し直す。
 
    ```bash
+   # compose のイメージを取得する
    cd ~/compose-sample
    podman-compose pull
    printf '\n\033[7m 確認 \033[0m\n'
@@ -409,40 +434,37 @@
   - `systemctl --user is-active podman.socket` が `active` を返さない、または `dnf repolist enabled | grep -E '^epel'` で何も出なければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md)・[参考資料](reference/podman-tui.md)・[注意点](extra/podman-tui.md)
-- **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 2 を貼る
-- **手順 4 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了してから手順 5 を貼る（`q` では終わらない）
+- **手順 1 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）
+- **手順 3 で podman-tui の画面（TUI）が開く**。`Ctrl+C` で終了する（`q` では終わらない）
 - Docker の API でつなぐ TUI なら [lazydocker](#lazydocker)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/podman-tui.md#選択した方針)）
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（podman-tui は、自分のユーザーの API ソケットにつなぐため）
 
-1. 入手できる版を見てから、podman-tui を入れる。
+1. podman-tui を導入し、版と実行ファイルの場所を確認する。
 
    ```bash
+   # 配布されている版を確認する
    dnf -q list --showduplicates podman-tui
+   # podman-tui を導入する
    sudo dnf install podman-tui
-   ```
-
-   - 版は `podman-tui.x86_64  1.10.0-1.el10_2  epel` のように 1 つだけ出る
-   - 入るのは `podman-tui` の 1 パッケージだけ（ダウンロード 9.5 MB、展開後 32 MB）
-   - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
-   - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. podman-tui が入ったか確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    podman-tui version
    command -v podman-tui
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-tui
    ```
 
+   - 版は `podman-tui.x86_64  1.10.0-1.el10_2  epel` のように 1 つだけ出る
+   - 入るのは `podman-tui` の 1 パッケージだけ（ダウンロード 9.5 MB、展開後 32 MB）
+   - トランザクション表の内容を確かめ、`[y/N]` に `y` と答える
+   - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
+   - fingerprint `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）なら `y`、違えば `N` で中断する
    - `podman-tui v1.10.0`、`/usr/bin/podman-tui`、`podman-tui 1.10.0-1.el10_2 epel` が出る
 
 1. 画面で操作する、確認用のコンテナを動かす。
 
    ```bash
+   # 確認用のコンテナを起動する
    podman run -d --name podman-tui-web registry.access.redhat.com/ubi10/httpd-24:latest
    printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
@@ -450,10 +472,13 @@
 
    - `podman-tui-web Up Less than a second` のように出る
 
-1. podman-tui を起動し、確認用のコンテナを画面から止める。
+1. podman-tui でコンテナを停止し、結果を確認する。
 
    ```bash
+   # podman-tui を起動する
    podman-tui
+   printf '\n\033[7m 確認 \033[0m\n'
+   podman ps -a --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
    ```
 
    - 最初に SYSTEM の画面が開き、上の `Connection:` に `✅ STATUS_OK`、`API version:` に `5.8.2` が出る
@@ -462,14 +487,6 @@
    - `m` でコマンドのメニューを開き、↓ で `stop` まで下りて Enter を押す（確認は出ない）
    - 数秒で、`STATUS` が `▼ Exited (0) ...` に変わる
    - `Ctrl+C` で終了する
-   - **次の手順は、`Ctrl+C` で終了してから貼る**（続けて貼ると podman-tui への操作として食われる）
-
-1. 確認用のコンテナが止まったことを、podman でも確かめる。
-
-   ```bash
-   podman ps -a --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
-   ```
-
    - `podman-tui-web Exited (0) ...` と出ればよい
 
 #### podman-tui: 使い方の基本
@@ -512,35 +529,32 @@
 ### lazydocker
 
 - Homebrew の lazydocker を入れ、podman の API ソケットにつないで、確認用のコンテナを画面（TUI）から止める
-- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)、[Homebrew](almalinux-setup.md#homebrew)の手順 1〜3、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
+- 前提: [共通の bash 設定](shell-terminal.md#共通の-bash-設定)、[Homebrew](almalinux-setup.md#homebrew)の手順 1〜2、[Podman](#podman)の手順 7（API ソケット）まで、[Podman: Docker 向けのツールから使う](#podman-docker-向けのツールから使う)を通してある
   - ツール別の設定は bash リポジトリで管理し、`~/.bashrc` には追記しない
   - `command -v brew podman` が 2 行を返さない、または `echo "${DOCKER_HOST}"` が `unix:///run/user/<UID>/podman/podman.sock` を返さなければ、先に前提を通す
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md)・[参考資料](reference/lazydocker.md)・[注意点](extra/lazydocker.md)
-- **手順 4 で lazydocker の画面（TUI）が開く**。`q` で終了してから手順 5 を貼る
+- **手順 3 で lazydocker の画面（TUI）が開く**。`q` で終了する
 - pod やシークレットも画面で扱うなら [podman-tui](#podman-tui)（違いは[選択した方針](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#選択した方針)）
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（Homebrew の導入・更新は root では行わず、lazydocker も自分のユーザーの API ソケットにつなぐため）
 
-1. brew で lazydocker を入れる。
+1. lazydocker を導入し、版と接続先を確認する。
 
    ```bash
+   # lazydocker を導入する
    brew install lazydocker
-   ```
-
-   - **次の手順は、確認が出たら答え、インストールが終わってシェルのプロンプトに戻ってから貼る**（依存の追加を確認する `[y/n]` が出る版では、続けて貼ると回答として食われる）
-
-1. lazydocker が入ったことと、つなぐ先を確かめる。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 版と実行ファイルの場所を確認する
    lazydocker --version
    command -v lazydocker
+   # API の接続先と応答を確認する
    echo "${DOCKER_HOST}"
    curl -s --unix-socket "${DOCKER_HOST#unix://}" http://d/_ping; echo
    ```
 
+   - 依存の追加を確認する `[y/n]` などが出たら、内容を見て答える
    - 1 行目で `Version: 0.25.2` と `BuildSource: Homebrew` が出る
    - `/home/linuxbrew/.linuxbrew/bin/lazydocker` が出る
    - `unix:///run/user/<UID>/podman/podman.sock` と `OK` が出れば、lazydocker は podman の API ソケットにつなぐ
@@ -549,6 +563,7 @@
 1. 画面で操作する、確認用のコンテナを動かす。
 
    ```bash
+   # 確認用のコンテナを起動する
    podman run -d --name lazydocker-web --label name=lazydocker-web registry.access.redhat.com/ubi10/httpd-24:latest
    printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
@@ -556,10 +571,16 @@
 
    - `lazydocker-web Up Less than a second` のように出る
 
-1. lazydocker を起動し、確認用のコンテナを画面から止める。
+1. lazydocker でコンテナを停止し、結果を確認する。
 
    ```bash
+   # lazydocker を起動する
    lazydocker
+   printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナの停止を確認する
+   podman ps -a --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
+   # lazydocker の設定ファイルを確認する
+   ls -l ~/.config/lazydocker
    ```
 
    - 左に `[3]─Containers`・`[4]─Images`・`[5]─Volumes`・`[6]─Networks`、右に `Logs - Stats - Env - Config - Top` の枠が出る
@@ -567,16 +588,6 @@
    - `s` を押し、`Are you sure you want to stop this container?` に `y` と答える
    - 行が `exited (0)` に変わる
    - `q` で終了する
-   - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
-
-1. 確認用のコンテナが止まったことと、設定ファイルができたことを確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   podman ps -a --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
-   ls -l ~/.config/lazydocker
-   ```
-
    - `lazydocker-web Exited (0) ...` と出ればよい
    - `config.yml`（0 バイト）がある
 
@@ -587,7 +598,7 @@
 - 前提: [lazydocker](#lazydocker)を通してある（確認用のコンテナ `lazydocker-web` と、設定ファイル `~/.config/lazydocker/config.yml` を使う）
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 
-1. [手順 4](#lazydocker) で止めた確認用のコンテナを、起動し直す。
+1. [手順 3](#lazydocker) で止めた確認用のコンテナを、起動し直す。
 
    ```bash
    podman start lazydocker-web
@@ -598,6 +609,7 @@
 1. `podman exec` でシェルを開くコマンドを、設定ファイルに足す。
 
    ```bash
+   # シェルを開くコマンドの設定を追加する
    cat >> ~/.config/lazydocker/config.yml <<'EOF'
    customCommands:
      containers:
@@ -623,18 +635,19 @@
    - `id` を打つと `uid=1001(default) gid=0(root) groups=0(root)` と出る
    - `exit` で抜け、`Press enter to return to lazydocker ...` で Enter を押すと画面に戻る
    - `q` で終了する
-   - **ほかの項の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
+   - **ほかの項の手順は、`q` で終了してから貼る**（lazydocker を開いたまま貼ると、lazydocker への入力になる）
 
 #### lazydocker: compose のプロジェクトを見る
 
 - lazydocker は、起動したディレクトリで `docker compose config --quiet` が通ったときだけ、`[1]─Project` と `[2]─Services` の枠を出す
 - podman だけの PC では通らないので、この項で compose のコマンドを `podman-compose` に替える
-- 前提: [lazydocker](#lazydocker)を通し、[podman-compose](#podman-compose)を手順 4 まで通して、`~/compose-sample` のコンテナが動いている
+- 前提: [lazydocker](#lazydocker)を通し、[podman-compose](#podman-compose)を手順 3 まで通して、`~/compose-sample` のコンテナが動いている
 - 実行場所: 自分のユーザーでログインした bash（GNOME の端末か SSH）
 
 1. compose のコマンドを `podman-compose` にする設定を、設定ファイルに足す。
 
    ```bash
+   # compose の実行コマンドの設定を追加する
    cat >> ~/.config/lazydocker/config.yml <<'EOF'
    commandTemplates:
      dockerCompose: podman-compose
@@ -646,11 +659,15 @@
    - 読み戻した中身に、足した 2 行が出る
    - **注意**: 既に `commandTemplates:` があるなら、`cat >>` で足さずに手で中身をまとめる
 
-1. compose ファイルのあるディレクトリで lazydocker を起動し、`web` のサービスを再起動する。
+1. lazydocker で web を再起動し、稼働時間を確認する。
 
    ```bash
+   # compose のプロジェクトで lazydocker を起動する
    cd ~/compose-sample
    lazydocker
+   cd ~/compose-sample
+   printf '\n\033[7m 確認 \033[0m\n'
+   podman-compose ps --format '{{.Names}} {{.Status}}'
    ```
 
    - 左の上に `[1]─Project`（`compose-sample`）と `[2]─Services`（`check`・`web`）の枠が出る
@@ -658,23 +675,13 @@
    - `web` の行を選ぶと、右の枠に Apache のログが出る
    - `r` を押すと、確認なしに `web` が再起動する
    - `q` で終了する
-   - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
-
-1. `web` だけが再起動したことを確かめる。
-
-   ```bash
-   cd ~/compose-sample
-   printf '\n\033[7m 確認 \033[0m\n'
-   podman-compose ps --format '{{.Names}} {{.Status}}'
-   ```
-
    - `compose-sample_web_1 Up 15 seconds` のように、`web` の動いている時間が `check` より短ければよい
 
 #### lazydocker: root でも使う
 
 - この項で、システムの podman の API ソケット（`/run/podman/podman.sock`）を有効にし、root のコンテナを lazydocker で見る
 - **root のコンテナを lazydocker で見ないなら、この項は不要**
-- root のコンテナは `/var/lib/containers` にあり、[手順 4](#lazydocker)の一般ユーザーの画面には出ない
+- root のコンテナは `/var/lib/containers` にあり、[手順 3](#lazydocker)の一般ユーザーの画面には出ない
 - 前提: [lazydocker](#lazydocker)と[共通の bash 設定を root に入れる](shell-terminal.md#共通の-bash-設定を-root-に入れる)を通してある
   - この設定が Homebrew の PATH と root 用の `DOCKER_HOST` を読む。sudo の `secure_path` だけではこの項の前提を満たさない
   - `sudo -i bash -c 'command -v lazydocker'` が `/home/linuxbrew/.linuxbrew/bin/lazydocker` を返せばよい
@@ -693,13 +700,13 @@
 1. システムの podman の API ソケットを有効にして、root で応答を確かめる。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo systemctl enable --now podman.socket
-     systemctl is-active podman.socket
-     sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
-     sudo podman --remote version --format '{{.Server.Version}}'
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   # システムの API ソケットを有効にする
+   sudo systemctl enable --now podman.socket
+   systemctl is-active podman.socket
+   # API の応答とサーバーの版を確認する
+   sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
+   sudo podman --remote version --format '{{.Server.Version}}'
    ```
 
    - `active`・`OK`・`5.8.2` が出ればよい
@@ -717,37 +724,29 @@
 1. 確認用のコンテナを root で動かす。
 
    ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
-     sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
-   }
+   printf '\n\033[7m 確認 \033[0m\n'
+   sudo podman run -d --name lazydocker-root-web --label name=lazydocker-root-web registry.access.redhat.com/ubi10/httpd-24:latest
+   sudo podman ps --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
    ```
 
    - コンテナの ID の後に、`lazydocker-root-web Up Less than a second` のように出る
 
-1. root で lazydocker を起動し、確認用のコンテナを止める。
+1. root の lazydocker でコンテナを停止し、結果を確認する。
 
    ```bash
+   # root の lazydocker を起動する
    sudo -i lazydocker
+   printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナの停止を確認する
+   sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
+   # root の lazydocker の設定ファイルを確認する
+   sudo ls -l /root/.config/lazydocker
    ```
 
-   - `[3]─Containers` に `running  lazydocker-root-web` の行が出る。[手順 3](#lazydocker) の `lazydocker-web` は出ない
+   - `[3]─Containers` に `running  lazydocker-root-web` の行が出る。[手順 2](#lazydocker) の `lazydocker-web` は出ない
    - ↑↓ で `lazydocker-root-web` の行を選び、`s` を押し、`Are you sure you want to stop this container?` に `y` と答える
    - 行が `exited (0)` に変わる
    - `q` で終了する
-   - **次の手順は、`q` で終了してから貼る**（続けて貼ると lazydocker への操作として食われる）
-
-1. 確認用のコンテナが止まったことと、root の設定ファイルができたことを確かめる。
-
-   ```bash
-   {
-     printf '\n\033[7m 確認 \033[0m\n'
-     sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
-     sudo ls -l /root/.config/lazydocker
-   }
-   ```
-
    - `lazydocker-root-web Exited (0) ...` と出ればよい
    - `config.yml`（0 バイト）は root の設定ファイル
 
@@ -795,8 +794,8 @@
 - 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）
 - [検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/distrobox.md)・[参考資料](reference/distrobox.md)・[注意点](extra/distrobox.md)
 - この項の手順 1 で変数を設定したシェルに貼る
-- **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）。答えてから手順 3 を貼る
-- **手順 5 と 6 はボックスの中のコマンドになる**。手順 5 は終わってから、手順 6 は `exit` で戻ってから、次を貼る
+- **手順 2 には対話入力がある**（トランザクション表の `[y/N]` と、EPEL の鍵の確認）
+- **手順 4 と 5 はボックスの中のコマンドになる**。手順 4 は終わってから、手順 5 は `exit` で戻ってから、次を貼る
 
 > [!IMPORTANT]
 > - **自分のユーザーでログインしたシェルで実行する**。`sudo -i` した root のシェルでは行わない（ボックスは自分のユーザーの rootless の podman で動かすため）
@@ -815,30 +814,27 @@
    - 最後の行で値を読み戻して確かめる
    - **新しいシェルを開いたら**（SSH を張り直したあとも）、先にこのブロックを貼り直す
 
-1. 入手できる版を見てから、distrobox を入れる。
+1. Distrobox を導入し、版とボックスの一覧を確認する。
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 配布されている版を確認する
    dnf -q list --showduplicates distrobox
+   # Distrobox を導入する
    sudo dnf install distrobox
+   # 導入した版と実行ファイルの場所を確認する
+   distrobox version
+   command -v distrobox
+   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' distrobox
+   # ボックスの一覧を確認する
+   distrobox list
    ```
 
    - 版は `distrobox.noarch  1.8.2.3-1.el10_2  epel` のように 1 つだけ出る
    - `hicolor-icon-theme` が未導入なら一緒に入る。導入済みなら追加されない
+   - トランザクション表の内容を確かめ、`[y/N]` に `y` と答える
    - **EPEL の署名鍵をまだ取り込んでいなければ、ここで 1 回だけ確認を求められる**
    - fingerprint が `7D8D 15CB FC4E 6268 8591 FB26 33D9 8517 E37E D158`（Fedora (epel10) &lt;epel@fedoraproject.org&gt;）であることを確かめてから `y` と答える
-   - **次の手順は、トランザクション表の `[y/N]` と鍵の確認に答えてから貼る**（続けて貼ると答えとして食われる）
-
-1. distrobox が入ったか確かめる。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   distrobox version
-   command -v distrobox
-   dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' distrobox
-   distrobox list
-   ```
-
    - `distrobox: 1.8.2.3`、`/usr/bin/distrobox`、`distrobox 1.8.2.3-1.el10_2 epel` が出る
    - `distrobox list` は見出しの行だけを出す（ボックスはまだ無い）
 
@@ -862,7 +858,7 @@
 
    - 初回はボックスの初期化が走る。`[ OK ]` の行が並んだ後に `Container Setup Complete!` が出る
    - その後に `PRETTY_NAME="Ubuntu 24.04.5 LTS"`・自分のユーザー名・`/home/<USER>` が出る
-   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
+   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、初期化に失敗しても後ろのボックスへの接続が動く）
 
 1. ボックスのシェルに入る。
 
@@ -873,7 +869,7 @@
    - プロンプトが `📦[<USER>@ubuntu ~]$` に変わる。ここから先はボックスの中のシェル
    - SSH など画面の無いログインから入ると、`host-spawn: command not found` が出ることがある。出なくても、ボックスのプロンプトに入れればよい
    - `exit` でホストに戻る
-   - **ほかの項の手順は、`exit` でホストに戻ってから貼る**
+   - **ほかの項の手順は、`exit` でホストに戻ってから貼る**（続けて貼ると、ボックスのシェルの中ではなく、ボックスのシェルを閉じた後の元のシェルで動く）
 
 #### Distrobox: ボックスのコマンドをホストから呼ぶ
 
@@ -881,7 +877,7 @@
 - ボックスに入れたものはボックスの中にだけある。ホストには、ボックスを呼び出す小さなスクリプトが `~/.local/bin` に置かれる
 - 前提: [Distrobox](#distrobox)を通して、ボックスを作ってある
 - 実行場所: ホストの、自分のユーザーでログインした bash（GNOME の端末か SSH）。ボックスの中のシェルには貼らない
-- **この項の手順 2〜4 は `distrobox enter` で終わる**。プロンプトが戻ってから次を貼る
+- **この項の手順 2・3 は `distrobox enter` で終わる**。プロンプトが戻ってから次を貼る
 
 1. 変数を設定する（既定のままでよい）。
 
@@ -902,7 +898,7 @@
    ```
 
    - `Reading package lists...` または `パッケージリストを読み込んでいます... 完了` で終わる
-   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
+   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、一覧の更新に失敗しても後ろのパッケージ導入が動く）
 
 1. ボックスに ffmpeg を入れる。
 
@@ -910,25 +906,19 @@
    distrobox enter "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- sudo apt-get install -y ffmpeg
    ```
 
-   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
+   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入に失敗しても後ろのホストへの書き出しが動く）
 
-1. ffmpeg をホストから呼べるように書き出す。
+1. ffmpeg をホストへ書き出し、呼び出す版を確認する。
 
    ```bash
+   # ffmpeg の呼び出し口を作成する
    distrobox enter "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- distrobox-export --bin /usr/bin/ffmpeg --export-path ~/.local/bin
-   ```
-
-   - `/usr/bin/ffmpeg from ubuntu exported successfully in /home/<USER>/.local/bin.` と `OK!` が出る
-   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
-
-1. ホストのシェルから ffmpeg を呼ぶ。
-
-   ```bash
    printf '\n\033[7m 確認 \033[0m\n'
    command -v ffmpeg
    ~/.local/bin/ffmpeg -version | head -1
    ```
 
+   - `/usr/bin/ffmpeg from ubuntu exported successfully in /home/<USER>/.local/bin.` と `OK!` が出る
    - 最後の行が `ffmpeg version 6.1.1-3ubuntu5 ...` なら、書き出したコマンドを呼べている
    - `command -v ffmpeg` が `/home/<USER>/.local/bin/ffmpeg` 以外なら、通常の `ffmpeg` は既存の別の版を呼ぶ。ボックスの版を使うときは `~/.local/bin/ffmpeg` で呼ぶ
 
@@ -958,7 +948,7 @@
 
    - システム全体なら `sudo dnf upgrade`
    - 更新があると `[y/N]` で聞かれる。無ければ `Nothing to do.` で終わる
-   - **次の手順は、答えて完了してから貼る**（続けて貼ると答えとして食われる）
+   - **次の手順は、答えて完了してから貼る**（続けて貼ると、ホスト側の更新を断ってもボックス内の更新が動く）
 
 1. ボックスの中のパッケージを更新する。
 
@@ -967,6 +957,6 @@
    ```
 
    - **ボックスの中身は `dnf upgrade` では上がらない**。ボックスごとにこの手順を行う
-   - **ほかの項の手順は、プロンプトが戻ってから貼る**（続けて貼るとボックスの中のコマンドへの入力として食われる）
+   - **ほかの項の手順は、プロンプトが戻ってから貼る**（終わる前に貼ると、動いているコマンドへの入力になる）
 
 ---

@@ -11,39 +11,39 @@
 - ビルド済みのボトルが降ってくる。aarch64 でもソースからのビルドにはならない
 - hadolint は `gmp` など 4 つの依存を連れてくる（Haskell 製のため）。dive に依存は無い
 
-### 画像の道具 / 手順 3: 補足: リポジトリのファイル
+### 画像の道具 / 手順 2: 補足: リポジトリのファイル
 
 - 中身は Trivy の公式の導入手順（RHEL/CentOS）と同じ
 - `<<'EOF'` と引用符を付けているので、`$basearch` はそのままファイルに書かれ、dnf が `x86_64` / `aarch64` に置き換える
 
-### 画像の道具 / 手順 4: 補足: root の PATH
+### 画像の道具 / 手順 2: 補足: root の PATH
 
 - Trivy は RPM なので、Homebrew の 2 つと違い、何も足さずに root の PATH にも入っている
 
-### 画像の道具 / 手順 5: 補足: 標準入力
+### 画像の道具 / 手順 3: 補足: 標準入力
 
 - `hadolint -` の末尾の `-` は、標準入力の Containerfile を読む指定
 
-### 画像の道具 / 手順 6: 補足: 確認用のイメージ
+### 画像の道具 / 手順 4: 補足: 確認用のイメージ
 
 - `ubi10/httpd-24`（Apache）に、ページを 1 つ足すだけのイメージ
 
-### 画像の道具 / 手順 7: 補足: buildah
+### 画像の道具 / 手順 5: 補足: buildah
 
 - `podman build` は podman に入っている。buildah を別に入れる必要は無い
 
-### 画像の道具 / 手順 8: 補足: FAIL の理由と、判定の基準
+### 画像の道具 / 手順 6: 補足: FAIL の理由と、判定の基準
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/image-tools.md#実施手順--手順-8-補足-fail-の理由と判定の基準)
 
-- 無駄の元はベースイメージの層で、同じ項の手順 6 の `COPY` の層ではない
+- 無駄の元はベースイメージの層で、同じ項の手順 4 の `COPY` の層ではない
 - `ubi10/httpd-24` は、複数の層でパッケージを入れるため、層ごとに rpm のデータベースが書き直される
 - 自分が足した層が小さいと、「自分が足した量に対する無駄」の割合が大きく出る
 
 - 基準は `--lowestEfficiency` などのオプションか、リポジトリに置く `.dive-ci` で変えられる（`dive --help`）
 - `--source podman` の dive は podman のコマンド（`podman image save`）でイメージを取り出すので、API ソケットは要らない
 
-### 画像の道具 / 手順 10: 補足: 画面の項目
+### 画像の道具 / 手順 8: 補足: 画面の項目
 
 - `Layers` は層の一覧、`Current Layer Contents` はその層のファイルの木
 
@@ -69,6 +69,6 @@
 - [dive — README](https://github.com/wagoodman/dive) — `--source`、`--ci` と `.dive-ci`、キー操作
 - [Trivy — Installation](https://trivy.dev/docs/latest/getting-started/installation/) — RHEL/CentOS の公式 dnf リポジトリの登録
 - [Trivy — Container Image](https://trivy.dev/docs/latest/guide/target/container_image/) — `--image-src`（podman は API ソケットを使う）
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜3 の Homebrew） / [Podman](../containers.md#podman) — 前提の手順書
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜2 の Homebrew） / [Podman](../containers.md#podman) — 前提の手順書
 
 ---

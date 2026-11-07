@@ -30,12 +30,12 @@
 
 - Samba のパスワードは、OS のパスワードとは別に保存される
 
-### Samba サーバー / 手順 8: 補足: サービス
+### Samba サーバー / 手順 7: 補足: サービス
 
 - `smb.service` は `nmb.service` を `Requires` / `Wants` していない（`After=` に並ぶだけ）。nmb を起動しなくても単独で動く
 - 起動すると `/var/log/samba/` に `log.smbd` と `log.rpcd_*`（`samba-dcerpcd` が起動する RPC ヘルパーのログ）ができる。`cups` 無しでも、本手順の `smb.conf` なら CUPS 関連のエラーは出ない
 
-### Samba サーバー / 手順 9: 補足: ディレクトリのリース
+### Samba サーバー / 手順 8: 補足: ディレクトリのリース
 
 - Windows では、サーバーで変えたファイルやディレクトリは、F5 を押さなくても出る（手順 3 の `smb3 directory leases = no`）
 

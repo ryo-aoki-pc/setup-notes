@@ -104,6 +104,6 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 - 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。注意点は `docs/extra/` で確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にする（[AlmaLinux 10 の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo)で設定する）
-- `sudo` の後ろに別のコマンドが続くブロックは、全体を `{` と `}` の行で囲む。ブラケットペーストが効かないとき（bash の `enable-bracketed-paste` が off など）に貼ると、`sudo` が後ろの行を読んで捨てるため（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/samba-client.md#付録-sudo-の後ろの行が失われる条件2026-09-28)）
+- ブロックは、貼った全体が 1 つの入力になる窓に貼る前提で書く。bash はブラケットペーストの効く端末（bash 5.1 以降）、PowerShell は[シェルと端末のセットアップの「Windows Terminal で複数行を 1 つの入力として貼る」](docs/shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓。貼った後に Enter を押す（[実測](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/shell-terminal.md#付録-ブラケットペーストで貼ったときの対話と-sudo2026-11-07)）。その前に通す項など、1 行ずつ届く窓の項は、その項のリードに書く
 - Windows の `powershell` のブロックは PowerShell 7 に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](docs/windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者の窓か通常の窓かは、各項のリードの実行場所に従う
 - 未検証のことは手順書に明記する。パスワード・秘密鍵・トークンなどの秘密情報は残さない

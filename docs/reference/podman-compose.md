@@ -8,16 +8,16 @@
 
 - fingerprint を確かめる EPEL の鍵は、[AlmaLinux 10 の初期設定の「EPEL と RPM Fusion」の手順 1](../almalinux-setup.md#epel-と-rpm-fusion) に書いた鍵
 
-### podman-compose / 手順 2: 補足: podman compose
+### podman-compose / 手順 1: 補足: podman compose
 
 - `podman compose` は podman のサブコマンド
 
-### podman-compose / 手順 3: 補足: compose ファイルの中身
+### podman-compose / 手順 2: 補足: compose ファイルの中身
 
 - `web` は Apache で、`127.0.0.1:8081` で開く。ページは `~/compose-sample/html` から読む
 - `check` は、`web` にサービス名でつながるかを確かめるためだけのコンテナ（同じイメージなので、取得は 1 回で済む）
 
-### podman-compose / 手順 4: 補足: up -d が作るもの
+### podman-compose / 手順 3: 補足: up -d が作るもの
 
 podman-compose は、ディレクトリの名前（`compose-sample`）をプロジェクトの名前にして、次を作る。
 
@@ -27,18 +27,18 @@ podman-compose は、ディレクトリの名前（`compose-sample`）をプロ�
 | ネットワーク | `compose-sample_default` |
 | コンテナ | `compose-sample_web_1`・`compose-sample_check_1` |
 
-- 同じネットワークのコンテナ同士は、サービス名（`web`・`check`）で名前が引ける（手順 6）
+- 同じネットワークのコンテナ同士は、サービス名（`web`・`check`）で名前が引ける（手順 5）
 - `-d` を付けないと、ログを表示したまま前で動き続ける
 
-### podman-compose / 手順 4: 補足: 初回のイメージの取得
+### podman-compose / 手順 3: 補足: 初回のイメージの取得
 
 - 初回はイメージ（285 MB）を取得する
 
-### podman-compose / 手順 5: 補足: curl の試し直し
+### podman-compose / 手順 4: 補足: curl の試し直し
 
 - curl は、Apache が待ち受けるまで 1 秒おきに 10 回まで試し直す
 
-### podman-compose / 手順 6: 補足: サービス名で引ける
+### podman-compose / 手順 5: 補足: サービス名で引ける
 
 - `hello from compose` が出れば、`web` という名前が、compose のネットワークの中で引けている
 

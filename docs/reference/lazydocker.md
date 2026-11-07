@@ -13,15 +13,15 @@
 - ビルド済みのボトルが降ってくる。依存は無い
 - aarch64 でもソースからのビルドにはならない
 
-### lazydocker / 手順 3: 補足: --label name= を付ける理由
+### lazydocker / 手順 2: 補足: --label name= を付ける理由
 
 lazydocker は、コンテナに `name` というラベルがあると、コンテナの名前の代わりにそれを出す（上流のソースの `pkg/commands/docker.go`）。
 
-### lazydocker / 手順 3: 補足: イメージの取得
+### lazydocker / 手順 2: 補足: イメージの取得
 
 - 初回はイメージ（285 MB）を取得する。[Podman: Quadlet で自動起動する](../containers.md#podman-quadlet-で自動起動する) などで取得済みなら、取り直さない
 
-### lazydocker / 手順 4: 補足: 画面の中身
+### lazydocker / 手順 3: 補足: 画面の中身
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#実施手順--手順-4-補足-画面の中身)
 
@@ -29,7 +29,7 @@ lazydocker は、コンテナに `name` というラベルがあると、コン�
 - `s` の確認の枠の下には `n/esc: no, y/enter: yes` と出る
 - `x` を押すと、選んでいる枠のキーの一覧が出る（`Esc` で閉じる）
 
-### lazydocker / 手順 5: 補足: 確かめたものの意味
+### lazydocker / 手順 3: 補足: 確かめたものの意味
 
 - `lazydocker-web Exited (0) ...` と出れば、画面の操作が、API を通して podman に届いている
 - `config.yml`（0 バイト）は、lazydocker が最初の起動で作った空のファイルで、中身が無ければ既定の設定で動く
@@ -76,13 +76,13 @@ SocketMode=0660
 ### root でも使う / 手順 3: 補足: 確認用のコンテナ
 
 - root の保管場所に、イメージ（285 MB）を取得する。自分のユーザーで取得したイメージは使われない
-- 名前を[lazydocker](../containers.md#lazydocker)の手順 3 の `lazydocker-web` と分けて、どちらのコンテナの画面かを見分ける
+- 名前を[lazydocker](../containers.md#lazydocker)の手順 2 の `lazydocker-web` と分けて、どちらのコンテナの画面かを見分ける
 
 ### root でも使う / 手順 4: 補足: 画面の中身
 
 [この節の検証記録](https://github.com/ryo-aoki-pc/setup-notes-verification/blob/main/docs/verification/lazydocker.md#root-でも使う--手順-4-補足-画面の中身)
 
-- 出るのは root のコンテナとイメージだけ。[手順 3](../containers.md#lazydocker) の `lazydocker-web` と、自分のユーザーの `quay.io/podman/hello` は出ない
+- 出るのは root のコンテナとイメージだけ。[手順 2](../containers.md#lazydocker) の `lazydocker-web` と、自分のユーザーの `quay.io/podman/hello` は出ない
 - `-i` を付けずに `sudo lazydocker` と打つと（[AlmaLinux 10 の初期設定の Homebrew を sudo でも使う](../almalinux-setup.md#homebrew-を-sudo-でも使う)の節を通したホスト）、`Error` の枠に次が出て、枠は空のまま:
 
 ```
@@ -91,7 +91,7 @@ unix:///var/run/docker.sock. Is the docker daemon running?
 Retry count: 3
 ```
 
-### root でも使う / 手順 5: 補足: root の設定ファイル
+### root でも使う / 手順 4: 補足: root の設定ファイル
 
 - 自分の `~/.config/lazydocker` の設定（任意節で足したもの）は、root では使われない
 
@@ -110,7 +110,7 @@ Retry count: 3
 - [lazydocker — Config.md](https://github.com/jesseduffield/lazydocker/blob/master/docs/Config.md) — `customCommands`・`commandTemplates` の書き方、設定ファイルの場所（Linux は `~/.config/lazydocker/config.yml`）
 - [lazydocker — Keybindings](https://github.com/jesseduffield/lazydocker/blob/master/docs/keybindings/Keybindings_en.md) — 枠ごとのキー
 - `lazydocker --config` — 既定の設定の全体
-- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜3 の Homebrew） / [Podman](../containers.md#podman) / [podman-compose](../containers.md#podman-compose) — 前提の手順書
+- [AlmaLinux 10 の初期設定](../almalinux-setup.md)（「Homebrew」の手順 1〜2 の Homebrew） / [Podman](../containers.md#podman) / [podman-compose](../containers.md#podman-compose) — 前提の手順書
 - [podman-system-service(1)](https://docs.podman.io/en/latest/markdown/podman-system-service.1.html) — root の API ソケット（`unix:///run/podman/podman.sock`）
 - `man sudo`（`-i`）・`man sudoers`（`env_reset`・`env_keep`） — [root でも使う](../containers.md#lazydocker-root-でも使う)の節で、`-i` の無い `sudo` に `DOCKER_HOST` が渡らない理由
 
