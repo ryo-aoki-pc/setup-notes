@@ -42,6 +42,7 @@
 
    ```powershell
    & {
+     # PowerShell の版と権限を確認する
      $ErrorActionPreference = 'Stop'
      if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
        throw '中断: Windows PowerShell 5.1 で実行する'
@@ -50,7 +51,9 @@
        throw '中断: この項の手順 1 で管理者の Windows PowerShell を開く'
      }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 更新モジュールの有無を確認する
      Get-Module -ListAvailable -Name PSWindowsUpdate | Select-Object Name, Version, ModuleBase
+     # 実行ポリシーと通信方式を設定する
      if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
      }
@@ -70,6 +73,7 @@
 
    ```powershell
    & {
+     # 更新モジュールを準備する
      $ErrorActionPreference = 'Stop'
      if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
        $gallery = Get-PSRepository -Name PSGallery
@@ -96,13 +100,16 @@
 
    ```powershell
    & {
+     # エラー時に処理を止める設定にする
      $ErrorActionPreference = 'Stop'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 再起動待ちの有無を確認する
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
        throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
      }
+     # 対象の更新を検索して表示する
      $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
      '対象の更新: {0} 件' -f $updates.Count
      $updates | Format-Table KB, Size, Title -AutoSize
@@ -118,13 +125,16 @@
 
    ```powershell
    & {
+     # エラー時に処理を止める設定にする
      $ErrorActionPreference = 'Stop'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 再起動待ちの有無を確認する
      $rebootRequired = Get-WURebootStatus -Silent
      if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
      if ($rebootRequired) {
        throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
      }
+     # 対象の更新を適用する
      Install-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' -AcceptAll -IgnoreReboot |
        ForEach-Object {
          $_
@@ -157,6 +167,7 @@
 
    ```powershell
    & {
+     # 更新と再起動待ちを確認する
      $ErrorActionPreference = 'Stop'
      $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
      $rebootRequired = Get-WURebootStatus -Silent
@@ -206,6 +217,7 @@
 
    ```powershell
    & {
+     # PowerShell の版と権限を確認する
      $ErrorActionPreference = 'Stop'
      if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
        throw '中断: Windows PowerShell 5.1 で実行する'
@@ -214,7 +226,9 @@
        throw '中断: この項の手順 1 で管理者ではない窓を開く'
      }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # Microsoft Store の版を確認する
      Get-AppxPackage -Name Microsoft.WindowsStore | Select-Object Name, Version
+     # Store CLI と winget の場所を確認する
      foreach ($name in 'store.exe', 'winget.exe') {
        $command = Get-Command -Name $name -ErrorAction SilentlyContinue
        if ($command) { $command | Select-Object Name, Source } else { Write-Warning "見つからない: $name" }
@@ -230,6 +244,7 @@
 
    ```powershell
    & {
+     # App Installer を登録する
      $ErrorActionPreference = 'Stop'
      Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -246,6 +261,7 @@
 
    ```powershell
    & {
+     # エラー時に処理を止める設定にする
      $ErrorActionPreference = 'Stop'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      foreach ($id in '9NBLGGH4NNS1', '9WZDNCRFJBMP') {
@@ -265,6 +281,7 @@
 
    ```powershell
    & {
+     # Store CLI の一括更新に対応するか確認する
      $ErrorActionPreference = 'Stop'
      if (-not (Get-Command -Name store.exe -ErrorAction SilentlyContinue)) {
        throw '中断: Store CLI が無い。この項の手順 4 で準備してから再確認する'
@@ -287,6 +304,7 @@
 
    ```powershell
    & {
+     # エラー時に処理を止める設定にする
      $ErrorActionPreference = 'Stop'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      store.exe updates --apply
@@ -302,15 +320,18 @@
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # Store の更新を再検索する
      $ErrorActionPreference = 'Stop'
      store.exe updates
      if ($LASTEXITCODE -ne 0) { throw "中断: Store の再検索に失敗（終了コード $LASTEXITCODE）" }
+     # App Installer と端末の状態を確認する
      foreach ($name in 'Microsoft.DesktopAppInstaller', 'Microsoft.WindowsTerminal') {
        $package = Get-AppxPackage -Name $name
        if (-not $package) { throw "中断: 必要なアプリが無い: $name" }
        $package | Select-Object Name, Version, Status
        if ($package.Status -ne 'Ok') { throw "中断: アプリの状態を確認する: $name" }
      }
+     # winget の版を確認する
      winget.exe --version
      if ($LASTEXITCODE -ne 0) { throw "中断: winget の確認に失敗（終了コード $LASTEXITCODE）" }
    }
@@ -347,6 +368,7 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 環境と既存の設定を確認する
    $sm = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout' -ErrorAction SilentlyContinue).'Scancode Map'
    [pscustomobject]@{
      PowerShell    = $PSVersionTable.PSVersion.ToString()
@@ -359,6 +381,7 @@
      Profile       = $PROFILE
      ProfileExists = Test-Path -LiteralPath $PROFILE
    } | Format-List
+   # 実行ポリシーを確認する
    Get-ExecutionPolicy -List | Format-Table -AutoSize
    '実行ポリシー: {0}' -f (Get-ExecutionPolicy)
    ```
@@ -372,6 +395,7 @@
 1. スクリプトの実行ポリシーを RemoteSigned にする。
 
    ```powershell
+   # 実行ポリシーを設定する
    if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') { Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-ExecutionPolicy
@@ -384,6 +408,7 @@
 
    ```powershell
    & {
+     # プロファイルと貼り付け設定を準備する
      $line = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md'
      if (-not (Test-Path -LiteralPath $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
      $text = Get-Content -LiteralPath $PROFILE -Raw
@@ -429,8 +454,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # scoop の版とバケットを確認する
    scoop --version
    scoop bucket list
+   # shims のパスを確認する
    [Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -like '*\scoop\shims' }
    ```
 
@@ -442,7 +469,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # scoop-search を導入する
    scoop install scoop-search
+   # UniGet UI を導入して確認する
    winget install --exact --id Devolutions.UniGetUI --source winget --scope user --accept-source-agreements --accept-package-agreements
    winget list --exact --id Devolutions.UniGetUI --source winget
    ```
@@ -454,6 +483,7 @@
 1. PowerToys を、自分のユーザーに入れる。
 
    ```powershell
+   # PowerToys を導入する
    winget install --exact --id Microsoft.PowerToys --source winget --scope user --accept-source-agreements --accept-package-agreements
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Microsoft.PowerToys --source winget
@@ -465,6 +495,7 @@
 1. PowerShell 7 を、自分のユーザーに入れる。
 
    ```powershell
+   # PowerShell 7 を導入する
    winget install --exact --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    winget list --exact --id Microsoft.PowerShell --source winget
@@ -477,6 +508,7 @@
 
    ```powershell
    & {
+     # PowerShell 7 のプロファイルを準備する
      $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
      $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
      if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
@@ -509,8 +541,11 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # PowerShell の版を確認する
    $PSVersionTable.PSVersion.ToString()
+   # Ctrl+Enter の割り当てを確認する
    Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Ctrl+Enter' | Format-Table Key, Function -AutoSize
+   # 実行ポリシーを確認する
    Get-ExecutionPolicy
    ```
 
@@ -596,6 +631,7 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # PC とネットワークの設定を確認する
    $cv = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
    [pscustomobject]@{
      Admin            = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -611,6 +647,7 @@
      Sudo             = (Get-Command sudo -ErrorAction SilentlyContinue).Source
      Hypervisor       = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
    } | Format-List
+   # 配信の最適化の設定を確認する
    Get-DODownloadMode
    ```
 
@@ -663,12 +700,15 @@
 1. 長いパス・開発者モード・sudo（今の窓で動く形）を有効にする。
 
    ```powershell
+   # 長いパスと開発者モードを有効にする
    $dev = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Type DWord -Value 1
    if (-not (Test-Path -LiteralPath $dev)) { New-Item -Path $dev | Out-Null }
    Set-ItemProperty -Path $dev -Name AllowDevelopmentWithoutDevLicense -Type DWord -Value 1
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # sudo を有効にする
    if (Get-Command sudo -ErrorAction SilentlyContinue) { sudo config --enable normal } else { 'sudo が無い（24H2 より前の Windows）' }
+   # 長いパスと開発者モードを確認する
    Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' | Format-List LongPathsEnabled
    Get-ItemProperty -Path $dev | Format-List AllowDevelopmentWithoutDevLicense
    ```
@@ -680,6 +720,7 @@
 1. 電源接続中の眠りと蓋の動作を止め、電源に関係なく休止状態と放置後のロックを切る。
 
    ```powershell
+   # 電源とロックの設定を変更する
    powercfg /change standby-timeout-ac 0
    powercfg /hibernate off
    powercfg /setacvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION 0
@@ -697,6 +738,7 @@
 1. LAN のアダプターを、電力の節約のために止めないようにする。
 
    ```powershell
+   # アダプターの省電力設定を変更する
    if (-not $LAN_IF) {
      Write-Error 'この項の手順 2 の $LAN_IF が空'
    } else {
@@ -731,6 +773,7 @@
 1. 「Windows Hello サインインのみを許可する」を切る。
 
    ```powershell
+   # Hello 以外のサインインを許可する
    $k = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name DevicePasswordLessBuildVersion -Type DWord -Value 0
@@ -744,6 +787,7 @@
 1. スタートの検索で、Web（Bing）の結果を出さないようにする。
 
    ```powershell
+   # スタートの検索の提案を無効にする
    $k = 'HKCU:\Software\Policies\Microsoft\Windows\Explorer'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name DisableSearchBoxSuggestions -Type DWord -Value 1
@@ -757,13 +801,16 @@
 1. デスクトップの Edge と UniGet UI のショートカットを消し、Edge が作り直したら消すようにする。
 
    ```powershell
+   # Edge のショートカット削除を設定する
    $k = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name RemoveDesktopShortcutDefault -Type DWord -Value 1
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # デスクトップのショートカットを削除する
    foreach ($f in (Join-Path ([Environment]::GetFolderPath('CommonDesktopDirectory')) 'Microsoft Edge.lnk'), (Join-Path ([Environment]::GetFolderPath('Desktop')) 'UniGetUI.lnk')) {
      if (Test-Path -LiteralPath $f) { Remove-Item -LiteralPath $f; "消した: $f" } else { "無い: $f" }
    }
+   # ショートカット削除の設定を確認する
    Get-ItemProperty -Path $k | Format-List RemoveDesktopShortcutDefault
    ```
 
@@ -774,6 +821,7 @@
 
    ```powershell
    & {
+     # Caps Lock の割り当てと管理者権限を確認する
      $key = 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout'
      $want = '00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00'
      $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -795,6 +843,7 @@
 1. US 配列（101/102 キー）のキーボードを使うときだけ、キーボードの種類を変える。
 
    ```powershell
+   # キーボードを US 配列に設定する
    $k = 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters'
    Set-ItemProperty -Path $k -Name 'LayerDriver JPN' -Type String -Value 'kbd101.dll'
    Set-ItemProperty -Path $k -Name OverrideKeyboardIdentifier -Type String -Value 'PCAT_101KEY'
@@ -887,9 +936,11 @@
 1. WSL に AlmaLinux 10 を入れてユーザーを作り、WSL 2 の動作を確認する。
 
    ```powershell
+   # WSL に AlmaLinux 10 を導入する
    $env:WSL_UTF8 = '1'
    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
    wsl.exe --install AlmaLinux-10
+   # WSL の出力を UTF-8 に設定する
    $env:WSL_UTF8 = '1'
    [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -922,6 +973,7 @@
 
    ```powershell
    & {
+     # プライバシー設定の変更前の値を取得する
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
      $set = @(
        @('HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo', 'Enabled', 0),
@@ -938,11 +990,13 @@
      )
      $old = foreach ($s in $set) { $key = Get-Item -LiteralPath $s[0] -ErrorAction SilentlyContinue; [pscustomobject]@{ Path = $s[0]; Name = $s[1]; Value = [string](Get-ItemProperty -LiteralPath $s[0] -ErrorAction SilentlyContinue).($s[1]); Kind = $(if ($key -and ($key.GetValueNames() -contains $s[1])) { [string]$key.GetValueKind($s[1]) } else { '' }) } }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 変更前の値を保存する
      if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
        $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding utf8BOM
        "控えた: $rec"
      }
+     # プライバシーと広告の設定を変更する
      for ($i = 0; $i -lt $set.Count; $i++) {
        $p, $n, $v = $set[$i]
        if (-not (Test-Path -LiteralPath $p)) { New-Item -Path $p -Force | Out-Null }
@@ -997,6 +1051,7 @@
 1. Edge のスタートアップ ブーストとバックグラウンドの実行を、ポリシーで切る。
 
    ```powershell
+   # Edge の常駐を無効にする
    $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -Path $k -Name StartupBoostEnabled -Type DWord -Value 0
@@ -1043,6 +1098,7 @@
 1. エクスプローラーで、拡張子と隠しファイルを表示し、「PC」で開き、最近使ったものを出さないようにする。
 
    ```powershell
+   # エクスプローラーの表示を設定する
    $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
    $exp = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer'
    Set-ItemProperty -Path $adv -Name HideFileExt -Type DWord -Value 0
@@ -1073,6 +1129,7 @@
 1. スタートと設定の、おすすめ・提案・ヒントを切る。
 
    ```powershell
+   # スタートと Windows の提案を無効にする
    $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
    $cdm = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
    $upe = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement'
@@ -1093,6 +1150,7 @@
 1. タスクバーを左に寄せ、タスク ビューと検索のボタンを消し、時計に秒を出す。
 
    ```powershell
+   # タスクバーの表示を設定する
    $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
    Set-ItemProperty -Path $adv -Name TaskbarAl -Type DWord -Value 0
    Set-ItemProperty -Path $adv -Name ShowTaskViewButton -Type DWord -Value 0
@@ -1109,6 +1167,7 @@
 1. ダークモードにする。
 
    ```powershell
+   # Windows とアプリをダークモードに設定する
    $p = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
    Set-ItemProperty -Path $p -Name AppsUseLightTheme -Type DWord -Value 0
    Set-ItemProperty -Path $p -Name SystemUsesLightTheme -Type DWord -Value 0
@@ -1122,6 +1181,7 @@
 1. 既定の端末を Windows Terminal にする。
 
    ```powershell
+   # 既定の端末を Windows Terminal に設定する
    $p = 'HKCU:\Console\%%Startup'
    if (-not (Test-Path -LiteralPath $p)) { New-Item -Path $p | Out-Null }
    Set-ItemProperty -LiteralPath $p -Name DelegationConsole -Type String -Value '{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}'
@@ -1174,6 +1234,7 @@
 
    ```powershell
    & {
+     # 表示と入力の変更前の値を取得する
      $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\display-before.csv'
      $acc = 'HKCU:\Control Panel\Accessibility'
      $tog = 'HKCU:\Keyboard Layout\Toggle'
@@ -1231,6 +1292,7 @@
 
    ```powershell
    & {
+     # 入力言語の切り替えの設定先を準備する
      $t = 'HKCU:\Keyboard Layout\Toggle'
      if (-not (Test-Path -LiteralPath $t)) { New-Item -Path $t -Force | Out-Null }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1248,6 +1310,7 @@
 1. Alt+Tab に Edge のタブを出さず、タイトル バーのシェイクを切る。
 
    ```powershell
+   # Alt+Tab とウィンドウシェイクの設定を変更する
    $adv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
    Set-ItemProperty -Path $adv -Name MultiTaskingAltTabFilter -Type DWord -Value 3
    Set-ItemProperty -Path $adv -Name DisallowShaking -Type DWord -Value 1
@@ -1276,6 +1339,7 @@
 1. タスクバーのアプリの右クリックに「タスクの終了」を出す。
 
    ```powershell
+   # タスクバーからのタスクの終了を有効にする
    $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
    if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
    Set-ItemProperty -LiteralPath $k -Name TaskbarEndTask -Type DWord -Value 1
@@ -1290,18 +1354,21 @@
 
    ```powershell
    & {
+     # アニメーション設定の操作を定義する
      Add-Type -Namespace SetupNotes -Name Spi -MemberDefinition @'
    [StructLayout(LayoutKind.Sequential)] public struct ANIMATIONINFO { public uint cbSize; public int iMinAnimate; }
    [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
    [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref int pvParam, uint fWinIni);
    [DllImport("user32.dll", SetLastError = true)] public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref ANIMATIONINFO pvParam, uint fWinIni);
    '@
+     # アニメーションを無効にする
      $f = 3   # SPIF_UPDATEINIFILE (1) + SPIF_SENDCHANGE (2)
      [void][SetupNotes.Spi]::SystemParametersInfo(0x1043, 0, [IntPtr]::Zero, $f)   # SPI_SETCLIENTAREAANIMATION: FALSE
      $ai = New-Object 'SetupNotes.Spi+ANIMATIONINFO'
      $ai.cbSize = 8
      $ai.iMinAnimate = 0
      [void][SetupNotes.Spi]::SystemParametersInfo(0x0049, 8, [ref]$ai, $f)   # SPI_SETANIMATION
+     # アニメーション設定を取得する
      $on = 1
      [void][SetupNotes.Spi]::SystemParametersInfo(0x1042, 0, [ref]$on, 0)   # SPI_GETCLIENTAREAANIMATION
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1317,13 +1384,16 @@
 
    ```powershell
    & {
+     # システムサウンドの保存先を設定する
      $bak = Join-Path $env:LOCALAPPDATA 'setup-notes\appevents.reg'
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # システムサウンドの設定を保存する
      if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else {
        New-Item -ItemType Directory -Path (Split-Path -Path $bak) -Force | Out-Null
        reg.exe export 'HKCU\AppEvents' $bak /y
      }
      if (-not (Test-Path -LiteralPath $bak)) { Write-Error "中断: 控えを作れなかった: $bak"; return }
+     # システムサウンドを無効にして確認する
      $n = 0
      Get-ChildItem -Path 'HKCU:\AppEvents\Schemes\Apps\*\*' | ForEach-Object {
        $cur = Join-Path $_.PSPath '.Current'
@@ -1355,6 +1425,7 @@
 
    ```powershell
    & {
+     # ストレージセンサーの設定値を準備する
      $k = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
      $set = [ordered]@{ '01' = 1; '04' = 1; '08' = 1; '256' = 30; '32' = 0; '512' = 0; '2048' = 30 }
      if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
@@ -1420,17 +1491,21 @@
 
    ```powershell
    & {
+     # 自動起動を止めるアプリを取得する
      $run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
      $ok = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
      if (-not (Test-Path -LiteralPath $ok)) { New-Item -Path $ok -Force | Out-Null }
      $names = (Get-Item -LiteralPath $run).Property | Where-Object { $_ -eq 'OneDrive' -or $_ -eq 'OneDriveSetup' -or $_ -like 'MicrosoftEdgeAutoLaunch_*' }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # OneDrive と Edge の自動起動を無効にする
      foreach ($n in $names) {
        Set-ItemProperty -LiteralPath $ok -Name $n -Type Binary -Value ([byte[]](3, 0, 0, 0) + [BitConverter]::GetBytes((Get-Date).ToFileTime()))
        "止めた: $n"
      }
+     # Teams の自動起動を無効にする
      $teams = 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\MSTeams_8wekyb3d8bbwe\TeamsTfwStartupTask'
      if (Test-Path -LiteralPath $teams) { Set-ItemProperty -LiteralPath $teams -Name State -Type DWord -Value 1; '止めた: Teams' }
+     # 自動起動の設定を確認する
      (Get-Item -LiteralPath $run).Property | ForEach-Object { $b = (Get-ItemProperty -LiteralPath $ok -ErrorAction SilentlyContinue).$_; '{0}: {1}' -f $_, $(if ($b -and $b[0] -ne 2) { '止めている' } else { '起動する' }) }
    }
    ```
@@ -1457,6 +1532,7 @@
 1. ウィジェット（Windows Web Experience Pack）を外す。
 
    ```powershell
+   # ウィジェットのパッケージを取得する
    $p = Get-AppxPackage -Name MicrosoftWindows.Client.WebExperience
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if ($p) { $p | Remove-AppxPackage; '外した: MicrosoftWindows.Client.WebExperience' } else { '無い: MicrosoftWindows.Client.WebExperience' }
@@ -1504,12 +1580,14 @@
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # PowerToys の設定を確認する
      $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
      if (-not (Test-Path -LiteralPath $path)) { Write-Error "中断: 設定ファイルが無い: $path"; return }
      $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json
      $s.enabled.PSObject.Properties | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Enabled = $_.Value; Off = $PT_OFF -contains $_.Name } } | Format-Table -AutoSize
      foreach ($n in $PT_OFF) { if (-not $s.enabled.PSObject.Properties[$n]) { "無い名前: $n" } }
      'startup: {0} / run_elevated: {1}' -f $s.startup, $s.run_elevated
+     # PowerToys のタスクを確認する
      Get-ScheduledTask -TaskPath '\PowerToys\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    }
    ```
@@ -1528,20 +1606,25 @@
 
    ```powershell
    & {
+     # PowerToys の設定と控えの場所を設定する
      $path = Join-Path $env:LOCALAPPDATA 'Microsoft\PowerToys\settings.json'
      $bak = "$path.windows-setup.bak"
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # PowerToys の停止と設定を確認する
      if (Get-Process -Name PowerToys, PowerToys.Settings -ErrorAction SilentlyContinue) { Write-Error '中断: PowerToys が動いている。この項の手順 4 で終了してから貼り直す'; return }
      if (-not $PT_EXE) { Write-Error '中断: $PT_EXE が空。スタートメニューから PowerToys を起動し、この項の手順 2 を貼り直してから、この項の手順 4 に戻る'; return }
      try { $s = [IO.File]::ReadAllText($path) | ConvertFrom-Json -ErrorAction Stop } catch { Write-Error "中断: 設定ファイルを読めない: $path"; return }
      if (-not $s.PSObject.Properties['enabled']) { Write-Error "中断: 設定ファイルに enabled が無い: $path"; return }
      $miss = @($PT_OFF | Where-Object { -not $s.enabled.PSObject.Properties[$_] })
      if ($miss.Count) { Write-Error "中断: 設定ファイルに無い名前: $($miss -join ', ')"; return }
+     # 設定ファイルを保存する
      if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
+     # 指定したユーティリティを無効にして確認する
      foreach ($n in $PT_OFF) { $s.enabled.PSObject.Properties[$n].Value = $false }
      [IO.File]::WriteAllText($path, ($s | ConvertTo-Json -Depth 100), (New-Object System.Text.UTF8Encoding $false))
      $r = [IO.File]::ReadAllText($path) | ConvertFrom-Json
      foreach ($n in $PT_OFF) { '{0}: {1}' -f $n, $r.enabled.$n }
+     # PowerToys を起動する
      Start-Process -FilePath $PT_EXE
    }
    ```
@@ -1770,6 +1853,7 @@
 1. 同じスレッドで登録・解除する診断コードを読み込む。
 
    ```powershell
+   # ホットキーの登録可否を調べる操作を定義する
    if (-not ('HotkeyAvailabilityProbe' -as [type])) {
        Add-Type -TypeDefinition @'
    using System;
@@ -1826,6 +1910,7 @@
 1. 対象キーの登録可否を確認する。
 
    ```powershell
+   # ホットキーの登録可否を試験する
    $taskHotkeyResult = [HotkeyAvailabilityProbe]::Test($taskHotkeyModifiers, $taskHotkeyVirtualKey)
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    switch ($taskHotkeyResult) {
@@ -1916,6 +2001,7 @@
 1. LAN の接続をプライベートにする。
 
    ```powershell
+   # LAN のネットワークをプライベートに設定する
    if (-not $LAN_IF) {
      Write-Error '中断: この項の手順 2 の $LAN_IF が空'
    } else {
@@ -1931,6 +2017,7 @@
 1. Pro 以上のときだけ、リモート デスクトップを有効にし、受け付けるのをプライベートの LAN に絞る。
 
    ```powershell
+   # リモート デスクトップを有効にする
    $ed = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').EditionID
    if ($ed -like 'Core*') { Write-Error "中断: Home（$ed）は、リモート デスクトップでつながれる側になれない" } else {
      Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Type DWord -Value 0
@@ -1947,6 +2034,7 @@
 1. リモート アシスタンスを切る。
 
    ```powershell
+   # リモート アシスタンスを無効にする
    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -Name fAllowToGetHelp -Type DWord -Value 0
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Set-NetFirewallRule -Group '@FirewallAPI.dll,-33002' -Enabled False
@@ -1960,6 +2048,7 @@
 1. プライベートの LAN からの ping（ICMP のエコー要求）に応える規則を作る。
 
    ```powershell
+   # ping を許可する規則を作成する
    $g = 'Ping (setup-notes)'
    Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
    New-NetFirewallRule -Name 'Ping-ICMPv4-In-setup-notes' -DisplayName 'Ping (ICMPv4 エコー要求)' -Group $g -Direction Inbound -Action Allow -Profile Private -Protocol ICMPv4 -IcmpType 8 | Out-Null
@@ -1975,6 +2064,7 @@
 1. 配信の最適化を、LAN の PC とだけ共有するようにする。
 
    ```powershell
+   # 配信の最適化を LAN 内に設定する
    Set-DODownloadMode -DownloadMode Lan
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-DODownloadMode
@@ -2008,9 +2098,11 @@
    ```powershell
    & {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # WSL の設定ファイルを確認する
      $env:WSL_UTF8 = '1'
      $p = Join-Path $env:USERPROFILE '.wslconfig'
      if (Test-Path -LiteralPath $p) { "--- $p"; [IO.File]::ReadAllText($p) } else { "無い: $p" }
+     # WSL の版と実行中の構成を確認する
      wsl.exe --version
      wsl.exe --list --running
    }
@@ -2025,6 +2117,7 @@
 
    ```powershell
    & {
+     # WSL の設定ファイルと文字コードを準備する
      $path = Join-Path $env:USERPROFILE '.wslconfig'
      $bak = "$path.windows-setup.bak"
      $enc = New-Object System.Text.UTF8Encoding $false
@@ -2057,6 +2150,7 @@
 1. WSL を止めて、ミラーで動くことを確かめる。
 
    ```powershell
+   # WSL を停止する
    wsl.exe --shutdown
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
@@ -2072,6 +2166,7 @@
 
    ```powershell
    & {
+     # WSL の設定ファイルと控えの場所を設定する
      $path = Join-Path $env:USERPROFILE '.wslconfig'
      $bak = "$path.windows-setup.bak"
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2097,6 +2192,7 @@
 1. この PC でミラーを使えなかったときだけ、WSL を止めて、NAT に戻ったことを確かめる。
 
    ```powershell
+   # WSL を停止する
    wsl.exe --shutdown
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
@@ -2174,12 +2270,14 @@
 
    ```powershell
    & {
+     # RDP の切断用ショートカットを作成する
      $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'RDP をロックせずに切断.lnk'
      $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
      $s.TargetPath = "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe"
      $s.Arguments = '-NoProfile -WindowStyle Hidden -Command "tscon.exe (Get-Process -Id $PID).SessionId /dest:console"'
      $s.IconLocation = "$env:WINDIR\System32\mstsc.exe,0"
      $s.Save()
+     # ショートカットを管理者として実行する設定にする
      $b = [System.IO.File]::ReadAllBytes($lnk)
      if ($b[0] -ne 0x4C) { Write-Error "中断: $lnk がショートカットの形式でない"; return }
      $b[0x15] = $b[0x15] -bor 0x20
@@ -2249,10 +2347,13 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Windows と Git の SSH の版と場所を確認する
    & "$env:WINDIR\System32\OpenSSH\ssh.exe" -V
    & 'C:\Program Files\Git\usr\bin\ssh.exe' -V
    Get-Command ssh, ssh-keygen -All -ErrorAction SilentlyContinue | Format-Table Source
+   # SSH の鍵と設定ファイルの有無を確認する
    Test-Path "$env:USERPROFILE\.ssh\id_ed25519", "$env:USERPROFILE\.ssh\id_ed25519.pub", "$env:USERPROFILE\.ssh\config"
+   # Git の SSH とホームの指定を確認する
    git config --show-origin --get-all core.sshCommand
    'GIT_SSH={0} GIT_SSH_COMMAND={1} HOME={2}' -f $env:GIT_SSH, $env:GIT_SSH_COMMAND, $env:HOME
    ```
@@ -2265,6 +2366,7 @@
 1. 鍵ペアが無いときだけ、ed25519 で作る（公開鍵だけが無ければ作り直す）。
 
    ```powershell
+   # SSH の鍵の保存先を設定する
    $k = "$env:USERPROFILE\.ssh\id_ed25519"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    if ((Test-Path -LiteralPath $k) -and (Test-Path -LiteralPath "$k.pub")) {
@@ -2303,6 +2405,7 @@
 1. ほかの主体に許可があるときだけ、秘密鍵のアクセス権を直す。
 
    ```powershell
+   # 秘密鍵のアクセス権を設定する
    $f = "$env:USERPROFILE\.ssh\id_ed25519"
    $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
    icacls.exe $f /reset
@@ -2316,6 +2419,7 @@
 1. `~/.ssh/config` に接続先を足し、Windows と Git の両方の ssh で読めることを確かめる。
 
    ```powershell
+   # SSH の接続値と設定ファイルを確認する
    $f = "$env:USERPROFILE\.ssh\config"
    if (-not $SSH_HOST -or -not $SSH_ALIAS -or -not $SSH_USER) {
      Write-Error '中断: この項の手順 2 の SSH_HOST・SSH_ALIAS・SSH_USER のどれかが空のまま。値を入れて貼り直す'
@@ -2326,6 +2430,7 @@
    } elseif ((Test-Path -LiteralPath $f) -and (Select-String -LiteralPath $f -Pattern "^\s*Host(\s*=\s*|\s+)(.*\s)?$([regex]::Escape($SSH_ALIAS))(\s|$)" -Quiet)) {
      Write-Error "中断: Host $SSH_ALIAS は $f にもうある"
    } else {
+     # 接続先を設定ファイルに登録する
      New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.ssh" | Out-Null
      $lines = @("# BEGIN windows-ssh-client.md $SSH_ALIAS", "Host $SSH_ALIAS", "  HostName $SSH_HOST", "  User $SSH_USER", '  IdentityFile ~/.ssh/id_ed25519', '  IdentitiesOnly yes', "# END windows-ssh-client.md $SSH_ALIAS")
      if ((Test-Path -LiteralPath $f) -and (Get-Item -LiteralPath $f).Length -gt 0 -and -not (Get-Content -LiteralPath $f -Raw).EndsWith("`n")) { $lines = @('') + $lines }
@@ -2357,6 +2462,7 @@
 1. 公開鍵を登録し、Windows と Git の ssh による鍵認証を確認する。
 
    ```powershell
+   # SSH の接続先と公開鍵を確認する
    $pub = "$env:USERPROFILE\.ssh\id_ed25519.pub"
    if (-not $SSH_ALIAS) {
      Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
@@ -2364,8 +2470,10 @@
      Write-Error "中断: $pub が無いか、ed25519 の公開鍵の形でない"
    } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # ホストに公開鍵を登録する
      Get-Content -LiteralPath $pub -TotalCount 1 | & "$env:WINDIR\System32\OpenSSH\ssh.exe" -o PubkeyAuthentication=no $SSH_ALIAS 'umask 077; mkdir -p ~/.ssh && if [ -s ~/.ssh/authorized_keys ] && [ $(tail -c1 ~/.ssh/authorized_keys | wc -l) -eq 0 ]; then echo >> ~/.ssh/authorized_keys; fi && tr -d ''\r'' | sed ''1s/^\xEF\xBB\xBF//'' >> ~/.ssh/authorized_keys && echo added; if type restorecon >/dev/null 2>&1; then restorecon -F ~/.ssh ~/.ssh/authorized_keys; fi'
    }
+   # 公開鍵での接続を確認する
    if (-not $SSH_ALIAS) {
      Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {
@@ -2424,8 +2532,10 @@
    if (-not $SSH_ALIAS) {
      Write-Error '中断: この項の手順 2 の SSH_ALIAS が空のまま。値を入れて貼り直す'
    } else {
+     # SSH の版を確認する
      & "$env:WINDIR\System32\OpenSSH\ssh.exe" -V
      & 'C:\Program Files\Git\usr\bin\ssh.exe' -V
+     # SSH の接続先を確認する
      & "$env:WINDIR\System32\OpenSSH\ssh.exe" -G $SSH_ALIAS | Select-String -Pattern '^(hostname|user) '
      & 'C:\Program Files\Git\usr\bin\ssh.exe' -G $SSH_ALIAS | Select-String -Pattern '^(hostname|user) '
    }
@@ -2578,7 +2688,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # GitHub CLI の認証を確認する
    gh auth status
+   # Git の資格情報ヘルパーを確認する
    git config --get-regexp '^credential\..*helper$'
    ```
 
@@ -2650,7 +2762,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # lazygit の版を確認する
    lazygit --version
+   # 設定と実行ファイルの場所を確認する
    lazygit --print-config-dir
    (Get-Command lazygit -All).Source
    ```
@@ -2662,8 +2776,10 @@
 1. 確かめ用の git のリポジトリで、lazygit を起動して確かめる。
 
    ```powershell
+   # 確認用のリポジトリを作成する
    git init --quiet "$env:TEMP\lazygit-check"
    if (-not (Test-Path -LiteralPath "$env:TEMP\lazygit-check\.git")) { Write-Error '中断: 確かめ用のリポジトリ（%TEMP%\lazygit-check）を作れない' } else {
+     # 確認用のリポジトリで lazygit を起動する
      Set-Location -LiteralPath "$env:TEMP\lazygit-check"
      lazygit
    }
@@ -2696,6 +2812,7 @@
 1. 既存設定を退避して、設定ディレクトリへ clone する。
 
    ```powershell
+   # lazygit の設定を退避して取得する
    $d = "$env:LOCALAPPDATA\lazygit"
    if (Test-Path -LiteralPath "$d.bak") {
      Write-Warning "$d.bak がすでにあるため中止しました。中身を確かめて片付けてから、貼り直してください"
@@ -2759,6 +2876,7 @@
 1. この項の手順 3 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
 
    ```powershell
+   # 進行中のリベースを中止する
    git -C "$env:LOCALAPPDATA\lazygit" rebase --abort
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\lazygit" rebase --autostash --onto origin/custom HEAD
@@ -2772,9 +2890,12 @@
 1. この項の手順 3・4 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
 
    ```powershell
+   # 作業ツリーの変更を破棄する
    git -C "$env:LOCALAPPDATA\lazygit" reset -q --hard
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 設定リポジトリの状態を確認する
    git -C "$env:LOCALAPPDATA\lazygit" status --short --branch
+   # 退避した変更を確認する
    git --no-pager -C "$env:LOCALAPPDATA\lazygit" stash show -p
    ```
 
@@ -2786,7 +2907,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 上流の基準の版を確認する
    git --no-pager -C "$env:LOCALAPPDATA\lazygit" log -1 --format=%s origin/main
+   # lazygit の版を確認する
    lazygit --version
    ```
 
@@ -2816,6 +2939,7 @@
 1. Python が無ければ scoop で入れ、版を確かめる。
 
    ```powershell
+   # Python を導入する
    if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    python --version
@@ -2827,8 +2951,10 @@
 1. リポジトリを clone し、導入して確かめる。
 
    ```powershell
+   # excel-diff のリポジトリを取得する
    git clone https://github.com/ryo-aoki-pc/excel-diff.git "$env:USERPROFILE\excel-diff"
    & {
+     # excel-diff の導入と確認を実行する
      Push-Location -LiteralPath "$env:USERPROFILE\excel-diff" -ErrorAction Stop
      try {
        "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2883,6 +3009,7 @@
 
    ```powershell
    & {
+     # Excel のリポジトリに移動する
      if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
      Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2896,7 +3023,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Excel の差分属性を確認する
    git check-attr diff -- "売上表.xlsx"
+   # Excel の作業ツリーとステージの差分を確認する
    git diff -- "売上表.xlsx"
    git diff --cached -- "売上表.xlsx"
    ```
@@ -2936,6 +3065,7 @@
 
    ```powershell
    & {
+     # Excel のリポジトリで lazygit を起動する
      if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
      Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
      lazygit
@@ -2997,6 +3127,7 @@
 
    ```powershell
    & {
+     # Excel のリポジトリに移動する
      if (-not $EXCEL_REPO) { Write-Error '中断: この項の手順 2 の EXCEL_REPO が空のまま'; return }
      Set-Location -LiteralPath $EXCEL_REPO -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -3033,6 +3164,7 @@
 1. WinMerge が無ければ winget で入れ、版を確かめる。
 
    ```powershell
+   # WinMerge を導入する
    winget list --id WinMerge.WinMerge --exact --accept-source-agreements
    if ($LASTEXITCODE -ne 0) {
      winget install --exact --id WinMerge.WinMerge --source winget --scope user --accept-source-agreements --accept-package-agreements
@@ -3067,6 +3199,7 @@
 
    ```powershell
    & {
+     # Excel のブックの比較と取り込みを開始する
      if (-not $EXCEL_TARGET -or -not $EXCEL_SOURCE) { Write-Error '中断: この項の手順 3 の EXCEL_TARGET・EXCEL_SOURCE が空のまま'; return }
      git excel-merge -- $EXCEL_TARGET $EXCEL_SOURCE
    }
@@ -3130,6 +3263,7 @@
 
    ```powershell
    & {
+     # Word のリポジトリに移動する
      if (-not $WORD_REPO) { Write-Error '中断: この項の手順 2 の WORD_REPO が空のまま'; return }
      Set-Location -LiteralPath $WORD_REPO -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -3143,7 +3277,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Word の差分属性を確認する
    git check-attr diff -- "仕様書.docx"
+   # Word の作業ツリーとステージの差分を確認する
    git diff -- "仕様書.docx"
    git diff --cached -- "仕様書.docx"
    ```
@@ -3186,6 +3322,7 @@
 
    ```powershell
    & {
+     # Word のリポジトリで lazygit を起動する
      if (-not $WORD_REPO) { Write-Error '中断: この項の手順 2 の WORD_REPO が空のまま'; return }
      Set-Location -LiteralPath $WORD_REPO -ErrorAction Stop
      lazygit
@@ -3259,6 +3396,7 @@
 1. WinMerge が無ければ winget で入れ、版を確かめる。
 
    ```powershell
+   # WinMerge を導入する
    winget list --id WinMerge.WinMerge --exact --accept-source-agreements
    if ($LASTEXITCODE -ne 0) {
      winget install --exact --id WinMerge.WinMerge --source winget --scope user --accept-source-agreements --accept-package-agreements
@@ -3274,6 +3412,7 @@
 
    ```powershell
    & {
+     # 取り込む Word 文書の指定を確認する
      if (-not $WORD_TARGET -or -not $WORD_SOURCE) { Write-Error '中断: この項の手順 2 の WORD_TARGET・WORD_SOURCE が空のまま'; return }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      git word-merge -- $WORD_TARGET $WORD_SOURCE
@@ -3369,6 +3508,7 @@
 1. ユーザーの環境変数 `YAZI_FILE_ONE` を Git for Windows の `file.exe` にする。
 
    ```powershell
+   # yazi が使う file の場所を設定する
    if (-not (Test-Path -LiteralPath 'C:\Program Files\Git\usr\bin\file.exe')) { Write-Error '中断: C:\Program Files\Git\usr\bin\file.exe が無い（「Git for Windows」で入れる）' } else {
      [Environment]::SetEnvironmentVariable('YAZI_FILE_ONE', 'C:\Program Files\Git\usr\bin\file.exe', 'User')
      $env:YAZI_FILE_ONE = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
@@ -3391,8 +3531,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # yazi と ya の版を確認する
    yazi --version
    ya --version
+   # yazi の実行環境を確認する
    ya env
    ```
 
@@ -3450,6 +3592,7 @@
 1. yazi を終了し、自分用の設定を clone する。
 
    ```powershell
+   # yazi の設定を退避して取得する
    $dst = "$env:APPDATA\yazi\config"
    if ((Test-Path -LiteralPath $dst) -and (Test-Path -LiteralPath "$dst.bak")) {
      Write-Error "中断: $dst.bak が既にある。中身を確かめて片付けてから貼り直す"
@@ -3553,6 +3696,7 @@
 1. この項の手順 3 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
 
    ```powershell
+   # 進行中のリベースを中止する
    git -C "$env:APPDATA\yazi\config" rebase --abort
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:APPDATA\yazi\config" rebase --autostash --onto origin/custom HEAD
@@ -3566,9 +3710,12 @@
 1. この項の手順 3・4 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
 
    ```powershell
+   # 作業ツリーの変更を破棄する
    git -C "$env:APPDATA\yazi\config" reset -q --hard
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 設定リポジトリの状態を確認する
    git -C "$env:APPDATA\yazi\config" status --short --branch
+   # 退避した変更を確認する
    git --no-pager -C "$env:APPDATA\yazi\config" stash show -p
    ```
 
@@ -3582,7 +3729,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 設定の基準の版を確認する
    git -C "$env:APPDATA\yazi\config" describe --tags --abbrev=0
+   # yazi の版を確認する
    yazi --version
    ```
 
@@ -3611,6 +3760,7 @@
 1. Python が無ければ scoop で入れ、版を確かめる。
 
    ```powershell
+   # Python を導入する
    if (-not (Get-Command python -ErrorAction SilentlyContinue)) { scoop install python }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    python --version
@@ -3622,8 +3772,10 @@
 1. リポジトリを clone し、導入して確かめる。
 
    ```powershell
+   # md-table-excel のリポジトリを取得する
    git clone https://github.com/ryo-aoki-pc/md-table-excel.git "$env:USERPROFILE\md-table-excel"
    & {
+     # mdtable を導入する
      Push-Location -LiteralPath "$env:USERPROFILE\md-table-excel" -ErrorAction Stop
      try {
        python scripts/setup-mdtable.py
@@ -3686,6 +3838,7 @@
 
    ```powershell
    & {
+     # Markdown の作業フォルダーに移動する
      if (-not $MDTABLE_DIR) { Write-Error '中断: この項の手順 2 の MDTABLE_DIR が空のまま'; return }
      Set-Location -LiteralPath $MDTABLE_DIR -ErrorAction Stop
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -3698,6 +3851,7 @@
 1. 表を一覧にし、Excel で開いて編集する。
 
    ```powershell
+   # Markdown の表を一覧にして編集する
    mdtable list README.md
    mdtable edit README.md
    ```
@@ -3764,6 +3918,7 @@
 1. Node.js が無ければ scoop で入れ、版を確かめる。
 
    ```powershell
+   # Node.js を導入する
    if (-not (Get-Command node -ErrorAction SilentlyContinue)) { scoop install nodejs-lts }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    node --version
@@ -3775,8 +3930,10 @@
 1. リポジトリを clone し、導入して確かめる。
 
    ```powershell
+   # md-format のリポジトリを取得する
    git clone https://github.com/ryo-aoki-pc/md-format.git "$env:USERPROFILE\md-format"
    & {
+     # mdfmt を導入する
      Push-Location -LiteralPath "$env:USERPROFILE\md-format" -ErrorAction Stop
      try {
        node scripts/setup.mjs
@@ -4091,8 +4248,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # インストーラー版の Firefox を確認する
    $arp = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
    Get-ItemProperty -Path $arp -ErrorAction SilentlyContinue | Where-Object DisplayName -like 'Mozilla Firefox*' | Format-Table DisplayName, DisplayVersion, InstallLocation
+   # Microsoft Store 版の Firefox を確認する
    Get-AppxPackage -Name 'Mozilla.MozillaFirefox' | Format-Table Name, Version
    ```
 
@@ -4103,10 +4262,13 @@
 1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
 
    ```powershell
+   # Firefox を導入する
    winget install --exact --id Mozilla.Firefox.ja --source winget --scope machine --accept-source-agreements --accept-package-agreements
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Firefox の導入先と版を確認する
    winget list --exact --id Mozilla.Firefox.ja --source winget
    (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo | Format-List FileName, ProductVersion
+   # Firefox の更新サービスとタスクを確認する
    Get-Service -Name MozillaMaintenance | Format-Table Name, Status, StartType
    Get-ScheduledTask -TaskPath '\Mozilla\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
    ```
@@ -4211,7 +4373,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # WSL を更新する
    wsl.exe --update
+   # AlmaLinux 10 のパッケージを更新する
    wsl.exe --distribution AlmaLinux-10 --user root -- dnf -y upgrade
    ```
 
@@ -4222,11 +4386,13 @@
 
    ```powershell
    & {
+     # モジュールの更新に使う実行環境を準備する
      $ErrorActionPreference = 'Stop'
      if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
      }
      [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+     # Windows Update のモジュールを更新する
      Update-Module -Name PSWindowsUpdate -Force
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      Get-InstalledModule -Name PSWindowsUpdate | Select-Object Name, Version, InstalledLocation
@@ -4248,10 +4414,13 @@
 
    ```powershell
    & {
+     # バケットを更新して zoxide の版を取得する
      scoop update
      $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # zoxide の版を確認する
      if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この項の手順 7 から"; return }
+     # zoxide の固定を解除して更新する
      scoop unhold zoxide
      scoop update zoxide --force
      zoxide --version
@@ -4305,6 +4474,7 @@
 1. Firefox の新しい版があるときだけ、Firefox をすべて閉じてから winget で上げる。
 
    ```powershell
+   # Firefox を更新する
    winget upgrade --exact --id Mozilla.Firefox.ja --source winget --accept-source-agreements --accept-package-agreements
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo.ProductVersion
@@ -4317,7 +4487,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # WezTerm の版を確認する
    (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{BCF6F0DA-5B9A-408D-8562-F680AE6E1EAF}_is1').DisplayVersion
+   # WezTerm の実行中のプロセスを確認する
    Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
    ```
 

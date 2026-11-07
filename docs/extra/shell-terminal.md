@@ -56,6 +56,7 @@
   設定で `term = "wezterm"` にするなら、先に公式ドキュメントの手順で terminfo を入れる:
 
   ```bash
+  # WezTerm の terminfo を取得して登録する
   tempfile=$(mktemp) \
     && curl -o "$tempfile" https://raw.githubusercontent.com/wezterm/wezterm/main/termwiz/data/wezterm.terminfo \
     && tic -x -o ~/.terminfo "$tempfile" \

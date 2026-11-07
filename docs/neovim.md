@@ -32,6 +32,7 @@
 1. Neovim を導入し、版と実行ファイルの場所を確認する。
 
    ```bash
+   # Neovim を Homebrew から入れる
    brew install neovim
    printf '\n\033[7m 確認 \033[0m\n'
    nvim --version | head -3
@@ -92,6 +93,7 @@
 1. 外部コマンドと日本語入力を導入し、導入結果を確認する。
 
    ```bash
+   # 外部コマンドと日本語入力のパッケージを入れる
    sudo dnf install git gcc curl tar gzip unzip nodejs nodejs-npm file procps-ng ibus-anthy wl-clipboard
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q git gcc curl tar gzip unzip nodejs nodejs-npm file procps-ng ibus-anthy wl-clipboard
@@ -111,6 +113,7 @@
 1. 既存の Neovim の設定とデータがあれば、`.bak` を付けて退避する。
 
    ```bash
+   # Neovim の既存のディレクトリを退避する
    for d in ~/.config/nvim ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim; do
      [ ! -e "${d}" ] || mv -vT "${d}" "${d}.bak"
    done
@@ -122,6 +125,7 @@
 1. この設定を `~/.config/nvim` に clone する。
 
    ```bash
+   # 設定リポジトリを取得し、ブランチを確かめる
    [ -e ~/.config/nvim/init.lua ] || git clone https://github.com/ryo-aoki-pc/LazyVimStarter.git ~/.config/nvim
    git -C ~/.config/nvim branch --show-current
    ```
@@ -132,6 +136,7 @@
 1. lazygit・ripgrep・fd を導入し、版と場所を確認する。
 
    ```bash
+   # 検索と Git 操作に使う外部コマンドを入れる
    brew install lazygit ripgrep fd
    printf '\n\033[7m 確認 \033[0m\n'
    nvim --version | head -1
@@ -147,8 +152,10 @@
 1. 入力ソースを「英語 (US)」と Anthy の 2 つにする。
 
    ```bash
+   # 入力ソースの現在の値を取得する
    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
    /usr/bin/gsettings get org.gnome.desktop.input-sources sources
+   # 入力ソースを設定して読み戻す
    /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'anthy')]"
    /usr/bin/gsettings get org.gnome.desktop.input-sources sources
    ```
@@ -162,6 +169,7 @@
 1. Anthy の `on_off` のキーから `Ctrl+J` と `Ctrl+space` を外した値を作る。
 
    ```bash
+   # Anthy の切り替えキーを編集して表示する
    ANTHY_SHORTCUT=$(/usr/bin/gsettings get org.freedesktop.ibus.engine.anthy.shortcut default | sed "s/'on_off': <\['Zenkaku_Hankaku', 'Ctrl+space', 'Ctrl+J'\]>/'on_off': <['Zenkaku_Hankaku']>/")
    printf '%s\n' "${ANTHY_SHORTCUT}" | grep -o "'on_off': <\[[^]]*\]>"
    ```
@@ -173,6 +181,7 @@
 1. 作った値を Anthy の設定に書き戻す。
 
    ```bash
+   # Anthy の切り替えキーを保存して読み戻す
    /usr/bin/gsettings set org.freedesktop.ibus.engine.anthy.shortcut default "${ANTHY_SHORTCUT:?この項の手順 6 の ANTHY_SHORTCUT が空のまま。この項の手順 6 を貼り直す}"
    /usr/bin/gsettings get org.freedesktop.ibus.engine.anthy.shortcut default | grep -o "'on_off': <\[[^]]*\]>"
    ```
@@ -184,8 +193,10 @@
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
    ```bash
+   # パーサーの導入を待ちながらプラグインを入れる
    ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+$ts_wait" +qa
+   # lock ファイルを戻してプラグインの版を揃える
    git -C ~/.config/nvim checkout -- lazy-lock.json
    nvim --headless "+Lazy! restore" "+$ts_wait" +qa
    printf '\n\033[7m 確認 \033[0m\n'
@@ -205,10 +216,13 @@
 1. Mason の導入を待ち、外部コマンドの健全性を確認する。
 
    ```bash
+   # 確認用の Markdown を作って Neovim で開く
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    printf '\n\033[7m 確認 \033[0m\n'
+   # Mason が入れた外部コマンドを一覧にする
    ls ~/.local/share/nvim/mason/bin
+   # 健全性の検査を実行し、警告とエラーを抽出する
    nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! /tmp/lazyvim-health.txt" +qa
    grep -E 'ERROR|WARNING' /tmp/lazyvim-health.txt
    ```
@@ -239,6 +253,7 @@
 1. 試験用の Markdown を作って開き、日本語検索・整形・IME 連携を確かめる。
 
    ```bash
+   # 日本語の検索と整形を試すファイルを作って開く
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
@@ -267,6 +282,7 @@
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
    ```bash
+   # 設定を取り込み、プラグインの版を揃える
    ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    git -C ~/.config/nvim pull --ff-only && nvim --headless "+Lazy! restore" "+$ts_wait" +qa
    printf '\n\033[7m 確認 \033[0m\n'
@@ -350,6 +366,7 @@
 1. tmux の設定ファイルに `terminal-overrides` を 1 行足す。
 
    ```bash
+   # カーソル色の設定を tmux の設定ファイルに足す
    mkdir -p ~/.config/tmux
    grep -qF 'Cs=\E]12' ~/.config/tmux/tmux.conf 2>/dev/null || cat >> ~/.config/tmux/tmux.conf <<'EOF'
    set -ga terminal-overrides ',*:Cs=\E]12;%p1%s\007:Cr=\E]112\007'
@@ -362,6 +379,7 @@
 1. tmux の中で、設定を読み直して確かめる。
 
    ```bash
+   # tmux の設定を読み込み、適用した値を確かめる
    tmux source-file ~/.config/tmux/tmux.conf
    tmux show-options -g terminal-overrides | grep -F 'Cs='
    ```
@@ -383,6 +401,7 @@
 1. 拡張を、GNOME Shell が拡張を探す場所につなぐ。
 
    ```bash
+   # GNOME Shell の拡張を配置して確かめる
    mkdir -p ~/.local/share/gnome-shell/extensions
    ln -sfn ~/.config/nvim/gnome-shell/ibus-engine-follow@ryo-aoki-pc.github.com ~/.local/share/gnome-shell/extensions/
    ls -l ~/.local/share/gnome-shell/extensions/
@@ -399,6 +418,7 @@
 1. 拡張を有効にする。
 
    ```bash
+   # GNOME Shell の拡張を有効にして状態を調べる
    gnome-extensions enable ibus-engine-follow@ryo-aoki-pc.github.com
    gnome-extensions info ibus-engine-follow@ryo-aoki-pc.github.com | grep -E 'Enabled|State'
    ```
@@ -410,6 +430,7 @@
 1. Neovim を開き、上部バーが Neovim の IME の状態に付いてくることを確かめる。
 
    ```bash
+   # IME の切り替えを試すファイルを作って開く
    printf '%s\n' '#  動作確認' '' '日本語の検索を試す。' > /tmp/lazyvim-check.md
    nvim /tmp/lazyvim-check.md
    ```
@@ -431,7 +452,9 @@
 1. SSH のシェルで、この設定が OSC 52 を使うことを確かめる。
 
    ```bash
+   # SSH の接続情報を表示する
    printf 'SSH_CONNECTION=%s\n' "${SSH_CONNECTION:-(無い)}"
+   # Neovim のクリップボード設定を確かめる
    nvim --headless "+lua io.stdout:write((vim.g.clipboard or {}).name or '(無い)', '\n')" +qa
    ```
 
@@ -443,6 +466,7 @@
 1. 試験用のテキストを開き、ヤンクした行が手元のクリップボードに入ることを確かめる。
 
    ```bash
+   # ヤンクを試すテキストファイルを作って開く
    printf '%s\n' 'SSH 越しのヤンクを試す。' > /tmp/lazyvim-ssh.txt
    nvim /tmp/lazyvim-ssh.txt
    ```
@@ -503,8 +527,10 @@
 1. AlmaLinux 10 では、Homebrew で入れたものを上げる。
 
    ```bash
+   # Neovim・外部コマンド・フォントを更新する
    brew upgrade neovim lazygit ripgrep fd
    brew upgrade --cask font-hackgen-nerd
+   # 更新後の Neovim の版を確かめる
    nvim --version | head -1
    ```
 
@@ -514,6 +540,7 @@
 1. AlmaLinux 10 では、プラグインを上げて `lazy-lock.json` の差分を見る。
 
    ```bash
+   # パーサーの導入を待ちながらプラグインを更新する
    ts_wait="lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+Lazy! update" "+$ts_wait" +qa
    printf '\n\033[7m 確認 \033[0m\n'
@@ -584,8 +611,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Neovim の版と実行ファイルを確かめる
    nvim --version | Select-Object -First 3
    (Get-Command nvim -All).Source
+   # 設定とデータの保存先を確かめる
    nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
    ```
 
@@ -612,8 +641,10 @@
 
    ```powershell
    & {
+     # エディタの環境変数にある既存の値を調べる
      $other = @(foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::GetEnvironmentVariable($n, 'User') }) | Where-Object { $_ -and $_ -ne 'nvim' }
      if ($other) { Write-Error "中断: ユーザーの環境変数 EDITOR か VISUAL に、nvim ではない値がある（$($other -join ', ')）" } else {
+       # EDITOR と VISUAL をユーザーの環境変数に設定する
        foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::SetEnvironmentVariable($n, 'nvim', 'User') }
        "`n$([char]27)[7m 確認 $([char]27)[0m"
        foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
@@ -643,7 +674,9 @@
 1. git が無ければ入れ、scoop に `extras` のバケットを足す。
 
    ```powershell
+   # Git が無ければ scoop から入れる
    if (-not (Get-Command git -ErrorAction SilentlyContinue)) { scoop install git }
+   # scoop に extras の導入元を登録する
    scoop bucket add extras
    ```
 
@@ -654,10 +687,12 @@
 
    ```powershell
    & {
+     # 退避する場所と既存の控えの有無を調べる
      $nvimPaths = @("$env:LOCALAPPDATA\nvim", "$env:LOCALAPPDATA\nvim-data")
      foreach ($d in $nvimPaths) {
        if (Test-Path -LiteralPath "${d}.bak") { throw "中断: ${d}.bak がすでにある。何も退避していない" }
      }
+     # 既存の設定とデータを控えの場所へ移す
      foreach ($d in $nvimPaths) {
        if (Test-Path -LiteralPath $d) {
          Move-Item -LiteralPath $d -Destination "${d}.bak" -ErrorAction Stop
@@ -676,6 +711,7 @@
 1. この設定を `%LOCALAPPDATA%\nvim` に clone する。
 
    ```powershell
+   # Neovim の設定リポジトリを取得する
    if (-not (Test-Path "$env:LOCALAPPDATA\nvim\init.lua")) { git clone https://github.com/ryo-aoki-pc/LazyVimStarter.git "$env:LOCALAPPDATA\nvim" }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    git -C "$env:LOCALAPPDATA\nvim" branch --show-current
@@ -687,6 +723,7 @@
 1. Visual C++ のランタイムが無いときだけ入れ、外部コマンド・zenhan・lazygit を scoop で入れる。
 
    ```powershell
+   # ランタイムと Neovim の外部コマンドを入れる
    if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { scoop install vcredist2022 }
    scoop install ripgrep fd gcc nodejs zenhan lazygit
    ```
@@ -712,8 +749,10 @@
 1. プラグインを入れ、`lazy-lock.json` の版に揃える。
 
    ```powershell
+   # パーサーの導入を待ちながらプラグインを入れる
    $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+$tsWait" +qa
+   # lock ファイルを戻してプラグインの版を揃える
    git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json
    nvim --headless "+Lazy! restore" "+$tsWait" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -733,8 +772,10 @@
 1. Mason の導入を待ち、外部コマンドの健全性を確認する。
 
    ```powershell
+   # 確認用の Markdown を作って Neovim で開く
    Set-Content -Path "$env:TEMP\lazyvim-check.md" -Value '#  動作確認', '', '日本語の検索を試す。' -Encoding UTF8
    nvim "$env:TEMP\lazyvim-check.md"
+   # 外部コマンドの健全性を検査して結果を保存する
    nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! $env:TEMP\lazyvim-health.txt" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Select-String -Path "$env:TEMP\lazyvim-health.txt" -Pattern 'ERROR|WARNING'
@@ -786,6 +827,7 @@
 1. Windows 11 では、設定を最新にしてプラグインを揃える。
 
    ```powershell
+   # 設定を取り込み、プラグインの版を揃える
    $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    git -C "$env:LOCALAPPDATA\nvim" pull --ff-only; if ($?) { nvim --headless "+Lazy! restore" "+$tsWait" +qa }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -935,8 +977,10 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # scoop と Neovim・外部コマンドを更新する
    scoop update
    scoop update neovim ripgrep fd gcc nodejs zenhan lazygit
+   # 更新後の Neovim の版を確かめる
    nvim --version | Select-Object -First 1
    ```
 
@@ -945,6 +989,7 @@
 1. Windows 11 では、プラグインを上げて差分を見る。
 
    ```powershell
+   # パーサーの導入を待ちながらプラグインを更新する
    $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
    nvim --headless "+Lazy! update" "+$tsWait" +qa
    "`n$([char]27)[7m 確認 $([char]27)[0m"

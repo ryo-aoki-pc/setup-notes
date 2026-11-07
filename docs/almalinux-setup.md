@@ -46,14 +46,17 @@
 1. sudo をパスワード無しで使えるようにする（パスワードを 1 回聞かれる）。
 
    ```bash
+   # sudo を使うユーザーの所属を確かめる
    if ! id -nG | grep -qw wheel; then
      echo '中断: このユーザーは wheel の一員ではない（インストールのときに管理者にしたユーザーで貼る）' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
+     # sudo の設定を検査して書き込む
      printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo visudo -cf - &&
        printf 'Defaults:%s verifypw=any\n%s ALL=(ALL) NOPASSWD: ALL\n' "${USER}" "${USER}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/nopasswd
      sudo visudo -c
    fi
+   # 認証を解除して sudo の動作を確かめる
    sudo -k
    sudo -n -v && sudo -n true && echo 'sudo はパスワードを聞かない'
    ```
@@ -75,7 +78,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # OS のパッケージを更新する
    sudo dnf upgrade --refresh
+   # ファームウェアの情報を取得する
    sudo fwupdmgr refresh --force
    ```
 
@@ -93,7 +98,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # ファームウェアを更新する
    sudo fwupdmgr update
+   # 再起動が必要かを確かめる
    dnf needs-restarting -r
    ```
 
@@ -141,6 +148,7 @@
 1. PC の名前を変えるときだけ、名前を変える。
 
    ```bash
+   # ホスト名を変更して読み戻す
    if [ -z "${HOST_NAME}" ]; then echo '中断: この項の手順 1 の HOST_NAME が空のまま。名前を変えないなら、この手順は飛ばす' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      echo "変える前: $(hostnamectl --static)"
@@ -157,10 +165,13 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # SSH サーバーの起動状態を確かめる
    systemctl is-enabled sshd
    systemctl is-active sshd
+   # SSH の通信許可を確かめる
    sudo firewall-cmd --query-service=ssh
    sudo firewall-cmd --permanent --query-service=ssh
+   # 接続に使う IP アドレスを確かめる
    ip -4 -brief address show scope global
    ```
 
@@ -170,12 +181,16 @@
 1. SSH の待ち受けか、ファイアウォールの ssh が違うときだけ、直す。
 
    ```bash
+   # SSH サーバーを導入して起動する
    if ! rpm -q openssh-server; then sudo dnf install -y openssh-server; fi
    sudo systemctl enable --now sshd
+   # SSH の通信を許可する
    sudo firewall-cmd --permanent --add-service=ssh
    sudo firewall-cmd --reload
    printf '\n\033[7m 確認 \033[0m\n'
+   # SSH サーバーの動作を確かめる
    systemctl is-active sshd
+   # SSH の通信許可を確かめる
    sudo firewall-cmd --query-service=ssh
    ```
 
@@ -184,8 +199,10 @@
 1. ログ（journal）を、再起動の後も残るようにディスクに書く。
 
    ```bash
+   # journal の保存先を設定する
    sudo mkdir -p /etc/systemd/journald.conf.d
    printf '[Journal]\nStorage=persistent\n' | sudo tee /etc/systemd/journald.conf.d/50-persistent.conf >/dev/null
+   # 設定を反映して journal を書き出す
    sudo systemctl restart systemd-journald
    sudo journalctl --flush
    sudo systemd-tmpfiles --create --prefix /var/log/journal
@@ -200,7 +217,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # kdump の起動設定を確かめる
    systemctl is-enabled kdump
+   # クラッシュ用メモリーの予約を確かめる
    cat /sys/kernel/kexec_crash_size
    grep -o 'crashkernel=[^ ]*' /proc/cmdline
    ```
@@ -211,7 +230,9 @@
 1. kdump が有効なときだけ、止めて、カーネルが落ちたときのために予約しているメモリーを外す（効くのは再起動の後）。
 
    ```bash
+   # kdump を停止して自動起動を無効にする
    sudo systemctl disable --now kdump
+   # クラッシュ用メモリーの予約を無効にする
    sudo sed -i 's/^auto_reset_crashkernel yes$/auto_reset_crashkernel no/' /etc/kdump.conf
    sudo grubby --update-kernel=ALL --remove-args=crashkernel
    printf '\n\033[7m 確認 \033[0m\n'
@@ -242,6 +263,7 @@
 1. EPEL が無ければ入れ、有効になったか確かめる。
 
    ```bash
+   # EPEL のリポジトリを導入する
    if ! dnf repolist enabled | grep -qE '^epel'; then sudo dnf install -y epel-release; fi
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q epel-release
@@ -270,6 +292,7 @@
 1. 一致したら、鍵を rpm に取り込み、入ったか確かめる。
 
    ```bash
+   # RPM Fusion の署名鍵を取り込む
    sudo rpm --import 'https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-el-10'
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i fusion
@@ -281,6 +304,7 @@
 1. RPM Fusion のリポジトリを導入し、有効になったことを確認する。
 
    ```bash
+   # RPM Fusion のリポジトリを導入する
    sudo dnf --setopt=localpkg_gpgcheck=1 install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-10.noarch.rpm
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q rpmfusion-free-release
@@ -304,8 +328,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Flatpak を導入して版を確かめる
    if ! rpm -q flatpak; then sudo dnf install -y flatpak; fi
    flatpak --version
+   # 登録済みのリモートを確かめる
    flatpak remotes --show-details
    ```
 
@@ -325,6 +351,7 @@
 1. Flathub を system に登録して、登録されたか確かめる。
 
    ```bash
+   # Flathub をリモートに登録する
    sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
    printf '\n\033[7m 確認 \033[0m\n'
    flatpak remotes --show-details
@@ -335,11 +362,15 @@
 1. Flatseal を導入し、サンドボックスの起動を確認する。
 
    ```bash
+   # Flatseal を導入する
    sudo flatpak install flathub com.github.tchx84.Flatseal
    printf '\n\033[7m 確認 \033[0m\n'
+   # Flatseal の導入状態を確かめる
    flatpak list --app --columns=application,version,branch,installation
    flatpak info com.github.tchx84.Flatseal
+   # サンドボックスの起動を確かめる
    flatpak run --command=true com.github.tchx84.Flatseal && echo 'sandbox OK'
+   # アプリの起動ファイルを確かめる
    ls /var/lib/flatpak/exports/share/applications/
    ```
 
@@ -390,7 +421,9 @@
 1. Homebrew を導入して共通の bash 設定を読み、動作を確認する。
 
    ```bash
+   # Homebrew を導入する
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   # 共通の bash 設定を読み込む
    . ~/.bashrc
    printf '\n\033[7m 確認 \033[0m\n'
    brew --version
@@ -406,8 +439,10 @@
 1. IBus の GNOME 向けユーザーサービスの PATH を、Homebrew を含まない固定値にする。
 
    ```bash
+   # IBus の PATH 設定を書き込む
    mkdir -p ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d
    printf '%s\n' '[Service]' 'Environment=PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin' > ~/.config/systemd/user/org.freedesktop.IBus.session.GNOME.service.d/10-system-path.conf
+   # ユーザーサービスの設定を読み直す
    systemctl --user daemon-reload
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user show org.freedesktop.IBus.session.GNOME.service -p Environment
@@ -475,6 +510,7 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # sudo の PATH 設定を検査して書き込む
    if sudo printenv PATH | grep -q /home/linuxbrew; then echo '中断: sudo の PATH に Homebrew が既にある' >&2
    elif [ "$(sudo printenv PATH)" != /sbin:/bin:/usr/sbin:/usr/bin ]; then echo '中断: sudo の PATH が AlmaLinux 10 の既定（/sbin:/bin:/usr/sbin:/usr/bin）と違う' >&2
    else
@@ -482,6 +518,7 @@
      echo "${line}" | sudo visudo -cf - && echo "${line}" | sudo install -m 0440 /dev/stdin /etc/sudoers.d/homebrew
      sudo visudo -c
    fi
+   # sudo の PATH と brew の場所を確かめる
    sudo bash -c 'printenv PATH; command -v brew'
    ```
 
@@ -515,9 +552,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Homebrew の取得先への接続を確かめる
    for u in https://github.com https://raw.githubusercontent.com https://formulae.brew.sh https://ghcr.io/v2/; do
      printf '%-34s %s\n' "$u" "$(curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}' "$u")"
    done
+   # 依存パッケージの導入状態を確かめる
    rpm -q procps-ng curl file git
    ```
 
@@ -559,8 +598,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # jq の版と実行ファイルの場所を確かめる
    brew list --versions jq
    command -v jq
+   # JSON の値を取り出して確かめる
    echo '{"host": "offline"}' | jq -r .host
    ```
 
@@ -601,6 +642,7 @@
 1. 更新を入れるタイマーを有効にする。
 
    ```bash
+   # 自動更新のタイマーを有効にする
    sudo systemctl enable --now dnf-automatic-install.timer
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl list-timers 'dnf-automatic*' --no-pager
@@ -611,6 +653,7 @@
 1. GNOME Software の自動の更新を止める。
 
    ```bash
+   # GNOME Software の自動取得を無効にする
    /usr/bin/gsettings set org.gnome.software download-updates false
    printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.software download-updates
@@ -621,6 +664,7 @@
 1. 今すぐ 1 回動かして、動くことを確かめる。
 
    ```bash
+   # 自動更新を手動で開始する
    sudo systemctl start dnf-automatic-install.service
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl status dnf-automatic-install.service --no-pager | head -n 5
@@ -678,11 +722,15 @@
 1. 鍵がまだ無いときだけ、署名用の鍵を作り、MOK への登録を予約する。
 
    ```bash
+   # 署名鍵の有無を確かめる
    if sudo test -e /var/lib/shim-signed/mok/MOK.der; then echo '中断: 鍵が既にある。作り直さずに、手順 7 で登録を確かめる' >&2; else
+     # 署名鍵と証明書を生成する
      sudo mkdir -m 0700 -p /var/lib/shim-signed/mok
      sudo openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=Local kernel module signing key/" -days 36500 -keyout /var/lib/shim-signed/mok/MOK.priv -out /var/lib/shim-signed/mok/MOK.der
      printf '\n\033[7m 確認 \033[0m\n'
+     # 署名鍵のファイルを確かめる
      sudo ls -l /var/lib/shim-signed/mok
+     # 署名鍵の登録を予約する
      sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
    fi
    ```
@@ -749,6 +797,7 @@
 1. linger が無効のときだけ、linger を有効にして、有効になったか確かめる。
 
    ```bash
+   # ユーザーサービスの常駐を有効にする
    sudo loginctl enable-linger "${USER}"
    printf '\n\033[7m 確認 \033[0m\n'
    loginctl show-user "$(id -u)" -p Linger
@@ -795,11 +844,14 @@
 1. 入力ソースを「キーボードの配列 + Anthy」にする。
 
    ```bash
+   # 入力ソースの変数を確かめる
    if [ -z "${XKB_LAYOUT}" ]; then echo '中断: この項の手順 1 の XKB_LAYOUT が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
+     # 入力ソースを設定して読み戻す
      /usr/bin/gsettings get org.gnome.desktop.input-sources sources
      /usr/bin/gsettings set org.gnome.desktop.input-sources sources "[('xkb', '${XKB_LAYOUT}'), ('ibus', 'anthy')]"
      /usr/bin/gsettings get org.gnome.desktop.input-sources sources
+     # 入力切替のキーを確かめる
      /usr/bin/gsettings get org.gnome.desktop.wm.keybindings switch-input-source
    fi
    ```
@@ -834,6 +886,7 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # ホームのフォルダー名とブックマークを揃える
    /usr/bin/python3 - <<'EOF'
    import pathlib, subprocess, urllib.parse
    home = pathlib.Path.home()
@@ -864,6 +917,7 @@
            lines = [uri(new) + line[len(uri(old)):] if line == uri(old) or line.startswith(uri(old) + ' ') else line for line in lines]
        bookmarks.write_text('\n'.join(lines) + '\n')
    EOF
+   # フォルダーとブックマークの設定を読み戻す
    grep '^XDG_' ~/.config/user-dirs.dirs
    cat ~/.config/gtk-3.0/bookmarks
    ```
@@ -875,6 +929,7 @@
 1. ダークモードにする。
 
    ```bash
+   # 配色の設定をダークモードにする
    /usr/bin/gsettings set org.gnome.desktop.interface color-scheme prefer-dark
    printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface color-scheme
@@ -885,8 +940,10 @@
 1. Caps Lock を Ctrl にする（今の配列の設定に足す）。
 
    ```bash
+   # 現在のキー設定を取得する
    xkb=$(/usr/bin/gsettings get org.gnome.desktop.input-sources xkb-options)
    echo "変える前: ${xkb}"
+   # Caps Lock の Ctrl 割り当てを追加する
    case "${xkb}" in
      *"'ctrl:nocaps'"*) ;;
      '@as []') /usr/bin/gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']" ;;
@@ -901,6 +958,7 @@
 1. ウィンドウのタイトルバーに、最小化と最大化のボタンを出す。
 
    ```bash
+   # ウィンドウの操作ボタンを設定する
    /usr/bin/gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
    printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.wm.preferences button-layout
@@ -911,8 +969,10 @@
 1. 上部バーの時計に曜日と秒を出し、電池の残りを % で出す。
 
    ```bash
+   # 時計の表示を設定する
    /usr/bin/gsettings set org.gnome.desktop.interface clock-show-weekday true
    /usr/bin/gsettings set org.gnome.desktop.interface clock-show-seconds true
+   # 電池の残量表示を有効にする
    /usr/bin/gsettings set org.gnome.desktop.interface show-battery-percentage true
    printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings list-recursively org.gnome.desktop.interface | grep -E 'clock-show-(weekday|seconds)|show-battery-percentage'
@@ -937,8 +997,10 @@
 1. Alt+Tab を、アプリごとではなくウィンドウごとの切り替えにする。
 
    ```bash
+   # アプリを切り替えるキーを設定する
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Super>Tab']"
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-applications-backward "['<Shift><Super>Tab']"
+   # ウィンドウを切り替えるキーを設定する
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
    /usr/bin/gsettings set org.gnome.desktop.wm.keybindings switch-windows-backward "['<Shift><Alt>Tab']"
    printf '\n\033[7m 確認 \033[0m\n'
@@ -950,6 +1012,7 @@
 1. 画面の左上の角（ホットコーナー）にマウスを当てても、アクティビティの画面を開かないようにする。
 
    ```bash
+   # ホットコーナーを無効にする
    /usr/bin/gsettings set org.gnome.desktop.interface enable-hot-corners false
    printf '\n\033[7m 確認 \033[0m\n'
    /usr/bin/gsettings get org.gnome.desktop.interface enable-hot-corners
@@ -960,8 +1023,10 @@
 1. 設定の「ディスプレイ」で、拡大率に 125%・150% などを選べるようにする（効くのは再起動の後）。
 
    ```bash
+   # 拡大率に関する機能の設定を取得する
    f=$(/usr/bin/gsettings get org.gnome.mutter experimental-features)
    echo "変える前: ${f}"
+   # 拡大率の実験的な機能を追加する
    for x in scale-monitor-framebuffer xwayland-native-scaling; do
      case "${f}" in
        *"'${x}'"*) ;;
@@ -990,8 +1055,10 @@
 1. 入れた拡張を有効にする（効くのは再起動の後）。
 
    ```bash
+   # 有効な GNOME 拡張の一覧を取得する
    e=$(/usr/bin/gsettings get org.gnome.shell enabled-extensions)
    echo "変える前: ${e}"
+   # トレイアイコンの拡張を有効にする
    case "${e}" in
      *"'appindicatorsupport@rgcjonas.gmail.com'"*) ;;
      '@as []') /usr/bin/gsettings set org.gnome.shell enabled-extensions "['appindicatorsupport@rgcjonas.gmail.com']" ;;
@@ -1006,6 +1073,7 @@
 1. Ctrl+Alt+T で端末を開くようにする（ショートカットを足す）。
 
    ```bash
+   # 端末用のショートカットを一覧に登録する
    kb=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/
    list=$(/usr/bin/gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
    case "${list}" in
@@ -1013,6 +1081,7 @@
      '@as []') /usr/bin/gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['${kb}']" ;;
      *) /usr/bin/gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "${list%]}, '${kb}']" ;;
    esac
+   # 端末の起動コマンドとキーを設定する
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" name '端末'
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" command 'ptyxis --new-window'
    /usr/bin/gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:${kb}" binding '<Control><Alt>t'
@@ -1026,6 +1095,7 @@
 1. Dash のお気に入り（アクティビティの画面の下の並び）を、この項の手順 1 のアプリにする。
 
    ```bash
+   # Dash のアプリ一覧を設定して読み戻す
    if [ -z "${DASH_FAVORITES}" ]; then echo '中断: この項の手順 1 の DASH_FAVORITES が空のまま。値を入れて貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
      /usr/bin/gsettings get org.gnome.shell favorite-apps
@@ -1046,8 +1116,10 @@
 1. 拡大率がうまく動かないときは、mutter の実験的な機能を外す（効くのは再起動の後）。
 
    ```bash
+   # 拡大率に関する機能の設定を取得する
    f=$(/usr/bin/gsettings get org.gnome.mutter experimental-features)
    echo "変える前: ${f}"
+   # 拡大率の実験的な機能を無効にする
    for x in scale-monitor-framebuffer xwayland-native-scaling; do
      f=$(printf '%s' "${f}" | sed -e "s/, '${x}'//" -e "s/'${x}', //" -e "s/\['${x}'\]/@as []/")
    done
@@ -1061,6 +1133,7 @@
 1. トレイアイコンの拡張が動かなくなったときは、その拡張を無効にする。
 
    ```bash
+   # トレイアイコンの拡張を無効にする
    e=$(/usr/bin/gsettings get org.gnome.shell enabled-extensions)
    /usr/bin/gsettings set org.gnome.shell enabled-extensions "$(printf '%s' "${e}" | sed -e "s/, 'appindicatorsupport@rgcjonas.gmail.com'//" -e "s/'appindicatorsupport@rgcjonas.gmail.com', //" -e "s/\['appindicatorsupport@rgcjonas.gmail.com'\]/@as []/")"
    printf '\n\033[7m 確認 \033[0m\n'
@@ -1102,15 +1175,20 @@
 1. 自分のセッションの画面オフ・減光・ロック・自動サスペンド・電源ボタンを変える。
 
    ```bash
+   # 画面オフと画面ロックを設定する
    /usr/bin/gsettings set org.gnome.desktop.session idle-delay "${IDLE_DELAY:?この項の手順 1 の IDLE_DELAY が空のまま。値を入れて貼り直す}"
    /usr/bin/gsettings set org.gnome.desktop.screensaver lock-enabled "${LOCK_ENABLED:?この項の手順 1 の LOCK_ENABLED が空のまま。値を入れて貼り直す}"
+   # 減光と自動サスペンドを無効にする
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power idle-dim false
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
+   # 電源ボタンの動作を設定する
    /usr/bin/gsettings set org.gnome.settings-daemon.plugins.power power-button-action "${POWER_BUTTON:?この項の手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す}"
    printf '\n\033[7m 確認 \033[0m\n'
+   # 画面オフと画面ロックの設定を読み戻す
    /usr/bin/gsettings get org.gnome.desktop.session idle-delay
    /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
+   # 電源管理の設定を読み戻す
    /usr/bin/gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep -E 'idle-dim|sleep-inactive-(ac|battery)-type|power-button-action'
    ```
 
@@ -1121,6 +1199,7 @@
 1. ログイン画面（GDM）用の設定を書き、dconf を作り直して、ログイン画面から見える値を確かめる。
 
    ```bash
+   # ログイン画面の電源設定を書き込む
    if [ -z "${POWER_BUTTON}" ]; then echo '中断: この項の手順 1 の POWER_BUTTON が空のまま。値を入れて貼り直す' >&2; else
      sudo tee /etc/dconf/db/gdm.d/90-power >/dev/null <<EOF
    [org/gnome/settings-daemon/plugins/power]
@@ -1152,11 +1231,13 @@
 1. 蓋を閉じても何もしないように、logind のドロップインを置く。
 
    ```bash
+   # ふたを閉じたときの動作を設定する
    sudo mkdir -p /etc/systemd/logind.conf.d
    sudo tee /etc/systemd/logind.conf.d/90-lid.conf >/dev/null <<'EOF'
    [Login]
    HandleLidSwitch=ignore
    EOF
+   # logind の設定を反映する
    sudo systemctl reload systemd-logind
    printf '\n\033[7m 確認 \033[0m\n'
    busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager HandleLidSwitch
@@ -1201,7 +1282,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Git の版を確かめる
    git --version
+   # 読み込まれている Git の設定を確かめる
    git config --list --show-scope --show-origin
    ```
 
@@ -1214,6 +1297,7 @@
 1. 名前とメールアドレスを設定する。
 
    ```bash
+   # コミットに記録する作成者情報を設定する
    if [ -z "${GIT_USER_NAME}" ] || [ -z "${GIT_USER_EMAIL}" ]; then echo '中断: 「Git」の手順 1 の GIT_USER_NAME か GIT_USER_EMAIL が空のまま' >&2; else
      git config --global user.name "${GIT_USER_NAME}"
      git config --global user.email "${GIT_USER_EMAIL}"
@@ -1228,8 +1312,10 @@
 1. pull を rebase にし、autostash を有効にし、改行を変換しないようにする。
 
    ```bash
+   # pull と rebase の動作を設定する
    git config --global pull.rebase true
    git config --global rebase.autoStash true
+   # 改行の自動変換を無効にする
    git config --global core.autocrlf false
    ```
 
@@ -1238,13 +1324,19 @@
 1. 推奨の設定を入れる。
 
    ```bash
+   # 新規リポジトリのブランチ名を設定する
    git config --global init.defaultBranch main
+   # パス名の表示を設定する
    git config --global core.quotepath false
+   # fetch と push の動作を設定する
    git config --global fetch.prune true
    git config --global push.autoSetupRemote true
+   # 競合の記録と表示形式を設定する
    git config --global rerere.enabled true
    git config --global merge.conflictStyle zdiff3
+   # 差分の比較方式を設定する
    git config --global diff.algorithm histogram
+   # ブランチとタグの表示順を設定する
    git config --global branch.sort -committerdate
    git config --global tag.sort version:refname
    ```
@@ -1272,6 +1364,7 @@
 1. この項の手順 6 で `pull.ff` が `only` だったときだけ、`true` で上書きする。
 
    ```bash
+   # pull の fast-forward を許可する
    git config --global pull.ff true
    printf '\n\033[7m 確認 \033[0m\n'
    git config --show-scope --get pull.ff
@@ -1283,20 +1376,25 @@
 1. 使い捨てのリポジトリで、改行・ブランチ名・日本語のファイル名・最初の push を確かめる。
 
    ```bash
+   # 確認用のリポジトリを作成する
    GIT_TEST_DIR=$(mktemp -d)
    cd "$GIT_TEST_DIR"
    git init -q --bare remote.git
    git init -q a
    cd a
+   # 改行と日本語名を含むファイルを作成する
    printf 'line 1\r\n' > crlf.txt
    printf '1\n' > a.txt
    touch 日本語.txt
    printf '\n\033[7m 確認 \033[0m\n'
+   # 作成したファイルの状態を確かめる
    git status --short
+   # ファイルをコミットして改行とブランチを確かめる
    git add .
    git commit -q -m first
    git ls-files --eol crlf.txt
    git branch --show-current
+   # リモートを登録して push する
    git remote add origin ../remote.git
    git push
    ```
@@ -1309,12 +1407,14 @@
 1. この項の手順 8 と同じシェルで、別の clone から pull し、rebase と autostash を確かめる。
 
    ```bash
+   # リポジトリを複製して送信側の変更を作成する
    cd "$GIT_TEST_DIR"
    git clone -q remote.git b
    cd a
    printf '2\n' >> a.txt
    git commit -q -a -m 'a: 2'
    git push -q
+   # 受信側のコミットと未コミットの変更を作成する
    cd ../b
    printf 'b\n' > b.txt
    git add b.txt
@@ -1333,6 +1433,7 @@
 1. 使い捨てのリポジトリを消す。
 
    ```bash
+   # 確認用のリポジトリを削除する
    cd ~
    rm -rf "${GIT_TEST_DIR:?「Git」の手順 8 と同じシェルで貼る}"
    ```
@@ -1352,7 +1453,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 改行変換を有効にして変更の有無を確かめる
    git -c core.autocrlf=true status --short
+   # CRLF のファイル数を確かめる
    git ls-files --eol | grep -c 'i/lf *w/crlf'
    ```
 
@@ -1372,10 +1475,13 @@
 1. 作業ツリーのファイルを、今の設定で書き直す。
 
    ```bash
+   # インデックスと作業ツリーを作り直す
    git rm -r -q --cached .
    git reset -q --hard
    printf '\n\033[7m 確認 \033[0m\n'
+   # 改行が CRLF のファイル数を確かめる
    git ls-files --eol | grep -c 'i/lf *w/crlf'
+   # 作業ツリーの状態を確かめる
    git status --short
    ```
 
@@ -1386,7 +1492,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 退避した変更を戻す
    git stash pop
+   # 改行の状態を確かめる
    git ls-files --eol
    ```
 
@@ -1449,9 +1557,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # delta の版と実行ファイルの場所を確かめる
    delta --version
    brew list --versions git-delta
    command -v delta
+   # 差分を delta で表示する
    git -C ~/.config/bash show --format= | delta --paging=never | head -20
    ```
 
@@ -1487,6 +1597,7 @@
 1. `dnf config-manager` を使えるようにし、リポジトリを追加する。
 
    ```bash
+   # dnf のリポジトリ管理コマンドを導入する
    sudo dnf install -y 'dnf-command(config-manager)'
    printf '\n\033[7m 確認 \033[0m\n'
    sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
@@ -1532,7 +1643,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # GitHub の認証状態を確かめる
    gh auth status
+   # GitHub CLI の版を確かめる
    gh --version
    ```
 
@@ -1615,7 +1728,9 @@
 1. 設定を clone してリンクする。
 
    ```bash
+   # lazygit の設定を取得する
    git clone https://github.com/ryo-aoki-pc/lazygit.git ~/lazygit-config
+   # 設定ファイルへのリンクを作成する
    mkdir -p ~/.config/lazygit
    ln -sf ~/lazygit-config/config.yml ~/.config/lazygit/config.yml
    ```
@@ -1666,6 +1781,7 @@
 1. この項の手順 2 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
 
    ```bash
+   # 競合中の rebase を中止する
    git -C ~/lazygit-config rebase --abort
    printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/lazygit-config rebase --autostash --onto origin/custom HEAD
@@ -1679,9 +1795,12 @@
 1. この項の手順 2・3 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
 
    ```bash
+   # 作業ツリーの変更を破棄する
    git -C ~/lazygit-config reset -q --hard
    printf '\n\033[7m 確認 \033[0m\n'
+   # 作業ツリーの状態を確かめる
    git -C ~/lazygit-config status --short --branch
+   # 退避した変更の内容を確かめる
    git --no-pager -C ~/lazygit-config stash show -p
    ```
 
@@ -1693,7 +1812,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 設定の基になったリリースを確かめる
    git --no-pager -C ~/lazygit-config log -1 --format=%s origin/main
+   # lazygit 本体の版を確かめる
    lazygit --version
    ```
 
@@ -1727,7 +1848,9 @@
 1. リポジトリを clone し、導入して確かめる。
 
    ```bash
+   # excel-diff のソースを取得する
    git clone https://github.com/ryo-aoki-pc/excel-diff.git ~/excel-diff
+   # コマンドを導入して設定を検査する
    (
      cd ~/excel-diff || exit
      printf '\n\033[7m 確認 \033[0m\n'
@@ -1755,7 +1878,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 差分変換の属性を確かめる
    git check-attr diff -- "売上表.xlsx"
+   # 作業ツリーとインデックスの差分を表示する
    git diff -- "売上表.xlsx"
    git diff --cached -- "売上表.xlsx"
    ```
@@ -1844,6 +1969,7 @@
 1. 2 つのブックを比べる専用画面を開く。
 
    ```bash
+   # 取り込み先と取り込み元を指定してブックを開く
    if [ -z "$EXCEL_TARGET" ] || [ -z "$EXCEL_SOURCE" ]; then
      echo '中断: この項の手順 1 の EXCEL_TARGET または EXCEL_SOURCE が空のまま' >&2
    else
@@ -1878,7 +2004,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Word 用の差分変換の属性を確かめる
    git check-attr diff -- "仕様書.docx"
+   # 作業ツリーとインデックスの差分を表示する
    git diff -- "仕様書.docx"
    git diff --cached -- "仕様書.docx"
    ```
@@ -1959,6 +2087,7 @@
 1. 2 つの文書を比べる専用画面を開く。
 
    ```bash
+   # 取り込み先と取り込み元を指定して文書を開く
    if [ -z "$WORD_TARGET" ] || [ -z "$WORD_SOURCE" ]; then
      echo '中断: この項の手順 1 の WORD_TARGET または WORD_SOURCE が空のまま' >&2
    else
@@ -2037,9 +2166,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # yazi と ya の版を確かめる
    yazi --version
    ya --version
    brew list --versions yazi
+   # yazi を起動する
    y
    ```
 
@@ -2139,6 +2270,7 @@
 1. この項の手順 2 の `status` の 1 行目が `## HEAD (no branch)` のときだけ、手元の変更を残して rebase を取り消し、新しい `custom` に移る。
 
    ```bash
+   # 競合中の rebase を中止する
    git -C ~/.config/yazi rebase --abort
    printf '\n\033[7m 確認 \033[0m\n'
    git -C ~/.config/yazi rebase --autostash --onto origin/custom HEAD
@@ -2152,9 +2284,12 @@
 1. この項の手順 2・3 の `status` が `## custom` で始まり `UU` の行を出したときだけ、作業ツリーを新しい設定に戻す。
 
    ```bash
+   # 作業ツリーの変更を破棄する
    git -C ~/.config/yazi reset -q --hard
    printf '\n\033[7m 確認 \033[0m\n'
+   # 作業ツリーの状態を確かめる
    git -C ~/.config/yazi status --short --branch
+   # 退避した変更の内容を確かめる
    git --no-pager -C ~/.config/yazi stash show -p
    ```
 
@@ -2168,7 +2303,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 設定のリリースタグを確かめる
    git -C ~/.config/yazi describe --tags --abbrev=0
+   # yazi 本体の版を確かめる
    yazi --version
    ```
 
@@ -2190,7 +2327,9 @@
 1. リポジトリを clone し、導入して確かめる。
 
    ```bash
+   # md-table-excel のソースを取得する
    git clone https://github.com/ryo-aoki-pc/md-table-excel.git ~/md-table-excel
+   # コマンドを導入して設定を検査する
    (
      cd ~/md-table-excel &&
        python3 scripts/setup-mdtable.py &&
@@ -2271,6 +2410,7 @@
 1. Node.js が無ければ dnf で入れ、版を確かめる。
 
    ```bash
+   # Node.js と npm を導入する
    command -v node >/dev/null || sudo dnf install -y nodejs nodejs-npm
    printf '\n\033[7m 確認 \033[0m\n'
    node --version
@@ -2282,7 +2422,9 @@
 1. リポジトリを clone し、導入して確かめる。
 
    ```bash
+   # md-format のソースを取得する
    git clone https://github.com/ryo-aoki-pc/md-format.git ~/md-format
+   # コマンドを導入して設定を検査する
    (
      cd ~/md-format &&
        node scripts/setup.mjs &&
@@ -2349,14 +2491,18 @@
 1. ShellCheck と shfmt を導入し、検査の動作を確認する。
 
    ```bash
+   # シェルの検査と整形の道具を導入する
    brew install shellcheck shfmt
    printf '\n\033[7m 確認 \033[0m\n'
+   # 版と実行ファイルの場所を確かめる
    shellcheck --version
    shfmt --version
    command -v shellcheck shfmt
    brew list --versions shellcheck shfmt
+   # ShellCheck の指摘と終了コードを確かめる
    printf '#!/bin/bash\nx=$(ls)\necho $x\n' | shellcheck -
    echo "rc=$?"
+   # shfmt の整形結果と終了コードを確かめる
    printf '#!/bin/bash\nif true; then\necho a\nfi\n' | shfmt -i 2 -d -
    echo "rc=$?"
    ```
@@ -2397,6 +2543,7 @@
 1. 署名鍵を落として、取り込む前に fingerprint を見る。
 
    ```bash
+   # Microsoft の公開鍵を取得して照合する
    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc -o /tmp/microsoft.asc
    gpg --show-keys --with-fingerprint /tmp/microsoft.asc
    ```
@@ -2409,8 +2556,10 @@
 1. fingerprint が一致したら署名鍵を取り込み、確かめて鍵ファイルを消す。
 
    ```bash
+   # Microsoft の公開鍵を登録して読み戻す
    sudo rpm --import /tmp/microsoft.asc
    rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i microsoft
+   # 取得した公開鍵の一時ファイルを削除する
    rm -f /tmp/microsoft.asc
    ```
 
@@ -2419,6 +2568,7 @@
 1. リポジトリを追加する。
 
    ```bash
+   # VS Code のリポジトリ設定を書き込む
    sudo tee /etc/yum.repos.d/vscode.repo >/dev/null <<'EOF'
    [vscode]
    name=Visual Studio Code
@@ -2435,12 +2585,16 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 導入予定のパッケージを表示して導入する
    sudo dnf install --assumeno code
    sudo dnf install code
+   # VS Code の版と導入元を確かめる
    code --version
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' code
    rpm -qi code | sed -n '/^Vendor/p;/^Build Date/p'
+   # 共有ライブラリーの依存関係を確かめる
    ldd /usr/share/code/code | grep -c 'not found'
+   # アプリの起動ファイルを確かめる
    rpm -ql code | grep '/applications/.*\.desktop$'
    ```
 
@@ -2466,7 +2620,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # VS Code の設定フォルダーを確かめる
    ls -d ~/.config/Code ~/.vscode
+   # 導入した拡張機能を一覧にする
    code --list-extensions
    ```
 
@@ -2535,9 +2691,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Node.js と npm の版と配置先を確かめる
    node --version
    npm --version
    command -v node npm
+   # npm の通信経路を設定して接続を確かめる
    export https_proxy=socks5h://127.0.0.1:1080
    npm config get https-proxy
    npm config get proxy
@@ -2577,9 +2735,12 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # プロキシの環境変数を確かめる
    env | grep -i _proxy
+   # Mason の導入済みツールと動作を確かめる
    ls ~/.local/share/nvim/mason/bin
    ~/.local/share/nvim/mason/bin/markdownlint-cli2 --help | head -n 1
+   # npm レジストリへの接続を確かめる
    npm ping --fetch-retries=0 && echo '届いた（オフラインではない）' || echo '届かない（期待どおり）'
    ```
 
@@ -2607,7 +2768,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Neovim で設定ファイルを開く
    nvim -R ~/.config/nvim/init.lua
+   # トンネルのシェルを閉じる
    exit
    ```
 
@@ -2669,6 +2832,7 @@
 1. Mozilla のリポジトリを追加し、入手できる版を見る。
 
    ```bash
+   # Mozilla のリポジトリ設定を書き込む
    sudo tee /etc/yum.repos.d/mozilla.repo >/dev/null <<'EOF'
    [mozilla]
    name=Mozilla Packages
@@ -2689,6 +2853,7 @@
 1. Firefox を導入し、Mozilla 公式のビルドか確認する。
 
    ```bash
+   # Firefox と日本語の言語パックを導入する
    sudo dnf install "${FF_PKG:?「Firefox」の手順 1 の FF_PKG が空のまま。値を入れて貼り直す}" ${FF_L10N}
    printf '\n\033[7m 確認 \033[0m\n'
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' "${FF_PKG}" ${FF_L10N}
@@ -2737,7 +2902,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # ffmpeg-libs とリポジトリの導入元を確かめる
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' ffmpeg-libs rpmfusion-free-release epel-release
+   # 動画用の共有ライブラリーを確かめる
    ls /usr/lib64/libavcodec.so.*
    ```
 
@@ -2768,6 +2935,7 @@
 1. hadolint と dive を導入し、結果を確認する。
 
    ```bash
+   # hadolint と dive を導入する
    brew install hadolint dive
    printf '\n\033[7m 確認 \033[0m\n'
    hadolint --version
@@ -2782,6 +2950,7 @@
 1. 公式のリポジトリから Trivy を導入し、結果を確認する。
 
    ```bash
+   # Trivy のリポジトリ設定を書き込む
    sudo tee /etc/yum.repos.d/trivy.repo >/dev/null <<'EOF'
    [trivy]
    name=Trivy repository
@@ -2791,8 +2960,10 @@
    gpgkey=https://aquasecurity.github.io/trivy-repo/rpm/public.key
    EOF
    printf '\n\033[7m 確認 \033[0m\n'
+   # リポジトリ設定と提供されている版を確かめる
    cat /etc/yum.repos.d/trivy.repo
    dnf -q list --showduplicates trivy
+   # Trivy を導入して版と配置先を確かめる
    sudo dnf install trivy
    trivy --version
    command -v trivy
@@ -2817,6 +2988,7 @@
 1. 確認用の Containerfile とページを置き、hadolint が何も指摘しないことを確かめる。
 
    ```bash
+   # 確認用の HTML ファイルを作成する
    mkdir -p ~/image-check
    echo 'hello from image-check' > ~/image-check/index.html
    printf '\n\033[7m 確認 \033[0m\n'
@@ -2927,11 +3099,14 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 提供されている btop の版を確かめて導入する
    dnf -q list --showduplicates btop
    sudo dnf install btop
+   # btop の版と配置先と導入元を確かめる
    btop --version
    command -v btop
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' btop
+   # btop を起動して設定ファイルを確かめる
    btop
    ls -l ~/.config/btop
    ```
@@ -3002,10 +3177,12 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # gdu-go の版とコマンド名を確かめる
    gdu-go --version
    brew list --versions gdu
    command -v gdu-go
    command -v gdu || echo 'gdu という名前のコマンドは無い'
+   # ディスク使用量を集計して確かめる
    gdu-go -n /usr/share | tail -5
    ```
 
@@ -3022,6 +3199,7 @@
 1. 共通設定を読み直し、gdu のエイリアスを確かめる。
 
    ```bash
+   # 共通の bash 設定を読み込む
    . ~/.bashrc
    printf '\n\033[7m 確認 \033[0m\n'
    alias gdu
@@ -3074,12 +3252,15 @@
    ```
 
    ```bash
+   # 登録する公開鍵の形式を確かめる
    if [ -z "${SSH_PUBKEY}" ]; then echo '中断: SSH_PUBKEY が空のまま。公開鍵の 1 行を入れて貼り直す' >&2
    elif ! printf '%s\n' "${SSH_PUBKEY}" | ssh-keygen -lf - >/dev/null; then echo '中断: SSH_PUBKEY が公開鍵の形ではない' >&2
    else
+     # 公開鍵を登録するファイルを用意する
      install -d -m 700 ~/.ssh
      touch ~/.ssh/authorized_keys
      chmod 600 ~/.ssh/authorized_keys
+     # 公開鍵を追加して SELinux の設定を整える
      if grep -qxF "${SSH_PUBKEY}" ~/.ssh/authorized_keys; then echo 'この鍵はもうある'; else printf '%s\n' "${SSH_PUBKEY}" >> ~/.ssh/authorized_keys; fi
      restorecon -R ~/.ssh
      printf '\n\033[7m 確認 \033[0m\n'
@@ -3098,9 +3279,12 @@
 1. パスワードでの SSH のログインを切る。
 
    ```bash
+   # 公開鍵認証だけを許可する設定を書き込む
    printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\n' | sudo install -m 0600 /dev/stdin /etc/ssh/sshd_config.d/40-pubkey-only.conf
    printf '\n\033[7m 確認 \033[0m\n'
+   # SSH の設定を検査して読み直す
    sudo sshd -t && sudo systemctl reload sshd
+   # 認証方式の設定を読み戻す
    sudo sshd -T | grep -Ei '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
    ```
 
@@ -3170,9 +3354,12 @@
 1. オフラインのホストで、プロキシを環境変数に入れ、インターネットに届くか確かめる。
 
    ```bash
+   # SOCKS トンネルを使う通信経路を設定する
    export ALL_PROXY=socks5h://127.0.0.1:1080
    printf '\n\033[7m 確認 \033[0m\n'
+   # トンネルの待ち受けを確かめる
    ss -Hltn 'sport = :1080'
+   # トンネル経由の外部接続を確かめる
    curl -sS -o /dev/null --connect-timeout 10 -w '%{http_code}\n' https://github.com
    ```
 
@@ -3193,10 +3380,13 @@
 1. dnf にプロキシを設定する。
 
    ```bash
+   # dnf のプロキシ設定を追加する
    if grep -q '^proxy' /etc/dnf/dnf.conf; then echo '中断: /etc/dnf/dnf.conf に proxy の行が既にある（この手順は行わない）' >&2; else
      sudo sed -i '/^\[main\]$/a proxy=socks5h://127.0.0.1:1080' /etc/dnf/dnf.conf
      printf '\n\033[7m 確認 \033[0m\n'
+     # 追加した設定を読み戻す
      grep -n '^proxy' /etc/dnf/dnf.conf
+     # プロキシ経由でメタデータを取得する
      sudo dnf makecache
    fi
    ```
@@ -3252,7 +3442,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # トンネルの待ち受けを確かめる
    ss -Hltn 'sport = :1080'
+   # 外部への接続を確かめる
    curl -sS -o /dev/null --connect-timeout 10 https://github.com && echo '届いた（オフラインではない）' || echo '届かない（期待どおり）'
    ```
 
@@ -3296,10 +3488,14 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # journal の起動履歴を確かめる
    journalctl --list-boots --no-pager | tail -n 2
+   # クラッシュ用メモリーの予約を確かめる
    cat /sys/kernel/kexec_crash_size
+   # ホスト名とダウンロード先を確かめる
    hostnamectl --static
    xdg-user-dir DOWNLOAD
+   # Anthy の登録と起動に使う PATH を確かめる
    ibus list-engine | grep -w anthy
    IBUS_PID="$(pgrep -u "$(id -u)" -x ibus-daemon | head -n 1)"
    if [ -n "$IBUS_PID" ]; then
@@ -3309,6 +3505,7 @@
    else
      echo 'ibus-daemon が動いていない（GNOME にログインしてから貼り直す）'
    fi
+   # トレイアイコンの拡張と拡大率の設定を確かめる
    gnome-extensions info appindicatorsupport@rgcjonas.gmail.com | grep -E '^ *(状態|State)'
    /usr/bin/gsettings get org.gnome.mutter experimental-features
    ```

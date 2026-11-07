@@ -59,8 +59,10 @@
 1. 片方でも割り当てが無いときだけ、不足する側に範囲を割り当て、podman に読み直させる。
 
    ```bash
+   # ユーザーと割り当ての範囲を確認する
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: 自分のユーザーのシェルで貼る' >&2
    elif SUBID_START=$(awk -F: '{ e = $2 + $3; if (e > m) m = e } END { print (m > 524288 ? m : 524288) }' /etc/subuid /etc/subgid); then
+     # 不足する UID・GID の割り当てを組み立てる
      SUBID_ARGS=()
      if ! grep -q "^${USER}:" /etc/subuid; then
        SUBID_ARGS+=(--add-subuids "${SUBID_START}-$((SUBID_START + 65535))")
@@ -85,8 +87,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 版と実行ファイルの場所を確認する
    podman version --format '{{.Client.Version}}'
    command -v podman
+   # rootless の動作設定と保存先を確認する
    podman info --format '{{.Host.Security.Rootless}} {{.Store.GraphDriverName}} {{.Host.OCIRuntime.Name}} {{.Host.NetworkBackend}} {{.Host.RootlessNetworkCmd}} {{.Host.CgroupsVersion}}'
    podman info --format '{{.Store.GraphRoot}}'
    ```
@@ -99,7 +103,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナを実行する
    podman run --rm quay.io/podman/hello
+   # 取得したイメージを確認する
    podman images
    ```
 
@@ -111,8 +117,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # API ソケットを有効にして稼働状態を確認する
    systemctl --user enable --now podman.socket
    systemctl --user is-active podman.socket
+   # API の応答とサーバーの版を確認する
    curl -s --unix-socket "${XDG_RUNTIME_DIR}/podman/podman.sock" http://d/_ping; echo
    podman --remote version --format '{{.Server.Version}}'
    ```
@@ -132,6 +140,7 @@
 1. 共通設定を読み直し、ソケットが Docker の API に答えるか確かめる。
 
    ```bash
+   # 共通の bash 設定を再読込する
    . ~/.bashrc
    printf '\n\033[7m 確認 \033[0m\n'
    printf '%s\n' "${DOCKER_HOST-}"
@@ -155,8 +164,10 @@
 1. 確認用の Web サーバーの定義とページを置く。
 
    ```bash
+   # Web ページを作成する
    mkdir -p ~/hello-web ~/.config/containers/systemd
    echo 'hello from quadlet' > ~/hello-web/index.html
+   # Quadlet の定義を作成する
    cat > ~/.config/containers/systemd/hello-web.container <<'EOF'
    [Unit]
    Description=Quadlet の確認用の Web サーバー
@@ -179,11 +190,14 @@
 1. systemd に定義を読み直させ、サービスを起動して応答を確かめる。
 
    ```bash
+   # 定義を再読込してサービスを起動する
    systemctl --user daemon-reload
    systemctl --user start hello-web.service
    printf '\n\033[7m 確認 \033[0m\n'
+   # サービスの稼働状態と登録状態を確認する
    systemctl --user is-active hello-web.service
    systemctl --user is-enabled hello-web.service
+   # Web サーバーの応答を確認する
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8080/
    ```
 
@@ -204,8 +218,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # サービスの起動時刻とログイン時刻を確認する
    systemctl --user show hello-web.service -p ActiveEnterTimestamp
    loginctl show-session "${XDG_SESSION_ID}" -p Timestamp
+   # Web サーバーの応答を確認する
    curl -s http://127.0.0.1:8080/
    ```
 
@@ -252,7 +268,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 更新されるイメージを確認する
    podman auto-update --dry-run
+   # イメージを更新する
    podman auto-update
    ```
 
@@ -278,12 +296,16 @@
 1. podman-compose を導入し、版と呼び出し先を確認する。
 
    ```bash
+   # 配布されている版を確認する
    dnf -q list --showduplicates podman-compose
+   # podman-compose を導入する
    sudo dnf install podman-compose
    printf '\n\033[7m 確認 \033[0m\n'
+   # 導入した版と実行ファイルの場所を確認する
    podman-compose version
    command -v podman-compose
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' podman-compose
+   # podman compose の呼び出し先を確認する
    podman compose version
    ```
 
@@ -299,8 +321,10 @@
 1. 確認用の compose ファイルとページを置く。
 
    ```bash
+   # 確認用の Web ページを作成する
    mkdir -p ~/compose-sample/html
    echo 'hello from compose' > ~/compose-sample/html/index.html
+   # compose ファイルを作成して確認する
    cat > ~/compose-sample/compose.yaml <<'EOF'
    services:
      web:
@@ -320,6 +344,7 @@
 1. compose ファイルのあるディレクトリで、コンテナを起動する。
 
    ```bash
+   # compose の作業ディレクトリへ移動する
    cd ~/compose-sample
    printf '\n\033[7m 確認 \033[0m\n'
    podman-compose up -d
@@ -330,10 +355,13 @@
 1. 起動したコンテナと、公開したポートを確かめる。
 
    ```bash
+   # compose の作業ディレクトリへ移動する
    cd ~/compose-sample
    printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナと pod の稼働状態を確認する
    podman-compose ps
    podman pod ps
+   # Web サーバーの応答を確認する
    curl -s --retry 10 --retry-delay 1 --retry-all-errors http://127.0.0.1:8081/
    ```
 
@@ -344,6 +372,7 @@
 1. `check` のコンテナから、サービス名 `web` でつながるか確かめる。
 
    ```bash
+   # compose の作業ディレクトリへ移動する
    cd ~/compose-sample
    printf '\n\033[7m 確認 \033[0m\n'
    podman-compose exec check curl -s http://web:8080/
@@ -387,6 +416,7 @@
 1. イメージを取り直し、新しいイメージでコンテナを起動し直す。
 
    ```bash
+   # compose のイメージを取得する
    cd ~/compose-sample
    podman-compose pull
    printf '\n\033[7m 確認 \033[0m\n'
@@ -414,7 +444,9 @@
 1. podman-tui を導入し、版と実行ファイルの場所を確認する。
 
    ```bash
+   # 配布されている版を確認する
    dnf -q list --showduplicates podman-tui
+   # podman-tui を導入する
    sudo dnf install podman-tui
    printf '\n\033[7m 確認 \033[0m\n'
    podman-tui version
@@ -432,6 +464,7 @@
 1. 画面で操作する、確認用のコンテナを動かす。
 
    ```bash
+   # 確認用のコンテナを起動する
    podman run -d --name podman-tui-web registry.access.redhat.com/ubi10/httpd-24:latest
    printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
@@ -442,6 +475,7 @@
 1. podman-tui でコンテナを停止し、結果を確認する。
 
    ```bash
+   # podman-tui を起動する
    podman-tui
    printf '\n\033[7m 確認 \033[0m\n'
    podman ps -a --filter name=podman-tui-web --format '{{.Names}} {{.Status}}'
@@ -509,10 +543,13 @@
 1. lazydocker を導入し、版と接続先を確認する。
 
    ```bash
+   # lazydocker を導入する
    brew install lazydocker
    printf '\n\033[7m 確認 \033[0m\n'
+   # 版と実行ファイルの場所を確認する
    lazydocker --version
    command -v lazydocker
+   # API の接続先と応答を確認する
    echo "${DOCKER_HOST}"
    curl -s --unix-socket "${DOCKER_HOST#unix://}" http://d/_ping; echo
    ```
@@ -526,6 +563,7 @@
 1. 画面で操作する、確認用のコンテナを動かす。
 
    ```bash
+   # 確認用のコンテナを起動する
    podman run -d --name lazydocker-web --label name=lazydocker-web registry.access.redhat.com/ubi10/httpd-24:latest
    printf '\n\033[7m 確認 \033[0m\n'
    podman ps --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
@@ -536,9 +574,12 @@
 1. lazydocker でコンテナを停止し、結果を確認する。
 
    ```bash
+   # lazydocker を起動する
    lazydocker
    printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナの停止を確認する
    podman ps -a --filter name=lazydocker-web --format '{{.Names}} {{.Status}}'
+   # lazydocker の設定ファイルを確認する
    ls -l ~/.config/lazydocker
    ```
 
@@ -568,6 +609,7 @@
 1. `podman exec` でシェルを開くコマンドを、設定ファイルに足す。
 
    ```bash
+   # シェルを開くコマンドの設定を追加する
    cat >> ~/.config/lazydocker/config.yml <<'EOF'
    customCommands:
      containers:
@@ -605,6 +647,7 @@
 1. compose のコマンドを `podman-compose` にする設定を、設定ファイルに足す。
 
    ```bash
+   # compose の実行コマンドの設定を追加する
    cat >> ~/.config/lazydocker/config.yml <<'EOF'
    commandTemplates:
      dockerCompose: podman-compose
@@ -619,6 +662,7 @@
 1. lazydocker で web を再起動し、稼働時間を確認する。
 
    ```bash
+   # compose のプロジェクトで lazydocker を起動する
    cd ~/compose-sample
    lazydocker
    cd ~/compose-sample
@@ -657,8 +701,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # システムの API ソケットを有効にする
    sudo systemctl enable --now podman.socket
    systemctl is-active podman.socket
+   # API の応答とサーバーの版を確認する
    sudo curl -s --unix-socket /run/podman/podman.sock http://d/_ping; echo
    sudo podman --remote version --format '{{.Server.Version}}'
    ```
@@ -688,9 +734,12 @@
 1. root の lazydocker でコンテナを停止し、結果を確認する。
 
    ```bash
+   # root の lazydocker を起動する
    sudo -i lazydocker
    printf '\n\033[7m 確認 \033[0m\n'
+   # コンテナの停止を確認する
    sudo podman ps -a --filter name=lazydocker-root-web --format '{{.Names}} {{.Status}}'
+   # root の lazydocker の設定ファイルを確認する
    sudo ls -l /root/.config/lazydocker
    ```
 
@@ -769,11 +818,15 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 配布されている版を確認する
    dnf -q list --showduplicates distrobox
+   # Distrobox を導入する
    sudo dnf install distrobox
+   # 導入した版と実行ファイルの場所を確認する
    distrobox version
    command -v distrobox
    dnf -q repoquery --installed --qf '%{name} %{version}-%{release} %{from_repo}\n' distrobox
+   # ボックスの一覧を確認する
    distrobox list
    ```
 
@@ -858,6 +911,7 @@
 1. ffmpeg をホストへ書き出し、呼び出す版を確認する。
 
    ```bash
+   # ffmpeg の呼び出し口を作成する
    distrobox enter "${DBX_NAME:?この項の手順 1 の DBX_NAME が空のまま。値を入れて貼り直す}" -- distrobox-export --bin /usr/bin/ffmpeg --export-path ~/.local/bin
    printf '\n\033[7m 確認 \033[0m\n'
    command -v ffmpeg

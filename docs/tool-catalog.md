@@ -217,6 +217,7 @@ Meld は GUI の規則の 4 番目にあたる。
 **Google Chrome**（Google は `.repo` ファイルを配っていないので、自分で置く）:
 
 ```bash
+# Chrome の配布元を登録する
 sudo tee /etc/yum.repos.d/google-chrome.repo >/dev/null <<'EOF'
 [google-chrome]
 name=google-chrome
@@ -225,7 +226,9 @@ enabled=1
 gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
 EOF
+# Chrome を導入する
 sudo dnf install -y google-chrome-stable
+# 導入した Chrome の版を確かめる
 google-chrome-stable --version
 ```
 
@@ -236,8 +239,11 @@ google-chrome-stable --version
 **mise**:
 
 ```bash
+# mise の配布元を登録する
 sudo dnf config-manager --add-repo https://mise.jdx.dev/rpm/mise.repo
+# mise を導入する
 sudo dnf install -y mise
+# 導入した mise の版を確かめる
 mise --version
 ```
 

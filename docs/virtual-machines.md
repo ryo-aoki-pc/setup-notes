@@ -40,7 +40,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # CPU のアーキテクチャを確認する
    uname -m
+   # CPU の仮想化支援を確認する
    lscpu | grep -E '^Virtualization:' || echo 'CPU の仮想化支援が見えない'
    ```
 
@@ -51,6 +53,7 @@
 1. Oracle の署名鍵を落として、取り込む前に fingerprint を見る。
 
    ```bash
+   # Oracle の署名鍵を取得する
    curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc -o /tmp/oracle_vbox_2016.asc
    printf '\n\033[7m 確認 \033[0m\n'
    gpg --show-keys --with-fingerprint /tmp/oracle_vbox_2016.asc
@@ -67,9 +70,12 @@
 1. 一致したら、鍵を rpm に取り込み、入ったか確かめて、落としたファイルを消す。
 
    ```bash
+   # 署名鍵を rpm に登録する
    sudo rpm --import /tmp/oracle_vbox_2016.asc
    printf '\n\033[7m 確認 \033[0m\n'
+   # 登録した署名鍵を確認する
    rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} %{summary}\n' | grep -i virtualbox
+   # 取得した鍵のファイルを削除する
    rm -f /tmp/oracle_vbox_2016.asc
    ```
 
@@ -78,6 +84,7 @@
 1. リポジトリを設定し、管理者用とユーザー用の鍵を確認する。
 
    ```bash
+   # VirtualBox のリポジトリ設定を書き、読み戻す
    sudo tee /etc/yum.repos.d/virtualbox.repo >/dev/null <<'EOF'
    [virtualbox]
    name=Oracle VirtualBox for EL$releasever - $basearch
@@ -89,7 +96,9 @@
    EOF
    cat /etc/yum.repos.d/virtualbox.repo
    printf '\n\033[7m 確認 \033[0m\n'
+   # 管理者用のリポジトリの鍵を確認する
    sudo dnf makecache --repo virtualbox
+   # ユーザー用のリポジトリの鍵を確認する
    dnf makecache --repo virtualbox
    ```
 
@@ -132,9 +141,12 @@
 1. カーネルモジュールのビルドに要るものを、VirtualBox より先に入れて確かめる。
 
    ```bash
+   # カーネルモジュールのビルド用の道具を導入する
    sudo dnf install -y gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
    printf '\n\033[7m 確認 \033[0m\n'
+   # 導入したパッケージを確認する
    rpm -q gcc make perl-interpreter mokutil openssl "kernel-devel-$(uname -r)"
+   # カーネルのヘッダーを確認する
    ls -d "/lib/modules/$(uname -r)/build/include"
    ```
 
@@ -144,12 +156,16 @@
 1. VirtualBox を導入し、カーネルモジュールの動作を確認する。
 
    ```bash
+   # VirtualBox を導入する
    sudo dnf install VirtualBox-7.2
    printf '\n\033[7m 確認 \033[0m\n'
+   # ドライバーのサービスを確認する
    systemctl is-enabled vboxdrv
    systemctl is-active vboxdrv
+   # カーネルモジュールとデバイスを確認する
    lsmod | grep -E '^vbox'
    ls -l /dev/vboxdrv
+   # モジュールのビルドのログを確認する
    sudo tail -n 5 /var/log/vbox-setup.log
    ```
 
@@ -172,6 +188,7 @@
 1. KVM が仮想化支援を先に取らないように、modprobe.d に設定を置いて確かめる。
 
    ```bash
+   # KVM の設定を書き込む
    echo 'options kvm enable_virt_at_load=0' | sudo tee /etc/modprobe.d/kvm-virtualbox.conf
    printf '\n\033[7m 確認 \033[0m\n'
    cat /etc/modprobe.d/kvm-virtualbox.conf
@@ -184,6 +201,7 @@
 1. USB 機器を VM に渡すときだけ、自分を `vboxusers` に入れて確かめる。
 
    ```bash
+   # 自分を vboxusers グループに登録する
    sudo usermod -aG vboxusers "${USER}"
    printf '\n\033[7m 確認 \033[0m\n'
    getent group vboxusers
@@ -211,10 +229,14 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # VirtualBox の版を確認する
    VBoxManage --version
+   # ドライバーとカーネルモジュールを確認する
    systemctl is-active vboxdrv
    lsmod | grep -E '^vbox'
+   # KVM の設定を確認する
    cat /sys/module/kvm/parameters/enable_virt_at_load 2>/dev/null || echo 'kvm は未ロード'
+   # 自分のグループを確認する
    id -nG | tr ' ' '\n' | grep -x vboxusers || echo 'vboxusers には入っていない'
    ```
 
@@ -234,14 +256,19 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # VM の重複を確かめ、使い捨ての VM を作成する
    if VBoxManage showvminfo vbox-selftest >/dev/null 2>&1; then
      echo 'vbox-selftest はすでにある。変更せずに中断する' >&2
    elif VBoxManage createvm --name vbox-selftest --ostype Other_64 --register; then
+     # VM を設定して画面無しで起動する
      if VBoxManage modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off &&
         VBoxManage startvm vbox-selftest --type headless; then
+       # VM の状態を確認する
        VBoxManage showvminfo vbox-selftest --machinereadable | grep -E '^VMState='
+       # VM の電源を切る
        VBoxManage controlvm vbox-selftest poweroff
      fi
+     # VM の登録とファイルを削除する
      VBoxManage unregistervm vbox-selftest --delete
    else
      echo 'VM を作れなかった。変更・起動・削除は行わない' >&2
@@ -256,6 +283,7 @@
 1. VirtualBox を起動し、終了後に設定ファイルを確認する。
 
    ```bash
+   # VirtualBox の画面を開く
    VirtualBox
    printf '\n\033[7m 確認 \033[0m\n'
    ls ~/.config/VirtualBox
@@ -282,7 +310,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 動いているカーネルの版を確認する
    uname -r
+   # ドライバーの起動状態と対応カーネルを確認する
    systemctl is-active vboxdrv
    modinfo -F vermagic vboxdrv
    ```
@@ -377,8 +407,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 仮想化の方式を確認する
    systemd-detect-virt
+   # ビルドに使う領域の空きを確認する
    df -h /var
+   # bootc のイメージを確認する
    sudo bootc status
    ```
 
@@ -389,6 +422,7 @@
 1. ビルド用のディレクトリに Containerfile を置く。
 
    ```bash
+   # ビルド用のディレクトリと Containerfile を作成する
    mkdir -p ~/vbox-ga-image
    cat > ~/vbox-ga-image/Containerfile <<'EOF'
    # VirtualBox Guest Additions を焼き込んだ派生イメージ（VirtualBox の bootc ゲスト）
@@ -484,9 +518,12 @@
 1. CD からインストーラをコピーし、壊れていないかと版を確かめる。
 
    ```bash
+   # Guest Additions のインストーラーをコピーする
    install -m 0644 /run/media/"${USER}"/VBox_GAs_*/VBoxLinuxAdditions.run ~/vbox-ga-image/
    printf '\n\033[7m 確認 \033[0m\n'
+   # インストーラーの整合性を確認する
    sh ~/vbox-ga-image/VBoxLinuxAdditions.run --check
+   # インストーラーの版を確認する
    sh ~/vbox-ga-image/VBoxLinuxAdditions.run --info | head -1
    ```
 
@@ -498,6 +535,7 @@
 1. 派生イメージをビルドする。
 
    ```bash
+   # 署名用のビルド引数を設定する
    build_args=(--pull=newer)
    if mokutil --sb-state 2>/dev/null | grep -q 'SecureBoot enabled'; then
      build_args+=(--build-arg MOK_SIGN=1 --secret id=mok_priv,src=/var/lib/shim-signed/mok/MOK.priv --secret id=mok_der,src=/var/lib/shim-signed/mok/MOK.der)
@@ -538,9 +576,12 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # Guest Additions のモジュールを確認する
    lsmod | grep -E '^vbox'
+   # Guest Additions のサービスとクライアントを確認する
    systemctl is-active vboxadd vboxadd-service
    pgrep -a VBoxClient
+   # 起動した bootc のイメージを確認する
    sudo bootc status
    ```
 
@@ -626,16 +667,21 @@
 1. Secure Boot が有効なときだけ、ホストの端末で署名用の鍵を作り、証明書を VM に送る。
 
    ```bash
+   # VM の接続先が設定されていることを確認する
    if [ -z "${VM_SSH}" ]; then
      echo 'VM_SSH が空のまま。この項の手順 3 を貼り直す' >&2
    else
+     # OpenSSL を導入する
      rpm -q openssl >/dev/null || sudo dnf install -y openssl
+     # 署名鍵と証明書を作成する
      if [ ! -e ~/vbox-ga-mok/MOK.priv ]; then
        mkdir -m 0700 -p ~/vbox-ga-mok
        openssl req -nodes -new -x509 -newkey rsa:2048 -outform DER -addext "extendedKeyUsage=codeSigning" -subj "/CN=Local kernel module signing key/" -days 36500 -keyout ~/vbox-ga-mok/MOK.priv -out ~/vbox-ga-mok/MOK.der
      fi
      printf '\n\033[7m 確認 \033[0m\n'
+     # 署名鍵と証明書のファイルを確認する
      ls -l ~/vbox-ga-mok
+     # 証明書を VM に転送する
      scp ~/vbox-ga-mok/MOK.der "${VM_SSH}:"
    fi
    ```
@@ -649,11 +695,15 @@
 1. Secure Boot が有効なときだけ、VM の端末で証明書を置き、MOK への登録を予約する。
 
    ```bash
+   # 証明書を MOK のディレクトリに配置する
    sudo install -d -m 0700 /var/lib/shim-signed/mok
    sudo install -m 0644 ~/MOK.der /var/lib/shim-signed/mok/MOK.der
+   # 転送元の証明書を削除する
    rm ~/MOK.der
    printf '\n\033[7m 確認 \033[0m\n'
+   # 配置した証明書を確認する
    sudo ls -l /var/lib/shim-signed/mok
+   # 証明書の MOK 登録を予約する
    sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
    ```
 
@@ -668,9 +718,11 @@
 1. ホストの端末で、ビルドの材料と、署名を確かめる設定を VM から写す。
 
    ```bash
+   # VM の接続先が設定されていることを確認する
    if [ -z "${VM_SSH}" ]; then
      echo 'VM_SSH が空のまま。この項の手順 3 を貼り直す' >&2
    else
+     # 取得したビルド材料の保存先を作成する
      mkdir -p ~/vbox-ga-host
      printf '\n\033[7m 確認 \033[0m\n'
      ssh "${VM_SSH}" 'tar -cf - vbox-ga-image -C / etc/containers/policy.json etc/containers/registries.d etc/pki/containers' | tar -xvf - -C ~/vbox-ga-host
@@ -685,6 +737,7 @@
 1. ホストの端末で、ベースのイメージの署名を VM と同じ鍵で確かめるようにする。
 
    ```bash
+   # 既存の設定を確かめ、署名の設定をコピーする
    if [ -e ~/.config/containers/policy.json ] || [ -L ~/.config/containers/policy.json ] ||
       [ -e ~/.config/containers/registries.d ] || [ -L ~/.config/containers/registries.d ] ||
       [ -e ~/.config/containers/pki ] || [ -L ~/.config/containers/pki ]; then
@@ -717,6 +770,7 @@
 1. ホストの端末で、派生イメージをビルドする（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 の代わりに）。
 
    ```bash
+   # 署名用のビルド引数を設定する
    build_args=(--pull=newer)
    if [ -e ~/vbox-ga-mok/MOK.priv ]; then
      build_args+=(--build-arg MOK_SIGN=1 --secret "id=mok_priv,src=${HOME}/vbox-ga-mok/MOK.priv" --secret "id=mok_der,src=${HOME}/vbox-ga-mok/MOK.der")
@@ -734,12 +788,16 @@
 1. ホストの端末で、派生イメージとベースのイメージを 1 つのファイルにして、VM に送る。
 
    ```bash
+   # 接続先とイメージが設定されていることを確認する
    if [ -z "${VM_SSH}" ] || [ -z "${BASE_IMAGE}" ]; then
      echo 'VM_SSH か BASE_IMAGE が空のまま。この項の手順 3 を貼り直す' >&2
    else
+     # 前回のイメージのアーカイブを削除する
      rm -f ~/vbox-ga-host/vbox-ga.tar
      printf '\n\033[7m 確認 \033[0m\n'
+     # イメージを保存して VM に転送する
      podman save -m -o ~/vbox-ga-host/vbox-ga.tar localhost/vbox-ga:latest "${BASE_IMAGE}" && ls -lh ~/vbox-ga-host/vbox-ga.tar && scp ~/vbox-ga-host/vbox-ga.tar "${VM_SSH}:"
+     # 転送済みのイメージのアーカイブを削除する
      rm -f ~/vbox-ga-host/vbox-ga.tar
    fi
    ```
@@ -752,8 +810,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 転送したイメージを取り込む
    sudo podman load -i ~/vbox-ga.tar
+   # 転送したアーカイブを削除する
    rm ~/vbox-ga.tar
+   # 取り込んだイメージを確認する
    sudo podman images
    ```
 
@@ -771,11 +832,13 @@
 1. 署名設定のコピーやビルドに失敗したときは、ホストの端末で、ビルドに使ったものと署名を確かめる設定を片付ける。
 
    ```bash
+   # イメージと設定の控えを確認する
    if [ -z "${BASE_IMAGE}" ]; then
      echo 'BASE_IMAGE が空のまま。この項の手順 3 を貼り直す' >&2
    elif [ ! -f ~/vbox-ga-host/containers-config-created/.ready ]; then
      echo '新規作成した設定の控えが無いか、不完全。自動では消さず、この手順の注意に従って戻す' >&2
    else
+     # 設定と控えの内容を比較する
      vbox_config_matches=1
      for vbox_config_item in policy.json registries.d pki; do
        if [ -e "${HOME}/.config/containers/${vbox_config_item}" ] || [ -L "${HOME}/.config/containers/${vbox_config_item}" ]; then
@@ -835,7 +898,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 共有フォルダー用のグループを確認する
    id -nG | tr ' ' '\n' | grep -x vboxsf
+   # 共有フォルダーのマウントを確認する
    findmnt -t vboxsf
    ```
 
@@ -944,6 +1009,7 @@
 1. Podman と Git を導入し、パッケージの版を確認する。
 
    ```bash
+   # Podman と Git を導入する
    sudo dnf install podman git
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q podman git
@@ -957,6 +1023,7 @@
 1. リポジトリを clone する。
 
    ```bash
+   # リポジトリを取得してファイルを確認する
    [ -e "${REPO:?この項の手順 1 の REPO が空のまま。この項の手順 1 を貼り直す}/kvm.sh" ] || git clone https://github.com/ryo-aoki-pc/kvm-container.git "${REPO}"
    cd "${REPO}" && ls -l kvm.sh
    ```
@@ -970,8 +1037,11 @@
 1. ホストの SELinux と画面の有無を確かめる。
 
    ```bash
+   # SELinux の状態を確認する
    getenforce
+   # 画面の環境変数を確認する
    env | grep -E 'DISPLAY|WAYLAND|XDG_RUNTIME|XAUTH'
+   # 画面の有無を判定する
    if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then echo '画面あり: kvm と kvm-gui を使う'; else echo '画面なし: kvm だけを使う'; fi
    ```
 
@@ -1027,9 +1097,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # kvm のサービスと libvirt の接続を確認する
    sudo podman exec kvm systemctl is-system-running         # running (degraded ではない)
    sudo podman exec kvm ls -l /run/libvirt/virtqemud-sock   # srw-rw---- root libvirt
    ./kvm.sh virsh list --all                                # 空の一覧 (ヘッダだけ) で可
+   # GUI コンテナからの libvirt の接続を確認する
    if sudo podman container exists kvm-gui; then
      sudo podman exec kvm-gui systemctl is-system-running                          # running
      sudo podman exec kvm-gui runuser -u "$USER" -- virsh -c qemu:///system list   # 一般ユーザーが kvm-gui から kvm の libvirt に接続できること
@@ -1092,7 +1164,9 @@
 1. ISO があるか確かめ、`data/` にコピーする。
 
    ```bash
+   # ISO のファイルを確認する
    ls -l "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}"
+   # ISO をコンテナのデータ領域にコピーする
    sudo cp "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}" data/var-libvirt/images/
    ```
 
@@ -1112,6 +1186,7 @@
 1. ディスクを SATA の SSD、NIC を e1000e にして VM を作る。
 
    ```bash
+   # ディスクと NIC を指定して VM を作成する
    ./kvm.sh virt-install --name "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}" --memory "${VM_MEMORY}" --vcpus "${VM_VCPUS}" \
      --machine q35 --disk "size=${VM_DISK},bus=sata,target.rotation_rate=1" \
      --cdrom "/var/lib/libvirt/images/$(basename "${ISO:?この項の手順 1 の ISO が空のまま。値を入れて貼り直す}")" --osinfo detect=on,require=off \
@@ -1145,10 +1220,14 @@
 1. VM ができ、ディスクが SATA の SSD、NIC が e1000e か確かめる。
 
    ```bash
+   # VM の登録を確認する
    ./kvm.sh virsh list --all                       # VM_NAME の行がある (インストール完了後は shut off)
+   # VM のディスクと SATA の設定を確認する
    ./kvm.sh virsh domblklist "${VM_NAME}"          # sda = /var/lib/libvirt/images/${VM_NAME}.qcow2。sdb はインストール中は ISO、終了後は空 (-)
    ./kvm.sh virsh dumpxml "${VM_NAME}" | grep "bus='sata'"   # sda の行に rotation_rate='1' (SATA の SSD)
+   # VM の NIC の設定を確認する
    ./kvm.sh virsh domiflist "${VM_NAME}"           # Model が e1000e
+   # ホストのディスクと ISO を確認する
    sudo ls -l "${REPO}/data/var-libvirt/images/"   # ${VM_NAME}.qcow2 と ISO がある (root / qemu 所有)
    ```
 
@@ -1220,6 +1299,7 @@
 1. VM を起動する。
 
    ```bash
+   # VM を起動して状態を確認する
    ./kvm.sh virsh start "${VM_NAME:?この項の手順 1 の VM_NAME が空のまま。値を入れて貼り直す}"
    ./kvm.sh virsh domstate "${VM_NAME}"            # running
    ```
@@ -1364,7 +1444,9 @@
 1. ブリッジの接続と、NIC を収容する接続を作る。
 
    ```bash
+   # ブリッジと NIC の値を確認する
    if [ -z "${BRIDGE}" ] || [ -z "${NIC}" ]; then echo '中断: この項の手順 1 の BRIDGE と NIC を設定してから貼り直す' >&2; else
+     # ブリッジと NIC の接続を作成する
      sudo nmcli connection add type bridge ifname "${BRIDGE}" con-name "${BRIDGE}" ipv4.method auto
      sudo nmcli connection add type bridge-slave ifname "${NIC}" master "${BRIDGE}"
    fi
@@ -1387,6 +1469,7 @@
 1. ブリッジが上がり、`kvm.sh` がブリッジと判定できるか確かめる。
 
    ```bash
+   # ブリッジの接続状態と判定用のディレクトリを確認する
    ip -br addr show "${BRIDGE}"                  # UP で、LAN の DHCP から IP が付く
    ls -d "/sys/class/net/${BRIDGE}/bridge"       # kvm.sh がブリッジと判定する条件 (このディレクトリがあること)
    ```
@@ -1426,6 +1509,7 @@
 1. `bridged` が登録されたか確かめる。
 
    ```bash
+   # libvirt のブリッジの登録と設定を確認する
    ./kvm.sh virsh net-list                # bridged が active (default と並ぶ)
    ./kvm.sh virsh net-dumpxml bridged     # forward mode が bridge、bridge name が BRIDGE の値
    ```
@@ -1521,6 +1605,7 @@
 1. VM の定義・UEFI 変数・ディスクを消す (取り戻せない)。
 
    ```bash
+   # VM の定義とディスクを削除して確認する
    ./kvm.sh virsh undefine "${VM_NAME}" --nvram --storage sda   # 定義・UEFI 変数・ディスクを削除 (ISO は残る)
    sudo ls "${REPO:?この項の手順 1 の REPO が空のまま。値を入れて貼り直す}/data/var-libvirt/images" "${REPO}/data/etc-libvirt/qemu"   # qcow2 と xml が消え、ISO は残っている
    ```
@@ -1557,7 +1642,9 @@
 1. リポジトリを最新にし、コンテナを止める。
 
    ```bash
+   # リポジトリを更新する
    cd "${REPO:?この項の手順 1 の REPO が空のまま。この項の手順 1 を貼り直す}" && git pull --ff-only
+   # コンテナを停止する
    ./kvm.sh down
    ```
 
@@ -1600,6 +1687,7 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 権限と OS と CPU の状態を確認する
    [pscustomobject]@{
      Admin        = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
      User         = "$env:USERDOMAIN\$env:USERNAME"
@@ -1608,8 +1696,10 @@
      Hypervisor   = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
      VirtFirmware = (Get-CimInstance -ClassName Win32_Processor | Select-Object -First 1).VirtualizationFirmwareEnabled
    } | Format-List
+   # Hyper-V と仮想化の機能を確認する
    Get-WindowsOptionalFeature -Online | Where-Object FeatureName -like 'Microsoft-Hyper-V*' | Format-Table FeatureName, State
    Get-WindowsOptionalFeature -Online | Where-Object FeatureName -in 'HypervisorPlatform', 'VirtualMachinePlatform' | Format-Table FeatureName, State
+   # Hyper-V の管理グループを確認する
    Get-LocalGroupMember -SID 'S-1-5-32-578' | Format-Table Name, ObjectClass
    ```
 
@@ -1638,6 +1728,7 @@
 1. Hyper-V が有効でないときだけ、Hyper-V を有効にする。
 
    ```powershell
+   # Hyper-V を有効にする
    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -All -NoRestart
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-WindowsOptionalFeature -Online | Where-Object FeatureName -like 'Microsoft-Hyper-V*' | Format-Table FeatureName, State
@@ -1650,6 +1741,7 @@
 1. VirtualBox か VMware Workstation も同じ PC で使うときだけ、Windows ハイパーバイザー プラットフォームも有効にする。
 
    ```powershell
+   # Windows ハイパーバイザー プラットフォームを有効にする
    Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
    "`n$([char]27)[7m 確認 $([char]27)[0m"
    Get-WindowsOptionalFeature -Online | Where-Object FeatureName -in 'HypervisorPlatform', 'VirtualMachinePlatform' | Format-Table FeatureName, State
@@ -1661,6 +1753,7 @@
 1. 自分のユーザーを Hyper-V Administrators に足す。
 
    ```powershell
+   # 自分を Hyper-V の管理グループに登録する
    $HV_USER = "$env:USERDOMAIN\$env:USERNAME"
    if ((Get-LocalGroupMember -SID 'S-1-5-32-578' -ErrorAction SilentlyContinue).Name -contains $HV_USER) { "すでに一員: $HV_USER" } else { Add-LocalGroupMember -SID 'S-1-5-32-578' -Member $HV_USER }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1695,8 +1788,11 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # Hyper-V の管理権限を確認する
    whoami /groups | Select-String -Pattern 'S-1-5-32-578'
+   # Hyper-V のサービスを確認する
    Get-Service -Name vmms, vmcompute | Format-Table Name, Status, StartType
+   # Hyper-V ホストと仮想スイッチを確認する
    Get-VMHost | Format-List LogicalProcessorCount, VirtualMachinePath, VirtualHardDiskPath
    Get-VMSwitch | Format-Table Name, SwitchType
    ```
@@ -1723,6 +1819,7 @@
    ```
 
    ```powershell
+   # VM の作成に使う値を設定する
    $HV_VM = 'alma10'
    $HV_DIR = "$env:USERPROFILE\Hyper-V"
    $HV_CPU = 2
@@ -1739,12 +1836,17 @@
 1. 第 2 世代の VM を作り、ISO を付ける。
 
    ```powershell
+   # 作成に使う値と既存の VM を確認する
    if (-not $HV_ISO -or -not $HV_VM -or -not $HV_DIR -or -not $HV_CPU -or -not $HV_MEM -or -not $HV_DISK) { Write-Error '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $HV_ISO)) { Write-Error "中断: ISO が無い: $HV_ISO" } elseif (Get-VM -Name $HV_VM -ErrorAction SilentlyContinue) { Write-Error "中断: 同じ名前の VM がすでにある: $HV_VM" } else {
+     # 第 2 世代の VM を作成する
      New-VM -Name $HV_VM -Generation 2 -MemoryStartupBytes $HV_MEM -Path $HV_DIR -NewVHDPath "$HV_DIR\$HV_VM\$HV_VM.vhdx" -NewVHDSizeBytes $HV_DISK -SwitchName 'Default Switch' | Out-Null
+     # CPU とメモリと起動用の ISO を設定する
      Set-VM -Name $HV_VM -ProcessorCount $HV_CPU -StaticMemory -AutomaticCheckpointsEnabled $false -CheckpointType Standard
      Set-VMFirmware -VMName $HV_VM -FirstBootDevice (Add-VMDvdDrive -VMName $HV_VM -Path $HV_ISO -Passthru)
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 作成した VM の構成を確認する
      Get-VM -Name $HV_VM | Format-List Name, State, Generation, Version, ProcessorCount, DynamicMemoryEnabled, AutomaticCheckpointsEnabled, Path
+     # Secure Boot の設定を確認する
      Get-VMFirmware -VMName $HV_VM | Format-List SecureBoot, SecureBootTemplate
    }
    ```
@@ -1755,6 +1857,7 @@
 1. Linux を入れるときだけ、Secure Boot のテンプレートを Linux 用に変える。
 
    ```powershell
+   # VM の Secure Boot テンプレートを設定する
    if (-not $HV_VM) { throw '中断: この項の手順 2 の $HV_VM が空のまま。値を入れて貼り直す' }
    Set-VMFirmware -VMName $HV_VM -SecureBootTemplate MicrosoftUEFICertificateAuthority
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1768,6 +1871,7 @@
 1. Windows 11 を入れるときだけ、仮想 TPM を付ける。
 
    ```powershell
+   # VM の仮想 TPM を有効にする
    if (-not $HV_VM) { throw '中断: この項の手順 2 の $HV_VM が空のまま。値を入れて貼り直す' }
    Set-VMKeyProtector -VMName $HV_VM -NewLocalKeyProtector
    Enable-VMTPM -VMName $HV_VM
@@ -1806,7 +1910,9 @@
 1. VM を起動し、VM の画面を開く。
 
    ```powershell
+   # 起動する VM の名前を確認する
    if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
+   # VM を起動して画面を開く
    Start-VM -Name $HV_VM
    vmconnect.exe localhost $HV_VM
    ```
@@ -1822,6 +1928,7 @@
 1. ISO を付けた DVD ドライブを、VM から外す。
 
    ```powershell
+   # VM から DVD ドライブを取り外す
    if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    Get-VMDvdDrive -VMName $HV_VM | Remove-VMDvdDrive
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1859,9 +1966,12 @@
 1. VM の状態と、ゲストの IP を確かめる。
 
    ```powershell
+   # VM 名が設定されていることを確認する
    if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VM の状態を確認する
    Get-VM -Name $HV_VM | Format-List Name, State, Uptime, Status
+   # ゲストの IP を確認する
    Get-VMNetworkAdapter -VMName $HV_VM | Format-Table Name, SwitchName, MacAddress, IPAddresses
    ```
 
@@ -1911,6 +2021,7 @@
    ```
 
    ```powershell
+   # チェックポイントとクローンに使う値を設定する
    $HV_DIR = "$env:USERPROFILE\Hyper-V"
    $HV_CHECKPOINT = 'clean-install'
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1923,7 +2034,9 @@
 1. VM を止めて、チェックポイントを取る。
 
    ```powershell
+   # VM とチェックポイントの値を確認する
    if (-not $HV_VM -or -not $HV_DIR -or -not $HV_CHECKPOINT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
+   # VM を停止してチェックポイントを作成する
    Stop-VM -Name $HV_VM
    Checkpoint-VM -Name $HV_VM -SnapshotName $HV_CHECKPOINT
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1936,7 +2049,9 @@
 1. VM をチェックポイントの時点に戻すときは、VM を止めてから戻す。
 
    ```powershell
+   # VM とチェックポイントの値を確認する
    if (-not $HV_VM -or -not $HV_DIR -or -not $HV_CHECKPOINT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
+   # VM を停止してチェックポイントを復元する
    Stop-VM -Name $HV_VM -TurnOff
    Restore-VMSnapshot -VMName $HV_VM -Name $HV_CHECKPOINT -Confirm:$false
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1950,18 +2065,24 @@
 1. チェックポイントの時点から、差分ディスクで別の VM を作る。
 
    ```powershell
+   # クローンの作成に使う値を確認する
    if (-not $HV_VM -or -not $HV_DIR -or -not $HV_CHECKPOINT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $HV_CLONE = "$HV_VM-clone"
    if (Get-VM -Name $HV_CLONE -ErrorAction SilentlyContinue) { Write-Error "中断: 同じ名前の VM がすでにある: $HV_CLONE" } else {
+     # 差分ディスクを作成する
      $parent = (Get-VMHardDiskDrive -VMSnapshot (Get-VMSnapshot -VMName $HV_VM -Name $HV_CHECKPOINT) | Select-Object -First 1).Path
      New-Item -ItemType Directory -Path "$HV_DIR\$HV_CLONE" | Out-Null
      New-VHD -Path "$HV_DIR\$HV_CLONE\$HV_CLONE.vhdx" -ParentPath $parent -Differencing | Out-Null
+     # 差分ディスクを使う VM を作成する
      New-VM -Name $HV_CLONE -Generation 2 -MemoryStartupBytes (Get-VM -Name $HV_VM).MemoryStartup -Path $HV_DIR -VHDPath "$HV_DIR\$HV_CLONE\$HV_CLONE.vhdx" -SwitchName 'Default Switch' | Out-Null
      Set-VM -Name $HV_CLONE -ProcessorCount (Get-VM -Name $HV_VM).ProcessorCount -StaticMemory -AutomaticCheckpointsEnabled $false -CheckpointType Standard
+     # 元の VM の Secure Boot 設定を引き継ぐ
      $firmware = Get-VMFirmware -VMName $HV_VM
      if ($firmware.SecureBoot -eq 'On') { Set-VMFirmware -VMName $HV_CLONE -EnableSecureBoot On -SecureBootTemplate $firmware.SecureBootTemplate } else { Set-VMFirmware -VMName $HV_CLONE -EnableSecureBoot Off }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # クローンの差分ディスクを確認する
      Get-VHD -Path "$HV_DIR\$HV_CLONE\$HV_CLONE.vhdx" | Format-List VhdType, ParentPath
+     # クローンの VM の構成を確認する
      Get-VM -Name $HV_CLONE | Format-List Name, State, ProcessorCount, MemoryStartup
    }
    ```
@@ -2000,14 +2121,18 @@
 1. スイッチを作り、止めてある VM に 2 枚目の NIC として付ける。
 
    ```powershell
+   # VM とスイッチの値を確認する
    if (-not $HV_VM) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $HV_SWITCH = 'lab-lan'
    $switch = Get-VMSwitch -Name $HV_SWITCH -ErrorAction SilentlyContinue
    if ($switch -and $switch.SwitchType -ne 'Private') { Write-Error "中断: 同じ名前で、Private ではないスイッチがある: $HV_SWITCH" } else {
+     # スイッチを作成して VM に NIC を追加する
      if (-not $switch) { New-VMSwitch -Name $HV_SWITCH -SwitchType Private | Out-Null }
      Add-VMNetworkAdapter -VMName $HV_VM -SwitchName $HV_SWITCH
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # スイッチの設定を確認する
      Get-VMSwitch -Name $HV_SWITCH | Format-Table Name, SwitchType
+     # VM の NIC を確認する
      Get-VMNetworkAdapter -VMName $HV_VM | Format-Table Name, SwitchName, MacAddress
    }
    ```
@@ -2037,11 +2162,14 @@
    ```
 
    ```powershell
+   # 削除する VM の名前と登録を確認する
    if (-not $HV_REMOVE) { Write-Error '中断: $HV_REMOVE が空のまま。消す VM の名前を入れて貼り直す' } elseif (-not (Get-VM -Name $HV_REMOVE -ErrorAction SilentlyContinue)) { Write-Error "中断: VM が無い: $HV_REMOVE" } else {
+     # VM のフォルダーとほかの VM の参照を確認する
      $dir = (Get-VM -Name $HV_REMOVE).Path.TrimEnd('\')
      $others = @(Get-VM | Where-Object Name -ne $HV_REMOVE)
      $disks = @($others | Get-VMHardDiskDrive | ForEach-Object { $_.Path; (Get-VHD -Path $_.Path).ParentPath })
      if ((Split-Path -Leaf $dir) -ne $HV_REMOVE) { Write-Error "中断: VM のフォルダーが、VM の名前のフォルダーではない: $dir" } elseif (($others | Where-Object { $_.Path.TrimEnd('\') -eq $dir }) -or ($disks | Where-Object { $_ -like "$dir\*" })) { Write-Error "中断: ほかの VM が、このフォルダーのファイルを使っている: $dir" } else {
+       # VM を停止して登録とファイルを削除する
        Stop-VM -Name $HV_REMOVE -TurnOff -Force -WarningAction SilentlyContinue
        Remove-VM -Name $HV_REMOVE -Force -ErrorAction Stop
        Remove-Item -LiteralPath $dir -Recurse -Force
@@ -2080,6 +2208,7 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 権限と導入済みのツールと CPU を確認する
    [pscustomobject]@{
      Admin        = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
      Arch         = $env:PROCESSOR_ARCHITECTURE
@@ -2088,6 +2217,7 @@
      Hypervisor   = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
      VirtFirmware = (Get-CimInstance -ClassName Win32_Processor | Select-Object -First 1).VirtualizationFirmwareEnabled
    } | Format-List
+   # 仮想化の機能を確認する
    Get-WindowsOptionalFeature -Online | Where-Object FeatureName -in 'Microsoft-Hyper-V-All', 'VirtualMachinePlatform', 'HypervisorPlatform' | Format-Table FeatureName, State
    ```
 
@@ -2112,9 +2242,12 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VirtualBox の導入と版を確認する
    winget list --exact --id Oracle.VirtualBox --source winget
    & "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe" --version
+   # VirtualBox のドライバーを確認する
    Get-CimInstance -ClassName Win32_SystemDriver -Filter "Name LIKE 'VBox%'" | Format-Table Name, State, StartMode
+   # ホストオンリーアダプターを確認する
    Get-NetAdapter -InterfaceDescription 'VirtualBox Host-Only Ethernet Adapter*' | Format-Table Name, InterfaceDescription, Status
    ```
 
@@ -2131,25 +2264,32 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 実行するコマンドと権限を確認する
    $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
    if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
      Write-Error '管理者の PowerShell に貼っている（この項の手順 5 で開いた窓に貼る）'
    } else {
+     # 同じ名前の VM が無いことを確認する
      & $vbm showvminfo vbox-selftest *> $null
      if ($LASTEXITCODE -eq 0) {
        Write-Error 'vbox-selftest はすでにある。変更せずに中断する'
      } else {
+       # 使い捨ての VM を作成する
        & $vbm createvm --name vbox-selftest --ostype Other_64 --register
        if ($LASTEXITCODE -eq 0) {
+         # VM を設定して画面無しで起動する
          & $vbm modifyvm vbox-selftest --memory 64 --nic1 none --audio-enabled off
          if ($LASTEXITCODE -eq 0) {
            & $vbm startvm vbox-selftest --type headless
            if ($LASTEXITCODE -eq 0) {
+             # VM の状態と仮想化の方式を確認する
              & $vbm showvminfo vbox-selftest --machinereadable | Select-String -Pattern '^VMState='
              & $vbm showvminfo vbox-selftest --log 0 | Select-String -Pattern 'fall back to NEM|Snail execution mode'
+             # VM の電源を切る
              & $vbm controlvm vbox-selftest poweroff
            }
          }
+         # VM の登録とファイルを削除する
          & $vbm unregistervm vbox-selftest --delete
        } else {
          Write-Error 'VM を作れなかった。変更・起動・削除は行わない'
@@ -2204,6 +2344,7 @@
    ```
 
    ```powershell
+   # VM の作成に使う値を設定する
    $VB_VM = 'alma10'
    $VB_BASE = "$env:USERPROFILE\VirtualBox VMs"
    $VB_CPU = 2
@@ -2223,13 +2364,16 @@
 1. VM を登録し、EFI・CPU・メモリ・画面・NAT を設定する。
 
    ```powershell
+   # 作成に使う値と既存の VM を確認する
    if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CPU -or -not $VB_MEM_MB -or -not $VB_SSH_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    if (-not $VB_ISO -or -not (Test-Path -LiteralPath $VB_ISO -PathType Leaf)) { throw '中断: ISO のパスを入れて貼り直す' }
    if (Test-Path -LiteralPath "$VB_BASE\$VB_VM") { throw '中断: 同じ名前のフォルダーがある' }
    $registered = & $vbm list vms
    if ($registered | Where-Object { $_.StartsWith('"' + $VB_VM + '" {') }) { throw '中断: 同じ名前の VM がある' }
+   # VM を登録する
    & $vbm createvm --name $VB_VM --ostype RedHat_64 --basefolder $VB_BASE --register
    if ($LASTEXITCODE -ne 0) { throw '中断: VM を作れなかった' }
+   # EFI と CPU と画面と NAT を設定する
    & $vbm modifyvm $VB_VM --firmware efi --chipset piix3 --ioapic on --cpus $VB_CPU --memory $VB_MEM_MB --paravirt-provider kvm --graphicscontroller vmsvga --vram 128 --accelerate-3d off --audio-enabled off --nic1 nat --nictype1 82540EM --cable-connected1 on --nat-pf1 "ssh,tcp,127.0.0.1,$VB_SSH_PORT,,22" --boot1 dvd --boot2 disk --boot3 none --boot4 none
    if ($LASTEXITCODE -ne 0) { throw '中断: 設定に失敗した' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2243,9 +2387,12 @@
 1. 可変のディスクと光学ドライブを作り、ISO を付ける。
 
    ```powershell
+   # ディスク作成に使う値を確認する
    if (-not $VB_VM -or -not $VB_BASE -or -not $VB_DISK_MB -or -not $VB_ISO -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
+   # 可変のディスクを作成する
    & $vbm createmedium disk --filename "$VB_BASE\$VB_VM\$VB_VM.vdi" --size $VB_DISK_MB --format VDI --variant Standard
    if ($LASTEXITCODE -ne 0) { throw '中断: ディスクを作れなかった' }
+   # SATA コントローラーにディスクと ISO を接続する
    & $vbm storagectl $VB_VM --name SATA --add sata --controller IntelAhci --portcount 2
    if ($LASTEXITCODE -ne 0) { throw '中断: コントローラーを作れなかった' }
    & $vbm storageattach $VB_VM --storagectl SATA --port 0 --device 0 --type hdd --medium "$VB_BASE\$VB_VM\$VB_VM.vdi"
@@ -2253,7 +2400,9 @@
    & $vbm storageattach $VB_VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium $VB_ISO
    if ($LASTEXITCODE -ne 0) { throw '中断: ISO を付けられなかった' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VM のストレージの接続を確認する
    & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^"SATA-[01]-0"='
+   # VM のファイルを確認する
    Get-ChildItem -LiteralPath "$VB_BASE\$VB_VM" | Format-Table Name, Length
    ```
 
@@ -2289,6 +2438,7 @@
 1. VM のウィンドウを開いて起動する。
 
    ```powershell
+   # VM を GUI モードで起動する
    if (-not $VB_VM -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm startvm $VB_VM --type gui
    ```
@@ -2305,6 +2455,7 @@
 1. 停止した VM の光学ドライブから ISO を外す。
 
    ```powershell
+   # VM の光学ドライブから ISO を取り外す
    if (-not $VB_VM -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm storageattach $VB_VM --storagectl SATA --port 1 --device 0 --type dvddrive --medium emptydrive
    if ($LASTEXITCODE -ne 0) { throw '中断: ISO を外せなかった' }
@@ -2347,11 +2498,14 @@
 1. VM を画面無しで起動し、状態と仮想化の載り方を確かめる。
 
    ```powershell
+   # VM を画面無しで起動する
    if (-not $VB_VM -or -not $VB_SSH_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm startvm $VB_VM --type headless
    if ($LASTEXITCODE -ne 0) { throw '中断: VM が起動しなかった' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VM の起動状態を確認する
    & $vbm showvminfo $VB_VM --machinereadable | Select-String -Pattern '^VMState='
+   # VM の仮想化の方式を確認する
    & $vbm showvminfo $VB_VM --log 0 | Select-String -Pattern 'fall back to NEM|Snail execution mode'
    ```
 
@@ -2399,6 +2553,7 @@
    ```
 
    ```powershell
+   # スナップショットとクローンに使う値を設定する
    $VB_BASE = "$env:USERPROFILE\VirtualBox VMs"
    $VB_CLONE_PORT = 2223
    $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
@@ -2413,6 +2568,7 @@
 1. ゲストに電源ボタンを送り、停止を確かめる。
 
    ```powershell
+   # VM に電源ボタンを送信する
    if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm controlvm $VB_VM acpipowerbutton
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2426,6 +2582,7 @@
 1. 停止した VM のスナップショットを取る。
 
    ```powershell
+   # VM のスナップショットを作成する
    if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm snapshot $VB_VM take clean-install
    if ($LASTEXITCODE -ne 0) { throw '中断: スナップショットを取れなかった' }
@@ -2438,6 +2595,7 @@
 1. 元に戻すときは、VM を停止してからスナップショットを復元する。
 
    ```powershell
+   # VM のスナップショットを復元する
    if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & $vbm snapshot $VB_VM restore clean-install
    if ($LASTEXITCODE -ne 0) { throw '中断: 復元できなかった' }
@@ -2450,13 +2608,16 @@
 1. スナップショットから完全クローンを作り、SSH の転送ポートを変える。
 
    ```powershell
+   # クローンの作成に使う値と登録を確認する
    if (-not $VB_VM -or -not $VB_BASE -or -not $VB_CLONE_PORT -or -not $vbm) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $VB_CLONE = "$VB_VM-clone"
    if (Test-Path -LiteralPath "$VB_BASE\$VB_CLONE") { throw '中断: クローン先のフォルダーがある' }
    $registered = & $vbm list vms
    if ($registered | Where-Object { $_.StartsWith('"' + $VB_CLONE + '" {') }) { throw '中断: 同じ名前の VM がある' }
+   # スナップショットから完全クローンを作成する
    & $vbm clonevm $VB_VM --snapshot clean-install --name $VB_CLONE --basefolder $VB_BASE --mode machine --register
    if ($LASTEXITCODE -ne 0) { throw '中断: クローンを作れなかった' }
+   # クローンの SSH 転送ポートを変更する
    & $vbm modifyvm $VB_CLONE --nat-pf1 delete ssh
    if ($LASTEXITCODE -ne 0) { throw '中断: 転送を外せなかった' }
    & $vbm modifyvm $VB_CLONE --nat-pf1 "ssh,tcp,127.0.0.1,$VB_CLONE_PORT,,22"
@@ -2486,6 +2647,7 @@
 1. 変数を設定する。
 
    ```powershell
+   # VM の保存先と VBoxManage の場所を設定する
    $VB_BASE = "$env:USERPROFILE\VirtualBox VMs"
    $vbm = "$env:ProgramFiles\Oracle\VirtualBox\VBoxManage.exe"
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2502,14 +2664,18 @@
    ```
 
    ```powershell
+   # 削除する VM の値と停止状態を確認する
    if (-not $VB_REMOVE -or -not $VB_BASE -or -not $vbm) { throw '中断: この項の手順 2 の変数と、消す VM の名前の VB_REMOVE を入れて貼り直す' }
    $info = & $vbm showvminfo $VB_REMOVE --machinereadable
    if ($LASTEXITCODE -ne 0) { throw '中断: VM が見つからない' }
    if ($info -notcontains 'VMState="poweroff"') { throw '中断: ゲストの操作で電源を切ってから貼り直す' }
+   # VM の登録とディスクを削除する
    & $vbm unregistervm $VB_REMOVE --delete
    if ($LASTEXITCODE -ne 0) { throw '中断: 削除に失敗した' }
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VM の登録の削除を確認する
    & $vbm list vms
+   # VM のフォルダーに残ったファイルを確認する
    Get-ChildItem -LiteralPath "$VB_BASE\$VB_REMOVE" -Force -ErrorAction SilentlyContinue | Format-Table Name
    ```
 
@@ -2538,7 +2704,9 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VirtualBox のプロセスを確認する
    Get-Process -Name VirtualBox, VirtualBoxVM, VBoxHeadless, VBoxSVC -ErrorAction SilentlyContinue | Format-Table Id, ProcessName
+   # VirtualBox の版と更新の有無を確認する
    winget list --exact --id Oracle.VirtualBox --source winget
    ```
 
@@ -2605,9 +2773,12 @@
 1. インストーラーの署名と版を確かめる。
 
    ```powershell
+   # インストーラーのパスを確認する
    if (-not $VMW_SETUP) { Write-Error '中断: この項の手順 3 の $VMW_SETUP が空のまま。値を入れて貼り直す' } else {
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # インストーラーの署名を確認する
      Get-AuthenticodeSignature -LiteralPath $VMW_SETUP | Format-List Status, @{ n = 'Signer'; e = { $_.SignerCertificate.Subject } }
+     # インストーラーの版を確認する
      (Get-Item -LiteralPath $VMW_SETUP).VersionInfo | Format-List ProductName, ProductVersion
    }
    ```
@@ -2646,7 +2817,9 @@
 1. 使用許諾契約に同意して、画面無しでインストールする。
 
    ```powershell
+   # インストーラーのパスを確認する
    if (-not $VMW_SETUP) { Write-Error '中断: この項の手順 2 の $VMW_SETUP が空のまま。値を入れて貼り直す' } else {
+     # VMware Workstation Pro を導入する
      $p = Start-Process -FilePath $VMW_SETUP -ArgumentList '/s /v"/qn EULAS_AGREED=1 AUTOSOFTWAREUPDATE=0 DATACOLLECTION=0 REBOOT=ReallySuppress"' -Wait -PassThru
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      "ExitCode = $($p.ExitCode)"
@@ -2683,11 +2856,14 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # VMware のコマンドと製品の版を確認する
    $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
    if (-not $VMW_DIR) { Write-Error 'vmrun.exe が見つからない。インストールできていない' } else {
      $VMW_DIR
      (Get-Item -LiteralPath "$VMW_DIR\vmware.exe").VersionInfo | Format-List ProductName, ProductVersion
+     # VM の一覧を確認する
      & "$VMW_DIR\vmrun.exe" -T ws list
+     # VMware の仮想ネットワークを確認する
      Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias 'VMware Network Adapter*' | Format-Table InterfaceAlias, IPAddress, PrefixLength
    }
    ```
@@ -2714,6 +2890,7 @@
    ```
 
    ```powershell
+   # VM の作成に使う値を設定する
    $VMW_VM = 'alma10'
    $VMW_BASE = "$env:USERPROFILE\VMware"
    $VMW_GUEST = 'almalinux-64'
@@ -2735,8 +2912,11 @@
 1. VM の設定ファイルとディスクを作る。
 
    ```powershell
+   # 作成に使う値と保存先を確認する
    if (-not $VMW_ISO -or -not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_GUEST -or -not $VMW_DISK) { Write-Error '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $VMW_ISO)) { Write-Error "中断: ISO が無い: $VMW_ISO" } elseif (Test-Path -LiteralPath "$VMW_BASE\$VMW_VM") { Write-Error "中断: 同じ名前のフォルダーがすでにある: $VMW_BASE\$VMW_VM" } else {
+     # VM の設定ファイルを作成する
      & "$VMW_DIR\vmcli.exe" VM Create -n $VMW_VM -d "$VMW_BASE\$VMW_VM" -c $VMW_GUEST
+     # VM のディスクを指定した大きさで作成する
      Remove-Item -LiteralPath "$VMW_BASE\$VMW_VM\$VMW_VM.vmdk"
      & "$VMW_DIR\vmcli.exe" $VMW_VMX Disk Create -f "$VMW_BASE\$VMW_VM\$VMW_VM.vmdk" -a lsilogic -s $VMW_DISK -t 0
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2749,20 +2929,24 @@
 1. ファームウェア・CPU・メモリ・ディスク・ISO・NIC を設定する。
 
    ```powershell
+   # VM の設定に使う値を確認する
    if (-not $VMW_ISO -or -not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_CPU -or -not $VMW_MEM_MB) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $vmcli = "$VMW_DIR\vmcli.exe"
+   # VM の名前とファームウェアと CPU と画面を設定する
    & $vmcli $VMW_VMX ConfigParams SetEntry displayName $VMW_VM
    & $vmcli $VMW_VMX ConfigParams SetEntry firmware efi
    & $vmcli $VMW_VMX ConfigParams SetEntry cpuid.coresPerSocket $VMW_CPU
    & $vmcli $VMW_VMX Chipset SetVCpuCount $VMW_CPU
    & $vmcli $VMW_VMX Chipset SetMemSize $VMW_MEM_MB
    & $vmcli $VMW_VMX MKS SetAccel3d false
+   # ディスクと ISO を接続する
    & $vmcli $VMW_VMX Nvme SetPresent nvme0 1
    & $vmcli $VMW_VMX Disk SetBackingInfo nvme0:0 disk "$VMW_BASE\$VMW_VM\$VMW_VM.vmdk" 0
    & $vmcli $VMW_VMX Disk SetPresent nvme0:0 1
    & $vmcli $VMW_VMX Sata SetPresent sata0 1
    & $vmcli $VMW_VMX Disk SetBackingInfo sata0:0 cdrom_image $VMW_ISO 0
    & $vmcli $VMW_VMX Disk SetPresent sata0:0 1
+   # VM の NIC を設定する
    & $vmcli $VMW_VMX Ethernet SetVirtualDevice ethernet0 vmxnet3
    & $vmcli $VMW_VMX Ethernet SetConnectionType ethernet0 nat
    & $vmcli $VMW_VMX Ethernet SetPresent ethernet0 1
@@ -2791,6 +2975,7 @@
    ```
 
    ```powershell
+   # VM の保存先とコマンドの場所を設定する
    $VMW_BASE = "$env:USERPROFILE\VMware"
    $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
    $VMW_VMX = "$VMW_BASE\$VMW_VM\$VMW_VM.vmx"
@@ -2805,6 +2990,7 @@
 1. VM を起動する。
 
    ```powershell
+   # VMware のゲストを起動する
    if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmrun.exe" -T ws start $VMW_VMX
    ```
@@ -2820,6 +3006,7 @@
 1. ISO を外す。
 
    ```powershell
+   # VM の光学ドライブから ISO を取り外す
    if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmcli.exe" $VMW_VMX Disk SetPresent sata0:0 0
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2846,6 +3033,7 @@
    ```
 
    ```powershell
+   # VM の保存先とコマンドの場所を設定する
    $VMW_BASE = "$env:USERPROFILE\VMware"
    $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
    $VMW_VMX = "$VMW_BASE\$VMW_VM\$VMW_VM.vmx"
@@ -2860,11 +3048,15 @@
 1. VM を画面無しで起動し、Hyper-V の上で動いているかと、ゲストの IP を確かめる。
 
    ```powershell
+   # VM を画面無しで起動する
    if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    & "$VMW_DIR\vmrun.exe" -T ws start $VMW_VMX nogui
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 動いている VM を確認する
    & "$VMW_DIR\vmrun.exe" -T ws list
+   # VM の仮想化の方式を確認する
    Select-String -LiteralPath "$VMW_BASE\$VMW_VM\vmware.log" -Pattern 'Monitor Mode:' | Select-Object -Last 1 | ForEach-Object { ($_.Line -split '\] ')[-1] }
+   # ゲストの IP を確認する
    & "$VMW_DIR\vmrun.exe" -T ws readVariable $VMW_VMX guestVar ip
    ```
 
@@ -2916,6 +3108,7 @@
    ```
 
    ```powershell
+   # スナップショットとクローンに使う値を設定する
    $VMW_BASE = "$env:USERPROFILE\VMware"
    $VMW_DIR = @("$env:ProgramFiles\VMware\VMware Workstation", "${env:ProgramFiles(x86)}\VMware\VMware Workstation") | Where-Object { Test-Path -LiteralPath "$_\vmrun.exe" } | Select-Object -First 1
    $VMW_VMX = "$VMW_BASE\$VMW_VM\$VMW_VM.vmx"
@@ -2931,7 +3124,9 @@
 1. VM を止めて、スナップショットを取る。
 
    ```powershell
+   # VM とスナップショットの値を確認する
    if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_SNAPSHOT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
+   # VM を停止してスナップショットを作成する
    & "$VMW_DIR\vmrun.exe" -T ws stop $VMW_VMX soft
    & "$VMW_DIR\vmrun.exe" -T ws snapshot $VMW_VMX $VMW_SNAPSHOT
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2944,7 +3139,9 @@
 1. VM をスナップショットの時点に戻すときは、VM を止めてから戻す。
 
    ```powershell
+   # VM とスナップショットの値を確認する
    if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_SNAPSHOT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
+   # VM を停止してスナップショットを復元する
    & "$VMW_DIR\vmrun.exe" -T ws stop $VMW_VMX hard
    & "$VMW_DIR\vmrun.exe" -T ws revertToSnapshot $VMW_VMX $VMW_SNAPSHOT
    "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -2957,12 +3154,16 @@
 1. スナップショットの時点から、リンククローンで別の VM を作る。
 
    ```powershell
+   # クローンの作成に使う値を確認する
    if (-not $VMW_VM -or -not $VMW_BASE -or -not $VMW_DIR -or -not $VMW_VMX -or -not $VMW_SNAPSHOT) { throw '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す' }
    $VMW_CLONE = "$VMW_VM-clone"
    if (Test-Path -LiteralPath "$VMW_BASE\$VMW_CLONE") { Write-Error "中断: 同じ名前のフォルダーがすでにある: $VMW_BASE\$VMW_CLONE" } else {
+     # スナップショットからリンククローンを作成する
      & "$VMW_DIR\vmrun.exe" -T ws clone $VMW_VMX "$VMW_BASE\$VMW_CLONE\$VMW_CLONE.vmx" linked "-snapshot=$VMW_SNAPSHOT" "-cloneName=$VMW_CLONE"
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # クローンのファイルを確認する
      Get-ChildItem -LiteralPath "$VMW_BASE\$VMW_CLONE" | Format-Table Name, Length
+     # クローンの名前とディスクの参照先を確認する
      Get-Content -LiteralPath "$VMW_BASE\$VMW_CLONE\$VMW_CLONE.vmx" | Select-String -Pattern '^(displayName|nvme0:0\.fileName)'
    }
    ```
@@ -3004,11 +3205,15 @@
    ```
 
    ```powershell
+   # 削除する VM のパスとコマンドを確認する
    if (-not $VMW_DIR) { Write-Error '中断: この項の手順 2 の $VMW_DIR が空のまま。インストールを確かめ直す' } elseif (-not $VMW_REMOVE) { Write-Error '中断: $VMW_REMOVE が空のまま。消す VM の .vmx のパスを入れて貼り直す' } elseif (-not (Test-Path -LiteralPath $VMW_REMOVE)) { Write-Error "中断: .vmx が無い: $VMW_REMOVE" } else {
+     # VM を停止して登録とファイルを削除する
      & "$VMW_DIR\vmrun.exe" -T ws stop $VMW_REMOVE hard
      & "$VMW_DIR\vmrun.exe" -T ws deleteVM $VMW_REMOVE
      "`n$([char]27)[7m 確認 $([char]27)[0m"
+     # 動いている VM を確認する
      & "$VMW_DIR\vmrun.exe" -T ws list
+     # VM の設定ファイルの削除を確認する
      Test-Path -LiteralPath $VMW_REMOVE
    }
    ```
@@ -3054,10 +3259,13 @@
 
    ```powershell
    & {
+     # Windows Sandbox の現在の状態を取得する
      $feature = Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop
      if ($feature.State -in 'Disabled', 'DisabledWithPayloadRemoved') {
        "`n$([char]27)[7m 確認 $([char]27)[0m"
+       # Windows Sandbox を有効にする
        Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart -ErrorAction Stop | Select-Object Online, RestartNeeded
+       # Windows Sandbox の有効化後の状態を確認する
        Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -ErrorAction Stop | Select-Object FeatureName, State
      } elseif ($feature.State -eq 'Enabled') {
        "`n$([char]27)[7m 確認 $([char]27)[0m"

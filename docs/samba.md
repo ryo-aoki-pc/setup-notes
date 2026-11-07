@@ -62,9 +62,11 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # cifs-utils を導入し、モジュールを確かめる
    sudo dnf install -y cifs-utils
    rpm -q cifs-utils
    modinfo -n cifs
+   # サーバーの共有用ポートへの接続を確かめる
    timeout 5 bash -c "exec 3<>/dev/tcp/${SERVER:?手順 1 の SERVER が空のまま}/445" && echo '445/tcp に届く'
    ```
 
@@ -76,6 +78,7 @@
 1. 共有のパスワードを入力し、資格情報ファイルを作成する。
 
    ```bash
+   # 共有のパスワードを受け取り、入力値を検査する
    IFS= read -rsp "Samba password for ${SMB_USER}@${SERVER}: " PW; echo
    if [ -z "${SMB_USER}" ] || [ -z "${SERVER}" ]; then echo '中断: 手順 1 の SMB_USER か SERVER が空のまま。手順 1 と手順 3 を貼り直す' >&2
    elif [ -z "${PW}" ]; then echo '中断: PW が空のまま。手順 3 を貼り直す' >&2
@@ -95,12 +98,16 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 共有をマウントし、接続先を確かめる
    sudo mkdir -p "${MOUNT_POINT:?手順 1 の MOUNT_POINT が空のまま}" &&
    sudo mount -t cifs "//${SERVER:?手順 1 の SERVER が空のまま}/${SHARE:?手順 1 の SHARE が空のまま}" "${MOUNT_POINT}" \
      -o "credentials=/root/smb-${SMB_USER:?手順 1 の SMB_USER が空のまま}@${SERVER}.cred,uid=$(id -u),gid=$(id -g),file_mode=0600,dir_mode=0700" && {
      findmnt "${MOUNT_POINT}"
+     # テストファイルを書き、読み戻す
      echo "cifs write" > "${MOUNT_POINT}/cifs-test.txt" && cat "${MOUNT_POINT}/cifs-test.txt" && rm "${MOUNT_POINT}/cifs-test.txt"
+     # マウント先の属性を確かめる
      ls -ldZ "${MOUNT_POINT}"
+     # 共有をアンマウントする
      sudo umount "${MOUNT_POINT}"
    }
    ```
@@ -113,6 +120,7 @@
 1. `/etc/fstab` に自動マウントの行を足し、systemd に読み直させる。
 
    ```bash
+   # マウント設定に使う値と既存行を検査する
    if [ -z "${SERVER}" ] || [ -z "${SMB_USER}" ] || [ -z "${SHARE}" ] || [ -z "${MOUNT_POINT}" ]; then
      echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    elif grep -q '[[:space:]]' <<< "${SERVER}${SMB_USER}${SHARE}${MOUNT_POINT}"; then
@@ -134,13 +142,16 @@
 1. 自動マウントを始め、アクセスしたときにマウントされることを確かめる。
 
    ```bash
+   # マウント先の指定を検査する
    if [ -z "${MOUNT_POINT}" ]; then echo '中断: 手順 1 の MOUNT_POINT が空のまま。手順 1 を貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
+     # 自動マウントと共有の読み書きを確かめる
      sudo systemctl start "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
      systemctl is-active "$(systemd-escape -p --suffix=automount "${MOUNT_POINT}")" &&
      ls "${MOUNT_POINT}" > /dev/null && findmnt -R "${MOUNT_POINT}" &&
      echo "automount write" > "${MOUNT_POINT}/automount-test.txt" && cat "${MOUNT_POINT}/automount-test.txt" &&
      rm "${MOUNT_POINT}/automount-test.txt"
+     # SELinux の拒否を調べる
      sudo ausearch -m AVC -ts recent
    fi
    ```
@@ -202,11 +213,14 @@
 1. 共有をマウントし、接続先と共有内の一覧を確認する。
 
    ```bash
+   # GNOME Files の共有に接続する
    /usr/bin/gio mount "smb://${SMB_USER:?この項の手順 1 の SMB_USER が空のまま}@${SERVER:?この項の手順 1 の SERVER が空のまま}/${SHARE:?この項の手順 1 の SHARE が空のまま}"
    if [ -z "${SERVER}" ] || [ -z "${SMB_USER}" ] || [ -z "${SHARE}" ]; then echo '中断: この項の手順 1 の SERVER・SMB_USER・SHARE を設定してから貼り直す' >&2; else
      printf '\n\033[7m 確認 \033[0m\n'
+     # 接続先とマウント先を確かめる
      /usr/bin/gio mount -l | grep -F "${SERVER}"
      ls "/run/user/$(id -u)/gvfs/"
+     # 共有内の一覧を表示する
      /usr/bin/gio list "smb://${SMB_USER}@${SERVER}/${SHARE}/"
    fi
    ```
@@ -267,6 +281,7 @@
 1. samba・samba-client・cifs-utils を入れる。
 
    ```bash
+   # Samba と接続用ツールを導入する
    sudo dnf install -y samba samba-client cifs-utils
    printf '\n\033[7m 確認 \033[0m\n'
    rpm -q samba samba-client cifs-utils
@@ -276,7 +291,9 @@
 
    ```bash
    if [ -z "${WORKGROUP}" ]; then echo '中断: 手順 1 の WORKGROUP が空のまま。値を入れて貼り直す' >&2; else
+     # 既存の設定ファイルの控えを作成する
      sudo cp -an /etc/samba/smb.conf /etc/samba/smb.conf.orig
+     # 共有の設定を書き込む
      sudo tee /etc/samba/smb.conf >/dev/null <<EOF
    [global]
        workgroup = ${WORKGROUP:?手順 1 の WORKGROUP が空のまま。値を入れて貼り直す}
@@ -307,6 +324,7 @@
 1. SELinux の boolean `samba_enable_home_dirs` を on にする。
 
    ```bash
+   # ホームの公開を SELinux で許可する
    sudo setsebool -P samba_enable_home_dirs on
    printf '\n\033[7m 確認 \033[0m\n'
    sudo getsebool samba_enable_home_dirs        # samba_enable_home_dirs --> on
@@ -315,6 +333,7 @@
 1. firewalld で 445/tcp を開ける。
 
    ```bash
+   # 共有用のポートを開放し、設定を反映する
    sudo firewall-cmd --permanent --add-port=445/tcp && sudo firewall-cmd --reload
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-ports               # 445/tcp が含まれる
@@ -324,7 +343,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # アカウントの存在を照会する
    id "${USER}"
+   # Samba の認証用ユーザーを追加する
    sudo smbpasswd -a "${USER}"
    sudo pdbedit -L                              # <USER>:1000: の 1 行が出る
    ```
@@ -336,6 +357,7 @@
 1. smb.service を有効にして起動する。
 
    ```bash
+   # Samba サービスを常駐させる
    sudo systemctl enable --now smb.service
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl is-active smb.service              # active
@@ -373,6 +395,7 @@
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。公開したユーザー自身のシェルで貼る' >&2
    elif grep -q '^\[root\]' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [root] が既にある' >&2
    else
+     # root の共有設定を追記する
      sudo tee -a /etc/samba/smb.conf >/dev/null <<EOF
 
    [root]
@@ -395,11 +418,13 @@
 1. SELinux で、smbd に `/root`（`admin_home_t`）の読み書きを許すモジュールを入れる。
 
    ```bash
+   # SELinux の許可ルールをファイルに保存する
    cat > /tmp/samba_root_home.cil <<'EOF'
    (allow smbd_t admin_home_t (dir (add_name create getattr ioctl link lock open read remove_name rename reparent rmdir search setattr unlink watch watch_reads write)))
    (allow smbd_t admin_home_t (file (append create getattr ioctl link lock open read rename setattr unlink watch watch_reads write)))
    (allow smbd_t admin_home_t (lnk_file (append create getattr ioctl link lock read rename setattr unlink watch watch_reads write)))
    EOF
+   # SELinux のモジュールを登録し、作業ファイルを消す
    sudo semodule -i /tmp/samba_root_home.cil
    rm /tmp/samba_root_home.cil
    printf '\n\033[7m 確認 \033[0m\n'
@@ -446,6 +471,7 @@
    if [ -z "${USER}" ] || [ "${USER}" = root ]; then echo '中断: USER が空か root。公開したユーザー自身のシェルで貼る' >&2
    elif grep -q '^\[home\]' /etc/samba/smb.conf; then echo '中断: /etc/samba/smb.conf に [home] が既にある' >&2
    else
+     # /home の共有設定を追記する
      sudo tee -a /etc/samba/smb.conf >/dev/null <<EOF
 
    [home]
@@ -510,6 +536,7 @@
 1. 資格情報ファイルを作るため、[Samba サーバー](#samba-サーバー)の手順 6 で登録したパスワードを入力する。
 
    ```bash
+   # 資格情報の保存先を決め、パスワードを受け取る
    AUTHFILE=/run/user/$(id -u)/smb-auth
    read -rsp "Samba password for ${USER}: " PW; echo
    ```
@@ -519,6 +546,7 @@
 1. 資格情報ファイルを作る。
 
    ```bash
+   # 資格情報をファイルに保存し、変数から消去する
    ( umask 077; printf 'username=%s\npassword=%s\n' "${USER}" "${PW}" > "${AUTHFILE}" ); unset PW
    printf '\n\033[7m 確認 \033[0m\n'
    ls -l "${AUTHFILE}"                          # -rw------- で自分の所有
@@ -528,23 +556,30 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 公開されている共有とファイルの一覧を取得する
    smbclient -L //localhost -A "${AUTHFILE}"    # IPC$ と <USER> の 2 つだけ出る
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c 'ls'
+   # ファイルを送受信し、属性と内容を照合する
    smbclient "//localhost/${USER}" -A "${AUTHFILE}" -c "put /etc/hostname smb-test.txt; get smb-test.txt /tmp/smb-test.txt; ls smb-test.txt"
    ls -lZ ~/smb-test.txt /tmp/smb-test.txt      # -rw-r--r--。ホーム側は user_home_t、/tmp 側は user_tmp_t
    cmp /etc/hostname /tmp/smb-test.txt && echo "content identical"
+   # サーバーの IP アドレス経由で共有を確かめる
    smbclient "//${SERVER_IP}/${USER}" -A "${AUTHFILE}" -c 'ls smb-test.txt'
    ```
 
 1. `mount.cifs` でマウントして書き込み、`smbstatus` でセッションを確かめる。
 
    ```bash
+   # 共有をテスト用のディレクトリにマウントする
    sudo mkdir -p /mnt/smbtest
    sudo mount -t cifs "//127.0.0.1/${USER}" /mnt/smbtest -o "credentials=${AUTHFILE},uid=$(id -u),gid=$(id -g)"
    printf '\n\033[7m 確認 \033[0m\n'
+   # マウントの状態を確かめる
    mount | grep cifs                            # vers=3.1.1
+   # ファイルを書き、内容と属性を確かめる
    echo "cifs write" > /mnt/smbtest/cifs-test.txt && cat /mnt/smbtest/cifs-test.txt
    ls -lZ /mnt/smbtest/cifs-test.txt ~/cifs-test.txt
+   # SMB の接続方式と署名を確かめる
    sudo smbstatus                               # Protocol Version: SMB3_11、Signing: partial(AES-128-CMAC)
    ```
 
@@ -559,6 +594,7 @@
 1. 後片付けとして、検証で作ったファイルと資格情報ファイルを消し、AVC を確かめる。
 
    ```bash
+   # 確認に使ったファイルと資格情報を消去する
    rm -f ~/smb-test.txt ~/cifs-test.txt /tmp/smb-test.txt "${AUTHFILE}"
    printf '\n\033[7m 確認 \033[0m\n'
    sudo ausearch -m AVC -ts today               # <no matches>
@@ -581,8 +617,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 作成したファイルの属性を確かめ、削除する
    sudo ls -lZ /root/smb-root-test.txt          # -rw-r--r--. root root … admin_home_t
    sudo rm /root/smb-root-test.txt
+   # SELinux の拒否を調べる
    sudo ausearch -m AVC -ts recent              # <no matches>
    ```
 
@@ -604,8 +642,10 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 作成したファイルの属性を確かめ、削除する
    ls -lZ ~/smb-home-test.txt                   # -rw-r--r--. <USER> root … user_home_t
    rm ~/smb-home-test.txt
+   # SELinux の拒否を調べる
    sudo ausearch -m AVC -ts recent              # <no matches>
    ```
 
@@ -629,10 +669,13 @@
 
    ```bash
    if [ -z "${ALLOW_FROM}" ]; then echo '中断: ALLOW_FROM が空のまま。値を入れて貼り直す' >&2; else
+   # ポート全体への接続許可を解除する
    sudo firewall-cmd --permanent --remove-port=445/tcp
+   # 指定したサブネットからの接続を許可する
    for src in ${ALLOW_FROM}; do
      sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${src} port port=445 protocol=tcp accept"
    done
+   # firewalld の設定を反映する
    sudo firewall-cmd --reload
    printf '\n\033[7m 確認 \033[0m\n'
    sudo firewall-cmd --list-rich-rules        # source address に実際のサブネットが入っていることを確認する
@@ -694,6 +737,7 @@
 
    ```powershell
    "`n$([char]27)[7m 確認 $([char]27)[0m"
+   # 変数・権限・接続先・ドライブ文字を検査する
    if (-not $SERVER -or -not $SMB_USER -or -not $SHARE -or -not $DRIVE) {
      Write-Error '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す'
    } elseif (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -706,6 +750,7 @@
      Write-Error "中断: $DRIVE はもう使われている（切れたまま覚えている割り当ても含む）"
    } else {
      "$SERVER の 445/tcp に届く。$DRIVE は空いている"
+     # 保存済みの資格情報を照会する
      cmdkey "/list:$SERVER"
    }
    ```
@@ -718,6 +763,7 @@
 1. 資格情報マネージャーに、共有のユーザー名とパスワードを登録する。
 
    ```powershell
+   # 資格情報の登録に使う値を検査する
    if (-not $SERVER -or -not $SMB_USER) {
      Write-Error '中断: この項の手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
    } else {
@@ -733,6 +779,7 @@
 1. 共有をドライブ文字に割り当て、サインインのたびにつなぎ直すようにする。
 
    ```powershell
+   # ドライブの割り当てに使う値を検査する
    if (-not $SERVER -or -not $SHARE -or -not $DRIVE) {
      Write-Error '中断: この項の手順 2 の変数が空のまま。値を入れて貼り直す'
    } else {
@@ -754,9 +801,12 @@
    if (-not $DRIVE) {
      Write-Error '中断: この項の手順 2 の DRIVE が空のまま。値を入れて貼り直す'
    } else {
+     # 共有内のファイル名を一覧にする
      Get-ChildItem -LiteralPath "$DRIVE\" | Select-Object -First 5 -ExpandProperty Name
+     # テストファイルを書き、読み戻す
      Set-Content -LiteralPath "$DRIVE\smb-win-test.txt" -Value 'smb write' -Encoding ascii
      Get-Content -LiteralPath "$DRIVE\smb-win-test.txt"
+     # テストファイルを消し、残っていないか確かめる
      Remove-Item -LiteralPath "$DRIVE\smb-win-test.txt"
      Test-Path -LiteralPath "$DRIVE\smb-win-test.txt"
    }
@@ -818,9 +868,11 @@
 1. Samba のパスワードを変えたときだけ、資格情報を登録し直す。
 
    ```powershell
+   # 資格情報の登録に使う値を検査する
    if (-not $SERVER -or -not $SMB_USER) {
      Write-Error '中断: この項の手順 2 の SERVER か SMB_USER が空のまま。値を入れて貼り直す'
    } else {
+     # 新しいパスワードを資格情報に登録する
      cmdkey "/add:$SERVER" "/user:$SMB_USER" /pass
    }
    ```

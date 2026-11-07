@@ -64,11 +64,15 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # SSH の自動起動と受信の許可を確認する
    systemctl is-enabled sshd.service
    sudo firewall-cmd --permanent --query-service=ssh
+   # GNOME の起動設定を確認する
    systemctl get-default
    systemctl is-enabled gdm.service
+   # 接続しているモニターの数を確認する
    cat /sys/class/drm/card*-*/status 2>/dev/null | grep -cx connected
+   # 暗号化したディスクの数を確認する
    lsblk -rno TYPE | grep -cx crypt
    ```
 
@@ -87,9 +91,11 @@
    if [ -z "${USER}" ] || [ "${USER}" = root ] || [ -z "${RDP_PORT}" ]; then echo '中断: USER が空か root、または「前提を確かめる」の手順 1 の RDP_PORT が空のまま。共有するユーザーのシェルで「前提を確かめる」の手順 1 を貼り直す' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
+     # 画面オフとロック、サスペンドの設定を確認する
      /usr/bin/gsettings get org.gnome.desktop.session idle-delay
      /usr/bin/gsettings get org.gnome.desktop.screensaver lock-enabled
      systemctl is-enabled suspend.target
+     # デスクトップ共有とヘッドレスの状態を確認する
      /usr/bin/gsettings get org.gnome.desktop.remote-desktop.rdp enable
      systemctl --user is-enabled gnome-remote-desktop-headless.service
      systemctl --user is-active gnome-remote-desktop-headless.service
@@ -97,9 +103,13 @@
         systemctl --user is-active --quiet gnome-remote-desktop-headless.service; then
        echo '中断: ヘッドレスの unit が有効か起動中。以降は貼らず、利用状況を確認する' >&2
      fi
+     # RDP ポートの使用状況を確認する
      ss -Hlnt "sport = :${RDP_PORT}" | wc -l
+     # GDM の自動ログインの設定を確認する
      grep -c '^AutomaticLogin' /etc/gdm/custom.conf
+     # 保存済みの RDP 資格情報を検索する
      busctl --user call org.freedesktop.secrets /org/freedesktop/secrets org.freedesktop.Secret.Service SearchItems 'a{ss}' 1 xdg:schema org.gnome.RemoteDesktop.RdpCredentials
+     # PC の画面のセッションを確認する
      loginctl list-sessions --no-legend | awk '$4 == "seat0"'
    fi
    ```
@@ -210,6 +220,7 @@
 1. 変える設定の元値と共用する TLS 設定を退避し、証明書と鍵を作る（既にあれば作らない）。
 
    ```bash
+   # 変更前の RDP 設定を退避する
    if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
      echo '中断: この項の手順 1 の変数が空のまま。この項の手順 1 を貼り直す' >&2
    else
@@ -231,6 +242,7 @@
          done
          touch ~/.local/state/gnome-desktop-sharing-setup/backup-complete
        fi
+       # 証明書と鍵を用意し、生成物を記録する
        rm -f ~/.local/state/gnome-desktop-sharing-setup/ready ~/.local/state/gnome-desktop-sharing-setup/restored
        if [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] || [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
           [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ] || [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
@@ -252,6 +264,7 @@
          sha256sum ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt \
            ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key > ~/.local/state/gnome-desktop-sharing-setup/created.sha256
        fi
+       # 証明書と鍵を読み、公開鍵の一致を確認する
        openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout
        openssl pkey -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -passin pass: -noout
        CERT_PUBLIC_KEY=$(openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -pubkey -noout)
@@ -389,6 +402,7 @@
         systemctl --user is-active --quiet gnome-remote-desktop-headless.service; then
      echo '中断: 同じユーザーのヘッドレスのセッションの RDP が有効か起動中。有効にしない' >&2
    else
+     # デスクトップ共有の RDP を有効にする
      grdctl rdp enable
      printf '\n\033[7m 確認 \033[0m\n'
      systemctl --user is-enabled gnome-remote-desktop.service
@@ -440,6 +454,7 @@
 1. 起動画面（plymouth）を止め、自動ログインの後にログイン画面が前に出ないようにする。
 
    ```bash
+   # 起動画面を無効にする引数をカーネルに設定する
    sudo grubby --update-kernel=ALL --args="rd.plymouth=0 plymouth.enable=0"
    printf '\n\033[7m 確認 \033[0m\n'
    sudo grubby --info=DEFAULT | grep '^args='
@@ -492,8 +507,10 @@
      echo '中断: PC の画面にこのユーザーのセッションが無い（自動ログインしていない）' >&2
    else
      printf '\n\033[7m 確認 \033[0m\n'
+     # 自動ログインと画面の共有機能を確認する
      loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Service -p Active
      busctl --user status org.gnome.Mutter.ScreenCast >/dev/null 2>&1 && echo 'ScreenCast: ok'
+     # RDP サービスと待ち受けを確認する
      systemctl --user is-active gnome-remote-desktop.service
      (
        for attempt in {1..30}; do
@@ -522,6 +539,7 @@
 1. 設定を読み戻し、TLS のハンドシェイクと、提示される証明書を確かめる。
 
    ```bash
+   # TLS 確認用のスクリプトを作成する
    cat > ~/rdp_tls_probe.py <<'PY'
    #!/usr/bin/env python3
    # usage: python3 rdp_tls_probe.py <host> [port]
@@ -588,6 +606,7 @@
 1. クライアントからのキーボードとマウスを受け付けないようにする。
 
    ```bash
+   # 共有を読み取り専用に切り替える
    grdctl rdp enable-view-only
    printf '\n\033[7m 確認 \033[0m\n'
    grdctl status | grep 'View-only'
@@ -598,6 +617,7 @@
 1. 元に戻すときは、クライアントからの操作を受け付ける。
 
    ```bash
+   # 共有を操作できる状態に切り替える
    grdctl rdp disable-view-only
    printf '\n\033[7m 確認 \033[0m\n'
    grdctl status | grep 'View-only'
@@ -731,6 +751,7 @@
    if [ -z "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0"')" ]; then
      echo '中断: PC の画面にこのユーザーのセッションが無い。この項の手順 3 を行う' >&2
    else
+     # 共有するデスクトップを前面に戻す
      sudo loginctl activate "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')"
      printf '\n\033[7m 確認 \033[0m\n'
      loginctl show-session "$(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $4 == "seat0" {print $1}')" -p Active
@@ -809,6 +830,7 @@
 1. 共用する TLS 設定を退避し、証明書と鍵を作る（既にあれば作らない）。
 
    ```bash
+   # 変更前の共用 TLS 設定を退避する
    if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
      echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    else
@@ -831,6 +853,7 @@
          dconf read /org/gnome/desktop/remote-desktop/rdp/tls-key > ~/.local/state/gnome-headless-session-setup/tls-key
          touch ~/.local/state/gnome-headless-session-setup/backup-complete
        fi
+       # 証明書と鍵を用意し、生成物を記録する
        rm -f ~/.local/state/gnome-headless-session-setup/ready ~/.local/state/gnome-headless-session-setup/restored
        if [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] || [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
           [ -e ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ] || [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key ]; then
@@ -852,6 +875,7 @@
          sha256sum ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt \
            ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key > ~/.local/state/gnome-headless-session-setup/created.sha256
        fi
+       # 証明書と鍵を読み、準備完了を記録する
        openssl x509 -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt -noout
        openssl pkey -in ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key -passin pass: -noout
        touch ~/.local/state/gnome-headless-session-setup/ready
@@ -898,6 +922,7 @@
 1. RDP を有効にする。
 
    ```bash
+   # ヘッドレス用の RDP サービスを有効にする
    grdctl --headless rdp enable
    printf '\n\033[7m 確認 \033[0m\n'
    systemctl --user is-enabled gnome-remote-desktop-headless.service
@@ -923,7 +948,9 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # RDP の設定と稼働状態を確認する
    grdctl --headless status
+   # RDP の待ち受けを確認する
    ss -Hlnt "sport = :${RDP_PORT:?手順 1 の RDP_PORT が空のまま}"
    ```
 
@@ -934,6 +961,7 @@
 1. TLS のハンドシェイクと、提示される証明書を確かめる。
 
    ```bash
+   # TLS 確認用のスクリプトを作成する
    cat > ~/rdp_tls_probe.py <<'PY'
    #!/usr/bin/env python3
    # usage: python3 rdp_tls_probe.py <host> [port]
@@ -999,6 +1027,7 @@
 1. RDP とヘッドレス用の資格情報・設定を解除し、共用 TLS 設定を戻す。
 
    ```bash
+   # 退避を確認し、復旧処理を開始する
    (
      set -e
      trap 'echo "中断: 復元が失敗した。この項の手順 2 へ進まない" >&2' ERR
@@ -1010,10 +1039,12 @@
        echo '中断: TLS 設定の退避が不完全。設定とファイルは変更しない' >&2
        exit 1
      fi
+     # ヘッドレス用の RDP と資格情報を解除する
      rm -f ~/.local/state/gnome-headless-session-setup/restored
      grdctl --headless rdp disable
      grdctl --headless rdp clear-credentials
      dconf reset -f /org/gnome/desktop/remote-desktop/rdp/headless/
+     # 退避した共用 TLS 設定を復元する
      if [ -f ~/.local/state/gnome-headless-session-setup/backup-complete ]; then
        for key in tls-cert tls-key; do
          if [ -s ~/.local/state/gnome-headless-session-setup/"${key}" ]; then
@@ -1037,6 +1068,7 @@
 1. [GNOME のヘッドレスセッション](#gnome-のヘッドレスセッション)の手順 3 で生成した証明書と鍵と、TLS 設定の退避を消す（取り戻せない）。
 
    ```bash
+   # TLS 設定の復元記録を確認する
    if [ -L ~/.local/state/gnome-headless-session-setup ]; then
      echo '中断: TLS 設定の退避先がリンクになっている。ファイルは削除しない' >&2
    elif [ ! -e ~/.local/state/gnome-headless-session-setup ]; then
@@ -1046,6 +1078,7 @@
    else
      (
        set -e
+       # 生成物を照合し、証明書と鍵を削除する
        if [ -f ~/.local/state/gnome-headless-session-setup/created-certificate ]; then
          if [ ! -f ~/.local/state/gnome-headless-session-setup/created.sha256 ] ||
             [ -L ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ] ||
@@ -1060,6 +1093,7 @@
          rm -f ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt ~/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
          rmdir --ignore-fail-on-non-empty ~/.local/share/gnome-remote-desktop/certificates
        fi
+       # 設定の退避と確認用スクリプトを削除する
        rm -f ~/.local/state/gnome-headless-session-setup/tls-cert ~/.local/state/gnome-headless-session-setup/tls-key \
          ~/.local/state/gnome-headless-session-setup/backup-complete ~/.local/state/gnome-headless-session-setup/ready \
          ~/.local/state/gnome-headless-session-setup/restored ~/.local/state/gnome-headless-session-setup/created-certificate \
@@ -1132,11 +1166,14 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 現在のセッションを確認する
    for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
      echo "${s} $(loginctl show-session "${s}" -p Service --value)"
    done
+   # ヘッドレス用のサービスの起動設定を確認する
    systemctl is-enabled "gnome-headless-session@${USER}.service"
    systemctl --user is-enabled gnome-remote-desktop-headless.service
+   # ファイアウォールの許可を確認する
    sudo firewall-cmd --list-ports
    sudo firewall-cmd --list-rich-rules
    ```
@@ -1212,11 +1249,14 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # 残っているセッションと GNOME を確認する
    for s in $(loginctl list-sessions --no-legend | awk -v u="${USER}" '$3 == u && $7 == "headless" {print $1}'); do
      echo "${s} $(loginctl show-session "${s}" -p Service --value)"
    done
    pgrep -a -u "${USER}" -x gnome-shell
+   # ヘッドレスの自動起動の設定を確認する
    systemctl is-enabled "gnome-headless-session@${USER}.service"
+   # リモートログインの待ち受けを確認する
    ss -Hlnt 'sport = :3389'
    ```
 
@@ -1266,6 +1306,7 @@
    if [ -z "${SERVER_IP}" ] || [ -z "${SERVER_NAME}" ] || [ -z "${SERVER_FQDN}" ]; then
      echo '中断: 手順 1 の変数が空のまま。手順 1 を貼り直す' >&2
    else
+     # 保存先を作り、TLS 証明書と鍵を生成する
      sudo -u gnome-remote-desktop mkdir -p /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
      sudo -u gnome-remote-desktop openssl req -x509 -newkey rsa:2048 -noenc -days 3650 \
        -subj "/CN=${SERVER_NAME}" \
@@ -1281,8 +1322,10 @@
 1. 証明書と鍵のパーミッションと、SELinux のコンテキストを整える。
 
    ```bash
+   # 証明書と鍵の読み取り権限を設定する
    sudo chmod 600 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
    sudo chmod 644 /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   # SELinux のラベルを復元する
    sudo restorecon -Rv /var/lib/gnome-remote-desktop
    printf '\n\033[7m 確認 \033[0m\n'
    sudo ls -lZ /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates
@@ -1293,8 +1336,10 @@
 1. grdctl で、システムデーモンに鍵と証明書を設定し、RDP を有効にする。
 
    ```bash
+   # システムの RDP に証明書と鍵を登録する
    sudo grdctl --system rdp set-tls-key  /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.key
    sudo grdctl --system rdp set-tls-cert /var/lib/gnome-remote-desktop/.local/share/gnome-remote-desktop/certificates/rdp-tls.crt
+   # システムの RDP を有効にする
    sudo grdctl --system rdp enable
    ```
 
@@ -1304,13 +1349,16 @@
 1. GDM の後に起動するようにしてサービスを有効にし、ファイアウォールで RDP を開ける。
 
    ```bash
+   # サービスの起動順を設定する
    sudo mkdir -p /etc/systemd/system/gnome-remote-desktop.service.d
    sudo tee /etc/systemd/system/gnome-remote-desktop.service.d/10-after-gdm.conf >/dev/null <<'CONF'
    [Unit]
    After=gdm.service
    CONF
+   # サービス定義を読み直し、起動を有効にする
    sudo systemctl daemon-reload
    sudo systemctl enable --now gnome-remote-desktop.service
+   # RDP の受信を許可する
    sudo firewall-cmd --permanent --add-service=rdp
    sudo firewall-cmd --reload
    ```
@@ -1338,9 +1386,12 @@
 
    ```bash
    printf '\n\033[7m 確認 \033[0m\n'
+   # RDP 設定とサービスの状態を確認する
    sudo grdctl --system status              # Status: enabled / Username: (hidden)
    systemctl status gnome-remote-desktop    # active (running)
+   # RDP の待ち受けを確認する
    ss -lntp | grep 3389                     # *:3389 で LISTEN
+   # ファイアウォールの許可を確認する
    sudo firewall-cmd --list-services        # rdp が含まれる
    ```
 
@@ -1357,6 +1408,7 @@
 1. TLS ハンドシェイクと、提示される証明書を確かめる。
 
    ```bash
+   # TLS 確認用のスクリプトを作成する
    cat > ~/rdp_tls_probe.py <<'PY'
    #!/usr/bin/env python3
    # usage: python3 rdp_tls_probe.py <host> [port]
@@ -1420,6 +1472,7 @@
    ```
 
    ```bash
+   # 接続元を指定した RDP の許可に切り替える
    if [ -z "${LAN_SUBNET}" ]; then echo '中断: LAN_SUBNET が空のまま。値を入れて貼り直す' >&2; else
    sudo firewall-cmd --permanent --remove-service=rdp
    sudo firewall-cmd --permanent --add-rich-rule="rule family=ipv4 source address=${LAN_SUBNET} port port=3389 protocol=tcp accept"
@@ -1439,6 +1492,7 @@
 1. デーモンを起動し直す必要があるときは、止めて待ってから起動する。
 
    ```bash
+   # デーモンを停止し、待機してから起動する
    sudo systemctl stop gnome-remote-desktop.service
    sleep 5
    sudo systemctl start gnome-remote-desktop.service
@@ -1453,6 +1507,7 @@
 1. ヘッドレスのセッションがある PC では、そのユーザーのシェルで、受け渡し役のデーモンを再起動する。
 
    ```bash
+   # 受け渡し役を再起動し、起動を待つ
    systemctl --user restart gnome-remote-desktop-handover.service
    sleep 3
    printf '\n\033[7m 確認 \033[0m\n'
