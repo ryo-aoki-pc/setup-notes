@@ -9,13 +9,8 @@
 補足・参照資料・注意点は、正本の各用途の末尾の折りたたみに置く。
 
 - `docs/windows-setup.md` — Windows 11 の手順書。7 のカテゴリ（基本の設定・デスクトップ・ネットワークとリモート操作・SSH・Git と開発の道具・アプリ・更新）に置き、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせる
-  - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、WinMerge での 2 つのブックの取り込みを扱う
-    - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「WinMerge で 2 つの Word の変更を取り込む」を置く
-  - 「md-table-sticky」は md-format の後に置き、Edge のお気に入りへのブックマークレットの登録・更新、GitLab の表を固定して見る操作、GitLab の表の折り返しと幅を変えて見る操作、GitLab の表を検索してコピーする操作の 4 項を扱う
-  - 全 32 用途は、検証記録・参考資料・注意点・選択した方針と、リードや手順の説明を、用途末尾の「補足と注意点」に置く。複数用途で共有する資料と注意点は、冒頭の「この文書の補足と注意点」に置く
+  - 全 28 用途は、検証記録・参考資料・注意点・選択した方針と、リードや手順の説明を、用途末尾の「補足と注意点」に置く。複数用途で共有する資料と注意点は、冒頭の「この文書の補足と注意点」に置く
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。7 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・再起動の後の確認・更新）に置き、項ごとに前提・実行場所を書いて、変数を項の中に持たせる。実行するホストを区別する
-  - 「excel-diff」は lazygit と yazi の間に置き、導入・更新、差分の確認、セル変更の部分ステージ、大きなブックの変換待ち、lazygit での 2 つのブックの取り込みを扱う
-    - Word は「lazygit で Word の差分を確かめる」「lazygit で Word の変更を部分ステージする」「lazygit で 2 つの Word の変更を取り込む」を置く
   - 各用途は、検証記録・参考資料・注意点・選択した方針と、リードや手順の説明を、用途末尾の「補足と注意点」に置く。文書全体の補足と「省略できない初期設定」は、冒頭の「この文書の補足と注意点」に置く
 - `docs/virtual-machines.md` — 仮想マシンの手順書。両 OS を 1 冊にし、`## AlmaLinux 10 で使う` が VirtualBox・VirtualBox の bootc ゲスト・kvm-container、`## Windows 11 で使う` が Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox
   - 検証記録は、用途ごとに `virtualbox`・`virtualbox-guest-bootc`・`hyper-v`・`vmware`・`windows-sandbox` を使う。参考資料・注意点・選択した方針と、リード・手順から外した説明は、kvm-container 以外の 6 用途それぞれの末尾の折りたたみに置く。VirtualBox の参考資料と注意点は、AlmaLinux 10 と Windows 11 の項に分ける。kvm-container には折りたたみを作らず、仕様・参照情報・検証記録は、kvm-container のリポジトリにある
@@ -38,6 +33,7 @@
   - 補足・注意点・選択した方針・参照資料は、各用途の末尾の「Podman の補足と注意点」などの折りたたみに置く。検証記録は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使い、各折りたたみの「参照」で「検証記録（`docs/verification/<名前>.md`）」と文字で指す
   - 文中の短いコマンドの言及と、誤用・手順で使わないコマンド・試験用のものへの影響の注意は、各用途の折りたたみに置く。Distrobox のボックスがホームなどを共有して隔離にならないことは、作る項のリードに残す。見える箇条書きは判断と操作に要るものに絞り、出力例・版・件数・予告・説明は手順ごとの補足へ移す
 - 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の `repos/<リポジトリ名>/` に置く
+- excel-diff・md-table-excel・md-format・md-table-sticky の導入・使い方・更新の手順は、それぞれのリポジトリの `docs/install.md`・`docs/usage.md` に置く。2冊の「Git と開発の道具」のリードと `## 更新` のリードから案内する
 - 補足と注意点はこのリポジトリの正本に置き、`docs/verification/` は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスに置く
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
 - 共同 VM 検証の横断報告は、Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/hypervisor-verification.md` にある
