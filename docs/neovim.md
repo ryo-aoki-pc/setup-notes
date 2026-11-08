@@ -319,7 +319,7 @@
 - 設定と `lazy-lock.json` を取り込み、プラグインをその版に揃える
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
-- Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)の手順 2 で上げる
+- Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)の手順 2 で上げる
 
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
@@ -352,7 +352,7 @@
 #### LazyVim の安全な Markdown 整形を導入する
 
 - 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、Neovim で整形を確かめる
-- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)と、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してある
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)と、[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)を通してある
 - 実行場所: 自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 2 は、手順 1 で開く Neovim の中。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブで開く
 
 1. 試験用の Markdown を Neovim で開く。
@@ -391,7 +391,7 @@
    - 一部の lint 診断は残ることがある
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
    - 貼り終えたら Esc を押し、ノーマルモードに戻る
-   - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](almalinux-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
+   - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)を通してから、Neovim を開き直す
    - 確かめ終えたら `:qa!` で閉じる。試験用の `/tmp/lazyvim-format-check.md` は、要らなければ `rm /tmp/lazyvim-format-check.md` で消す
 
 #### LazyVim のカーソル色を tmux で使う
@@ -961,7 +961,7 @@
    ```
 
    - `/kensaku` で「検索」に移り、検索欄の `<Tab>` で「検索」に置き換わることを確かめる。`:w` で見出しの `#` の後の空白が 1 つになり (`# 動作確認`)、`<C-j>` で `A` / `あ` が切り替わり、ファイルピッカーのアイコンが表示されればよい
-   - 初めてなら [md-format を導入・更新する](windows-setup.md#md-format-を導入更新する) で整形器を入れ、[安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) で確かめる
+   - 初めてなら [Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する) で整形器を入れ、[安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) で確かめる
    - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
    - `:qa!` で閉じる
    - **次の手順は、`:qa!` で閉じてから貼る**（続けて貼ると、検索・整形・IME の確認を終える前でも後ろの公式スタイルの取得が動く）
@@ -981,7 +981,7 @@
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
-- Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)の手順 3 で上げる
+- Markdown の整形器 md-format は、この項では上がらない。[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)の手順 3 で上げる
 
 1. 管理者ではない PowerShell 7 を開く。
 
@@ -1018,7 +1018,7 @@
 #### Windows 11 で LazyVim の安全な Markdown 整形を導入する
 
 - 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、保存と手動整形を確かめる
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してある
+- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 からは、その窓で起動する Neovim
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -1062,7 +1062,7 @@
    - `<leader>cf` はビジュアル選択した範囲にも使える
    - 一部の lint 診断は残ることがある
    - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
-   - `md-format (mdfmt) が導入されていません` と出たら、[md-format を導入・更新する](windows-setup.md#md-format-を導入更新する)を通してから、Neovim を開き直す
+   - `md-format (mdfmt) が導入されていません` と出たら、[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)を通してから、Neovim を開き直す
    - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
    - **ほかのブロックは、Neovim を閉じてから貼る**（Neovim を開いたまま貼ると、Neovim への入力になる）
 
