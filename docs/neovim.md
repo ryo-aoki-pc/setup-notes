@@ -52,6 +52,7 @@
 
 - [md-preview](https://github.com/ryo-aoki-pc/md-preview) が手元で描く。本文を GitLab に送らず、トークンは要らない
 - 公式スタイルは任意で、取得は md-preview の手順（[AlmaLinux 10](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-の公式スタイルを取得する)・[Windows 11](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)）に従う
+- PlantUML の図も任意で、`plantuml` コマンドが PATH にあれば、手元のそのコマンドで描く。無ければ、図は原文のコードブロックで表示する。Windows 11 の導入は md-preview の [Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う
 - 設計は [md-preview の参考資料](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/reference/readme.md)を参照する
 
 **更新時の :checkhealth の読み方**
@@ -1006,6 +1007,7 @@
 - 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 は、その窓で起動する Neovim
 - 公式スタイルは任意。[Windows 11 で md-preview の公式スタイルを取得する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)に従う（Neovim の `:GitLabPreviewInstall` でも取得できる）
+- PlantUML の図も任意。[Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う。入れた後は、Neovim を起動し直す
 
 1. 管理者ではない PowerShell 7 を開く。
 
