@@ -305,6 +305,7 @@
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
 - Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)の手順 2 で上げる
+- GitLab プレビューのアプリ md-preview も、この項では上がらない。[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-を導入更新する)を通して上げる
 
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
@@ -500,7 +501,7 @@
    ```
 
    - `<leader>cp` を押す。ブラウザが開き、操作欄の左に `README.md`、右に「一覧」「見出し」「配色」「本文幅」が出ればよい（「GitLab との違い <件数>」は、知らせがあるときだけ出る）
-   - `md-preview が導入されていません` と出たら、前提の md-preview の導入を通してから、この手順をやり直す
+   - `md-preview が導入されていません` か `取り決めの版が違います` と出たら、前提の md-preview の導入・更新を通してから、この手順をやり直す
    - もう一度 `<leader>cp` を押す。ページの上に「プレビューを止めた」と出ればよい
    - `:qa` で閉じる。プレビューのアプリも終わり、ページの上に「プレビューが終了した」と出る
 
@@ -923,6 +924,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - Markdown の整形器 md-format は、この項では上がらない。[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)の手順 3 で上げる
+- GitLab プレビューのアプリ md-preview も、この項では上がらない。[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通して上げる
 
 1. 管理者ではない PowerShell 7 を開く。
 
@@ -1017,7 +1019,7 @@
    ```
 
    - `<leader>cp` を押す。ブラウザが開き、操作欄の左に `README.md`、右に「一覧」「見出し」「配色」「本文幅」が出ればよい（「GitLab との違い <件数>」は、知らせがあるときだけ出る）
-   - `md-preview が導入されていません` と出たら、前提の md-preview の導入を通してから、この手順をやり直す
+   - `md-preview が導入されていません` か `取り決めの版が違います` と出たら、前提の md-preview の導入・更新を通してから、この手順をやり直す
    - もう一度 `<leader>cp` を押す。ページの上に「プレビューを止めた」と出ればよい
    - `:qa` で閉じる。プレビューのアプリも終わり、ページの上に「プレビューが終了した」と出る
 
