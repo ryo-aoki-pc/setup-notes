@@ -3965,7 +3965,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ## Git と開発の道具
 
 - git-delta・GitHub CLI・lazygit・yazi。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
-- excel-diff・mdtable・md-format（mdfmt）・md-table-sticky は、それぞれのリポジトリの手順（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#windows-11-で-excel-diff-を導入更新する)・[mdtable](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/install.md#windows-11-で-mdtable-を導入更新する)・[md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)・[md-table-sticky](https://github.com/ryo-aoki-pc/md-table-sticky/blob/main/docs/install.md#md-table-sticky-のブックマークレットを登録する)）で入れる。使い方は、各リポジトリの `docs/usage.md` にある
+- excel-diff・mdtable・md-format（mdfmt）・md-preview（mdpreview）・md-table-sticky は、それぞれのリポジトリの手順（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#windows-11-で-excel-diff-を導入更新する)・[mdtable](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/install.md#windows-11-で-mdtable-を導入更新する)・[md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)・[md-preview](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)・[md-table-sticky](https://github.com/ryo-aoki-pc/md-table-sticky/blob/main/docs/install.md#md-table-sticky-のブックマークレットを登録する)）で入れる。使い方は、各リポジトリの `docs/usage.md` にある
 
 ### git-delta
 
@@ -5145,7 +5145,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - PowerShell の開発の設定は、[シェルと端末のセットアップの「PowerShell の開発の設定を更新する」](shell-terminal.md#powershell-の開発の設定を更新する)で上げる。scoop で gh・rg・fd・delta・bat・starship を上げた後は、同じ項で補完の控えを作り直す
 - 自分用の設定のうち、WezTerm・Neovim はそれぞれのリポジトリの更新で上げ、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
   - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
-- excel-diff・mdtable・md-format は、それぞれのリポジトリの導入の項（[Windows 11 で excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#windows-11-で-excel-diff-を導入更新する)・[Windows 11 で mdtable を導入・更新する](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/install.md#windows-11-で-mdtable-を導入更新する)・[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)）の更新の箇条書きで上げる
+- excel-diff・mdtable・md-format・md-preview は、それぞれのリポジトリの導入の項（[Windows 11 で excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#windows-11-で-excel-diff-を導入更新する)・[Windows 11 で mdtable を導入・更新する](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/install.md#windows-11-で-mdtable-を導入更新する)・[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)・[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)）の更新の箇条書きで上げる
 - md-table-sticky は、[md-table-sticky のブックマークレットを登録する](https://github.com/ryo-aoki-pc/md-table-sticky/blob/main/docs/install.md#md-table-sticky-のブックマークレットを登録する)で、お気に入りを作り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
