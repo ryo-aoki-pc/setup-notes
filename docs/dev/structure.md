@@ -19,7 +19,7 @@
   - gnome-remote.md は「GNOME のデスクトップ共有」「GNOME のヘッドレスセッション」「GNOME のリモートログイン」、samba.md は「Samba クライアント」「Samba サーバー」と「Windows 11 で Samba クライアントを使う」、neovim.md は両 OS の項を扱う
   - gnome-remote.md の検証記録・参考資料・注意点・選択した方針は、3 用途それぞれの末尾の「補足と注意点」に置く。出力例と説明は、折りたたみの各項のリード・手順の区分に置く
   - リモートログインの winpr-makecert の証明書作成と、FreeRDP・ログによる接続確認は、同じ用途の子の任意の項に置く。grd.conf の確認と修復は「GNOME のリモートログイン」の手順 8 に置く
-  - neovim.md の補足・注意点・参照資料は、AlmaLinux 10 の「Neovim」と「Windows 11 で Neovim を入れる」の末尾の折りたたみに分ける。両 OS にかかる treesitter・公式スタイル・健全性の読み方と設定ファイルの場所は、冒頭の「この文書の補足と注意点」に置く。検証記録は各折りたたみの「参照」で「検証記録（`docs/verification/neovim.md`）」と文字で指す
+  - neovim.md の補足・注意点・参照資料は、AlmaLinux 10 の「Neovim」と「Windows 11 で Neovim を入れる」の末尾の折りたたみに分ける。両 OS にかかる treesitter・GitLab プレビュー・健全性の読み方と設定ファイルの場所は、冒頭の「この文書の補足と注意点」に置く。検証記録は各折りたたみの「参照」で「検証記録（`docs/verification/neovim.md`）」と文字で指す
   - samba.md の補足・注意点・選択した方針・参照資料は「Samba クライアント」「Samba サーバー」「Windows 11 で Samba クライアントを使う」の各用途の末尾の折りたたみに分ける。検証記録は各折りたたみの「参照」で、サーバーは「検証記録」、両 OS のクライアントは「検証記録（`docs/verification/samba-client.md`）」と文字で指す
   - Neovim の Windows 11 の項と子の LazyVim の 5 項には「Windows 11 で」を付ける
   - 検証記録は、用途ごとに `gnome-desktop-sharing`・`gnome-headless-session`・`gnome-remote-desktop`・`samba`・`samba-client`・`neovim` を使う。補足と注意点は、各用途の末尾の折りたたみに置く
@@ -33,7 +33,7 @@
   - 補足・注意点・選択した方針・参照資料は、各用途の末尾の「Podman の補足と注意点」などの折りたたみに置く。検証記録は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使い、各折りたたみの「参照」で「検証記録（`docs/verification/<名前>.md`）」と文字で指す
   - 文中の短いコマンドの言及と、誤用・手順で使わないコマンド・試験用のものへの影響の注意は、各用途の折りたたみに置く。Distrobox のボックスがホームなどを共有して隔離にならないことは、作る項のリードに残す。見える箇条書きは判断と操作に要るものに絞り、出力例・版・件数・予告・説明は手順ごとの補足へ移す
 - 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の `repos/<リポジトリ名>/` に置く
-- excel-diff・md-table-excel・md-format・md-table-sticky の導入・使い方・更新の手順は、それぞれのリポジトリの `docs/install.md`・`docs/usage.md` に置く。2冊の「Git と開発の道具」のリードと `## 更新` のリードから案内する
+- excel-diff・md-table-excel・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれのリポジトリの `docs/install.md`・`docs/usage.md` に置く。2冊の「Git と開発の道具」のリードと `## 更新` のリードから案内する
 - 補足と注意点はこのリポジトリの正本に置き、`docs/verification/` は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスに置く
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
 - 共同 VM 検証の横断報告は、Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/hypervisor-verification.md` にある

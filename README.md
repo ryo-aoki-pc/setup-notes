@@ -69,7 +69,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### 開発の補助
 
-- Excel・Word の差分は [excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md)、Markdown の表の Excel での編集は [md-table-excel](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/install.md)、Markdown の整形は [md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md)、GitLab の表の固定は [md-table-sticky](https://github.com/ryo-aoki-pc/md-table-sticky/blob/main/docs/install.md) の手順で入れる
+- Excel・Word の差分は [excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md)、Markdown の表の Excel での編集は [md-table-excel](https://github.com/ryo-aoki-pc/md-table-excel/blob/main/docs/install.md)、Markdown の整形は [md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md)、GitLab の Markdown のプレビューは [md-preview](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md)、GitLab の表の固定は [md-table-sticky](https://github.com/ryo-aoki-pc/md-table-sticky/blob/main/docs/install.md) の手順で入れる
 - シェルの検査は [ShellCheck と shfmt](docs/almalinux-setup.md#shellcheck-と-shfmt) を通す
 
 ### コンテナ
