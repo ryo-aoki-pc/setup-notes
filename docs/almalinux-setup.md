@@ -2049,7 +2049,7 @@
 ## Git と開発の道具
 
 - Git・git-delta・GitHub CLI・lazygit・yazi・ShellCheck と shfmt・VS Code と、オフラインの npm。Neovim（LazyVim）は、[Neovim のセットアップ](neovim.md)で入れる
-- excel-diff・md-format（mdfmt）・md-preview（mdpreview）は、それぞれのリポジトリの手順（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#excel-diff-を導入更新する)・[md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)・[md-preview](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-を導入更新する)）で入れる。使い方は、各リポジトリの `docs/usage.md` にある
+- excel-diff・md-format（mdfmt）・md-preview（mdpreview）は、それぞれのリポジトリの手順（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#excel-diff-を導入更新する)・[md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)・[md-preview](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#md-preview-を導入更新する)）で入れる。使い方は、各リポジトリの `docs/usage.md` にある
 
 ### Git
 
@@ -5144,7 +5144,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - HackGen Console NF・git-delta・Neovim・lazygit・yazi（Homebrew で入れたもの）は、[共通の bash 設定・Homebrew・Flatpak を上げる](#共通の-bash-設定homebrewflatpak-を上げる)の手順 3 で上がる
   - **Neovim の設定やプラグインは更新に追従しない**。メジャー更新の後は `:checkhealth` で壊れていないか見る
 - 共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm と自分用の WezTerm の設定の上げ方は、[シェルと端末のセットアップ](shell-terminal.md)の冒頭にまとめてある
-- excel-diff・md-format・md-preview は、それぞれのリポジトリの導入の項（[excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#excel-diff-を導入更新する)・[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)・[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-を導入更新する)）の更新の箇条書きで上げる
+- excel-diff・md-format・md-preview は、それぞれのリポジトリの導入の項（[excel-diff を導入・更新する](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#excel-diff-を導入更新する)・[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)・[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#md-preview-を導入更新する)）の更新の箇条書きで上げる
 - 自分用の設定のうち、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる。Neovim のプラグインと外部コマンドは[LazyVimStarter の更新手順](neovim.md#lazyvim-の本体外部コマンドプラグインを更新する)
   - yazi の [README の「上流の新しい版に追従する」](https://github.com/ryo-aoki-pc/yazi#上流の新しい版に追従する)は、持ち主が 1 台で行う作業。ほかの PC の clone は[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
 

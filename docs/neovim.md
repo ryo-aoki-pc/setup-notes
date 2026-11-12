@@ -50,10 +50,10 @@
 
 **GitLab プレビュー**
 
-- [md-preview](https://github.com/ryo-aoki-pc/md-preview) が手元で描く。本文を GitLab に送らず、トークンは要らない
-- 公式スタイルは任意で、取得は md-preview の手順（[AlmaLinux 10](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-の公式スタイルを取得する)・[Windows 11](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)）に従う
-- PlantUML の図も任意で、`plantuml` コマンドが PATH にあれば、手元のそのコマンドで描く。無ければ、図は原文のコードブロックで表示する。Windows 11 の導入は md-preview の [Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う
-- 設計は [md-preview の参考資料](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/reference/readme.md)を参照する
+- [md-preview](https://github.com/ryo-aoki-pc/md-tools) が手元で描く。本文を GitLab に送らず、トークンは要らない
+- 公式スタイルは任意で、取得は md-preview の手順（[AlmaLinux 10](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#md-preview-の公式スタイルを取得する)・[Windows 11](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)）に従う
+- PlantUML の図も任意で、`plantuml` コマンドが PATH にあれば、手元のそのコマンドで描く。無ければ、図は原文のコードブロックで表示する。Windows 11 の導入は md-preview の [Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う
+- 設計は [md-preview の参考資料](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/reference/readme.md)を参照する
 
 **更新時の :checkhealth の読み方**
 
@@ -306,7 +306,7 @@
 - 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。[WezTerm](shell-terminal.md#wezterm)を通したなら、WezTerm のタブ。この項の手順 1 で `pull` が止まったときの、手元の変更の確認を省かない
 - Markdown の整形器 md-format は、この項では上がらない。[md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#md-format-を導入更新する)の手順 2 で上げる
-- GitLab プレビューのアプリ md-preview も、この項では上がらない。[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-を導入更新する)を通して上げる
+- GitLab プレビューのアプリ md-preview も、この項では上がらない。[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#md-preview-を導入更新する)を通して上げる
 
 1. AlmaLinux 10 では、設定を最新にしてプラグインを揃える。
 
@@ -491,9 +491,9 @@
 #### LazyVim の GitLab プレビューを導入する
 
 - md-preview を使い、LazyVim の Markdown をブラウザでプレビューする
-- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)と、[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-を導入更新する)を通してある
+- 前提: [LazyVim の設定を導入する](#lazyvim-の設定を導入する)と、[md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#md-preview-を導入更新する)を通してある
 - 実行場所: GNOME にログインした自分のユーザーの端末（bash。`sudo` は使わない）。この項の手順 1 で起動する Neovim
-- 公式スタイルは任意。[md-preview の公式スタイルを取得する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#md-preview-の公式スタイルを取得する)に従う（Neovim の `:GitLabPreviewInstall` でも取得できる）
+- 公式スタイルは任意。[md-preview の公式スタイルを取得する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#md-preview-の公式スタイルを取得する)に従う（Neovim の `:GitLabPreviewInstall` でも取得できる）
 
 1. AlmaLinux 10 では、この設定の README を開き、プレビューで確かめる。
 
@@ -925,7 +925,7 @@
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - Markdown の整形器 md-format は、この項では上がらない。[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)の手順 3 で上げる
-- GitLab プレビューのアプリ md-preview も、この項では上がらない。[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通して上げる
+- GitLab プレビューのアプリ md-preview も、この項では上がらない。[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通して上げる
 
 1. 管理者ではない PowerShell 7 を開く。
 
@@ -1004,10 +1004,10 @@
 #### Windows 11 で LazyVim の GitLab プレビューを導入する
 
 - md-preview を使い、LazyVim の Markdown をブラウザでプレビューする
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通してある
+- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 は、その窓で起動する Neovim
-- 公式スタイルは任意。[Windows 11 で md-preview の公式スタイルを取得する](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)に従う（Neovim の `:GitLabPreviewInstall` でも取得できる）
-- PlantUML の図も任意。[Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-preview/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う。入れた後は、Neovim を起動し直す
+- 公式スタイルは任意。[Windows 11 で md-preview の公式スタイルを取得する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)に従う（Neovim の `:GitLabPreviewInstall` でも取得できる）
+- PlantUML の図も任意。[Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う。入れた後は、Neovim を起動し直す
 
 1. 管理者ではない PowerShell 7 を開く。
 

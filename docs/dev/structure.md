@@ -33,7 +33,7 @@
   - 補足・注意点・選択した方針・参照資料は、各用途の末尾の「Podman の補足と注意点」などの折りたたみに置く。検証記録は、用途ごとに `podman`・`podman-compose`・`podman-tui`・`lazydocker`・`distrobox` を使い、各折りたたみの「参照」で「検証記録（`docs/verification/<名前>.md`）」と文字で指す
   - 文中の短いコマンドの言及と、誤用・手順で使わないコマンド・試験用のものへの影響の注意は、各用途の折りたたみに置く。Distrobox のボックスがホームなどを共有して隔離にならないことは、作る項のリードに残す。見える箇条書きは判断と操作に要るものに絞り、出力例・版・件数・予告・説明は手順ごとの補足へ移す
 - 設定リポジトリの導入操作は正本の該当用途に置く。実装・仕様・開発用検査・他 OS 固有の手順は各リポジトリに置き、検証記録は Forgejo の非公開リポジトリ `setup-notes-verification` の `repos/<リポジトリ名>/` に置く
-- excel-diff・md-table-excel・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれのリポジトリの `docs/install.md`・`docs/usage.md` に置く。2冊の「Git と開発の道具」のリードと `## 更新` のリードから案内する
+- excel-diff・md-table-excel・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれの道具の置き場所（excel-diff・md-format のリポジトリと、md-tools のルート・`mdtable/`・`sticky/`）の `docs/install.md`・`docs/usage.md` に置く。2冊の「Git と開発の道具」のリードと `## 更新` のリードから案内する
 - 補足と注意点はこのリポジトリの正本に置き、`docs/verification/` は Forgejo の非公開リポジトリ `setup-notes-verification` の同じパスに置く
 - [README](../../README.md) — 手順書（正本）の表、用途から探す短い案内、置き場所と記法
 - 共同 VM 検証の横断報告は、Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/hypervisor-verification.md` にある
