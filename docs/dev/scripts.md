@@ -96,4 +96,4 @@ apply は、変える前に `今:` と `変える:` を出す。`Complete-SetupI
 - 秘密を引数・出力・結果・ファイルに出さない。`$PSScriptRoot` と配布した `scripts/` の中には書き込まない
 - check は設定・プロファイル・ファイルを変えない。明示された `SETUP_ITEM_RESULT` への結果の出力だけは行う
 - `auto` と check は対話で止まらない。対話が要る操作は `terminal` にする。画面を開いて戻るだけの `guide` は、手作業待ちを返す
-- 開発の PC で apply と check を実行しない。構文は両方の PowerShell の `Parser.ParseFile` で調べ、設定の変更と読み戻しは検証用の PC で確かめる
+- 開発の PC で apply を実行しない。check は読むだけなので流してよい。構文は両方の PowerShell の `Parser.ParseFile` で調べ、設定の変更と読み戻しは検証用の PC で確かめる
