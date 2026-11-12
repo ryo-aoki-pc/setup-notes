@@ -7,7 +7,7 @@
 Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・リモート操作も、対応する OS のカテゴリの用途に集約する。仮想マシンは両 OS とも `docs/virtual-machines.md`、GNOME のリモート操作は `docs/gnome-remote.md`、Neovim・Samba は両 OS とも `docs/neovim.md`・`docs/samba.md`、シェルと端末は両 OS とも `docs/shell-terminal.md`、コンテナは AlmaLinux 10 の `docs/containers.md` を正本とする。導入元の一覧は `docs/tool-catalog.md` に置く。正本を増やす・減らすのは、利用者の決定があるときだけにする。
 
 - 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
-- excel-diff・md-table-excel・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、元リポジトリの `docs/install.md`・`docs/usage.md` に置く（書き方はこの文書に従う）
+- excel-diff・md-table-excel・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれの道具の置き場所（excel-diff・md-format のリポジトリと、md-tools のルート・`mdtable/`・`sticky/`）の `docs/install.md`・`docs/usage.md` に置く（書き方はこの文書に従う）
 - 補足・選択した方針・参照資料・注意点は、用途の末尾の折りたたみに置く。検証記録は用途ごとの文書に置き、折りたたみの「参照」から案内する
 - 文書を移す・分ける・まとめるときは、移した経緯と、旧ファイル名・旧見出しとの対応を文書に書かない（経緯は git の履歴と Pull Request の本文に残す）。リンクを今の場所へ直す。中身が新しい場所への案内だけになったファイルは消す
 - 両 OS を載せる手順書では、OS で分かれる「実施手順」「更新」の見出しに OS 名を入れる（`AlmaLinux 10 で使う`・`AlmaLinux 10 の更新`、`Windows 11 で使う`・`Windows 11 の更新`）。OS 名の無い「実施手順」「更新」は、片方の OS だけの文書か、`## AlmaLinux 10 で使う` などの OS の節の下にだけ置く

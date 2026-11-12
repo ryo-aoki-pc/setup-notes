@@ -21,7 +21,7 @@ AI エージェントの手順と、職場で使わない手順は、Forgejo の
 - 大きな項のうち、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、Neovim・Samba（クライアント・サーバー）は両 OS とも `docs/neovim.md`・`docs/samba.md` へ集約する。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
 - シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は、両 OS とも `docs/shell-terminal.md` へ集約する。Homebrew・btop・gdu・Git for Windows・貼り付けの設定・SSH の項は2冊に残す。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
 - コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）は、AlmaLinux 10 の `docs/containers.md` へ集約する。almalinux-setup.md には項を置かず、冒頭と `## 更新` のリードから案内する
-- 自作の道具の excel-diff・md-table-excel（mdtable）・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれのリポジトリの `docs/install.md`・`docs/usage.md` に置く。2冊には項を置かず、「Git と開発の道具」のリードと `## 更新` のリードから案内する
+- 自作の道具の excel-diff・md-table-excel（mdtable）・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれの道具の置き場所の `docs/install.md`・`docs/usage.md` に置く（excel-diff・md-format はそのリポジトリ、md-preview は md-tools のルート、md-table-excel は md-tools の `mdtable/`、md-table-sticky は md-tools の `sticky/`）。2冊には項を置かず、「Git と開発の道具」のリードと `## 更新` のリードから案内する
 - 正本を増やす・減らすのは、利用者の決定があるときだけにする。以下の「正本」は、この 9 冊を指す
 - 個別ツール・VM・リモート操作も対象。導入前、ホスト・ゲスト、Workstation・bootc の条件を明記する
 - 設定・実装・開発用検査は各リポジトリに残す。導入の変更時は正本と元リポジトリの案内を合わせる
