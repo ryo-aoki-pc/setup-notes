@@ -6,7 +6,7 @@
 
 Windows 11・AlmaLinux 10 の実施手順は、既存・新規とも `docs/windows-setup.md`・`docs/almalinux-setup.md` を正本とする。個別ツール・リモート操作も、対応する OS のカテゴリの用途に集約する。仮想マシンは両 OS とも `docs/virtual-machines.md`、GNOME のリモート操作は `docs/gnome-remote.md`、Neovim・Samba は両 OS とも `docs/neovim.md`・`docs/samba.md`、シェルと端末は両 OS とも `docs/shell-terminal.md`、コンテナは AlmaLinux 10 の `docs/containers.md` を正本とする。導入元の一覧は `docs/tool-catalog.md` に置く。正本を増やす・減らすのは、利用者の決定があるときだけにする。
 
-- 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す
+- 設定・スクリプトの実装、開発用検査、macOS・他 Linux 固有の手順は元リポジトリに残す。この手順書の項が実行するスクリプトは例外で、`scripts/windows/` に置き、[スクリプトの約束](scripts.md)に従う。手順書は呼び出しと判定を載せ、処理の説明は用途の末尾の折りたたみに置く
 - excel-diff・md-table-excel・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれの道具の置き場所（excel-diff・md-format のリポジトリと、md-tools のルート・`mdtable/`・`sticky/`）の `docs/install.md`・`docs/usage.md` に置く（書き方はこの文書に従う）
 - 補足・選択した方針・参照資料・注意点は、用途の末尾の折りたたみに置く。検証記録は用途ごとの文書に置き、折りたたみの「参照」から案内する
 - 文書を移す・分ける・まとめるときは、移した経緯と、旧ファイル名・旧見出しとの対応を文書に書かない（経緯は git の履歴と Pull Request の本文に残す）。リンクを今の場所へ直す。中身が新しい場所への案内だけになったファイルは消す
@@ -164,7 +164,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
   - **貼り先**: 貼った全体が 1 つの入力になる窓に貼る前提で書く。どちらも、貼っただけでは動かず、Enter で動く（実測は検証記録の付録: `docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）
     - bash は、ブラケットペーストの効く端末（bash 5.1 以降で `enable-bracketed-paste` が on。AlmaLinux 10 の GNOME の端末・WezTerm、Windows Terminal・WezTerm からの SSH、WezTerm の Git Bash）
     - PowerShell は、shell-terminal.md の「Windows Terminal で複数行を 1 つの入力として貼る」を通した窓（PSReadLine は bracketed paste を使わない。管理者の窓にも効く）
-    - 例外（貼った行が 1 行ずつ届く窓）: windows-setup.md の「Windows Update」「Microsoft Store の更新」「貼り付けの設定」「アプリを入れる」と、shell-terminal.md の「Windows Terminal で複数行を 1 つの入力として貼る」（割り当てより前に通す）、制限言語モードの窓、VM のコンソールにキー入力で送る所、bash が 5.1 未満の環境。例外の項は、今までの形（上の骨格の対話入力と、下の `sudo` の `{ }`）で書く
+    - 例外（貼った行が 1 行ずつ届く窓）: windows-setup.md の「手順書のスクリプトを取る」「Windows Update」「Microsoft Store の更新」「貼り付けの設定」「アプリを入れる」と、shell-terminal.md の「Windows Terminal で複数行を 1 つの入力として貼る」（割り当てより前に通す）、制限言語モードの窓、VM のコンソールにキー入力で送る所、bash が 5.1 未満の環境。例外の項は、今までの形（上の骨格の対話入力と、下の `sudo` の `{ }`）で書く
     - 冒頭の全体の前提に、貼り先と「貼った後に Enter を押す」を書く。理由は shell-terminal.md の該当用途の折りたたみの「選択した方針」に置く
   - **コメント**: 2 行以上のブロック（確認の見出しの行と、`{`・`}`・`& {` の行は数えない）には、処理のまとまりごとに、その直前の行へ `# <何をするか>` を 1 行置く。まとまりが 1 つなら、ブロックの先頭に 1 行置く
     - 日本語で、「〜する」で終わる短い 1 文にする（句点なし、目安 40 字まで）。`{` や `& {` で囲んだブロックは、その次の行から置き、字下げは続く行にそろえる
@@ -173,7 +173,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
     - 置かない所: 1 行のブロック、1 変数だけのブロック、`text` などのブロック、ヒアドキュメント・ヒア文字列の本文（書くファイルの中身になる）、行末の `\`・`` ` ``・`|`・`&&`・`||`・`,` で続く行の間、`$(…)` の中、入力の数を数える試験のブロック（shell-terminal.md の「Windows Terminal で複数行を 1 つの入力として貼る」の手順 4。試験の条件を変えない）。任意の変数のブロックは、変数ごとの行末のコメントのままでよい
   - Windows の操作は `powershell` のブロックにし、PowerShell 7（Microsoft Store 版）で貼る。管理者が必要な操作は該当項で指定する
     - 次に当たる項（または手順）だけは Windows PowerShell 5.1 で貼り、理由を用途の末尾の折りたたみの「<項>の手順 N: 5.1 にする理由」に置く
-      - 7 を入れる前に通す項（windows-setup.md の「Windows Update」「Microsoft Store の更新」「貼り付けの設定」「アプリを入れる」の手順 1〜7）
+      - 7 を入れる前に通す項（windows-setup.md の「手順書のスクリプトを取る」「Windows Update」「Microsoft Store の更新」「貼り付けの設定」と、「アプリを入れる」の手順 1〜7）
       - Dism のコマンド（`*-WindowsCapability`・`*-WindowsOptionalFeature` など）
       - PowerShell のリモートの受け口（`Enable-PSRemoting`）
       - 5.1 だけで動くモジュール（PSWindowsUpdate）
@@ -183,7 +183,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
     - タスク・ショートカットなどが起動する `powershell.exe` は、貼る窓とは別に決める
   - Git Bash・WSL・別ホストの bash を使う操作は、貼り先を説明で明記する。共通 CLI の同一ブロックを参照するときもシェルを指定する
   - 貼り付け設定前の conhost は Ctrl+V を使う。scoop の導入は管理者ではない窓で行い、SSH の昇格済みセッションには貼らない
-  - PowerShell の変数が空ならブロック先頭で中断する。`}` と `else` / `elseif` は同じ行に置く
+  - PowerShell の変数が空ならブロック先頭で中断する。`scripts/windows/` の呼び出しだけのブロックは、スクリプト側で必須入力を検査し、空なら `中断:` を出して止まる形でもよい。`}` と `else` / `elseif` は同じ行に置く
   - Windows Sandbox の状態確認・有効化・再起動は Dism のコマンドを使うため、管理者の Windows PowerShell 5.1 に貼る。起動・試験・窓を閉じた後の確認は通常のデスクトップで行う
   - 初期設定の「Git」は例外で、Windows でも Git for Windows の Git Bash に AlmaLinux 10 と同じ `bash` のブロックを貼る（PowerShell 向けに書き分けない。shell-terminal.md の「Git Bash と WezTerm の設定」の手順 4 が、almalinux-setup.md の「Git」の手順 1〜10 を名指しする）。Git for Windows を入れる項（windows-setup.md の「Git for Windows」）だけは PowerShell のブロック。windows-setup.md の「git-delta」の手順 4 と shell-terminal.md の「シェルのツールを入れる」の手順 7・8 も、Git Bash（WezTerm のタブ）で AlmaLinux 10 の手順（almalinux-setup.md の「git-delta」の手順 1・3、shell-terminal.md の「シェルのツール」の手順 4〜7・9・10 と「キー操作を試す」の手順 2〜5）を名指しする、コマンドの無い手順にする（bash のブロックを書き写さず、Windows との違いだけを箇条書きに書く）
   - `<...>` を含む別マシン用のコマンドは、ブロックにせず箇条書きのインラインコードにする
@@ -193,6 +193,7 @@ Windows のカテゴリは、基本の設定・デスクトップ・ネットワ
     - 点検は、ブロックを bash が 1 回に読む単位（`bash -n` が通る最小の行のまとまり）に区切り、`sudo` を含む単位の後ろにコメント以外の行が残らないかで見る
   - 目視で確かめてから次を実行するもの（dry-run の後の本番など）は、手順（手順の外ならブロック）を分ける
   - 変数が空なら止めるのは、ブロックの先頭の `if [ -z "${VAR}" ]; then echo '中断: …' >&2; else … fi` で行う。ヒアドキュメント・パイプ・`$(…)` の中の `${VAR:?}` は、そのコマンドしか止めず、後ろの行は動く（almalinux-setup.md の検証記録にある「GNOME の表示と入力」の補足と、「Samba クライアント」）。`{ … }` で囲んでも同じ
+- 手順書のスクリプトを呼ぶ手順は、読むだけなら `check.ps1`、変更するなら `apply.ps1` を呼ぶ。成功条件は `状態:` の行で判断し、`中断:` が出たら止まる。Restricted の窓で最初に通す「貼り付けの設定」は、`& { … }` の中で `Set-ExecutionPolicy -Scope Process` を使って呼び出し、最後に Process の元の値へ戻す
 - **確認の見出し**: 貼ったコマンドの表示と、確かめる出力を見分けるため、成功条件で出力を確かめるブロックには、判定する出力を出す最初のコマンドの直前に、反転表示の「確認」を出す 1 行を置く
   - `bash` は `printf '\n\033[7m 確認 \033[0m\n'`、`powershell` は ``"`n$([char]27)[7m 確認 $([char]27)[0m"``（ほかの行と同じ字下げ）
   - ブロック全体が確認ならブロックの先頭（`{` や `& {` で囲んだブロックは、その次の行）、変数ブロックは読み戻しの直前。判定する出力が操作のコマンド自身の出力なら、そのコマンドの直前
