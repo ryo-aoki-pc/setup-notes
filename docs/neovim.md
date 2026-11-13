@@ -5,8 +5,8 @@
 > [!IMPORTANT]
 >
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
-> - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - conhost の窓で複数行を右クリックで貼るときは、使う版の PSReadLine の Ctrl+Enter が `AddLine` に割り当てられ、貼った行が順番どおりに 1 つの入力になることを前提にする。未設定の窓では Ctrl+V で貼る
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
 - bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
@@ -697,14 +697,14 @@
 ### Windows 11 で Neovim を入れる
 
 - scoop で Neovim を入れ、自分用の LazyVim の設定を導入する
-- 前提: [アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [scoop の導入](https://scoop.sh/)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - scoop 版と、winget などで入れた Neovim は片方だけにする
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 管理者ではないことと、scoop・git・VC++ のランタイム・ほかの Neovim を確かめる。
 
@@ -721,8 +721,8 @@
    ```
 
    - `PowerShell` が `7.` で始まり、`Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 で入れる
-   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](windows-setup.md#git-for-windows)
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
+   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](https://gitforwindows.org/)
    - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、この手順を貼り直す
    - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。中断し、既存の導入元と設定を確かめる
 
@@ -770,7 +770,7 @@
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. Windows の PowerShell でも使うように、`EDITOR`・`VISUAL` を `nvim` にする。
 
@@ -794,7 +794,7 @@
 #### Windows 11 で LazyVim の設定を導入する
 
 - Windows の Neovim に自分用の LazyVim の設定と外部コマンド・プラグインを入れる
-- 前提: [Git for Windows](windows-setup.md#git-for-windows)・[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)と、[Neovim](#windows-11-で-neovim-を入れる)で本体を先に入れてある
+- 前提: [Git for Windows](https://gitforwindows.org/)・[scoop の導入](https://scoop.sh/)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)と、[Neovim](#windows-11-で-neovim-を入れる)で本体を先に入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
 - Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
@@ -802,7 +802,7 @@
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. git が無ければ入れ、scoop に `extras` のバケットを足す。
 
@@ -930,7 +930,7 @@
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. Windows 11 では、設定を最新にしてプラグインを揃える。
 
@@ -959,7 +959,7 @@
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 試験用の Markdown を Neovim で開く。
 
@@ -1012,7 +1012,7 @@
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. Windows 11 では、この設定の README を開き、プレビューで確かめる。
 
@@ -1037,7 +1037,7 @@
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. Windows 11 では、scoop で入れたものを上げる。
 
@@ -1071,7 +1071,7 @@
 
 - **Neovim: Windows 11 では、winget などで入れた Neovim と両方入れない**: winget の `Neovim.Neovim` は PC 全体（`C:\Program Files\Neovim`）に入り、PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、そちらが使われる。どちらか一方にする
 - **Neovim: Windows 11 で自分用の設定（LazyVimStarter）を使うと、`:!` や `:terminal` のシェルは PowerShell になる**: `pwsh` を実行ファイルとして見つけられれば PowerShell 7、見つけられなければ Windows PowerShell 5.1。素の Neovim の既定は `cmd.exe`
-  - [「アプリを入れる」の手順 6](windows-setup.md#アプリを入れる) の PowerShell 7（MSIX）は、PowerShell 7 の窓から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
+  - [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)（MSIX）は、PowerShell 7 の窓から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
 
 **[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 2: 確かめる値の意味**
 
@@ -1173,7 +1173,7 @@
 [Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)・[既定のエディタにする](#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（検証記録（`docs/verification/neovim.md` の「Neovim: Windows 11 で使う: 検証状況の記録」））。
 
 - **scoop の main の `neovim` で、自分のユーザーに入れる**（管理者の権限は要らない）
-  - [Windows 11 の初期設定の「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 1・2 で入れた scoop に、CLI のツールをまとめる。自分用の設定（LazyVimStarter）の Windows の導入も scoop の `neovim` を使う
+  - [公式の導入案内](https://scoop.sh/)で入れた scoop に、CLI のツールをまとめる。自分用の設定（LazyVimStarter）の Windows の導入も scoop の `neovim` を使う
   - winget の `Neovim.Neovim` は PC 全体に入る MSI（`C:\Program Files\Neovim`）。PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、両方あると winget の方が使われる。Windows 11 で使うの手順 2 で見つけたら、外してから始める
 - **VC++ のランタイムは、[Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を指す**（winget の `Microsoft.VCRedist.2015+.x64`。管理者の窓）
   - scoop の `neovim` はランタイムを入れず、`extras/vcredist2022` を勧めるだけ（`neovim.json` の `suggest`）。`nvim.exe` は `VCRUNTIME140.dll` を使う（リリースの zip のインポート表。検証記録の付録（`docs/verification/neovim.md` の「Neovim: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））

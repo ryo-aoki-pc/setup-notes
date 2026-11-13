@@ -2412,7 +2412,7 @@
   - 既定の PATH の選択（`cmd` だけを足す）で、PowerShell・scoop から `git` が見つかる。Unix の道具まで足す選択は、Windows の `find`・`sort` を隠す（インストーラの画面の警告）
   - `--override` は、winget が渡す黙って動かすスイッチ（`/SP- /SILENT …`）ごと置き換える（winget のソース）
 - **Git for Windows は、scoop の `scoop update` が使う git も兼ねる**
-  - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う（[Git for Windows](windows-setup.md#git-for-windows)の手順 3 の補足）
+  - scoop は、scoop の git が入っていなければ `PATH` の `git` を使う
 
 **参照**
 
@@ -2605,7 +2605,7 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [git-for-windows/MINGW-packages — git-wrapper.c](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/git-wrapper.c)・[mingw-w64-git.mak](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/mingw-w64-git.mak) — `cmd\git.exe` が PATH の先頭に `usr\bin` を足すこと
 - [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
-- [Windows 11 の初期設定](windows-setup.md) — [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5、scoop（[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3）、「PowerShell 7 のプロファイルを設定する」
+- [scoop の公式の導入案内](https://scoop.sh/)・[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する) — Windows 11 の導入とプロファイル
 - [Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる) — VC++ ランタイム（[Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3）と、Git Bash で開く自分用の設定
 
 - 検証記録（`docs/verification/almalinux-setup.md`）
@@ -2741,7 +2741,7 @@ AlmaLinux 10.2 の dnf は **4.20.0**（`dnf5` パッケージは未導入）な
 - [cli/go-gh v2.16.1 — pkg/config/config.go](https://github.com/cli/go-gh/blob/v2.16.1/pkg/config/config.go) — 設定・状態・データ・キャッシュの場所
 - [zalando/go-keyring v0.2.8 — keyring_windows.go](https://github.com/zalando/go-keyring/blob/v0.2.8/keyring_windows.go) — 資格情報マネージャーの項目の名前
 - [GitHub CLI manual — gh help environment](https://cli.github.com/manual/gh_help_environment) — `GH_CONFIG_DIR`・`GH_PATH` など
-- [Windows 11 の初期設定](windows-setup.md) — [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5、scoop（[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3）、「PowerShell 7 のプロファイルを設定する」。[Git](#git) — Git for Windows と、その Git Credential Manager
+- [scoop の公式の導入案内](https://scoop.sh/)・[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する) — Windows 11 の導入とプロファイル。[Git](#git) — Git for Windows と、その Git Credential Manager
 
 - 検証記録（`docs/verification/almalinux-setup.md`）
 

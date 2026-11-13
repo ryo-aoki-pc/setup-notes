@@ -31,11 +31,11 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 ### 導入の基盤
 
 - AlmaLinux 10 は RPM に無いか古いものを、CLI とフォントは [Homebrew](docs/almalinux-setup.md#homebrew)、GUI アプリはベンダーの dnf リポジトリ（[Firefox](docs/almalinux-setup.md#firefox)・[VS Code](docs/almalinux-setup.md#vs-code)）が無ければ [Flathub](docs/almalinux-setup.md#flatpak-と-flathub) で入れる（AppStream / BaseOS に無い RPM は [EPEL、Firefox の FFmpeg だけ RPM Fusion](docs/almalinux-setup.md#epel-と-rpm-fusion)）。インターネットに出られないホストは [Homebrew](docs/almalinux-setup.md#homebrew-のオフライン導入)・[npm](docs/almalinux-setup.md#npm-のオフライン導入) の項を通す
-- Windows 11 では、CLI ツールは scoop、GUI アプリは UniGet UI（winget と scoop を画面で扱う）で入れる（Windows 11 のセットアップの「[アプリを入れる](docs/windows-setup.md#アプリを入れる)」）
+- Windows 11 では、CLI ツールは [scoop](https://scoop.sh/)、GUI アプリは [UniGet UI](https://github.com/Devolutions/UniGetUI)（[winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)と scoop を画面で扱う）で入れる。各公式の導入案内に従う
 
 ### ほかの手順書が使う仕組み
 
-- ほかの手順書が前提にする設定は、AlmaLinux 10 の [linger（ユーザーサービスの常駐）](docs/almalinux-setup.md#ユーザーサービスの常駐)・[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)・[Secure Boot の MOK](docs/almalinux-setup.md#secure-boot-の署名鍵)、Windows 11 の[貼り付けの設定](docs/windows-setup.md#貼り付けの設定)・[LAN をプライベートにする手順](docs/windows-setup.md#ネットワークとリモート)にまとめてある。使う側の手順書は、その項を名指しする
+- ほかの手順書が前提にする設定は、AlmaLinux 10 の [linger（ユーザーサービスの常駐）](docs/almalinux-setup.md#ユーザーサービスの常駐)・[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)・[Secure Boot の MOK](docs/almalinux-setup.md#secure-boot-の署名鍵)、Windows 11 の[LAN をプライベートにする手順](docs/windows-setup.md#ネットワークとリモート)にまとめてある。使う側の手順書は、その項を名指しする
 - 設定はユーザーやホストに 1 つなので、別の用途で設定済みなら確認だけでよい
 
 ### デスクトップ
@@ -65,7 +65,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### git と GitHub
 
-- Git は AlmaLinux 10 の「[Git](docs/almalinux-setup.md#git)」・Windows 11 の「[Git for Windows](docs/windows-setup.md#git-for-windows)」、git-delta・lazygit・GitHub CLI は [AlmaLinux 10](docs/almalinux-setup.md#git-と開発の道具)・[Windows 11](docs/windows-setup.md#git-と開発の道具) の「Git と開発の道具」で入れる
+- Git は AlmaLinux 10 の「[Git](docs/almalinux-setup.md#git)」・Windows 11 の「[Git for Windows](https://gitforwindows.org/)」、git-delta・lazygit・GitHub CLI は [AlmaLinux 10](docs/almalinux-setup.md#git-と開発の道具)・[Windows 11](docs/windows-setup.md#git-と開発の道具) の「Git と開発の道具」で入れる
 
 ### 開発の補助
 
@@ -98,7 +98,6 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 | 理由・比較・資料・注意点 | 正本の各用途の末尾の「補足と注意点」の折りたたみ |
 | 文書全体の補足・参照先 | 正本の冒頭のリードの直後の「この文書の補足と注意点」の折りたたみ |
 | 実施日・環境・結果 | Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/verification/<手順書名>.md` |
-| 手順書の項が実行するスクリプト | [`scripts/windows/`](scripts/windows/)（約束は [docs/dev/scripts.md](docs/dev/scripts.md)） |
 | 書き方の規則 | [AGENTS.md](AGENTS.md) と [docs/dev/writing-rules.md](docs/dev/writing-rules.md) |
 
 ## 記法
@@ -107,5 +106,5 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にする（[AlmaLinux 10 の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo)で設定する）
 - ブロックは、貼った全体が 1 つの入力になる窓に貼る前提で書く。bash はブラケットペーストの効く端末（bash 5.1 以降）、PowerShell は[シェルと端末のセットアップの「Windows Terminal で複数行を 1 つの入力として貼る」](docs/shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓。貼った後に Enter を押す（実測: `docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）。その前に通す項など、1 行ずつ届く窓の項は、その項のリードに書く
-- Windows の `powershell` のブロックは PowerShell 7 に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](docs/windows-setup.md#アプリを入れる)の手順 6〜9）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者の窓か通常の窓かは、各項のリードの実行場所に従う
+- Windows の `powershell` のブロックは PowerShell 7 に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者の窓か通常の窓かは、各項のリードの実行場所に従う
 - 未検証のことは手順書に明記する。パスワード・秘密鍵・トークンなどの秘密情報は残さない
