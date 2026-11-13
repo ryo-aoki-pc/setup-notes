@@ -98,6 +98,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 | 理由・比較・資料・注意点 | 正本の各用途の末尾の「補足と注意点」の折りたたみ |
 | 文書全体の補足・参照先 | 正本の冒頭のリードの直後の「この文書の補足と注意点」の折りたたみ |
 | 実施日・環境・結果 | Forgejo の非公開リポジトリ `setup-notes-verification` の `docs/verification/<手順書名>.md` |
+| 手順書の項が実行するスクリプト | [`scripts/windows/`](scripts/windows/)（約束は [docs/dev/scripts.md](docs/dev/scripts.md)） |
 | 書き方の規則 | [AGENTS.md](AGENTS.md) と [docs/dev/writing-rules.md](docs/dev/writing-rules.md) |
 
 ## 記法

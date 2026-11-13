@@ -20,7 +20,7 @@
 > [!WARNING]
 > - ロックを止め、インラインの sudo を有効にすると、**PC に触れる人が管理者として操作できる**
 > - Hello 以外のサインインと RDP も有効にすると、**パスワードを知る人も管理者として操作できる**
-> - 人が触れる場所では、[PC 全体の設定](#pc-全体の設定)の手順 7 は行わない
+> - 人が触れる場所では、[PC 全体の設定](#pc-全体の設定)の手順 9 は行わない
 
 <details id="この文書の補足と注意点">
   <summary>この文書の補足と注意点</summary>
@@ -73,7 +73,84 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 
 ## 基本の設定
 
-- 更新・貼り付け・アプリと Git for Windows の導入・PC 全体の設定・サインイン・WSL と、プライバシー・Edge
+- スクリプトの取得・更新・貼り付け・アプリと Git for Windows の導入・PC 全体の設定・サインイン・WSL と、プライバシー・Edge
+
+### 手順書のスクリプトを取る
+
+- 手順書が使うスクリプトを、このユーザーの PC に置く。取り直すと main の版になる
+- 前提: インターネットにつながっている
+- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。貼り付けの設定より前なので、Ctrl+V で貼る
+- この項の手順 2 は、`%LOCALAPPDATA%\setup-notes\scripts` を取り直した版に置き換える。手で直したファイルも置き換わる
+
+1. 管理者ではない Windows PowerShell（5.1）を開く。
+
+   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
+   - 窓の名前に「管理者:」が付いていないことを確かめる
+
+1. main の ZIP を取り、スクリプトを置く。
+
+   ```powershell
+   & {
+     # main の ZIP を一時フォルダーに取って展開する
+     $ErrorActionPreference = 'Stop'
+     $work = Join-Path $env:TEMP ('setup-notes-' + [guid]::NewGuid().ToString('N'))
+     try {
+       New-Item -ItemType Directory -Path $work | Out-Null
+       $zip = Join-Path $work 'main.zip'
+       curl.exe --fail --location --silent --show-error --output $zip 'https://github.com/ryo-aoki-pc/setup-notes/archive/refs/heads/main.zip'
+       if ($LASTEXITCODE -ne 0) { throw 'ZIP を取れなかった' }
+       Expand-Archive -LiteralPath $zip -DestinationPath $work
+       $source = Join-Path $work 'setup-notes-main\scripts'
+       if (-not (Test-Path -LiteralPath (Join-Path $source 'windows\_lib\SetupItem.psm1'))) { throw 'ZIP にスクリプトが無い' }
+       # 置き換えるパスを確かめ、前の版を別の名前に退けてからスクリプトを置く
+       $base = [IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'setup-notes'))
+       $target = [IO.Path]::GetFullPath((Join-Path $base 'scripts'))
+       if ($target -ne ($base.TrimEnd('\') + '\scripts')) { throw '置き換えるパスが違う' }
+       if (-not (Test-Path -LiteralPath $base)) { New-Item -ItemType Directory -Path $base | Out-Null }
+       $old = $null
+       if (Test-Path -LiteralPath $target) {
+         $old = Join-Path $base ('scripts.old-' + [guid]::NewGuid().ToString('N'))
+         Rename-Item -LiteralPath $target -NewName (Split-Path -Leaf $old)
+       }
+       try { Move-Item -LiteralPath $source -Destination $target } catch {
+         if ($old -and -not (Test-Path -LiteralPath $target)) { Rename-Item -LiteralPath $old -NewName 'scripts' }
+         throw
+       }
+       if ($old) { Remove-Item -LiteralPath $old -Recurse -Force }
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       if (-not (Test-Path -LiteralPath (Join-Path $target 'windows\_lib\SetupItem.psm1'))) { throw '置いたファイルが見つからない' }
+       "変えた: $target"
+       '状態: 確認済み'
+     } catch {
+       Write-Error ('中断: ' + $_.Exception.Message)
+     } finally {
+       # 取った ZIP と展開した一時フォルダーを消す
+       if (Test-Path -LiteralPath $work) { Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue }
+     }
+   }
+   ```
+
+   - Ctrl+V で貼り、最後の `}` の行で Enter を押す
+   - `変えた:` に `…\setup-notes\scripts` が出て、`状態: 確認済み` ならよい
+   - `中断:` が出たら、先へ進まずに原因を直してこの手順からやり直す
+
+<details id="手順書のスクリプトを取る-の補足と注意点">
+  <summary>手順書のスクリプトを取る の補足と注意点</summary>
+
+**[手順書のスクリプトを取る](#手順書のスクリプトを取る)の手順 1: 5.1 にする理由**
+
+- PowerShell 7 を入れる前なので、Windows に含まれる Windows PowerShell 5.1 を使う。貼り付けの設定もまだなので、ブロックは `& { … }` にまとめて Ctrl+V で貼る
+
+**[手順書のスクリプトを取る](#手順書のスクリプトを取る)の手順 2: 取る版と置き場所**
+
+- Git を使わず、GitHub の main の ZIP を `curl.exe` で取る。展開した `setup-notes-main\scripts` だけを `%LOCALAPPDATA%\setup-notes\scripts` に置く
+- ZIP は `%TEMP%\setup-notes-<ランダムな名前>` に取って展開し、最後に消す。手順書の呼び出しは `%LOCALAPPDATA%` の写しを使う
+- 前の版は `scripts.old-<ランダムな名前>` に名前を変えて退け、新しい版を置けたら消す。置けなければ前の版を `scripts` に戻す
+- `scripts` の外にある `setup-notes` の控えは置き換えない
+
+</details>
+
+---
 
 ### Windows Update
 
@@ -253,7 +330,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 
 **[Windows Update](#windows-update)の手順 1: 先に更新する理由**
 
-- インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（[PC 全体の設定](#pc-全体の設定)の手順 6 の sudo は 24H2 以降、[表示と入力](#表示と入力)の手順 5 の時計の秒など）
+- インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（[PC 全体の設定](#pc-全体の設定)の手順 8 の sudo は 24H2 以降、[表示と入力](#表示と入力)の手順 5 の時計の秒など）
 - この後の[WSL と再起動](#wsl-と再起動)の手順 3 の再起動より前に、Windows Update の再起動を済ませておく。途中で更新の再起動が入ると、[PC 全体の設定](#pc-全体の設定)の手順 2 から[WSL と再起動](#wsl-と再起動)の手順 2 までの設定が効く時期が読みにくくなる
 
 **[Windows Update](#windows-update)の手順 1: 5.1 にする理由**
@@ -473,7 +550,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 ### 貼り付けの設定
 
 - 複数行を元の順に貼れるように、Ctrl+Enter とプロファイルを設定する
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)でアプリ インストーラーと winget を用意してある
+- 前提: [手順書のスクリプトを取る](#手順書のスクリプトを取る)と[Microsoft Store の更新](#microsoft-store-の更新)を通してある
 - 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -503,53 +580,57 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
      Git           = (Get-Command git -ErrorAction SilentlyContinue).Source
      ClassicMenu   = Test-Path -LiteralPath 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'
      ScancodeMap   = if ($sm) { ($sm | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
-     Profile       = $PROFILE
-     ProfileExists = Test-Path -LiteralPath $PROFILE
    } | Format-List
-   # 実行ポリシーを確認する
-   Get-ExecutionPolicy -List | Format-Table -AutoSize
-   '実行ポリシー: {0}' -f (Get-ExecutionPolicy)
+   & {
+     # この呼び出しの間だけスクリプトを許可する
+     $beforeProcess = Get-ExecutionPolicy -Scope Process
+     try {
+       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       & "$env:LOCALAPPDATA\setup-notes\scripts\windows\paste-ps51\check.ps1"
+     } catch {
+       Write-Error ('中断: ' + $_.Exception.Message)
+     } finally {
+       Set-ExecutionPolicy -Scope Process -ExecutionPolicy $beforeProcess -Force -ErrorAction SilentlyContinue
+     }
+   }
    ```
 
    - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じてこの項の手順 1 から
    - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 でアプリ インストーラーの登録と更新を確かめてから
    - `ScancodeMap` が空でなければ控える。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 は、別の割り当てがあれば止まる
    - `Scoop` に場所が出たら、scoop はもう入っている
-   - `CurrentUser` の値（未設定なら `Undefined`）を控える
+   - `今: CurrentUser` の値（未設定なら `Undefined`）を控える
+   - `状態: 確認済み` か `状態: 変更が要る` なら先へ進む。`中断:` が出たら、この項の手順 4・5 は行わず、ほかの手順書は Ctrl+V で貼る
 
-1. スクリプトの実行ポリシーを RemoteSigned にする。
-
-   ```powershell
-   # 実行ポリシーを設定する
-   if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') { Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ExecutionPolicy
-   ```
-
-   - `RemoteSigned`（もとから `Unrestricted` か `Bypass` だった PC では、その値）が出ればよい
-   - 上書きのエラーが出て別の値になる PC では、scoop とこの項の手順 5 のプロファイルは使えない。ほかの手順書は Ctrl+V で貼る
-
-1. プロファイルに、この項の手順 2 と同じ 1 行を足す。
+1. 実行ポリシーと、プロファイルの貼り付けの行を設定する。
 
    ```powershell
    & {
-     # プロファイルと貼り付け設定を準備する
-     $line = 'Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md'
-     if (-not (Test-Path -LiteralPath $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
-     $text = Get-Content -LiteralPath $PROFILE -Raw
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($text -and $text.Contains($line)) { "すでにある: $PROFILE" } else {
-       if ($text -and -not $text.EndsWith("`n")) { $line = "`r`n" + $line }
-       Add-Content -LiteralPath $PROFILE -Value $line
-       "足した: $PROFILE"
+     # この呼び出しの間だけスクリプトを許可する
+     $beforeProcess = Get-ExecutionPolicy -Scope Process
+     try {
+       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop
+       "`n$([char]27)[7m 確認 $([char]27)[0m"
+       & "$env:LOCALAPPDATA\setup-notes\scripts\windows\paste-ps51\apply.ps1"
+     } catch {
+       Write-Error ('中断: ' + $_.Exception.Message)
+     } finally {
+       Set-ExecutionPolicy -Scope Process -ExecutionPolicy $beforeProcess -Force -ErrorAction SilentlyContinue
      }
-     Get-Content -LiteralPath $PROFILE
    }
    ```
 
-   - `足した:` とプロファイルのパス、足した行が出ればよい
-   - プロファイルにほかの行があれば、それも出る
-   - 追加済みなら `すでにある:` と出て、重複しない
+   - `状態: 確認済み` ならよい
+   - `中断:` が出たら、先へ進まない。グループ ポリシーで許可されない PC では、ほかの手順書は Ctrl+V で貼る
+
+1. 実行ポリシーと、プロファイルの貼り付けの行を読み戻す。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\paste-ps51\check.ps1"
+   ```
+
+   - `状態: 確認済み` ならよい。`中断:` が出たら、先へ進まない
 
 <details id="貼り付けの設定-の補足と注意点">
   <summary>貼り付けの設定 の補足と注意点</summary>
@@ -572,21 +653,25 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - `ClassicMenu` は、[表示と入力](#表示と入力)の手順 3 で作るキー（`HKCU:\Software\Classes\CLSID\{86ca1aa0-…}`）があるか
 - `ScancodeMap` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で書く値（`HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout` の `Scancode Map`）を 16 進で並べたもの。読むだけなら管理者は要らない
 - `$PROFILE` は、このユーザーの、Windows PowerShell のコンソールのプロファイル（`Microsoft.PowerShell_profile.ps1`）。管理者で開いた窓も、同じユーザーなら同じファイルを読む。PowerShell 7・PowerShell ISE・VS Code は別のファイルを読む（about_Profiles）。OneDrive でドキュメントをバックアップしていると、`OneDrive` の下のパスになる
-- `Get-ExecutionPolicy -List` は、範囲（`MachinePolicy`・`UserPolicy`・`Process`・`CurrentUser`・`LocalMachine`）ごとの実行ポリシー。上の範囲ほど優先される。`MachinePolicy` か `UserPolicy` が `Undefined` でなければ、グループ ポリシーで決まっていて、[貼り付けの設定](#貼り付けの設定)の手順 4 では変えられない
+- check は `MachinePolicy`・`UserPolicy`・`CurrentUser`・`LocalMachine` の順に、`Undefined` ではない最初の実行ポリシーを使う。全部 `Undefined` なら Windows の既定の `Restricted`。呼び出しのために一時的に許可した `Process` は判定から除く。グループ ポリシーの制限は変えない
 - プロファイルもスクリプト（`.ps1`）なので、実行ポリシーが `Restricted` だと読まれない（Microsoft の about_Execution_Policies。`Restricted` は Windows のクライアントの既定）
 - `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [Git for Windows](#git-for-windows) で入れる）
-- `ProfileExists : False` なら、[貼り付けの設定](#貼り付けの設定)の手順 5 で作る
-- `実行ポリシー:` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、[貼り付けの設定](#貼り付けの設定)の手順 4 は何も変えない。Windows 11 の既定は `Restricted`（一覧はどれも `Undefined`）で、このままではプロファイルも scoop も動かない
+- `今: PasteLine = false` なら、[貼り付けの設定](#貼り付けの設定)の手順 4 でプロファイルに行を足す
+- `今: ExecutionPolicy` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、実行ポリシーは変えない。Windows 11 の既定の `Restricted` のままではプロファイルも scoop も動かない
 
-**[貼り付けの設定](#貼り付けの設定)の手順 4: 何も書かないとき**
+**[貼り付けの設定](#貼り付けの設定)の手順 4: スクリプトの動作**
 
-- 今の値が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、何も書かない
+- 呼び出しの間だけ `Process` を `Bypass` にし、最後に元へ戻す。次の窓でも使う実行ポリシーが `RemoteSigned`・`Unrestricted`・`Bypass` のどれでもなければ、`CurrentUser` を `RemoteSigned` にする
+- `CurrentUser` を書いた後に、一時的な `Process` が優先される通知（`ExecutionPolicyOverride`）だけが出た場合は、`CurrentUser` の読み戻しが `RemoteSigned` であることを確かめて続ける
+- `$PROFILE` が無ければ作る。`Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md` と同じ文字列が無いときだけ、その行を足す。末尾に改行が無いファイルには、先に CRLF を入れる
+- 印・既存の行・`Add-Content` の文字コードの扱いは変えず、ファイルの控えも新しくは作らない。変更前の `CurrentUser` と行の有無を `控える:` に出す
+- check は実行ポリシーと印付きの行を読み直す。プロファイルの任意のコードは実行せず、貼り付けの動作は人が試す
 
 **[貼り付けの設定](#貼り付けの設定)の手順 5**
 
 - OneDrive のバックアップ対象なら、プロファイルのパスは OneDrive の下
 
-**[貼り付けの設定](#貼り付けの設定)の手順 5: ほかの行と、この行を読む窓**
+**[貼り付けの設定](#貼り付けの設定)の手順 5: この行を読む窓**
 
 - プロファイルにほかの行があれば、そのまま残る
 - これより後に開く Windows PowerShell 5.1 の窓は、この行を読む。PowerShell 7 は[アプリを入れる](#アプリを入れる)の手順 7 で別のプロファイルに書く行を読む
@@ -904,11 +989,11 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 ### PC 全体の設定
 
 - PC の名前・長いパス・電源・ロック・LAN の省電力を設定する
-- 前提: 設定する LAN が接続されている
+- 前提: [手順書のスクリプトを取る](#手順書のスクリプトを取る)を通してあり、設定する LAN が接続されている
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
-- **この項の手順 6 のインラインの sudo は、同じ窓の管理者ではないプロセスからも管理者のコマンドに入力を送れる**
-- **この項の手順 7 の後、PC の前にいる人は、このユーザーとしてそのまま使える**
+- **この項の手順 8 のインラインの sudo は、同じ窓の管理者ではないプロセスからも管理者のコマンドに入力を送れる**
+- **この項の手順 9 の後、PC の前にいる人は、このユーザーとしてそのまま使える**
 
 1. 管理者の PowerShell 7 を開く。
 
@@ -945,27 +1030,32 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
      CtrlEnter        = (Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Ctrl+Enter').Function
      Edition          = $cv.EditionID
      Version          = '{0}（{1}.{2}）' -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
-     ComputerName     = $env:COMPUTERNAME
      LanCategory      = if ($LAN_IF) { (Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory } else { '' }
      RemoteDesktop    = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server').fDenyTSConnections
      RemoteAssistance = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -ErrorAction SilentlyContinue).fAllowToGetHelp
      HelloOnly        = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device' -ErrorAction SilentlyContinue).DevicePasswordLessBuildVersion
      Keyboard         = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters' -ErrorAction SilentlyContinue).'LayerDriver JPN'
-     Sudo             = (Get-Command sudo -ErrorAction SilentlyContinue).Source
      Hypervisor       = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
    } | Format-List
    # 配信の最適化の設定を確認する
    Get-DODownloadMode
+   # スクリプトで今の値と状態を確認する
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\pc-name\check.ps1" -PcName $PC_NAME
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\long-paths\check.ps1"
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\developer-mode\check.ps1"
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\sudo-inline\check.ps1"
    ```
 
    - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
    - `Admin` が `False` なら、管理者ではない窓に貼っている。この項の手順 1 から
    - `CtrlEnter : InsertLineAbove` なら、[アプリを入れる](#アプリを入れる)の手順 7〜9 を通し、この項の手順 1 から
    - 次の値を控える
-     - `ComputerName`（PC の名前）と `LanCategory`（LAN の種類）
+     - `今: ComputerName`（PC の名前）と `LanCategory`（LAN の種類）
      - `RemoteDesktop`（1 なら無効、0 ならもう有効）と `RemoteAssistance`（1 なら有効、0 なら無効）
      - `HelloOnly`（2 ならオン、0 ならオフ）と `Keyboard`（`kbd106.dll` なら JIS 配列）
      - 最後の行の配信の最適化のモード（`Lan` が Windows の既定）
+   - PC 名の `状態: 今の値だけ` は、`PC_NAME` が空のとき。名前を入れた場合とほかの設定の `状態: 変更が要る` は、後の手順で変える
+   - sudo が `状態: 前提が足りない・対象外` なら、この項の手順 8 だけを飛ばす。それ以外の `中断:` が出たら先へ進まない
    - `Edition` が `Core` で始まる（Home）なら、[ネットワークとリモート](#ネットワークとリモート)の手順 4 は飛ばす
 
 1. 複数行のブロックをコピーボタンでコピーして右クリックで貼り、元の順に動くことを確かめる。
@@ -986,42 +1076,37 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 1. PC の名前を変えるときだけ、名前を変える（効くのは再起動の後）。
 
    ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   if (-not $PC_NAME) {
-     Write-Error '中断: この項の手順 2 の $PC_NAME が空'
-   } elseif ($PC_NAME -notmatch '^[A-Za-z0-9]([A-Za-z0-9-]{0,13}[A-Za-z0-9])?$' -or $PC_NAME -match '^[0-9]+$') {
-     Write-Error "中断: 使えない名前（15 文字まで。英字・数字・ハイフンで、先頭と末尾は英数字。数字だけは不可）: $PC_NAME"
-   } elseif ($PC_NAME -eq $env:COMPUTERNAME) {
-     "すでにこの名前: $PC_NAME"
-   } else {
-     Rename-Computer -NewName $PC_NAME
-     "再起動の後に $PC_NAME になる"
-   }
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\pc-name\apply.ps1" -PcName $PC_NAME
    ```
 
-   - 再起動を求める旨の警告と、`再起動の後に <HOSTNAME> になる` が出ればよい
-   - 2 回目からは `すでにこの名前:` が出ればよい。ただし、再起動の前はまだ古い名前と比べる
+   - `状態: 再起動待ち` か `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
    - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
    - 名前を変えないなら（この項の手順 2 の `PC_NAME` が空なら）、この手順は飛ばす
 
-1. 長いパス・開発者モード・sudo（今の窓で動く形）を有効にする。
+1. 長いパスを有効にする。
 
    ```powershell
-   # 長いパスと開発者モードを有効にする
-   $dev = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
-   Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Type DWord -Value 1
-   if (-not (Test-Path -LiteralPath $dev)) { New-Item -Path $dev | Out-Null }
-   Set-ItemProperty -Path $dev -Name AllowDevelopmentWithoutDevLicense -Type DWord -Value 1
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # sudo を有効にする
-   if (Get-Command sudo -ErrorAction SilentlyContinue) { sudo config --enable normal } else { 'sudo が無い（24H2 より前の Windows）' }
-   # 長いパスと開発者モードを確認する
-   Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' | Format-List LongPathsEnabled
-   Get-ItemProperty -Path $dev | Format-List AllowDevelopmentWithoutDevLicense
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\long-paths\apply.ps1"
    ```
 
-   - `LongPathsEnabled : 1` と `AllowDevelopmentWithoutDevLicense : 1` が出ればよい
-   - sudo は、今の窓で動く形（インライン）になった旨を表示する（表示言語は環境による）
+   - `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
+
+1. 開発者モードを有効にする。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\developer-mode\apply.ps1"
+   ```
+
+   - `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
+
+1. sudo を今の窓で動く形（インライン）にする。
+
+   ```powershell
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\sudo-inline\apply.ps1"
+   ```
+
+   - `状態: 確認済み` ならよい
+   - `状態: 前提が足りない・対象外` なら、この手順は飛ばす。それ以外の `中断:` が出たら先へ進まない
 
 1. 電源接続中の眠りと蓋の動作を止め、電源に関係なく休止状態と放置後のロックを切る。
 
@@ -1077,22 +1162,25 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 **[PC 全体の設定](#pc-全体の設定)の手順 2: 変数について**
 
 - `$PC_NAME` は[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変える）で使う
-- `$LAN_IF` は、[PC 全体の設定](#pc-全体の設定)の手順 3（今の状態）・[PC 全体の設定](#pc-全体の設定)の手順 8（アダプターの省電力）で使う。「ネットワークとリモート」は、同じ式をその項の手順 2 で取り直す
+- `$LAN_IF` は、[PC 全体の設定](#pc-全体の設定)の手順 3（今の状態）・[PC 全体の設定](#pc-全体の設定)の手順 10（アダプターの省電力）で使う。「ネットワークとリモート」は、同じ式をその項の手順 2 で取り直す
 - 接続の一覧は `Get-NetConnectionProfile` で見られる
 
 **[PC 全体の設定](#pc-全体の設定)の手順 3: 見ているもの**
 
 - `CtrlEnter` は、この窓の PSReadLine の Ctrl+Enter の働き。[アプリを入れる](#アプリを入れる)の手順 7 のプロファイルを読んでいれば `AddLine`、読んでいなければ既定の `InsertLineAbove`
 - `Edition` は `HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion` の `EditionID`。`Core`・`CoreN`・`CoreSingleLanguage`・`CoreCountrySpecific` が Home、`Professional` などが Pro。Microsoft の文書では、Home はリモート デスクトップでつながれる側になれない
-- `Sudo` は、Windows に入っている `sudo.exe` の場所。Microsoft の文書では、sudo は 24H2 以降
+- sudo の check の `今: SudoPath` は、Windows に入っている `sudo.exe` の場所。Microsoft の文書では、sudo は 24H2 以降
 - `Hypervisor` は、Windows のハイパーバイザー（Hyper-V）が動いているか。WSL 2（[WSL と再起動](#wsl-と再起動)の手順 2）・メモリ整合性・Credential Guard などで動く
 - `Get-DODownloadMode` は、配信の最適化のモード（`CdnOnly`・`Lan`・`Internet` など）
-- `Version` が 24H2（ビルド 26100）より前で `Sudo` が空なら、[PC 全体の設定](#pc-全体の設定)の手順 6 の sudo の行は何もしない
+- ビルドが 26100 より前か、Windows の `sudo.exe` が無ければ、sudo の check と apply は終了コード 13（対象外）を返す
 - `Hypervisor : True` なら、Hyper-V がもう動いている（[Windows 11 で VirtualBox を入れる](virtual-machines.md#windows-11-で-virtualbox-を入れる)の VM は、その上で動く）
 
-**[PC 全体の設定](#pc-全体の設定)の手順 5**
+**[PC 全体の設定](#pc-全体の設定)の手順 5: スクリプトの動作**
 
-- 何度貼ってもよい
+- 稼働中の名前を `ActiveComputerName`、次に使う名前を `ComputerName` のレジストリのキーから読む。入力が無い check は今の値を表示するだけで、終了コード 14 を返す
+- 先に入力を検査し、合わなければ何も変えずに止まる。稼働中と次の名前の両方が入力と同じなら何も変えない。次の名前だけが一致する場合は、変更せず再起動待ちを返す。どちらも違うときだけ `Rename-Computer -NewName` で名前を変える
+- 書いた後も 2 つのキーを読み直し、次の名前が一致したら再起動待ちとする。元の名前は `控える:` に出し、ファイルの控えは作らない
+- 稼働中の名前と入力が同じで、別の名前への変更が再起動待ちなら、先に再起動してからやり直すように止まる
 
 **[PC 全体の設定](#pc-全体の設定)の手順 5: 名前の決まりと、確認の問いを出さないこと**
 
@@ -1101,19 +1189,27 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - 今と同じ名前を渡すと、`Rename-Computer` はエラー（`NewNameIsOldName`）を出すので、先に比べる
 - SSH・リモート デスクトップは、この名前でこの PC を見分ける
 
-**[PC 全体の設定](#pc-全体の設定)の手順 6: 3 つの設定**
+**[PC 全体の設定](#pc-全体の設定)の手順 6: スクリプトの動作**
 
 - **長いパス**: `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem` の `LongPathsEnabled` を 1 にすると、260 文字を超えるパスを、それを宣言したアプリ（マニフェストの `longPathAware`）が使える（Microsoft の文書）。エクスプローラーなど、宣言していないアプリは変わらない。プロセスが最初に使うときに読むので、効くのは[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後。Git for Windows には別に `core.longpaths` がある
+
+**[PC 全体の設定](#pc-全体の設定)の手順 7: スクリプトの動作**
+
 - **開発者モード**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock` の `AllowDevelopmentWithoutDevLicense` を 1（Microsoft の文書の `reg add` と同じ値）。管理者でなくてもシンボリック リンクを作れる（`mklink` や Git for Windows のように、作る側がその印を渡すとき）。Microsoft の文書では、レジストリで有効にしても、設定の画面で有効にしたときと違い、デバイスのポータルなどは入らない
+- `AppModelUnlock` のキーが無ければ作り、既にあるキーは作り直さない
+
+**[PC 全体の設定](#pc-全体の設定)の手順 8: スクリプトの動作**
+
 - **sudo**: Windows 11 24H2 から Windows に入っている `sudo.exe`。`sudo config --enable` の形は 3 つ（Microsoft の文書）
   - `forceNewWindow`（既定）: 管理者のコマンドを新しい窓で動かす。Microsoft が勧める形
   - `disableInput`: 今の窓に出すが、入力を受け付けない
   - `normal`（インライン）: 今の窓で入出力する。Linux の sudo に近い。同じ窓のほかのプロセスが、管理者のプロセスを操作できるおそれがあると Microsoft は書いている
   - 利用者の選択で `normal` にした。値は `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` の `Enabled`（0 が無効、1〜3 が上の順。microsoft/sudo のソース）
-- 3 つとも、設定の「システム」→「開発者向け」（25H2 では「システム」→「詳細設定」）でも変えられる
+- 長いパス・開発者モード・sudo は、変更前の値を `控える:` に出し、ファイルの控えは作らない。check と同じレジストリの値で読み戻し、長いパスと開発者モードは 1、sudo は `Enabled=3` を確認する。sudo の表示言語は判定に使わない
+- 長いパス・開発者モード・sudo は、設定の「システム」→「開発者向け」（25H2 では「システム」→「詳細設定」）でも変えられる
 - 管理者ではない窓で `sudo <コマンド>` を打つと、UAC の確認の後に、同じ窓でそのコマンドが管理者の権限で動く
 
-**[PC 全体の設定](#pc-全体の設定)の手順 7: どの設定で何が変わるか**
+**[PC 全体の設定](#pc-全体の設定)の手順 9: どの設定で何が変わるか**
 
 - `standby-timeout-ac 0`: 電源につないでいる間、放置しても眠らない（`SUB_SLEEP` の `STANDBYIDLE` を 0 にするのと同じ。Microsoft の文書）
 - `/hibernate off`: 休止状態を切り、`hiberfil.sys` を消す。高速スタートアップもこのファイルを使うので、使えなくなる（ハイブリッド スリープも）
@@ -1125,11 +1221,11 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 - バッテリー用の電源プランの値（スリープ時間・蓋を閉じたときの動作・`CONSOLELOCK`）は変えない
 - 休止状態の無効化と `DelayLockInterval` は電源接続中だけに限定されない（バッテリーのときもかかる）
 
-**[PC 全体の設定](#pc-全体の設定)の手順 7: 設定と確認方法の根拠**
+**[PC 全体の設定](#pc-全体の設定)の手順 9: 設定と確認方法の根拠**
 
 - 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
 
-**[PC 全体の設定](#pc-全体の設定)の手順 8: デバイス マネージャーの「電力の節約のために、コンピューターでこのデバイスの電源をオフにできるようにする」**
+**[PC 全体の設定](#pc-全体の設定)の手順 10: デバイス マネージャーの「電力の節約のために、コンピューターでこのデバイスの電源をオフにできるようにする」**
 
 - この手順は、デバイス マネージャーのアダプターの「電源の管理」タブの、上の項目を外すのと同じ
 - `Set-NetAdapterPowerManagement` の文書にこの項目の引数は無く、`Get-NetAdapterPowerManagement` で取ったものの `AllowComputerToTurnOffDevice` を変えて渡す形は、広く使われているもの（Microsoft の文書には無い）
@@ -1693,7 +1789,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### 表示と入力
 
 - エクスプローラー・タスクバー・テーマ・既定の端末・IME を設定する
-- 前提: Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
+- 前提: [手順書のスクリプトを取る](#手順書のスクリプトを取る)を通してあり、Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - **この項の手順 8 で Ctrl+Space を IME に割り当てると、アプリでは使えなくなるはず**。PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などにもかかる
 
@@ -1775,15 +1871,10 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. ダークモードにする。
 
    ```powershell
-   # Windows とアプリをダークモードに設定する
-   $p = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
-   Set-ItemProperty -Path $p -Name AppsUseLightTheme -Type DWord -Value 0
-   Set-ItemProperty -Path $p -Name SystemUsesLightTheme -Type DWord -Value 0
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $p | Format-List AppsUseLightTheme, SystemUsesLightTheme
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\dark-mode\apply.ps1"
    ```
 
-   - `AppsUseLightTheme : 0` と `SystemUsesLightTheme : 0` が出ればよい
+   - `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
    - 動いているアプリとタスクバーには、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
 
 1. 既定の端末を Windows Terminal にする。
@@ -1805,10 +1896,11 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. Microsoft IME の設定を開き、Ctrl+Space で IME をオン・オフするようにする。
 
    ```powershell
-   Start-Process 'ms-settings:regionlanguage-jpnime'
+   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\ime-ctrl-space\apply.ps1"
    ```
 
-   - 設定の Microsoft IME の画面が開く。「キーとタッチのカスタマイズ」を開き、「キーの割り当て」をオンにして、「Ctrl + Space」を「IME-オン/オフ」にする
+   - `状態: 手作業待ち` が出て、設定の Microsoft IME の画面が開けばよい。`中断:` が出たら先へ進まない
+   - 「キーとタッチのカスタマイズ」を開き、「キーの割り当て」をオンにして、「Ctrl + Space」を「IME-オン/オフ」にする
    - 「以前のバージョンの Microsoft IME を使う」がオンだと、この項目は出ない
    - 効くのは、次に IME を使う窓から（確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 1）
    - 割り当てたら、設定を閉じる
@@ -1831,6 +1923,10 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - ウィジェットのボタンは、[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 4 でウィジェットを外すと消える（この手順では書けない）
 
+**[表示と入力](#表示と入力)の手順 6: スクリプトの動作**
+
+- `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize` の `AppsUseLightTheme`・`SystemUsesLightTheme` を両方 0 にする。check で同じ 2 つを読み直す。変更前の値は `控える:` に表示し、ファイルの控えは作らない
+
 **[表示と入力](#表示と入力)の手順 6: 値の意味**
 
 - `AppsUseLightTheme` はアプリ、`SystemUsesLightTheme` はタスクバー・スタート・通知の色。0 で濃色、1 で淡色（Windows 11 の既定）
@@ -1843,6 +1939,10 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - Windows 11 22H2 以降の既定は「Windows に任せる」（2 つとも `{00000000-0000-0000-0000-000000000000}`）で、Windows Terminal が入っていればそれを使う（Microsoft のサポートの記事）。この手順は、それを Windows Terminal に決める
 - 管理者として起動したコンソールは、既定の端末に引き渡されず、conhost で開く。Windows Terminal の課題（microsoft/terminal の #13392。「管理者のコマンド ラインの受け手として登録できる端末は無く、COM の側の対応が要る」）が開いたまま。管理者の Windows Terminal は、Win+X の「ターミナル (管理者)」で開ける
 - 設定の「システム」→「開発者向け」→「ターミナル」と、Windows Terminal の設定の「スタートアップ」→「既定のターミナル アプリケーション」でも変えられる
+
+**[表示と入力](#表示と入力)の手順 8: スクリプトの動作**
+
+- `ms-settings:regionlanguage-jpnime` を開いて手作業待ちを返す。Ctrl+Space の割り当てを確実に読み取る方法は未確認のため、check は置かず、設定の画面と実際のキー操作で確かめる
 
 **参照**
 
@@ -2187,7 +2287,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - `Explorer\Advanced\TaskbarDeveloperSettings` の `TaskbarEndTask` = 1。Microsoft の WindowsDeveloperConfig の設定スクリプトが、同じキーと値を書く（コード）
 - 機能は KB5031455（2023-10、22621.2506・22631.2506）で足された（文書）。25H2 以降は「開発者向け」のページが「詳細設定」に変わった（文書。Windows の詳細設定）
-- 開発者モード（[PC 全体の設定](#pc-全体の設定)の手順 6）は要らない
+- 開発者モード（[PC 全体の設定](#pc-全体の設定)の手順 7）は要らない
 - 設定の画面では、24H2 は「システム」→「開発者向け」、25H2 以降は「システム」→「詳細設定」の「タスクの終了」
 
 **[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 8**
@@ -2223,7 +2323,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 起動音はサインインの前に鳴るので、ユーザーごとではなく PC 全体の設定（`HKLM`）
 - レジストリの値は、資料どうしで食い違う（`BootAnimation` の `DisableStartupSound` と `EditionOverrides` の `UserSetting_DisableStartupSound`。多くは 1 が鳴らさない側だが、Winaero は別の値を書く。どれも広く）。ポリシー（「Windows スタートアップのサウンドをオフにする」）は Policy CSP の一覧に無い
 - そのため、サウンドの画面のチェックで行う。`control.exe mmsys.cpl,,2` は、サウンドの画面を「サウンド」のタブで開く（広く）。PowerShell ではカンマが配列の区切りになるので、引数を引用符で囲む
-- [PC 全体の設定](#pc-全体の設定)の手順 7 で休止状態を切った（高速スタートアップも無くなる）ので、起動のたびに鳴るはず（推測）
+- [PC 全体の設定](#pc-全体の設定)の手順 9 で休止状態を切った（高速スタートアップも無くなる）ので、起動のたびに鳴るはず（推測）
 
 **[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 11: ストレージ センサーの値**
 
@@ -2512,7 +2612,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
   - FindMyMouse: 既定は左 Ctrl を 2 回で出る。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で Caps Lock を左 Ctrl にしたので、Caps Lock を 2 回押しても出る
   - MouseHighlighter（Win+Shift+H）・ColorPicker（Win+Shift+C）・Measure Tool: 使わないなら、Win のキーの割り当てを空ける
   - FancyZones: Windows のスナップで足りるなら要らない
-  - Awake: [PC 全体の設定](#pc-全体の設定)の手順 7 で、電源接続中は眠らないようにした。既定のモードは何もしない
+  - Awake: [PC 全体の設定](#pc-全体の設定)の手順 9 で、電源接続中は眠らないようにした。既定のモードは何もしない
 - 残す案: Always On Top（Win+Ctrl+T）・コマンド パレット（Win+Alt+Space）・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer。Text Extractor（Win+Shift+T。画面の文字を読み取ってコピーする）は既定で無効で、使うなら画面でオンにする
 - LightSwitch（既定で無効）は、時刻で明暗を切り替えるので、[表示と入力](#表示と入力)の手順 6 のダークモードとぶつかる。オンにしない
 - WezTerm の自分用の設定は Win のキーを使わないので、PowerToys の Win+ のショートカットとはぶつからない

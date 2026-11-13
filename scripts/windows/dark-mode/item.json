@@ -1,0 +1,27 @@
+{
+  "id": "dark-mode",
+  "title": "ダークモード",
+  "category": "デスクトップ",
+  "kind": "auto",
+  "shell": "ps7|ps51",
+  "privilege": "user",
+  "checkPrivilege": "user",
+  "requires": [],
+  "after": [],
+  "effect": "reboot",
+  "risk": {
+    "level": "normal",
+    "warning": "",
+    "default": false
+  },
+  "inputs": [],
+  "doc": {
+    "file": "docs/windows-setup.md",
+    "heading": "表示と入力",
+    "steps": [
+      6
+    ]
+  },
+  "timeoutSec": 60,
+  "checkCost": "fast"
+}
