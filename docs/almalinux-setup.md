@@ -4153,7 +4153,7 @@ Mozilla の案内する repo ファイルには `priority` が無い。`priority
 - **PC 全体（`machine`）に入れた**: winget の定義が `machine` しか持たない。AlmaLinux 10 の dnf と同じく、PC の全ユーザーで 1 つの Firefox を使い、更新は Maintenance Service で管理者の確認なしに行える
   - Mozilla のインストーラは、管理者の権限が無いまま入れると `%LOCALAPPDATA%\Mozilla Firefox` に入れ、Maintenance Service は入れない（Firefox のソースの `installer.nsi`・`postupdate_helper.nsh`）。winget の定義では、この形は選べない
 - **日本語版（`.ja`）にした**: 言語パックが要らないので、AlmaLinux 10 の「言語パックは本体と同時に上げる」（この折りたたみの「注意点」）に当たる注意が無く、閉じている間の更新も動く
-- **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[Firefox](windows-setup.md#firefox)の手順 5 の補足）
+- **既定のブラウザーは、Windows の設定の画面で変える**: 今の Windows 11 では、`http`・`https` の既定をコマンドで書き換えられない（[既定のブラウザーにする公式の案内](https://support.mozilla.org/ja/kb/make-firefox-your-default-browser)）
 
 **参照**
 

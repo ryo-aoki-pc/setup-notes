@@ -1255,7 +1255,7 @@ aarch64 には入らない:
 
 - ビルドの材料（[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 3 の Containerfile と、[VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 5 でコピーしたインストーラ）は、VM から写して使う
 
-- [WSL のミラーネットワーク](windows-setup.md#wsl-のネットワークをミラーにする)での接続は未確認
+- WSL のネットワークをミラーにしてある場合の接続は未確認（[WSL のネットワークの公式の案内](https://learn.microsoft.com/en-us/windows/wsl/networking)）
 
 - [VirtualBox の bootc ゲスト](#virtualbox-の-bootc-ゲスト)の手順 6 と違うところ:
   - ベースのイメージはホストが取り込む。署名は、VM の `policy.json` と公開鍵を写して、ホストで同じように確かめる（[VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の手順 7）
@@ -2098,138 +2098,10 @@ Guest Additions の入手元とビルドの場所:
 
 - Hyper-V で VM を作って使う
 
-#### Hyper-V: この PC で使えるかを確かめる
-
-- Windows 11 のこの PC で、Hyper-V が使えるかを確かめる
-- 前提: 無し
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-- Windows 11 Pro・Enterprise・Education の x64 が対象。Home には Hyper-V が無い
-
-1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開く
-
-1. エディション・CPU の仮想化支援・機能の今の状態を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # 権限と OS と CPU の状態を確認する
-   [pscustomobject]@{
-     Admin        = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     User         = "$env:USERDOMAIN\$env:USERNAME"
-     Arch         = $env:PROCESSOR_ARCHITECTURE
-     Edition      = (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').EditionID
-     Hypervisor   = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
-     VirtFirmware = (Get-CimInstance -ClassName Win32_Processor | Select-Object -First 1).VirtualizationFirmwareEnabled
-   } | Format-List
-   # Hyper-V と仮想化の機能を確認する
-   Get-WindowsOptionalFeature -Online | Where-Object FeatureName -like 'Microsoft-Hyper-V*' | Format-Table FeatureName, State
-   Get-WindowsOptionalFeature -Online | Where-Object FeatureName -in 'HypervisorPlatform', 'VirtualMachinePlatform' | Format-Table FeatureName, State
-   # Hyper-V の管理グループを確認する
-   Get-LocalGroupMember -SID 'S-1-5-32-578' | Format-Table Name, ObjectClass
-   ```
-
-   - `Admin : True`、`Arch : AMD64`、`Edition` が `Professional`（か `Enterprise`・`Education`）ならよい
-   - `Admin` が `False` なら、管理者ではない窓に貼っている。閉じて、この項の手順 1 から
-   - `Edition` が `Core`（Home）なら、Hyper-V は入らない。ここで止める
-   - `Hypervisor` が `False` で `VirtFirmware` も `False` なら、PC の UEFI（BIOS）の設定で Intel VT-x / AMD-V（SVM）を有効にしてから始める
-   - `Microsoft-Hyper-V-All` が `Enabled` なら、もう有効。[Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 2 は飛ばす
-   - 最後の表（Hyper-V Administrators の一員）は、空でよい
-
-#### Hyper-V: Hyper-V を有効にして再起動する
-
-- この PC の Hyper-V を有効にし、自分のユーザーで管理できるようにする
-- 前提: [Hyper-V: この PC で使えるかを確かめる](#hyper-v-この-pc-で使えるかを確かめる)を通してある
-- 実行場所: この PC のデスクトップの管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-
-> [!IMPORTANT]
-> - **この項の手順 5 で再起動する**。開いている作業を先に保存し、動いている VM を止める。SSH やリモート デスクトップのセッションからは行わない
-> - **同じ PC の VirtualBox と VMware Workstation の VM は、再起動の後は Windows のハイパーバイザーの上で動く**。遅くなり、起動しない VM が出ることがある
-
-1. 管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューの「Windows PowerShell」を右クリックし、「管理者として実行」で開き、UAC の確認に答える
-
-1. Hyper-V が有効でないときだけ、Hyper-V を有効にする。
-
-   ```powershell
-   # Hyper-V を有効にする
-   Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All -All -NoRestart
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-WindowsOptionalFeature -Online | Where-Object FeatureName -like 'Microsoft-Hyper-V*' | Format-Table FeatureName, State
-   ```
-
-   - `Microsoft-Hyper-V-All`・`Microsoft-Hyper-V-Hypervisor` が `Enabled` か `EnablePending` ならよい
-   - `Microsoft-Hyper-V-Services`・`Microsoft-Hyper-V-Management-PowerShell` も `Enabled` か `EnablePending` ならよい
-   - **まだ再起動しない**（この項の手順 5 でまとめて行う）
-
-1. VirtualBox か VMware Workstation も同じ PC で使うときだけ、Windows ハイパーバイザー プラットフォームも有効にする。
-
-   ```powershell
-   # Windows ハイパーバイザー プラットフォームを有効にする
-   Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All -NoRestart
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-WindowsOptionalFeature -Online | Where-Object FeatureName -in 'HypervisorPlatform', 'VirtualMachinePlatform' | Format-Table FeatureName, State
-   ```
-
-   - `HypervisorPlatform` が `Enabled` か `EnablePending` ならよい
-   - **再起動の後、VirtualBox と VMware Workstation の VM は Windows のハイパーバイザーの上で動き、遅くなることがある**。再起動の後に、既存の VM が起動するかを確かめる
-
-1. 自分のユーザーを Hyper-V Administrators に足す。
-
-   ```powershell
-   # 自分を Hyper-V の管理グループに登録する
-   $HV_USER = "$env:USERDOMAIN\$env:USERNAME"
-   if ((Get-LocalGroupMember -SID 'S-1-5-32-578' -ErrorAction SilentlyContinue).Name -contains $HV_USER) { "すでに一員: $HV_USER" } else { Add-LocalGroupMember -SID 'S-1-5-32-578' -Member $HV_USER }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-LocalGroupMember -SID 'S-1-5-32-578' | Format-Table Name, ObjectClass
-   ```
-
-   - 表に、ふだんログインするユーザーが出ればよい
-   - 別の管理者のユーザーで昇格した窓では、`$HV_USER` がその管理者になる。表のユーザーが違ったら、`Add-LocalGroupMember -SID 'S-1-5-32-578' -Member '<PC 名>\<ふだんのユーザー>'` を打って足す
-
-1. 再起動する。
-
-   ```powershell
-   Restart-Computer
-   ```
-
-   - **開いている作業を保存し、動いている VM（VirtualBox など）を止めてから貼る**（確認を聞かずに再起動が始まる）
-   - VMware も入れるなら、先に[VMware の導入](#vmware-workstation-pro-インストールする)の手順 3 まで済ませると、再起動は 1 回で済む（同じ項の手順 4 を兼ねる）
-   - **次の手順は、起動してサインインしてから行う**
-
-#### Hyper-V: 再起動の後に確かめる
-
-- 再起動後に、昇格せずに Hyper-V を管理できることを確かめる
-- 前提: [Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)を通し、再起動してサインインしてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. Hyper-V の管理のコマンドが、昇格せずに使えるかを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # Hyper-V の管理権限を確認する
-   whoami /groups | Select-String -Pattern 'S-1-5-32-578'
-   # Hyper-V のサービスを確認する
-   Get-Service -Name vmms, vmcompute | Format-Table Name, Status, StartType
-   # Hyper-V ホストと仮想スイッチを確認する
-   Get-VMHost | Format-List LogicalProcessorCount, VirtualMachinePath, VirtualHardDiskPath
-   Get-VMSwitch | Format-Table Name, SwitchType
-   ```
-
-   - `S-1-5-32-578` の行が出て、`vmms` が `Running` ならよい
-   - `Get-VMSwitch` に `Default Switch` が出る
-   - `Get-VMHost` が権限のエラーになったら、ログインし直していない。サインアウトしてサインインし直す
-
 #### Hyper-V: VM を作る
 
 - この PC に、第 2 世代の VM を作る
-- 前提: [Hyper-V: 再起動の後に確かめる](#hyper-v-再起動の後に確かめる)を通し、入れる OS のインストール用の ISO を用意してある
+- 前提: この PC の Hyper-V が有効で、自分が Hyper-V Administrators に入ってサインインし直してある。入れる OS のインストール用の ISO を用意してある。導入は[Hyper-V の公式の案内](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/Install-Hyper-V)に従う
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -2613,7 +2485,7 @@ Guest Additions の入手元とビルドの場所:
 
 **注意点**
 
-- **Hyper-V を有効にすると、同じ PC の VirtualBox と VMware Workstation は Windows のハイパーバイザーの上で動く**
+- **Hyper-V が有効な PC では、VirtualBox と VMware Workstation も Windows のハイパーバイザーの上で動く**
   - VirtualBox は VM のログに `fall back to NEM` と `Snail execution mode` を、VMware Workstation は `Monitor Mode: ULM` を出す
   - 各製品の文書は、CPU の仮想化支援を直接使うときより遅くなるとしている（本書では、Hyper-V を止めた状態と比べていない）
 - **第 2 世代の VM は、既定のままでは Linux の ISO から起動しない**
@@ -2626,42 +2498,6 @@ Guest Additions の入手元とビルドの場所:
   - 差分ディスクで作った VM を先に消してから、元の VM のチェックポイントを消す
 - **差分ディスクで作った VM には、仮想 TPM が引き継がれない**。要るなら、新しい VM に[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 5 を通す（元の VM の TPM の中身は移らない）
 - **VM に ISO を付けると、その ISO のファイルのアクセス権に VM の ID が足される**（`NT VIRTUAL MACHINE\<VM の ID>`）。ほかの用途と共有している ISO は、写しを付ける
-
-**[Hyper-V: この PC で使えるかを確かめる](#hyper-v-この-pc-で使えるかを確かめる)の手順 1: 5.1 にする理由**
-
-- [Hyper-V: この PC で使えるかを確かめる](#hyper-v-この-pc-で使えるかを確かめる)の手順 2 は Dism モジュールの `Get-WindowsOptionalFeature` を使うため、Windows PowerShell 5.1 に貼る
-- Microsoft Store 版の PowerShell 7 で、同じ Dism モジュールの `Add-WindowsCapability` が「クラスが登録されていません」で失敗した。`*-WindowsOptionalFeature` も、VM で確かめるまでは 5.1 にする
-
-**[Hyper-V: この PC で使えるかを確かめる](#hyper-v-この-pc-で使えるかを確かめる)の手順 2: 確かめる値の意味**
-
-- `Edition`: Hyper-V の役割は、Windows 11 の Pro・Enterprise・Education にある。Home には入らない
-- `Hypervisor`: Windows のハイパーバイザーが動いているか。WSL 2（仮想マシン プラットフォーム）やメモリ整合性を使っている PC では、Hyper-V の役割を入れる前から `True` になる
-- `VirtFirmware`: UEFI（BIOS）で CPU の仮想化支援が有効か
-- 機能の表: `Microsoft-Hyper-V-All` が Hyper-V の全体、`HypervisorPlatform` が Windows ハイパーバイザー プラットフォーム、`VirtualMachinePlatform` が WSL 2 の使う仮想マシン プラットフォーム
-- 最後の表: Hyper-V Administrators（SID `S-1-5-32-578`）の一員。Hyper-V の役割を入れる前から、グループだけはある
-
-**[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 1: 5.1 にする理由**
-
-- [Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 2・3 は Dism モジュールの `Enable-WindowsOptionalFeature`・`Get-WindowsOptionalFeature` を使うため、再起動まで Windows PowerShell 5.1 に貼る
-- Microsoft Store 版の PowerShell 7 で、同じ Dism モジュールの `Add-WindowsCapability` が「クラスが登録されていません」で失敗した。`*-WindowsOptionalFeature` も、VM で確かめるまでは 5.1 にする
-
-**[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 2: 機能の名前**
-
-- `Microsoft-Hyper-V-All` は、ハイパーバイザー・サービス・管理ツール（Hyper-V マネージャーと PowerShell のモジュール）をまとめた名前
-- Microsoft の文書の例は `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All`。本書は、管理ツールまで入ったことを機能の表で確かめるために、全体の名前を使う
-- `-NoRestart` を付けると、再起動するかを聞かれない。再起動するまで、機能は `EnablePending` のままで、Hyper-V は使えない
-
-**[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 3: Windows ハイパーバイザー プラットフォーム**
-
-- VirtualBox と VMware Workstation は、Windows のハイパーバイザーが動いている PC では、CPU の仮想化支援を直接は使えない。Windows ハイパーバイザー プラットフォームの API を通して VM を動かす
-- VirtualBox は、VM のログに `fall back to NEM` と `Snail execution mode` を出す。VMware Workstation は、VM のログに `Monitor Mode: ULM` を出す
-- Hyper-V だけを使う PC では要らない
-
-**[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 4: Hyper-V Administrators**
-
-- 本書は、VM の操作を管理者ではない窓で行うために、ユーザーをこのグループに足す
-- グループに足した後、サインインし直すまで（本書では再起動まで）は効かない
-- 一員になると、管理者ではない窓から、VM の作成・起動・停止・チェックポイント・削除、Private のスイッチの作成、仮想 TPM の追加までできた（検証記録）
 
 **[Hyper-V: VM を作る](#hyper-v-vm-を作る)の手順 2**
 
@@ -2734,7 +2570,7 @@ Guest Additions の入手元とビルドの場所:
 
 **参照**
 
-- [Install Hyper-V in Windows and Windows Server](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/install-hyper-v)（Microsoft Learn。2026-10-11 に確認。有効化のコマンド、Home には入らないこと、VirtualBox や VMware Workstation と併用するときの注意）
+- [Install Hyper-V in Windows and Windows Server](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/install-hyper-v)（Microsoft Learn。2026-10-11 に確認。VirtualBox や VMware Workstation と併用するときの注意）
 - [Hyper-V Generation 2 Virtual Machine Security Features](https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/generation-2-virtual-machine-security-features)（Microsoft Learn。2026-10-11 に確認。Secure Boot のテンプレートと仮想 TPM）
 
 - 検証記録（`docs/verification/hyper-v.md`）
@@ -3470,7 +3306,7 @@ Guest Additions の入手元とビルドの場所:
 #### VMware Workstation Pro: インストールする
 
 - 取得したインストーラーで VMware Workstation Pro を入れる
-- 前提: [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)を通してある。Hyper-V や WSL 2 と併用するなら、[Hyper-V: Hyper-V を有効にして再起動する](#hyper-v-hyper-v-を有効にして再起動する)の手順 3 で Windows ハイパーバイザー プラットフォームを有効にしてある
+- 前提: [VMware Workstation Pro: インストーラーを取得して確かめる](#vmware-workstation-pro-インストーラーを取得して確かめる)を通してある。Hyper-V や WSL 2 と併用するなら、Windows ハイパーバイザー プラットフォームが有効になっている
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
 > [!IMPORTANT]
@@ -3518,7 +3354,6 @@ Guest Additions の入手元とビルドの場所:
    ```
 
    - **開いている作業を保存し、動いている VM を止めてから貼る**（確認を聞かずに再起動が始まる）
-   - Hyper-V の手順書の途中から来たなら、[Hyper-V の「Hyper-V を有効にして再起動する」の手順 5](#hyper-v-hyper-v-を有効にして再起動する)の再起動がこれに当たる（再起動は 1 回でよい）
    - **次の手順は、起動してサインインしてから行う**
 
 #### VMware Workstation Pro: 入ったかを確かめる

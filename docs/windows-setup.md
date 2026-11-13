@@ -13,12 +13,9 @@
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - 設定を更新するときは[更新](#更新)を使う
-- 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で入れる
+- 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で作って使う
 - フォント（HackGen Console NF）・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイル・PowerShell の開発の設定は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で入れる
 - Neovim と Samba のクライアントは、[Neovim のセットアップ](neovim.md#windows-11-で使う)と[Samba のセットアップ](samba.md#windows-11-で使う)の「Windows 11 で使う」で入れる
-
-> [!WARNING]
-> - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2 で Hello 以外のサインインを許可し、[ネットワークとリモート](#ネットワークとリモート)の手順 4 で RDP を有効にすると、**パスワードを知る人がリモートから管理者として操作できる**
 
 <details id="この文書の補足と注意点">
   <summary>この文書の補足と注意点</summary>
@@ -31,17 +28,17 @@
 
 **参照**
 
-プライバシーと広告・表示と入力と音とストレージ・Edge の常駐の項の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
+表示と入力と音とストレージの項の資料。「文書」は Microsoft の文書、「コード」はソースと定義、「広く」はコミュニティの情報。
 
-- 文書: Policy CSP — [Privacy](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy)・[Experience](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience)・[System](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system)・[Search](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search)・[Multitasking](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-multitasking)・[Storage](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-storage)・[ApplicationManagement](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement) — 採らなかったポリシーと、値が無いときの動き
+- 文書: Policy CSP — [Experience](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience)・[Multitasking](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-multitasking)・[Storage](https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-storage) — 採らなかったポリシーと、値が無いときの動き
 
-- 文書: [Launch the Windows Settings app — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/develop/launch/launch-settings) — `ms-settings:privacy`・`storagepolicies`・`easeofaccess-visualeffects`・`clipboard`
+- 文書: [Launch the Windows Settings app — Microsoft Learn](https://learn.microsoft.com/en-us/windows/apps/develop/launch/launch-settings) — `storagepolicies`・`easeofaccess-visualeffects`
 
 - 文書: [New-Item（5.1）— Microsoft Learn](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1) — 既にあるレジストリのキーに `-Force` を付けると空のキーになる
 
-- 広く: [privacy.sexy の windows.yaml](https://github.com/undergroundwires/privacy.sexy/blob/master/src/application/collections/windows.yaml)・[Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
+- 広く: [Win10-Initial-Setup-Script](https://github.com/Disassembler0/Win10-Initial-Setup-Script/blob/master/Win10.psm1)（効果音）・[winutil の tweaks.json](https://github.com/ChrisTitusTech/winutil/blob/main/config/tweaks.json)（ギャラリーとホーム）・[stealthpuppy](https://stealthpuppy.com/windows-10-storage-sense-intune)・[cyberdrain](https://cyberdrain.com/automating-with-powershell-deploying-storagesense)（ストレージ センサー）、Ten Forums・ElevenForum・Winaero の記事
 
-PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネットワークの項の資料。「文書」「コード」「広く」の区別は上と同じ。
+PowerToys・PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文書」「コード」「広く」の区別は上と同じ。
 
 - 文書: [about_Profiles](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.6)・[about_Execution_Policies](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.6)・[about_PowerShell_Config](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_config?view=powershell-7.6)・[about_PSReadLine](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline?view=powershell-7.6)・[about_PSReadLine_Functions](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline_functions?view=powershell-7.6)・[Set-PSReadLineOption](https://learn.microsoft.com/en-us/powershell/module/psreadline/set-psreadlineoption?view=powershell-7.6)・[Using predictors in PSReadLine](https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/using-predictors)・[about_Update_Notifications](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_update_notifications?view=powershell-7.6)・[about_Telemetry](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.6) — Microsoft Learn
 
@@ -61,452 +58,9 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 
 </details>
 
-## 基本の設定
-
-- サインイン・検索・キーボード・再起動・プライバシー・Edge
-
-### サインイン・検索・キーボード
-
-- サインイン・検索・ショートカット・キー配列を設定する
-- 前提: 無し
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-- **この項の手順 5 で Caps Lock を左 Ctrl にすると、Caps Lock の働きは無くなる**。Caps Lock はほかのキーに割り当てない。大文字を続けて打つときは Shift を押す
-- **この項の手順 5 は、すべてのユーザー・すべてのキーボードにかかる**
-- **JIS 配列では、この項の手順 5 で「英数」のキーが Ctrl になる**。そのキーの IME の働き（英数への切り替え）も無くなるはず
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
-
-1. 「Windows Hello サインインのみを許可する」を切る。
-
-   ```powershell
-   # Hello 以外のサインインを許可する
-   $k = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device'
-   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
-   Set-ItemProperty -Path $k -Name DevicePasswordLessBuildVersion -Type DWord -Value 0
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $k | Format-List DevicePasswordLessBuildVersion
-   ```
-
-   - `DevicePasswordLessBuildVersion : 0` が出ればよい
-
-1. スタートの検索で、Web（Bing）の結果を出さないようにする。
-
-   ```powershell
-   # スタートの検索の提案を無効にする
-   $k = 'HKCU:\Software\Policies\Microsoft\Windows\Explorer'
-   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
-   Set-ItemProperty -Path $k -Name DisableSearchBoxSuggestions -Type DWord -Value 1
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $k | Format-List DisableSearchBoxSuggestions
-   ```
-
-   - `DisableSearchBoxSuggestions : 1` が出ればよい
-   - 効くのは、[再起動](#再起動)の手順 2 の再起動の後
-
-1. デスクトップの Edge と UniGet UI のショートカットを消し、Edge が作り直したら消すようにする。
-
-   ```powershell
-   # Edge のショートカット削除を設定する
-   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
-   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
-   Set-ItemProperty -Path $k -Name RemoveDesktopShortcutDefault -Type DWord -Value 1
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # デスクトップのショートカットを削除する
-   foreach ($f in (Join-Path ([Environment]::GetFolderPath('CommonDesktopDirectory')) 'Microsoft Edge.lnk'), (Join-Path ([Environment]::GetFolderPath('Desktop')) 'UniGetUI.lnk')) {
-     if (Test-Path -LiteralPath $f) { Remove-Item -LiteralPath $f; "消した: $f" } else { "無い: $f" }
-   }
-   # ショートカット削除の設定を確認する
-   Get-ItemProperty -Path $k | Format-List RemoveDesktopShortcutDefault
-   ```
-
-   - 2 つのファイルについて `消した:` か `無い:` と、`RemoveDesktopShortcutDefault : 1` が出ればよい
-   - ほかのショートカットは消さない。要らなければ手で消す
-
-1. Caps Lock を左 Ctrl にする Scancode Map を書く。
-
-   ```powershell
-   & {
-     # Caps Lock の割り当てと管理者権限を確認する
-     $key = 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout'
-     $want = '00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00'
-     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（この項の手順 1 から）'; return }
-     $now = (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue).'Scancode Map'
-     $nowHex = if ($now) { ($now | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($nowHex -and $nowHex -ne $want) { Write-Error "中断: 別の Scancode Map がある（$nowHex）"; return }
-     if (-not $nowHex) { New-ItemProperty -Path $key -Name 'Scancode Map' -PropertyType Binary -Value ([byte[]]($want -split ' ' | ForEach-Object { [Convert]::ToByte($_, 16) })) | Out-Null }
-     'Scancode Map = {0}' -f ((((Get-ItemProperty -Path $key).'Scancode Map') | ForEach-Object { '{0:X2}' -f $_ }) -join ' ')
-   }
-   ```
-
-   - `Scancode Map = 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00` が出ればよい
-   - `中断: 別の Scancode Map がある` が出たら、ほかのキーの割り当てがある（両方を使うなら、その値を手で直す。数を 1 つ増やし、終わりの印の前に `1D 00 3A 00` を足す）
-   - 効くのは、[再起動](#再起動)の手順 2 の再起動の後
-
-1. US 配列（101/102 キー）のキーボードを使うときだけ、キーボードの種類を変える。
-
-   ```powershell
-   # キーボードを US 配列に設定する
-   $k = 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters'
-   Set-ItemProperty -Path $k -Name 'LayerDriver JPN' -Type String -Value 'kbd101.dll'
-   Set-ItemProperty -Path $k -Name OverrideKeyboardIdentifier -Type String -Value 'PCAT_101KEY'
-   Set-ItemProperty -Path $k -Name OverrideKeyboardType -Type DWord -Value 7
-   Set-ItemProperty -Path $k -Name OverrideKeyboardSubtype -Type DWord -Value 0
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $k | Format-List 'LayerDriver JPN', OverrideKeyboardIdentifier, OverrideKeyboardType, OverrideKeyboardSubtype
-   ```
-
-   - `LayerDriver JPN : kbd101.dll`・`OverrideKeyboardIdentifier : PCAT_101KEY`・`OverrideKeyboardType : 7`・`OverrideKeyboardSubtype : 0` が出ればよい
-   - JIS 配列（日本語の 106/109 キー）のキーボードなら、この手順は飛ばす
-   - 効くのは、[再起動](#再起動)の手順 2 の再起動の後。US 配列で日本語の入力を切り替えるときは Alt+` を使う
-
-<details id="サインイン検索キーボード-の補足と注意点">
-  <summary>サインイン・検索・キーボード の補足と注意点</summary>
-
-**注意点**
-
-- **リモート デスクトップと Scancode Map**: Microsoft の文書は、Scancode Map がターミナル サービスでは正しく働かないことがあると書いている
-
-**[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2**
-
-- サインインの画面で、PIN のほかにパスワードも選べるようになる
-
-**[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2: この設定と、リモート デスクトップ**
-
-- 設定の「アカウント」→「サインイン オプション」の「セキュリティ向上のため、このデバイスでは Microsoft アカウント用に Windows Hello サインインのみを許可する」。値（2 がオン、0 がオフ）は Microsoft の文書に無く、広く使われているもの
-- オンだと、Microsoft アカウントのパスワードでのリモート デスクトップに入れない、という Microsoft Q&A の回答がある
-
-**[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3: 管理者の窓で書く理由と、効き目**
-
-- 自分のユーザーの設定（`HKCU`）だが、`HKCU\Software\Policies` の下は、管理者の権限が無いと書けない。管理者の窓も同じユーザーなので、自分の `HKCU` に書かれる
-- Microsoft の文書では、このポリシーは「エクスプローラーの検索ボックスに最近の検索の項目を出さない」。スタートの検索から Web の結果が消えることは、広く報告されているもの（24H2 でも効くという報告と、効かないことがあるという報告がある）
-- Windows 10 の `BingSearchEnabled` は、Windows 11 で効く根拠が見つからないので使わない
-
-**[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5**
-
-- 同じ値がもうあれば、何も書かずに同じ行を出す（何度貼ってもよい）
-
-**[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5: Scancode Map の値**
-
-Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイトずつのリトルエンディアン:
-
-| バイト | 値 | 意味 |
-|---|---|---|
-| 1〜4 | `00 00 00 00` | ヘッダ（版）。0 |
-| 5〜8 | `00 00 00 00` | ヘッダ（フラグ）。0 |
-| 9〜12 | `02 00 00 00` | 割り当ての数（終わりの印を含む）。2 |
-| 13〜16 | `1D 00 3A 00` | `0x003A001D`: Caps Lock（スキャン コード `0x3A`）を押すと、左 Ctrl（`0x1D`）として扱う |
-| 17〜20 | `00 00 00 00` | 終わりの印 |
-
-- 割り当てるのは Caps Lock だけで、左 Ctrl はそのまま（入れ替えではない）
-- 書く場所は `HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout`（`Keyboard Layouts` ではない）。PC 全体の設定なので、管理者の権限が要る
-- 文書のとおり、効くのは再起動の後
-- スキャン コードはキーの位置で決まるので、US 配列（[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6）でも JIS 配列でも、Caps Lock の位置のキー（`0x3A`）が Ctrl になる
-- 値を 16 進の文字列で比べるのは、もう同じ値があるか（2 回目）と、ほかの割り当てがあるかを分けるため
-- `中断: 別の Scancode Map がある` で止めるのは、ほかのキーの割り当てを消さないため
-
-**[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6: キーボードの種類の値**
-
-- 日本語の Windows は、キーボードの種類（配列のドライバー）を PC 全体で 1 つ持つ。`HKLM\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters` の 4 つの値で決まり、名前は i8042prt（PS/2）だが、USB のキーボードにもかかる
-- US 配列の値は、Microsoft の日本の社員のブログ（Learn に残っている「英語キーボードを快適に使う」）と同じ。設定の「時刻と言語」→「言語と地域」→「日本語」の「言語のオプション」→「キーボード レイアウト」の「英語キーボード (101/102 キー)」も、同じ値を書くと報告されている
-- JIS 配列の値は、`kbd106.dll`・`PCAT_106KEY`・7・2（広く使われているもの）
-- [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 の Scancode Map は、キーの位置（スキャン コード）で変えるので、US 配列でも Caps Lock の位置のキーが Ctrl になる
-- US 配列には半角/全角のキーが無いので、日本語の入力の切り替えは Alt+` で行う
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### 再起動
-
-- 設定を反映するため、この PC を再起動する
-- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)など、再起動が必要な設定を済ませてある
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-- この項の手順 2 は、すぐに再起動を始める。保存していない作業は先に保存する
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
-
-1. 再起動する。
-
-   ```powershell
-   Restart-Computer
-   ```
-
-   - ほかのユーザーがサインインしていると、エラーで止まる。そのときは、スタートメニューの電源から再起動する
-   - 起動してサインインしてから、後の項へ進む
-
-<details id="再起動-の補足と注意点">
-  <summary>再起動 の補足と注意点</summary>
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### プライバシーと広告の表示を切る
-
-- 自分のユーザーの広告・プライバシー・検索の設定を変える
-- 前提: 無し
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-
-- **ポリシー（`HKLM` や `HKCU\Software\Policies`）には書かない**
-
-- **この項の手順 4 で「カスタム手書き入力と入力の辞書」をオフにすると、覚えた単語の一覧が消える**
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 自分のユーザーで、プライバシーと広告の設定を切る（元の値はファイルに控える）。
-
-   ```powershell
-   & {
-     # プライバシー設定の変更前の値を取得する
-     $rec = Join-Path $env:LOCALAPPDATA 'setup-notes\privacy-before.csv'
-     $set = @(
-       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo', 'Enabled', 0),
-       @('HKCU:\Control Panel\International\User Profile', 'HttpAcceptLanguageOptOut', 1),
-       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy', 'TailoredExperiencesWithDiagnosticDataEnabled', 0),
-       @('HKCU:\Software\Microsoft\Input\TIPC', 'Enabled', 0),
-       @('HKCU:\Software\Microsoft\Siuf\Rules', 'NumberOfSIUFInPeriod', 0),
-       @('HKCU:\Software\Microsoft\Siuf\Rules', 'PeriodInNanoSeconds', 0),
-       @('HKCU:\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy', 'HasAccepted', 0),
-       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsMSACloudSearchEnabled', 0),
-       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsAADCloudSearchEnabled', 0),
-       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings', 'IsDeviceSearchHistoryEnabled', 0),
-       @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'ShowSyncProviderNotifications', 0)
-     )
-     $old = foreach ($s in $set) { $key = Get-Item -LiteralPath $s[0] -ErrorAction SilentlyContinue; [pscustomobject]@{ Path = $s[0]; Name = $s[1]; Value = [string](Get-ItemProperty -LiteralPath $s[0] -ErrorAction SilentlyContinue).($s[1]); Kind = $(if ($key -and ($key.GetValueNames() -contains $s[1])) { [string]$key.GetValueKind($s[1]) } else { '' }) } }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # 変更前の値を保存する
-     if (Test-Path -LiteralPath $rec) { "控えはもうある（書き換えない）: $rec" } else {
-       New-Item -ItemType Directory -Path (Split-Path -Path $rec) -Force | Out-Null
-       $old | Export-Csv -LiteralPath $rec -NoTypeInformation -Encoding utf8BOM
-       "控えた: $rec"
-     }
-     # プライバシーと広告の設定を変更する
-     for ($i = 0; $i -lt $set.Count; $i++) {
-       $p, $n, $v = $set[$i]
-       if (-not (Test-Path -LiteralPath $p)) { New-Item -Path $p -Force | Out-Null }
-       Set-ItemProperty -LiteralPath $p -Name $n -Type DWord -Value $v
-       '{0}\{1}: {2} -> {3}' -f (Split-Path -Path $p -Leaf), $n, $old[$i].Value, (Get-ItemProperty -LiteralPath $p).$n
-     }
-   }
-   ```
-
-   - `控えた:` か `控えはもうある` と 11 行が出て、`->` の右がすべて `0`（`HttpAcceptLanguageOptOut` だけ `1`）ならよい
-   - `IsDeviceSearchHistoryEnabled` は、0 と 1 のどちらがオフかで資料が食い違う。この項の手順 4 の画面で確かめる
-
-1. サインアウトして、同じユーザーでサインインし直す。
-
-   - スタートメニューのユーザーのアイコンから「サインアウト」を選ぶ（スタートメニューの電源から再起動してもよい）
-   - **次の手順は、サインインし、この項の手順 1 と同じ方法で管理者ではない窓を開いてから貼る**
-
-1. 設定の「プライバシーとセキュリティ」を開き、切り替えを確かめ、残りを画面で切る。
-
-   ```powershell
-   Start-Process 'ms-settings:privacy'
-   ```
-
-   - 「全般」（新しいビルドでは「おすすめとオファー」）で、広告 ID と言語リストの切り替えがオフ。「設定アプリで通知を表示する」があれば、オフにする
-   - 「音声認識」で、「オンライン音声認識」がオフ
-   - 「手書き入力と入力の個人用設定」で、「カスタム手書き入力と入力の辞書」をオフにする
-   - 「診断とフィードバック」で、「オプションの診断データを送信する」がオンなら、オフにする。「手書き入力と入力の改善」と「カスタマイズされたエクスペリエンス」がオフ、「フィードバックの頻度」が「しない」
-   - 新しいビルドでは、「カスタマイズされたエクスペリエンス」は「パーソナライズされたオファー」の名前で別のページにある
-   - 「検索のアクセス許可」で、「クラウドのコンテンツ検索」の 2 つと「このデバイスの検索履歴」がオフ。「検索のハイライトを表示する」は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の値で灰色になっている
-   - この項の手順 2 で書いた項目がオンのまま出ていたら、その画面でオフにする
-
-<details id="プライバシーと広告の表示を切る-の補足と注意点">
-  <summary>プライバシーと広告の表示を切る の補足と注意点</summary>
-
-**[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)のリード**
-
-- **[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 3 でサインアウトしてサインインし直し、[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 4 は設定の画面で行う**
-
-- 値の多くは Microsoft の文書に無く、広く使われているもの（[この文書の補足と注意点](#この文書の補足と注意点)の「参照」・検証記録）
-
-- ポリシーを置くと、設定の画面の切り替えが灰色になり、「組織によって管理」の表示が出るため
-
-**[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 2**
-
-- `->` の左は元の値（空なら値が無かった）。初めて貼ったときに `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控え、2 回目からは書き換えない
-
-- 多くは、[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 3 でサインインし直した後に効く
-
-- 出力の例は `AdvertisingInfo\Enabled: 1 -> 0`
-
-**[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 2: 値と画面の対応**
-
-出典の「文書」は Microsoft の文書（Microsoft Learn・サポートの記事）、「広く」はコミュニティで広く使われている情報（privacy.sexy・Ten Forums・ElevenForum・Winaero など）。値は `HKCU` の DWORD。
-
-| 値 | 書く値 | 設定の画面 | 出典 |
-|---|---|---|---|
-| `Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo` の `Enabled` | 0 | 「プライバシーとセキュリティ」→「全般」の広告 ID | 広く（Windows の移行マニフェストがユーザーごとの値として扱う。Microsoft Learn は `HKLM` の同じ名前の値を書く） |
-| `Control Panel\International\User Profile` の `HttpAcceptLanguageOptOut` | 1 | 同じページの言語リスト | 文書（Manage connections の 18.1） |
-| `Software\Microsoft\Windows\CurrentVersion\Privacy` の `TailoredExperiencesWithDiagnosticDataEnabled` | 0 | 「診断とフィードバック」の「カスタマイズされたエクスペリエンス」（新しいビルドでは「パーソナライズされたオファー」） | 広く（移行マニフェストに値がある） |
-| `Software\Microsoft\Input\TIPC` の `Enabled` | 0 | 「診断とフィードバック」の「手書き入力と入力の改善」 | 広く |
-| `Software\Microsoft\Siuf\Rules` の `NumberOfSIUFInPeriod`・`PeriodInNanoSeconds` | 0・0 | 「フィードバックの頻度」の「しない」 | 文書（18.16。「自動」は 2 つとも消す） |
-| `Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy` の `HasAccepted` | 0 | 「音声認識」の「オンライン音声認識」 | 文書（18.6） |
-| `Software\Microsoft\Windows\CurrentVersion\SearchSettings` の `IsMSACloudSearchEnabled`・`IsAADCloudSearchEnabled` | 0 | 「検索のアクセス許可」の「クラウドのコンテンツ検索」 | 広く |
-| 同じキーの `IsDeviceSearchHistoryEnabled` | 0 | 「検索のアクセス許可」の「このデバイスの検索履歴」 | 広く（Ten Forums は 0 がオフ。privacy.sexy は逆に 1 を書く） |
-| `Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced` の `ShowSyncProviderNotifications` | 0 | フォルダー オプションの「表示」の、同期プロバイダーの通知 | 広く |
-
-- 既定では、`HttpAcceptLanguageOptOut`・`Siuf\Rules` の 2 つ・`HasAccepted`・`SearchSettings` の 3 つ・`ShowSyncProviderNotifications` は値が無い（広く）。`AdvertisingInfo\Enabled`・`TailoredExperiences…`・`TIPC\Enabled` は、OOBE の選び方で 1 か 0
-- キーが無いときだけ `New-Item -Force` で作る。PowerShell 5.1 の `New-Item` の文書のとおり、既にあるレジストリのキーに `-Force` を付けると、値の無い空のキーで上書きされる
-- CSV は PowerShell 7 の `-Encoding utf8BOM` で書き、Windows PowerShell 5.1 でも文字コードを見分けられる BOM 付きの UTF-8 にする
-- 元の値と型（DWORD か QWORD）を `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に控える。初めて貼ったときだけ作るので、2 回目に貼っても元の値は失われない
-- 「フィードバックの頻度」を「1 日 1 回」などにしていると、`PeriodInNanoSeconds` は 864000000000 などの 32 ビットに収まらない数になる（18.16）。型は QWORD のはず（推測。文書は REG_DWORD と書く）なので、型も控える
-- 広告 ID を切っても、広告の数は減らない。オンに戻すと、ID は作り直される（サポートの記事）
-- 画面の名前が変わった後のビルド（「全般」→「おすすめとオファー」、「カスタマイズされたエクスペリエンス」→「パーソナライズされたオファー」）でも同じ値を使うかは、資料では確かめられなかった。日本語の表記も、「おすすめとオファー」と「推奨事項 & オファー」で割れている
-
-**[プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 4: 画面で行うもの**
-
-- 「カスタム手書き入力と入力の辞書」: レジストリの値を書いても、既にある辞書は消えない（広く）
-- 「オプションの診断データを送信する」: 画面が書く値は資料が無い。ポリシー（`AllowTelemetry`）は画面を灰色にするので使わない。Windows 10 1903 以降の既定は「必須」だけ（文書）。Rufus の「データ収集を無効化」で入れた PC は、既に切れている見込み（確かめていない）
-- 「設定アプリで通知を表示する」: 値（`SystemSettings\AccountNotifications` の `EnableAccountNotifications`）の資料は ElevenForum などだけ（広く）。24H2・25H2 の画面にあるかも確かめていない。[表示と入力](#表示と入力)の手順 4 の `Start_AccountNotifications`（スタートのアカウントの通知）とは別
-- 「検索のハイライトを表示する」: [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の `DisableSearchBoxSuggestions` で灰色になる（Microsoft Q&A の回答）。ポリシー（`EnableDynamicContentInWSB`）は管理者の窓が要り、同じく灰色にする
-- [プライバシーと広告の表示を切る](#プライバシーと広告の表示を切る)の手順 2 の値が画面でオンのまま出たら、その画面でオフにすれば、画面が値を書き直す
-
-**選択した方針**
-
-| 項目 | 採った方法 | 採らなかった方法と理由 |
-|---|---|---|
-| 広告 ID・カスタマイズされたエクスペリエンス | 自分のユーザーの値（`HKCU`） | ポリシー（`DisabledByGroupPolicy`・`DisableTailoredExperiencesWithDiagnosticData`）: 設定の画面が灰色になり、「組織によって管理」の表示が出る。広告 ID のポリシーは全ユーザーにかかる |
-| 診断データ | 画面で確かめ、オプションがオンのときだけ切る | `AllowTelemetry` のポリシー: 画面を灰色にする。0（オフ）は Enterprise・Education・Server だけ |
-| 辞書・設定アプリの通知 | 画面で切る | レジストリ: 辞書は既にある分が消えない。通知の値は資料が少ない |
-| アクティビティの履歴 | 入れない | 送信は KB5034204（2024-01）で廃止され、履歴はこの PC にだけ残る。24H2 以降は画面が無いと広く報告されていて、止めるのは `HKLM` のポリシー（`PublishUserActivities` など）だけ |
-| Recall | 入れない | Copilot+ PC だけの機能で、管理されていない PC では、利用者が同意するまでスナップショットを保存しない（文書） |
-| アプリの起動の追跡（`Start_TrackProgs`） | 入れない | 文書（18.1）にある値だが、スタートの「よく使う」と、Win+R・アドレス バーのアプリの履歴も消えると広く言われる（2025 年の新しいスタートでの働きは確かめていない） |
-| ロック画面のトリビアとヒント | 入れない | 背景が Windows スポットライトの間は切れない（チェックが出ない。広く）。スポットライトを止めるポリシーは Enterprise・Education だけ（文書） |
-| モバイル デバイスの提案・共有のおすすめのアプリ・スタートの閲覧履歴のサイト・Edge のおすすめ | 入れない | 資料が少ないか、管理者のポリシーで Pro では効かないものがある |
-| 位置情報 | 入れない | 文書にあるのは `HKLM` のポリシーだけで、「組織によって管理」の表示が出る |
-| 変更前の値の控え | 元の値をファイルに保存する | 既定の値だけを前提にする: Rufus で入れた PC などでは、元が 0 のことがある |
-
-**参照**
-
-- 文書: [Manage connections from Windows operating system components to Microsoft services — Microsoft Learn](https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services) — 18.1（広告 ID・言語リスト・`Start_TrackProgs`）、18.6（オンライン音声認識）、18.16（フィードバックの頻度）、18.21（手書き入力）、18.22（アクティビティの履歴）
-
-- 文書: [Manage Recall — Microsoft Learn](https://learn.microsoft.com/en-us/windows/client-management/manage-recall)・[Windows spotlight — Microsoft Learn](https://learn.microsoft.com/en-us/windows/configuration/windows-spotlight/)・[Windows activity history and your privacy — Microsoft Support](https://support.microsoft.com/en-us/windows/windows-activity-history-and-your-privacy-2b279964-44ec-8c2f-e0c2-6779b07d2cbd) — 入れなかった項目
-
-- 文書: [Diagnostics, feedback, and privacy in Windows](https://support.microsoft.com/en-us/windows/diagnostics-feedback-and-privacy-in-windows-28808a2b-a31b-dd73-dcd3-4559a5199319)・[Speech, voice activation, inking, typing, and privacy](https://support.microsoft.com/en-us/windows/privacy/speech-voice-activation-inking-typing-and-privacy)・[Windows Search and privacy](https://support.microsoft.com/en-us/windows/windows-search-and-privacy-99fb8251-7260-1cd6-1bbb-15c2370eb168) — Microsoft Support。画面の項目と、辞書が消えること
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### Edge の常駐をポリシーで止める
-
-- Edge のスタートアップ ブーストとバックグラウンドの実行を切る
-- 前提: 無し
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-
-- **この項の手順 2 のポリシーを置くと、Edge に「組織によって管理されている」旨が出て、Edge の設定の 2 つの切り替えが灰色になる**。出したくないなら、この項の手順 2 の代わりにこの項の手順 3（画面だけで切る）を行う
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - UAC の確認で「はい」を押す
-
-1. Edge のスタートアップ ブーストとバックグラウンドの実行を、ポリシーで切る。
-
-   ```powershell
-   # Edge の常駐を無効にする
-   $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-   if (-not (Test-Path -LiteralPath $k)) { New-Item -Path $k -Force | Out-Null }
-   Set-ItemProperty -Path $k -Name StartupBoostEnabled -Type DWord -Value 0
-   Set-ItemProperty -Path $k -Name BackgroundModeEnabled -Type DWord -Value 0
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-ItemProperty -Path $k | Format-List StartupBoostEnabled, BackgroundModeEnabled
-   ```
-
-   - `StartupBoostEnabled : 0` と `BackgroundModeEnabled : 0` が出ればよい
-   - 開いている Edge には、開き直すか、`edge://policy` の「ポリシーの再読み込み」で効く
-
-1. （この項の手順 2 の代わりに）管理の表示を出したくないときは、Edge の設定の画面で 2 つを切る。
-
-   - Edge のアドレス バーに `edge://settings/system` を入れて開く（「設定」→「システムとパフォーマンス」→「システム」）
-   - 「スタートアップ ブースト」をオフにする
-   - 「Microsoft Edge が終了してもバックグラウンドの拡張機能およびアプリの実行を続行する」をオフにする
-
-1. Edge で、2 つが切れていることを確かめる。
-
-   - `edge://settings/system` で、2 つがオフになっている（この項の手順 2 を行ったなら、灰色で変えられない）
-   - この項の手順 2 を行ったなら、`edge://policy` に `StartupBoostEnabled` と `BackgroundModeEnabled` が、値 `false`・状態 `OK` で出る
-   - Edge の窓をすべて閉じると、通知領域に Edge のアイコンが残らない
-   - サインインし直した後も `msedge.exe` が見えることがある
-
-<details id="edge-の常駐をポリシーで止める-の補足と注意点">
-  <summary>Edge の常駐をポリシーで止める の補足と注意点</summary>
-
-**注意点**
-
-- **Edge に「組織によって管理」と出る**: [Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める)の手順 2 のポリシーで出る。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 の `EdgeUpdate` だけで出るかは、確かめていない
-
-**[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める)のリード**
-
-- [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 の Edge Update のポリシー（`EdgeUpdate` のキー）とは別のキー（`Edge`）に書く
-
-- **[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める)の手順 3・4 は Edge の画面で行う**
-
-**[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める)の手順 2**
-
-- [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 で止めた `MicrosoftEdgeAutoLaunch_*` の行は、無くなることがある（[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 は、無いものを飛ばす）
-
-**[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める)の手順 2: 2 つのポリシー**
-
-- `StartupBoostEnabled`（Edge 88 から）と `BackgroundModeEnabled`（Edge 77 から）。どちらも REG_DWORD のブールで、必須にも推奨にもでき、Dynamic Policy Refresh が Yes（開き直さずに読み直せる）、Per Profile が No（文書。Microsoft Edge のポリシーの文書）
-- スタートアップ ブーストは、サインインのときに Edge を裏で起動しておく。4 GB を超えるメモリ（または 1 GB を超え、新しいディスク）で、Edge を数日おきに使う PC では、Edge が自分でオンにする（サポートの記事）
-- バックグラウンドの実行が残ると、スタートアップ ブーストの扱いと関係なく、窓を閉じても Edge が終わらないことがある（文書）。そのため 2 つを組で切る
-- [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 の `Run` の `MicrosoftEdgeAutoLaunch_<文字列>` は、Chromium のサインインのときの起動の仕組み（バックグラウンドの実行で使う）が書く（Chromium のコード）。ポリシーを置いた後に値が消えるかは確かめていない
-- Edge Update の、サインインのときのコマンド（`on-logon-startup-boost`・`on-logon-autolaunch`）でも、Edge が起動することがある（広く）。文書に無いので変えない
-- 必須のポリシー（`HKLM\SOFTWARE\Policies\Microsoft\Edge`）を置くと、Edge は組織が管理している旨を出し、その切り替えを灰色にする（表示の日本語の文言は広く）
-- [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 の `RemoveDesktopShortcutDefault` は `HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate`（Edge Update が読む）で、別のキー
-- `Edge` のキーが無いときだけ作る（既にあるキーを `New-Item -Force` で作り直すと、ほかの Edge のポリシーが消える）
-- ドメイン参加か MDM の登録が要るポリシーには、その旨の注記がある。2 つのポリシーの文書には無いので、家庭の PC でも効くはず（確かめていない）
-
-**選択した方針**
-
-| 経路 | 状況 | 採否 |
-|---|---|---|
-| **`HKLM` の必須のポリシー** | [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 と同じ `HKLM`。効き目がはっきりし、`edge://policy` で確かめられる。管理の表示が出て、切り替えが灰色になる | **採用** |
-| 推奨のポリシー（`Edge\Recommended`） | 利用者が一度でも切り替えていると効かない（文書）。管理の表示が出るかは資料が無い | 不採用 |
-| `HKCU` のポリシー | 書くのに管理者が要るのは同じ。両方あると `HKLM` が勝つ（Chromium の文書） | 不採用 |
-| Edge の設定の画面 | 管理の表示は出ない。Edge が自分でオンに戻すことがあるかは、資料が無い | 代わりの手順（[Edge の常駐をポリシーで止める](#edge-の常駐をポリシーで止める)の手順 3） |
-| 旧 Edge の `AllowPrelaunch` など | EdgeHTML の Edge のポリシーで、今の Edge には効かない | 不採用 |
-
-**参照**
-
-- 文書: [StartupBoostEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/startupboostenabled)・[BackgroundModeEnabled](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/backgroundmodeenabled)・[Configure Microsoft Edge](https://learn.microsoft.com/en-us/deployedge/configure-microsoft-edge)（Microsoft Learn）と [Get help with startup boost — Microsoft Support](https://support.microsoft.com/en-us/topic/get-help-with-startup-boost-ebef73ed-5c72-462f-8726-512782c5e442)
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
 ## デスクトップ
 
-- エクスプローラー・表示・入力・音・ストレージ、自動起動と標準アプリ、クリップボード、PowerToys、ホットキーと、再起動の後の確認。フォント（HackGen Console NF）と Windows Terminal は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で整える
+- エクスプローラー・表示・入力・音・ストレージ、自動起動と標準アプリ、PowerToys、ホットキーと、再起動とその後の確認。フォント（HackGen Console NF）と Windows Terminal は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で整える
 
 ### 表示と入力
 
@@ -612,10 +166,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](#表示と入力)の手順 3）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[表示と入力](#表示と入力)の手順 3 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](#表示と入力)の手順 2・4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 
-**[表示と入力](#表示と入力)の手順 4: 貼る順と、Web の結果**
+**[表示と入力](#表示と入力)の手順 4: 貼る順**
 
 - [自動起動と標準アプリ](#自動起動と標準アプリ)の手順 3 より前に貼るのは、外したアプリが戻らないようにするため（`SilentInstalledAppsEnabled`）
-- スタートの検索の Web（Bing）の結果は、管理者の権限が要るので、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 で切る
 
 **[表示と入力](#表示と入力)の手順 5: ウィジェットのボタン**
 
@@ -1177,12 +730,12 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### PowerToys のユーティリティを絞る
 
 - PowerToys の使わないユーティリティを、設定ファイルで切る
-- 前提: [PowerToys の公式の導入案内](https://learn.microsoft.com/en-us/windows/powertoys/install)に従って入れてある
+- 前提: [PowerToys の公式の導入案内](https://learn.microsoft.com/en-us/windows/powertoys/install)に従って入れてあり、Caps Lock を左 Ctrl にしてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - 切るユーティリティは好みで選ぶ。この項の手順 2 の `$PT_OFF` は案
 - 「起動時に実行」はオン、「常に管理者として実行」はオフのまま変えない。自動の更新の取得も変えない
-- Keyboard Manager は使わない（既定でオフ。Caps Lock は[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で変える）
+- Keyboard Manager は使わない（既定でオフ）
 
 1. 管理者ではない PowerShell 7 を開く。
 
@@ -1292,7 +845,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 設定ファイルの `enabled` の名前は、設定の画面のコード（`EnabledModules.cs`）の JSON の名前。`Measure Tool`・`File Locksmith`・`Image Resizer` などは空白を含む。DSC の文書の App の例の名前（`MeasureTool`・`PowerOCR` など）とは違う
 - 既定で有効なもの（main のソース）: FancyZones・Image Resizer・File Explorer Preview・PowerRename・ColorPicker・Awake・FindMyMouse・MouseHighlighter・AlwaysOnTop・Measure Tool・File Locksmith・Peek・CmdNotFound・CmdPal。ほかは既定で無効。0.101.2362.0 で同じかは、[PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)の手順 3 の表で確かめる
 - `$PT_OFF` の案（利用者の好みで変えてよい）
-  - FindMyMouse: 既定は左 Ctrl を 2 回で出る。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で Caps Lock を左 Ctrl にしたので、Caps Lock を 2 回押しても出る
+  - FindMyMouse: 既定は左 Ctrl を 2 回で出る。Caps Lock を左 Ctrl にしてあると、Caps Lock を 2 回押しても出る
   - MouseHighlighter（Win+Shift+H）・ColorPicker（Win+Shift+C）・Measure Tool: 使わないなら、Win のキーの割り当てを空ける
   - FancyZones: Windows のスナップで足りるなら要らない
   - Awake: 電源接続中にスリープしない設定なら不要。既定のモードは何もしない
@@ -1334,7 +887,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 | 設定の画面のスイッチ | すぐに効く。台数が少なければ足りる | [PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)の手順 6 で確かめに使う |
 | `PowerToys.DSC.exe`（DSC v3。0.95 から同梱） | Windows PowerShell 5.1 から JSON の文字列を渡すと、中の `"` が落ちる（`$PSNativeCommandArgumentPassing` は 7.3 から）。動いている PowerToys に伝わるかは確かめていない | 不採用 |
 | `winget configure`（PSDSC の `Microsoft.PowerToys.Configure` か dscv3） | PowerShell 7.2 以上と PowerShell Gallery のモジュールが要る | 不採用（1 台の個人の設定には大げさ） |
-| Keyboard Manager で Caps Lock を変える | [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 の Scancode Map を採った（`docs/verification/windows-setup.md` の「選択した方針」） | 不採用 |
 | 「常に管理者として実行」 | 管理者の窓でも効く機能が増えるが、自動の起動のタスクが最上位の特権で動く | 不採用（要るときだけ「管理者として再起動」） |
 
 **参照**
@@ -1748,27 +1300,51 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ---
 
+### 再起動
+
+- 設定を反映するため、この PC を再起動する
+- 前提: [表示と入力](#表示と入力)など、再起動が必要な設定を済ませてある
+- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
+- この項の手順 2 は、すぐに再起動を始める。保存していない作業は先に保存する
+
+1. 管理者の PowerShell 7 を開く。
+
+   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
+   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
+
+1. 再起動する。
+
+   ```powershell
+   Restart-Computer
+   ```
+
+   - ほかのユーザーがサインインしていると、エラーで止まる。そのときは、スタートメニューの電源から再起動する
+   - 起動してサインインしてから、後の項へ進む
+
+<details id="再起動-の補足と注意点">
+  <summary>再起動 の補足と注意点</summary>
+
+**参照**
+
+- 検証記録（`docs/verification/windows-setup.md`）
+
+</details>
+
+---
+
 ### 再起動の後に確かめる
 
 - 通した項の設定が再起動後にも効いていることを画面で確かめる
-- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)・[表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)のうち、確かめたい項を通し、再起動してサインインしてある
+- 前提: [表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)のうち、確かめたい項を通し、再起動してサインインしてある
 - 実行場所: この PC のデスクトップ（メモ帳・エクスプローラー・設定）
 
-1. キーボードで、Caps Lock・配列を確かめる。
-
-   - メモ帳を開いて何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-   - Caps Lock だけを押しても、Caps Lock のランプは点かず、大文字にもならない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-   - 日本語の配列（JIS）のキーボードでは、「英数」（Caps Lock）のキーが Ctrl になる（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-   - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
-
-1. エクスプローラー・タスクバー・スタートが変わったことを確かめる。
+1. エクスプローラー・タスクバーが変わったことを確かめる。
 
    - ファイルかデスクトップを右クリックすると、「その他のオプションを確認」を選ばなくても、「送る」「プロパティ」などの並ぶ旧形式のメニューが出る（[表示と入力](#表示と入力)を通したとき）
    - エクスプローラーを開くと「PC」が出て、ファイル名に拡張子が付き、隠しファイルも見える（[表示と入力](#表示と入力)を通したとき）
    - タスクバーのアイコンが左に寄り、タスク ビュー・検索のボタンが無く、時計に秒が出る（[表示と入力](#表示と入力)を通したとき）
    - タスクバーにウィジェットのボタンが無い（[自動起動と標準アプリ](#自動起動と標準アプリ)を通したとき）
-   - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-   - デスクトップに Edge と UniGet UI のショートカットが無い（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
 
 1. タスクバーとスタートの、要らないピン留めを外す。
 
@@ -1786,11 +1362,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 <details id="再起動の後に確かめる-の補足と注意点">
   <summary>再起動の後に確かめる の補足と注意点</summary>
 
-**[再起動の後に確かめる](#再起動の後に確かめる)の手順 2: Web の結果が出たとき**
-
-- スタートの検索に Web（Bing）の結果が出たら、検証記録と、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 3 の補足を見る
-
-**[再起動の後に確かめる](#再起動の後に確かめる)の手順 3: コマンドで外さない理由**
+**[再起動の後に確かめる](#再起動の後に確かめる)の手順 2: コマンドで外さない理由**
 
 - 自分のユーザーのピン留めを外す、サポートされたコマンドは無い。Microsoft の文書にある方法は、どれもポリシー（`ConfigureStartPins` やタスクバーのレイアウトの XML）か、新しいユーザーにだけかかるファイル
 - タスクバーの設定（`Taskband`）やスタートのファイル（`start2.bin`）を消す方法は、Microsoft の説明が無く、形も決まっていないので採らない
@@ -1806,343 +1378,19 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ## ネットワークとリモート操作
 
-- LAN とリモート デスクトップ、WSL のネットワーク、RDP の切断
-
-### ネットワークとリモート
-
-- LAN をプライベートにし、RDP・ping・配信の最適化を設定する
-- 前提: 設定する LAN が接続されている
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
-
-1. 変数を設定する。
-
-   ```powershell
-   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   'LAN_IF = {0}' -f $LAN_IF
-   ```
-
-   - `LAN_IF` が空か対象の LAN と違えば、`$LAN_IF = 'イーサネット'` のように接続名を入れる
-   - **新しい PowerShell を開いたら**、この項の手順 2 を貼り直してから先へ進む
-
-1. LAN の接続をプライベートにする。
-
-   ```powershell
-   # LAN のネットワークをプライベートに設定する
-   if (-not $LAN_IF) {
-     Write-Error '中断: この項の手順 2 の $LAN_IF が空'
-   } else {
-     Set-NetConnectionProfile -InterfaceAlias $LAN_IF -NetworkCategory Private
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetConnectionProfile -InterfaceAlias $LAN_IF | Format-Table InterfaceAlias, NetworkCategory
-   }
-   ```
-
-   - `<LAN_IF>  Private` が出ればよい
-   - **注意**: プライベート向けのほかの許可の規則（ネットワーク探索など）も、この LAN で効くようになる
-
-1. Pro 以上のときだけ、リモート デスクトップを有効にし、受け付けるのをプライベートの LAN に絞る。
-
-   ```powershell
-   # リモート デスクトップを有効にする
-   $ed = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').EditionID
-   if ($ed -like 'Core*') { Write-Error "中断: Home（$ed）は、リモート デスクトップでつながれる側になれない" } else {
-     Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections -Type DWord -Value 0
-     Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name UserAuthentication -Type DWord -Value 1
-     Set-NetFirewallRule -Group '@FirewallAPI.dll,-28752' -Enabled True -Profile Private
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-NetFirewallRule -Group '@FirewallAPI.dll,-28752' | Format-Table Name, Enabled, Profile, Direction, Action
-   }
-   ```
-
-   - `RemoteDesktop-UserMode-In-TCP` などの行が `True  Private  Inbound  Allow` で出ればよい
-   - Home なら、この手順は飛ばす（ブロック自身もエディションを調べ、`中断:` で止まる）
-
-1. リモート アシスタンスを切る。
-
-   ```powershell
-   # リモート アシスタンスを無効にする
-   Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -Name fAllowToGetHelp -Type DWord -Value 0
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Set-NetFirewallRule -Group '@FirewallAPI.dll,-33002' -Enabled False
-   Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' | Format-List fAllowToGetHelp
-   Get-NetFirewallRule -Group '@FirewallAPI.dll,-33002' | Format-Table Name, Enabled, Profile
-   ```
-
-   - `fAllowToGetHelp : 0` と、リモート アシスタンスの規則が `False` で並べばよい
-   - `Set-NetFirewallRule` が規則が見つからない旨のエラーを出したら、グループの ID が違う
-
-1. プライベートの LAN からの ping（ICMP のエコー要求）に応える規則を作る。
-
-   ```powershell
-   # ping を許可する規則を作成する
-   $g = 'Ping (setup-notes)'
-   Remove-NetFirewallRule -Group $g -ErrorAction SilentlyContinue
-   New-NetFirewallRule -Name 'Ping-ICMPv4-In-setup-notes' -DisplayName 'Ping (ICMPv4 エコー要求)' -Group $g -Direction Inbound -Action Allow -Profile Private -Protocol ICMPv4 -IcmpType 8 | Out-Null
-   New-NetFirewallRule -Name 'Ping-ICMPv6-In-setup-notes' -DisplayName 'Ping (ICMPv6 エコー要求)' -Group $g -Direction Inbound -Action Allow -Profile Private -Protocol ICMPv6 -IcmpType 128 | Out-Null
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-NetFirewallRule -Group $g | Format-Table Name, Enabled, Profile, Direction, Action
-   ```
-
-   - 2 つの規則が `True  Private  Inbound  Allow` で出ればよい
-   - 何度貼ってもよい
-   - LAN の別の PC から、この PC の IP アドレスへ ping が通るようになる
-
-1. 配信の最適化を、LAN の PC とだけ共有するようにする。
-
-   ```powershell
-   # 配信の最適化を LAN 内に設定する
-   Set-DODownloadMode -DownloadMode Lan
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-DODownloadMode
-   ```
-
-   - `Lan` が出ればよい
-
-<details id="ネットワークとリモート-の補足と注意点">
-  <summary>ネットワークとリモート の補足と注意点</summary>
-
-**[ネットワークとリモート](#ネットワークとリモート)の手順 3: もとからプライベートのときと、前提にする手順**
-
-- 既にプライベートなら、何も変わらない
-- [ネットワークとリモート](#ネットワークとリモート)の手順 4〜6 は、この LAN がプライベートであることを前提にする
-
-**[ネットワークとリモート](#ネットワークとリモート)の手順 4: つなぐときのユーザーと、前提にする手順書**
-
-- つなぐのは、この PC にサインインするのと同じユーザーとパスワード（Microsoft アカウントなら、そのアカウントのパスワード。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2 も）
-- [RDP をロックせずに切断](#rdp-をロックせずに切断)は、この手順を前提にする
-
-**[ネットワークとリモート](#ネットワークとリモート)の手順 5: リモート アシスタンス**
-
-- リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
-- グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
-- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている
-
-**[ネットワークとリモート](#ネットワークとリモート)の手順 6: 自分で規則を作る理由**
-
-- Windows の既定では、ping（ICMPv4 の種類 8、ICMPv6 の種類 128）に応えない。組み込みの規則（「ファイルとプリンターの共有 (エコー要求 - ICMPv4 受信)」など）は無効で、「ファイルとプリンターの共有」の設定と一緒に変わる
-- その規則を使わず、名前とグループ（`Ping (setup-notes)`）の決まった規則を作る。ほかの設定とぶつからず、消すときも分かる
-- 接続元は絞らない（`Any`）。プロファイルで決まるので、プライベートの LAN を通って届く、別のサブネットからの ping にも応える
-- 何度貼ってもよいのは、規則を消してから作り直すため
-
-**[ネットワークとリモート](#ネットワークとリモート)の手順 7: 配信の最適化**
-
-- 配信の最適化は、Windows Update とストアのアプリのファイルを、ほかの PC と分け合う仕組み。設定の「Windows Update」→「詳細オプション」→「配信の最適化」の「他のデバイスからのダウンロードを許可する」と同じ
-- `Lan` は同じ NAT の後ろ（同じ LAN）の PC とだけ、`Internet` はインターネットの PC とも、`CdnOnly` は分け合わない。Microsoft の文書の既定は `Lan`（ポリシーの文書は 0 = HTTP だけと書いていて、文書の間で食い違う）
-- `Set-DODownloadMode` は設定の画面と同じことをする（Microsoft の文書）。グループ ポリシーで決まっていると、そちらが優先される
-- Windows の既定も `Lan` なので、変更前が `Lan` なら何も変わらない
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### WSL のネットワークをミラーにする
-
-- WSL 2 のネットワークを、Windows と同じ IP を使うミラーに変える
-- 前提: [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)と[WSL の AlmaLinux 10](https://wiki.almalinux.org/documentation/wsl.html)で WSL 2 の AlmaLinux 10 を導入済み
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-
-- **この項の手順 4・6 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
-- ミラーにして変わること
-  - WSL からこの PC の Windows のサーバーには、`127.0.0.1` でつなぐ（`::1` は使えない。LAN の IP あてはつながらないはず）
-  - Windows が使っているポートは、WSL の中では使えない
-  - Docker のポートの公開と、一部の VPN には、既知の問題がある（[WSL のネットワークをミラーにする の補足と注意点](#wsl-のネットワークをミラーにする-の補足と注意点)の「選択した方針」）
-
-- **この項の手順 5 は、控えた後に設定の画面などで変えた値も、控えたときに戻す**
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 今の `.wslconfig` と、WSL の版と、動いているディストリビューションを確かめる。
-
-   ```powershell
-   & {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # WSL の設定ファイルを確認する
-     $env:WSL_UTF8 = '1'
-     $p = Join-Path $env:USERPROFILE '.wslconfig'
-     if (Test-Path -LiteralPath $p) { "--- $p"; [IO.File]::ReadAllText($p) } else { "無い: $p" }
-     # WSL の版と実行中の構成を確認する
-     wsl.exe --version
-     wsl.exe --list --running
-   }
-   ```
-
-   - `無い:` か、`.wslconfig` の中身が出る
-   - `wsl.exe --version` が、WSL の版（`2.…` の形）を出せばよい
-   - 最後に、動いているディストリビューションが出る（無ければ、無い旨の行）
-   - 中身の `[wsl2]` に `networkingMode=mirrored` があれば、もうミラー。この項の手順 3 は飛ばす
-
-1. ミラーになっていないときだけ、`.wslconfig` に、ネットワークをミラーにする行を書く（ファイルがあれば控える）。
-
-   ```powershell
-   & {
-     # WSL の設定ファイルと文字コードを準備する
-     $path = Join-Path $env:USERPROFILE '.wslconfig'
-     $bak = "$path.windows-setup.bak"
-     $enc = New-Object System.Text.UTF8Encoding $false
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (-not (Test-Path -LiteralPath $path)) {
-       [IO.File]::WriteAllText($path, "[wsl2]`r`nnetworkingMode=mirrored`r`n", $enc)
-       "作った: $path"
-     } else {
-       $text = [IO.File]::ReadAllText($path)
-       if ($text -match '(?im)^[ \t]*networkingMode[ \t]*=') { Write-Error "中断: networkingMode の行がもうある。手で直すか、設定の画面で変える: $path"; return }
-       if (Test-Path -LiteralPath $bak) { "控えはもうある（書き換えない）: $bak" } else { Copy-Item -LiteralPath $path -Destination $bak -ErrorAction Stop; "控えた: $bak" }
-       $nl = if ($text.Contains("`n") -and -not $text.Contains("`r`n")) { "`n" } else { "`r`n" }
-       $re = [regex]'(?im)^([ \t]*\[wsl2\][ \t]*)(?=\r?$)'
-       if ($re.IsMatch($text)) { $text = $re.Replace($text, '$1' + $nl + 'networkingMode=mirrored', 1) } else {
-         if ($text -and -not $text.EndsWith("`n")) { $text += $nl }
-         $text += '[wsl2]' + $nl + 'networkingMode=mirrored' + $nl
-       }
-       [IO.File]::WriteAllText($path, $text, $enc)
-       "足した: $path"
-     }
-     [IO.File]::ReadAllText($path)
-   }
-   ```
-
-   - `作った:` か `足した:` の行（ファイルがあったときは、その前に `控えた:`）と、`[wsl2]` の次の行が `networkingMode=mirrored` の中身が出ればよい
-   - 控えは `%USERPROFILE%\.wslconfig.windows-setup.bak`。ファイルがあって、控えが無いときだけ作る（この項の手順 5 で使い、戻すと消える）
-   - `中断: networkingMode の行がもうある` が出たら、何も書いていない。その行を手で `networkingMode=mirrored` にするか、設定の画面で変える
-   - 効くのは、この項の手順 4 で WSL を止めた後
-
-1. WSL を止めて、ミラーで動くことを確かめる。
-
-   ```powershell
-   # WSL を停止する
-   wsl.exe --shutdown
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
-   ```
-
-   - `mirrored` が出ればよい
-   - `ミラー化されたネットワーク モードはサポートされていません` の行が出て `nat` なら、この PC ではミラーを使えない（理由はその行に出る）。この項の手順 5・6 で戻す
-   - その行が無く `nat` なら、`.wslconfig` が読まれていない（この項の手順 2 で中身を確かめる）
-   - `wslinfo` が無い旨が出たら、`wsl.exe --distribution AlmaLinux-10 -- ip -4 -br addr` の IP が、Windows の LAN の IP（`ipconfig`）と同じならミラー
-   - WezTerm の WSL のタブは切れているので、開き直す
-
-1. この PC でミラーを使えなかったときだけ、`.wslconfig` を元に戻す。
-
-   ```powershell
-   & {
-     # WSL の設定ファイルと控えの場所を設定する
-     $path = Join-Path $env:USERPROFILE '.wslconfig'
-     $bak = "$path.windows-setup.bak"
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if (Test-Path -LiteralPath $bak) {
-       Move-Item -LiteralPath $bak -Destination $path -Force -ErrorAction Stop
-       "控えから戻した: $path"
-     } elseif (-not (Test-Path -LiteralPath $path)) {
-       "無い: $path"
-     } elseif ([IO.File]::ReadAllText($path) -eq "[wsl2]`r`nnetworkingMode=mirrored`r`n") {
-       Remove-Item -LiteralPath $path -ErrorAction Stop
-       "消した: $path"
-     } else {
-       Write-Error "中断: この項で作った形ではない。networkingMode の行を手で消す: $path"
-     }
-   }
-   ```
-
-   - `控えから戻した:`（ファイルがあったとき）か `消した:`（この項で作ったとき）が出ればよい
-   - `中断:` が出たら、`.wslconfig` をメモ帳で開き、`networkingMode=mirrored` の行を消して保存する
-   - 効くのは、この項の手順 6 で WSL を止めた後
-
-1. この PC でミラーを使えなかったときだけ、WSL を止めて、NAT に戻ったことを確かめる。
-
-   ```powershell
-   # WSL を停止する
-   wsl.exe --shutdown
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   wsl.exe --distribution AlmaLinux-10 -- wslinfo --networking-mode
-   ```
-
-   - `nat` が出ればよい
-   - WSL から Windows のサーバーには、また LAN の IP あてにつなぐ
-
-<details id="wsl-のネットワークをミラーにする-の補足と注意点">
-  <summary>WSL のネットワークをミラーにする の補足と注意点</summary>
-
-**[WSL のネットワークをミラーにする](#wsl-のネットワークをミラーにする)の手順 2**
-
-- [WSL のネットワークをミラーにする](#wsl-のネットワークをミラーにする)の手順 4 で、動いているディストリビューションを止める
-
-**[WSL のネットワークをミラーにする](#wsl-のネットワークをミラーにする)の手順 3: `.wslconfig`**
-
-- `%USERPROFILE%\.wslconfig` の `[wsl2]` の `networkingMode`。既定は `nat`（2.3.25 からは、NAT に失敗すると Consomme）。`[experimental]` の `networkingMode` も、互換のために読む（`WslCoreConfig.cpp`）
-- Windows 11 22H2 以上が要る（対象の 24H2・25H2 は満たす）
-- 「Linux 用 Windows サブシステム設定」の画面も同じファイルに書く。そのため、ファイルがあれば上書きせず、控えてから `[wsl2]` の見出しの次に 1 行足す（見出しが無ければ末尾に足す。改行はファイルに合わせる）。`networkingMode` の行が既にあれば止める
-- BOM の無い UTF-8 で書く
-- `localhostForwarding` は、ミラーでは無視される
-- 効くのは `wsl.exe --shutdown` の後。シェルを閉じるだけでは、VM が既定でおよそ 60 秒（`vmIdleTimeout`）残る
-- 書かないもの
-  - `dnsTunneling`・`firewall`・`autoProxy`: どれも既定で true（Windows 11 22H2 以上）。ミラーでは `firewall=false` を書いても、Hyper-V のファイアウォールは有効になる
-  - メモリ・プロセッサ・スワップ: 既定は RAM の 50%・全論理プロセッサ・RAM の 25%。VirtualBox と RAM を分けたいときだけ `memory` を絞る
-  - `[experimental]` の `autoMemoryReclaim`（既定 `dropCache`）・`sparseVhd`（新しく作る VHD にだけ効く）
-  - `[experimental]` の `hostAddressLoopback`（既定 false）: true にすると、WSL からこの PC の LAN の IP あてでも Windows につながる（IPv4 だけ）。`127.0.0.1` で足りる
-  - `[experimental]` の `ignoredPorts`: Windows が使っているポートでも Linux に bind させる。WSL の中で sshd を動かす手順は、このリポジトリに無い
-
-**[WSL のネットワークをミラーにする](#wsl-のネットワークをミラーにする)の手順 4・5: 確かめ方**
-
-- `wslinfo --networking-mode` は、WSL が各ディストリビューションに置くコマンド。AlmaLinux 10 のイメージで使えるかは確かめていない。無ければ、WSL の中の IP と Windows の IP を比べる（ミラーでは同じ IP になる）
-- ミラーを使えないとき、WSL は NAT に戻し、`wsl.exe` が理由の行（`ミラー化されたネットワーク モードはサポートされていません: …`）を出す（`Resources.resw` の `MessageMirroredNetworkingNotSupportedReason`）
-  - `wslinfo --networking-mode` は、そのときも `nat` を出す（`wslinfo.cpp`）
-
-**選択した方針**
-
-- **ミラーにする理由**: WSL と Windows が `127.0.0.1` で互いにつながり、IPv6・マルチキャスト（mDNS）・VPN との相性がよく、LAN から WSL に直接届く（Microsoft の文書）
-- **既知の問題**（Microsoft の文書。troubleshooting）
-  - Docker の `-p` のポートの公開（`ignoredPorts` で避ける）、OpenVPN 2.6.501 などの一部の VPN
-  - UDP 68・TCP 135/1900/2869/5004/3702/5357/5358 は、WSL に届かない
-  - WSL が `accept_local`・`route_localnet`・`rp_filter` などの sysctl を自分で設定する
-  - Global Secure Access のクライアントの PC では、`dnsTunneling=false` か NAT に戻す
-- **LAN から WSL の中のサーバーへの受信は開けない**: ミラーでは、Hyper-V のファイアウォールが受信を絞る。開けるなら、管理者で `New-NetFirewallHyperVRule … -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -Protocol TCP -LocalPorts <ポート> -Profiles Private` にする（`-Profiles` の既定は Any なので、[ネットワークとリモート](#ネットワークとリモート)の手順 4・6 と同じくプライベートに絞る）。全部を開ける `Set-NetFirewallHyperVVMSetting -DefaultInboundAction Allow` は使わない
-- **ファイルに書く**: Microsoft の文書は「Linux 用 Windows サブシステム設定」の画面を勧めるが、貼って確かめられるようにファイルに書く。画面も同じファイルに書く
-- [VirtualBox の bootc ゲスト: ホストオンリーアダプターだけの VM でビルドする](virtual-machines.md#virtualbox-の-bootc-ゲスト-ホストオンリーアダプターだけの-vm-でビルドする)の、WSL からホストオンリーのネットワークの VM に届いた記録は NAT のときのもの。ミラーでは確かめていない
-
-| 項目 | 採った方法 | 採らなかった方法と理由 |
-|---|---|---|
-| ネットワーク | ミラー | NAT（既定）: WSL から Windows のサーバーに LAN の IP あてでつなぎ、IPv6・mDNS が使えない |
-| 書くキー | `networkingMode` だけ | `dnsTunneling`・`firewall`・`autoProxy`: 既定で有効。メモリなど: 既定で足りる |
-| LAN から WSL への受信 | 開けない | Hyper-V のファイアウォールの規則: 管理者が要り、WSL の中のサーバーを LAN に開ける |
-| `hostAddressLoopback` | 書かない | LAN の IP あてでも Windows につながるが、`127.0.0.1` で足りる |
-| 既にある `.wslconfig` | 控えてから 1 行足す（`networkingMode` があれば止める） | 上書き: 画面などで書いた値が消える |
-
-**参照**
-
-- 文書: [Advanced settings configuration in WSL](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)・[Accessing network applications with WSL（Mirrored mode networking）](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking)・[Troubleshooting WSL](https://learn.microsoft.com/en-us/windows/wsl/troubleshooting)・[Hyper-V Firewall](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)・[New-NetFirewallHyperVRule](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallhypervrule) — Microsoft Learn
-
-- コード: [microsoft/WSL](https://github.com/microsoft/WSL)（`src/windows/common/WslCoreConfig.cpp`・`WslCoreConfig.h`、日本語の訳の `localization/strings/ja-JP/Resources.resw`）
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
+- RDP の切断
 
 ### RDP をロックせずに切断
 
 - RDP のセッションをこの PC の画面へ移し、ロックせずに切断する
-- 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している
+- 前提: [リモート デスクトップの公式の案内](https://support.microsoft.com/en-us/windows/how-to-use-remote-desktop-5fe128d5-8fb1-7a23-3b8a-41e636865e8c)に従って RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している
 - 実行場所: この PC のデスクトップ（RDP 接続先）の管理者の PowerShell 7。この項の手順 1 で開く。切断後は接続先の PC の画面で確かめる
 
 - この項の手順 1〜3 は RDP のセッションの中で行う。この項の手順 3 を貼ると、その場で RDP が切れる
 - この項の手順 4 は、接続先の PC の画面で行う
 
 > [!WARNING]
-> - **切断した後の PC の画面はロックされない**。PC の前にいる人が、このユーザー（Administrators の一員）としてそのまま操作できる。人が触れる場所にある PC では使わない
+> - **この項の手順 3 で切断した後の PC の画面はロックされない**。PC の前にいる人が、このユーザー（Administrators の一員）としてそのまま操作できる。人が触れる場所にある PC では使わない
 
 1. RDP でつないだセッションの中で、管理者の PowerShell 7 を開く。
 
@@ -2180,41 +1428,11 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 #### RDP をロックせずに切断: ショートカットで切断する
 
-- RDP をロックせずに切断するショートカットを作る
-- 前提: [ネットワークとリモート](#ネットワークとリモート)で RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。切断の注意は[RDP をロックせずに切断](#rdp-をロックせずに切断)を先に読む
-- 実行場所: この PC のデスクトップ（RDP 接続先）の管理者ではない PowerShell 7。この項の手順 1 で開く
+- 作ってあるショートカットで、RDP をロックせずに切断する
+- 前提: [リモート デスクトップの公式の案内](https://support.microsoft.com/en-us/windows/how-to-use-remote-desktop-5fe128d5-8fb1-7a23-3b8a-41e636865e8c)に従って RDP を有効にした Windows 11 Pro 以上に、サインイン中の Administrators のユーザーで RDP 接続している。デスクトップに「RDP をロックせずに切断」の、管理者として実行するショートカットがある。切断の注意は[RDP をロックせずに切断](#rdp-をロックせずに切断)を先に読む
+- 実行場所: この PC のデスクトップ（RDP 接続先）。切断後は接続先の PC の画面で確かめる
 
-- **切断した後の画面はロックされない**。人が触れる場所にある PC では使わない
-
-1. RDP でつないだセッションの中で、管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-
-1. デスクトップに、管理者として実行するショートカットを作る。
-
-   ```powershell
-   & {
-     # RDP の切断用ショートカットを作成する
-     $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'RDP をロックせずに切断.lnk'
-     $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
-     $s.TargetPath = "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe"
-     $s.Arguments = '-NoProfile -WindowStyle Hidden -Command "tscon.exe (Get-Process -Id $PID).SessionId /dest:console"'
-     $s.IconLocation = "$env:WINDIR\System32\mstsc.exe,0"
-     $s.Save()
-     # ショートカットを管理者として実行する設定にする
-     $b = [System.IO.File]::ReadAllBytes($lnk)
-     if ($b[0] -ne 0x4C) { Write-Error "中断: $lnk がショートカットの形式でない"; return }
-     $b[0x15] = $b[0x15] -bor 0x20
-     [System.IO.File]::WriteAllBytes($lnk, $b)
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     '{0}（管理者として実行: {1}）' -f $lnk, [bool]([System.IO.File]::ReadAllBytes($lnk)[0x15] -band 0x20)
-   }
-   ```
-
-   - ショートカットのパスと `管理者として実行: True` が出ればよい
-   - デスクトップに「RDP をロックせずに切断」のアイコンが出る
+- **この項の手順 1 で切断した後の画面はロックされない**。人が触れる場所にある PC では使わない
 
 1. 切断するときは、RDP でつないだセッションの中で、デスクトップのショートカットをダブルクリックする。
 
@@ -2264,29 +1482,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - UAC の確認は毎回出る。ショートカットは、管理者として実行する Windows PowerShell で `tscon` を動かす
 
-**[RDP をロックせずに切断: ショートカットで切断する](#rdp-をロックせずに切断-ショートカットで切断する)の手順 2**
-
-- 何度貼ってもよい
-
-- 同じ印は、画面でも付けられる: ショートカットのプロパティの「ショートカット」タブの「詳細設定」で、「管理者として実行」にチェックを入れる
-
-- OneDrive でデスクトップをバックアップしていると、ショートカットのパスは OneDrive の下
-
-**[RDP をロックせずに切断: ショートカットで切断する](#rdp-をロックせずに切断-ショートカットで切断する)の手順 2: ショートカットの作り**
-
-検証記録（`docs/verification/windows-rdp-disconnect.md` の「ショートカットで切断する / 手順 1: 補足: ショートカットの作り」）
-
-- 動かすのは `powershell.exe -NoProfile -WindowStyle Hidden -Command "tscon.exe (Get-Process -Id $PID).SessionId /dest:console"`。[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 3 と同じコマンドを、隠した窓で動かす
-- `Arguments` は単一引用符で囲み、`$PID` を、ショートカットを作る PowerShell ではなく、ショートカットが起動する PowerShell に読ませる
-- `WScript.Shell` のショートカットには「管理者として実行」を付ける口が無いので、保存した `.lnk` のバイトを直す
-  - `.lnk` の先頭はヘッダー（`ShellLinkHeader`。最初の 4 バイトが大きさの `0x4C`）。オフセット `0x14` からの 4 バイトが `LinkFlags` で、その `RunAsUser`（`0x00002000`）を立てる
-  - リトル エンディアンなので、オフセット `0x15` のバイトの `0x20` に当たる（MS-SHLLINK）
-  - Microsoft の資料は、この印を「別のユーザーとして動かす」とだけ書いている。チェック項目との対応については検証記録を参照する
-- アイコンは「リモート デスクトップ接続」（`mstsc.exe`）のもの
-- デスクトップの場所は `[Environment]::GetFolderPath('Desktop')` で取る（OneDrive に移したデスクトップも、この値になる）
-- 何度貼っても、同じショートカットを作り直すだけ
-
-**[RDP をロックせずに切断: ショートカットで切断する](#rdp-をロックせずに切断-ショートカットで切断する)の手順 3: 切れないとき**
+**[RDP をロックせずに切断: ショートカットで切断する](#rdp-をロックせずに切断-ショートカットで切断する)の手順 1: 切れないとき**
 
 - ショートカットは窓を隠して動かすので、切れないときのエラーが見えない。そのため、[RDP をロックせずに切断](#rdp-をロックせずに切断)の手順 1〜3 で切ってエラーを見る
 
@@ -2300,8 +1496,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - **セッションの ID は、PowerShell のプロセスから取る**
   - SmartBear の資料のバッチは、`query user` の出力の 3 列目を ID として取る
   - 本書は出力の列の位置に頼らず、この PowerShell が動いているセッション（RDP でつないでいるセッション）の ID を `(Get-Process -Id $PID).SessionId` で取る
-- **ショートカットは、毎回 UAC の確認が出る形にした**（利用者の選択）
-  - 最上位の特権のタスクを登録し、ショートカットから `schtasks /run` で動かせば UAC の確認は出ないが、仕組みが増えるので採らなかった
 - **採らなかった案**
   - ふつうの切断（RDP の窓を閉じる）: PC の画面がロック画面になる
   - サインアウト: セッションが終わり、動いていたアプリも終わる
@@ -2312,7 +1506,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - [quser — Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/quser)（列の意味、今のセッションに付く `>`）
 - [Enable Remote Desktop on your PC — Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/remotepc/remote-desktop-allow-access)（設定の「システム → リモート デスクトップ」、Home は RDP でつながれる側になれないこと）
 - [Process.SessionId — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.sessionid)（プロセスのターミナル サービスのセッションの ID）
-- MS-SHLLINK の [ShellLinkHeader](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/c3376b21-0931-45e4-b2fc-a48ac0e60d15)・[LinkFlags](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/ae350202-3ba9-4790-9e9e-98935f4ee5af)（`.lnk` のヘッダーと `RunAsUser`）、[SHELL_LINK_DATA_FLAGS](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/ne-shlobj_core-shell_link_data_flags)（`SLDF_RUNAS_USER` = `0x00002000`）
 - [Disconnecting From Remote Desktop While Running Automated Tests — SmartBear TestComplete](https://support.smartbear.com/testcomplete/docs/testing-with/running/via-rdp/keeping-computer-unlocked.html)（`tscon … /dest:console` を管理者として実行する、ロックされないことの注意、`rdpclip.exe`）
 
 - 検証記録（`docs/verification/windows-rdp-disconnect.md`）
@@ -3773,140 +2966,6 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 ---
 
-## アプリ
-
-- Firefox
-
-### Firefox
-
-- 日本語版の Firefox を PC 全体に入れ、既定のブラウザーにする
-- 前提: [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)が使え、Microsoft Store のアプリの更新を済ませてある
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Firefox の起動と設定は、この PC のデスクトップ
-- 言語パックは足さない。足すと、閉じている間の更新（Background Update）が止まる
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - ユーザーアカウント制御（UAC）の確認は「はい」
-
-1. Firefox がまだ入っていないことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # インストーラー版の Firefox を確認する
-   $arp = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
-   Get-ItemProperty -Path $arp -ErrorAction SilentlyContinue | Where-Object DisplayName -like 'Mozilla Firefox*' | Format-Table DisplayName, DisplayVersion, InstallLocation
-   # Microsoft Store 版の Firefox を確認する
-   Get-AppxPackage -Name 'Mozilla.MozillaFirefox' | Format-Table Name, Version
-   ```
-
-   - どちらも何も出なければ、入っていない
-   - `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` にあれば、この項の手順 3 をそのまま貼ってよい
-   - ほかのもの（`(x64 en-US)` などのほかの言語・`(x86 ja)`・ESR・`%LOCALAPPDATA%` の下・Microsoft Store 版の `Mozilla.MozillaFirefox`）が出たら、中断し、既存の導入元と設定を確かめる
-
-1. winget で日本語版の Firefox を PC 全体に入れ、入ったか確かめる。
-
-   ```powershell
-   # Firefox を導入する
-   winget install --exact --id Mozilla.Firefox.ja --source winget --scope machine --accept-source-agreements --accept-package-agreements
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # Firefox の導入先と版を確認する
-   winget list --exact --id Mozilla.Firefox.ja --source winget
-   (Get-Item -LiteralPath "$env:ProgramFiles\Mozilla Firefox\firefox.exe").VersionInfo | Format-List FileName, ProductVersion
-   # Firefox の更新サービスとタスクを確認する
-   Get-Service -Name MozillaMaintenance | Format-Table Name, Status, StartType
-   Get-ScheduledTask -TaskPath '\Mozilla\' -ErrorAction SilentlyContinue | Format-Table TaskName, State
-   ```
-
-   - `winget list` に `Mozilla Firefox (x64 ja)` と `Mozilla.Firefox.ja`、版が出ればよい
-   - `FileName` が `C:\Program Files\Mozilla Firefox\firefox.exe` で、`ProductVersion` が同じ版
-   - `MozillaMaintenance`（Mozilla Maintenance Service）の行が出ればよい（`Status` は `Stopped` でもよい。更新のときだけ動く）
-   - タスクの一覧に `Firefox Default Browser Agent <番号>` が出る
-   - `winget` が見つからないと出たら、Microsoft Store で「アプリ インストーラー」を更新してから貼り直す
-
-1. スタートメニューから Firefox を起動し、`about:support` で日本語版の公式のビルドかを確かめる。
-
-   - スタートメニューの「Firefox」から起動する（管理者の PowerShell からは起動しない。Firefox が管理者の権限で動いてしまう）
-   - 最初の起動で、Firefox を既定のブラウザーにするかを聞かれることがある。選ぶと Windows の設定が開くので、この項の手順 5 の操作をそこで行ってよい
-   - アドレスバーに `about:support` を入れ、「アプリケーション基本情報」を見る
-     - 「更新チャンネル」が `release`
-     - 「プログラムの実行ファイル」が `C:\Program Files\Mozilla Firefox\firefox.exe`
-   - 同じページの「コーデックサポート情報」で、`H264` と `AAC` の「ソフトウェアデコーディング」が「対応」になる
-     - 情報が利用できないと出たら、動画を 1 本再生してから開き直す
-   - メニューやボタンが日本語で出る
-
-1. Windows の設定で、Firefox を既定のブラウザーにする。
-
-   - 設定（Win+I）→「アプリ」→「既定のアプリ」を開き、「アプリケーションの既定値を設定する」の一覧で「Firefox」を選ぶ（2 つ並んだときは上のもの）
-   - 「Firefox を既定のブラウザーに設定する」の横の「既定値に設定」を押す（押すと横にチェックの印が出る）
-   - 押した後は、同じ画面の `.htm`・`.html`・`HTTP`・`HTTPS` などの既定が Firefox になる
-   - Win+R の「ファイル名を指定して実行」に `https://www.mozilla.org/ja/` を入れて Enter を押し、Firefox で開けばよい
-   - Firefox の `about:preferences` →「既定のブラウザーにする」からでもよい
-   - 画面の名前が異なる場合は、Windows の既定のアプリの設定から Firefox を選ぶ
-
-<details id="firefox-の補足と注意点">
-  <summary>Firefox の補足と注意点</summary>
-
-**注意点**
-
-- **Firefox: AAC と H.264 のために足すものは無い**: Windows の Media Foundation で復号する（この折りたたみの「Firefox の手順 4: Windows では AAC と H.264 のために何も足さない理由」）。N エディションの Windows では、Media Feature Pack が要るはず
-
-- 管理者の権限で起動した Firefox では、プロファイルに管理者の持ち物のファイルができうる
-
-- **Firefox: 言語パックを足さない**: 閉じている間の更新（Background Update）が止まる。別の言語にしたいなら、その言語の `Mozilla.Firefox.<言語>` を入れ直す
-
-- **Firefox: 英語版の `Mozilla.Firefox` と同じ `ProductCode`**: winget の定義では、`Mozilla.Firefox` と言語ごとの `Mozilla.Firefox.<言語>` の `ProductCode` が同じ。言語を指定して更新する
-
-**[Firefox](#firefox)のリード**
-
-- Firefox は起動中に取得し、次の起動時に更新する。起動後に作られる `\Mozilla\Firefox Background Update <番号>` のタスクも、7 時間ごとに更新する
-
-- Firefox の更新は Mozilla Maintenance Service が書き込み、UAC は出ない。日本語版に言語パックを足すと、閉じている間の更新が止まるので使わない
-
-**[Firefox](#firefox)の手順 2: 入れたものがあるとき**
-
-- `Mozilla Firefox (x64 ja)` が `C:\Program Files\Mozilla Firefox` で出たときも、[Firefox](#firefox)の手順 3 を貼れば、新しい版があれば上がる
-
-**[Firefox](#firefox)の手順 3**
-
-- `winget list` の表示は `Mozilla Firefox (x64 ja)  Mozilla.Firefox.ja  157.0` の形
-
-
-**[Firefox](#firefox)の手順 3: 入れ方と版**
-
-- winget はインストーラの sha256 を確かめてから、画面を出さずに入れる。管理者の PowerShell なので、管理者の確認（UAC）は出ない
-- `winget list` に出る版は、実行した日の最新
-
-**[Firefox](#firefox)の手順 4: Windows では AAC と H.264 のために何も足さない理由**
-
-- この方針の検証記録（`docs/verification/windows-setup.md` の「Firefox: Windows 11 で使う / 手順 4: 補足: Windows では AAC と H.264 のために何も足さない理由」）
-
-- Firefox の Windows 版は、H.264 を `CLSID_CMSH264DecoderMFT`、AAC を `CLSID_CMSAACDecMFT` で復号する。どちらも Windows の Media Foundation に入っている復号器（Firefox のソースの `dom/media/platforms/wmf/WMFDecoderModule.cpp`）
-- 同梱の FFmpeg（`mozavcodec.dll`）のソフトウェアの復号器に、AAC と H.264 は無い（ソースの `media/ffvpx/libavcodec/codec_list.c`。あるのはほかの OS の MediaCodec を使うものだけ）
-  - Linux では、そこを OS の FFmpeg で補う。そのため、AlmaLinux 10 では[Firefox](almalinux-setup.md#firefox)の手順 7〜10 が要る（[Firefox の補足と注意点](almalinux-setup.md#firefox-の補足と注意点)の「選択した方針」）
-- MDN も、Firefox は AVC（H.264）と AAC を OS の復号器に頼ると書いている
-
-- N エディションの Windows（メディアの機能が入っていない）では、Microsoft の Media Feature Pack が必要になる可能性がある
-
-**[Firefox](#firefox)の手順 4: 言語パック**
-
-- 日本語版なので、言語パックは要らない
-
-**[Firefox](#firefox)の手順 5: コマンドで変えない理由**
-
-- Windows は既定のブラウザーを、`HKCU\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\<プロトコル>\UserChoice` にハッシュ付きで記録する。今の Windows 11 では、User Choice Protection Driver（UCPD）が `http`・`https` の `UserChoice` の書き換えを止める
-- Firefox も、まず自分で `UserChoice` を書こうとし、できなければ Windows の設定の「既定に設定」の画面を開く（Mozilla の Set Default の文書）。そのため、本書は初めから設定の画面で行う
-- 確かめを Win+R から開くのは、管理者の PowerShell から URL を開くと、Firefox が管理者の権限で起動するため
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
 ## 更新
 
 - OS の更新は[Windows Update の公式の案内](https://support.microsoft.com/en-us/windows/install-windows-updates-3c5ae7fc-9fb6-9af1-1984-b5e0412c556a)に従う。Microsoft Store のアプリの更新を済ませ、必要なら再起動する
@@ -3924,7 +2983,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - md-table-sticky は、[md-table-sticky のブックマークレットを登録する](https://github.com/ryo-aoki-pc/md-tools/blob/main/sticky/docs/install.md#md-table-sticky-のブックマークレットを登録する)で、お気に入りを作り直す
 - UniGet UI の画面からも、scoop と winget のパッケージをまとめて上げられる（UniGet UI と PowerToys は、自分でも新しい版を確かめる）
 - Windows の大きな更新（機能の更新）の後は、外したアプリと切った提案が戻ることがある。[表示と入力](#表示と入力)の手順 4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 1〜4 を貼り直す
-- 機能更新後は、プライバシー・表示／入力／音／ストレージ・Edge の任意設定も確認する。設定が変わっていれば、その項の手順を貼り直す（控えは書き換えない）
+- 機能更新後は、[表示・入力・音・ストレージを変える](#表示入力音ストレージを変える)の設定も確認する。設定が変わっていれば、その項の手順を貼り直す（控えは書き換えない）
 - VirtualBox は[仮想マシンのセットアップの「VirtualBox: Windows 11 の更新」](virtual-machines.md#virtualbox-windows-11-の更新)
   - [SSH クライアント（Windows）](#windows-の-openssh-クライアント-更新)は「更新」、[Samba の共有のネットワーク ドライブ](samba.md#samba-クライアント-windows-11-の更新)は Samba のセットアップの「Samba クライアント: Windows 11 の更新」（どちらも、上げるものは無い）
 
@@ -4046,7 +3105,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### Git for Windows・Firefox・WezTerm を上げる
 
 - Git for Windows・Firefox・WezTerm を、設定を残して上げる
-- 前提: [Git for Windows](https://gitforwindows.org/)・[Firefox](#firefox)・[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
+- 前提: [Git for Windows](https://gitforwindows.org/)を導入し、[Firefox](https://www.firefox.com/ja/)の日本語版を PC 全体の `C:\Program Files\Mozilla Firefox` に入れてある。[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
 
 1. 管理者の PowerShell 7 を開く。
