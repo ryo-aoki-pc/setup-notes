@@ -3441,7 +3441,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - WezTerm の自分用の設定の Windows の `default_prog` は Git Bash（`C:/Program Files/Git/bin/bash.exe -i -l`。`lua/shells.lua`）。PowerShell 7・Windows PowerShell・WSL は、起動メニュー（Ctrl+Shift+M）から開く
   - 共通の bash 設定（README の「共通の bash 設定を先に入れる」）が、fzf・starship・zoxide・eza・bat・fd を `command -v` で見つけたときだけ読むので、Git Bash では、各ツールを入れるだけで効く。`~/.bashrc` には書かない
 - **PowerShell 7 は用途に合わせて設定する**: この項では starship と zoxide を、入っているときだけ読む。[PowerShell を開発に使う](#powershell-を開発に使う)では、補完・予測・PSFzf・eza の `ll` などを足す。yazi の `y` は足さない
-- **Windows PowerShell 5.1 は、貼り付けの設定を土台にする**: 任意の[Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)で Emacs と ↑↓ の履歴検索、[Windows PowerShell 5.1 のプロファイルに開発の設定を足す](#windows-powershell-51-のプロファイルに開発の設定を足す)で UTF-8 の関数・winget の補完・`ll` を足せる
+- **Windows PowerShell 5.1 は、Ctrl+Enter を `AddLine` に割り当てた状態を土台にする**: 任意の[Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)で Emacs と ↑↓ の履歴検索、[Windows PowerShell 5.1 のプロファイルに開発の設定を足す](#windows-powershell-51-のプロファイルに開発の設定を足す)で UTF-8 の関数・winget の補完・`ll` を足せる
   - プロファイルは、5.1 に貼る項で使う管理者の conhost の窓でも読まれ、キーや補完にも効く
   - starship と zoxide は 5.1 に足さない。見た目と起動の時間が変わる
 - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
@@ -4206,7 +4206,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **[PowerShell を開発に使う](#powershell-を開発に使う)の手順 4: 5.1 に保存する形**
 
 - 7 の `Save-PSResource -IncludeXml` で、ドキュメントの既知のフォルダーの下の `WindowsPowerShell\Modules` に保存する。5.1 の古い PowerShellGet や NuGet の提供者を上げずに済む
-- `-Path` の保存先が無いと止まるので、先に作る。Windows Update の項を通していない PC には `Documents\WindowsPowerShell\Modules` が無いことがある
+- `Documents\WindowsPowerShell\Modules` がまだ無い PC がある。`-Path` の保存先が無いと止まるので、先に作る
 - 保存先は名前・版ごとのフォルダーになる。`Get-PSResource -Path` で版と場所を見る。5.1 の `Get-InstalledModule` には出ない
 - 同じ版の `Save-PSResource` は上書きする。新しい版を保存しても古い版は残る。5.1 に同梱の Pester は消さず、追加した版を先に読む形にする
 - 導入前後の名前・版・保存先を控える
@@ -4340,7 +4340,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 | Microsoft.WinGet.CommandNotFound | 入れない | 打ち間違えのたびに winget の検索が走る。PowerToys の Command Not Found と同じもの |
 | posh-git | 入れない | 利用者が選ばなかった。読み込みに時間が掛かり、プロンプトを starship と合わせる必要がある |
 | 履歴の連続した重複の除去 | 既定の `HistoryNoDuplicates` を使う | 同じ設定を追加: 5.1・7 とも既定で有効 |
-| 設定アプリの「詳細設定」→「PowerShell」 | この項では扱わない | 実行ポリシーを RemoteSigned にするスイッチで、貼り付けの設定と 7 のプロファイルの項で扱う |
+| 設定アプリの「詳細設定」→「PowerShell」 | この項では扱わない | 実行ポリシーを RemoteSigned にするスイッチ。5.1 ではプロファイルを読み込める実行ポリシーが必要で、7 では[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 5 で扱う |
 
 **参照**
 
