@@ -4114,7 +4114,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 **注意点**
 
 - **Git: Git for Windows を上げるときは、Git の bash を使うものを閉じる**
-  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）など。動いていると、winget で上げてもインストーラが入れ替えずに終わるはず（この折りたたみの「Git for Windows・Firefox・WezTerm を上げるの手順 4: winget での更新」）
+  - Git Bash の窓、WezTerm のタブ（自分用の設定では Git Bash）など（この折りたたみの「Git for Windows・Firefox・WezTerm を上げるの手順 2: Git を上げるときに閉じる理由」）
 
 - **Firefox: Firefox を開いたまま `winget upgrade` しない**: 入れ替えが途中で終わることがある（[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 4 の補足）
 
@@ -4123,6 +4123,10 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - WezTerm は自分では更新しない。nightly の新しい版が出ても知らせない（WezTerm の更新の確認が見るのは stable のリリースだけで、nightly の版の方が新しいので何も出ない）
 
 - nightly は毎日ビルドし直される。版は main の最後のコミットで決まり、コミットの無い日は同じ版になる
+
+**[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2: Git を上げるときに閉じる理由**
+
+- Git の bash を使うものが動いていると、winget で上げてもインストーラが入れ替えずに終わるはず
 
 **[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 3: 新しい版が無いとき**
 

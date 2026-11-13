@@ -2328,7 +2328,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4: 更新するときに窓を閉じる理由**
 
-- [Git for Windows・Firefox・WezTerm を上げる](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の手順 5 で WezTerm を閉じる。動いていると、同じ更新の手順 7（[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4 のブロック）が止まる
+- [Git for Windows・Firefox・WezTerm を上げる](windows-setup.md#git-for-windowsfirefoxwezterm-を上げる)の手順 5 で WezTerm を閉じる。動いていると、同じ更新の手順 6（[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 4 のブロック）が止まる
 
 **[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 5**
 
