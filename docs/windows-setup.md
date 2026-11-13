@@ -4,8 +4,8 @@
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
-> - PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[アプリを入れる](#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
-> - Windows PowerShell 5.1 は[貼り付けの設定](#貼り付けの設定)、PowerShell 7 は[アプリを入れる](#アプリを入れる)の手順 7 より前は **Ctrl+V で貼る**。それぞれの設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+> - PowerShell のブロックは **PowerShell 7** に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - conhost の窓で複数行を右クリックで貼るときは、使う版の PSReadLine の Ctrl+Enter が `AddLine` に割り当てられ、貼った行が順番どおりに 1 つの入力になることを前提にする。未設定の窓では Ctrl+V で貼る
 
 - 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
 - どの項も単独で通せる。リードの前提を先に満たす
@@ -18,24 +18,14 @@
 - Neovim と Samba のクライアントは、[Neovim のセットアップ](neovim.md#windows-11-で使う)と[Samba のセットアップ](samba.md#windows-11-で使う)の「Windows 11 で使う」で入れる
 
 > [!WARNING]
-> - ロックを止め、インラインの sudo を有効にすると、**PC に触れる人が管理者として操作できる**
-> - Hello 以外のサインインと RDP も有効にすると、**パスワードを知る人も管理者として操作できる**
-> - 人が触れる場所では、[PC 全体の設定](#pc-全体の設定)の手順 9 は行わない
+> - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 2 で Hello 以外のサインインを許可し、[ネットワークとリモート](#ネットワークとリモート)の手順 4 で RDP を有効にすると、**パスワードを知る人がリモートから管理者として操作できる**
 
 <details id="この文書の補足と注意点">
   <summary>この文書の補足と注意点</summary>
 
 **注意点**
 
-- **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](#表示と入力)の手順 7）、管理者として開いた PowerShell は conhost の窓になる
-  - Windows PowerShell 5.1 で右クリックで貼れるのは、[貼り付けの設定](#貼り付けの設定)の手順 1〜5 のプロファイルの設定による
-  - PowerShell 7 では、[アプリを入れる](#アプリを入れる)の手順 7 のプロファイルの設定による
-
-- **貼ったブロックは、Enter を押すまで動かない**: コピーボタンの中身は末尾に改行が無いため。Windows PowerShell 5.1 は[貼り付けの設定](#貼り付けの設定)の手順 1〜5、PowerShell 7 は[アプリを入れる](#アプリを入れる)の手順 7 の設定後の conhost の窓では、ブロック全体が 1 つの入力になり、Enter で 1 回で動く。Windows Terminal の窓は、[Windows Terminal で複数行を 1 つの入力として貼る](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)の Enter の割り当て設定後、貼った全体が 1 つの入力になる
-
-- **Ctrl+Enter で上に行を作る操作（`InsertLineAbove`）は使えなくなる**: 下に行を作る Shift+Ctrl+Enter（`InsertLineBelow`）と、Shift+Enter（`AddLine`）はそのまま
-
-- **設定した版のコンソールの窓すべてに効く**: 同じユーザーなら、管理者の窓も同じプロファイルを読む。Windows PowerShell 5.1 と PowerShell 7 のプロファイルは別なので、それぞれに貼り付けの行を置く
+- **管理者の PowerShell は conhost の窓で開く**: 既定の端末を Windows Terminal にしても（[表示と入力](#表示と入力)の手順 6）、管理者として開いた PowerShell は conhost の窓になる
 
 - ツールの OS に依らない注意は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)の各用途の末尾の「補足と注意点」にある。Neovim の注意は、両 OS とも [Neovim のセットアップ](neovim.md)の、HackGen Console NF・WezTerm・Windows Terminal・シェルのツールの注意は、両 OS とも [シェルと端末のセットアップ](shell-terminal.md)の各用途の末尾の「補足と注意点」にある。この文書には Windows 11 だけの注意を書く
 
@@ -73,1171 +63,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 
 ## 基本の設定
 
-- スクリプトの取得・更新・貼り付け・アプリと Git for Windows の導入・PC 全体の設定・サインイン・WSL と、プライバシー・Edge
-
-### 手順書のスクリプトを取る
-
-- 手順書が使うスクリプトを、このユーザーの PC に置く。取り直すと main の版になる
-- 前提: インターネットにつながっている
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。貼り付けの設定より前なので、Ctrl+V で貼る
-- この項の手順 2 は、`%LOCALAPPDATA%\setup-notes\scripts` を取り直した版に置き換える。手で直したファイルも置き換わる
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-
-1. main の ZIP を取り、スクリプトを置く。
-
-   ```powershell
-   & {
-     # main の ZIP を一時フォルダーに取って展開する
-     $ErrorActionPreference = 'Stop'
-     $work = Join-Path $env:TEMP ('setup-notes-' + [guid]::NewGuid().ToString('N'))
-     try {
-       New-Item -ItemType Directory -Path $work | Out-Null
-       $zip = Join-Path $work 'main.zip'
-       curl.exe --fail --location --silent --show-error --output $zip 'https://github.com/ryo-aoki-pc/setup-notes/archive/refs/heads/main.zip'
-       if ($LASTEXITCODE -ne 0) { throw 'ZIP を取れなかった' }
-       Expand-Archive -LiteralPath $zip -DestinationPath $work
-       $source = Join-Path $work 'setup-notes-main\scripts'
-       if (-not (Test-Path -LiteralPath (Join-Path $source 'windows\_lib\SetupItem.psm1'))) { throw 'ZIP にスクリプトが無い' }
-       # 置き換えるパスを確かめ、前の版を別の名前に退けてからスクリプトを置く
-       $base = [IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'setup-notes'))
-       $target = [IO.Path]::GetFullPath((Join-Path $base 'scripts'))
-       if ($target -ne ($base.TrimEnd('\') + '\scripts')) { throw '置き換えるパスが違う' }
-       if (-not (Test-Path -LiteralPath $base)) { New-Item -ItemType Directory -Path $base | Out-Null }
-       $old = $null
-       if (Test-Path -LiteralPath $target) {
-         $old = Join-Path $base ('scripts.old-' + [guid]::NewGuid().ToString('N'))
-         Rename-Item -LiteralPath $target -NewName (Split-Path -Leaf $old)
-       }
-       try { Move-Item -LiteralPath $source -Destination $target } catch {
-         if ($old -and -not (Test-Path -LiteralPath $target)) { Rename-Item -LiteralPath $old -NewName 'scripts' }
-         throw
-       }
-       if ($old) { Remove-Item -LiteralPath $old -Recurse -Force }
-       "`n$([char]27)[7m 確認 $([char]27)[0m"
-       if (-not (Test-Path -LiteralPath (Join-Path $target 'windows\_lib\SetupItem.psm1'))) { throw '置いたファイルが見つからない' }
-       "変えた: $target"
-       '状態: 確認済み'
-     } catch {
-       Write-Error ('中断: ' + $_.Exception.Message)
-     } finally {
-       # 取った ZIP と展開した一時フォルダーを消す
-       if (Test-Path -LiteralPath $work) { Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue }
-     }
-   }
-   ```
-
-   - Ctrl+V で貼り、最後の `}` の行で Enter を押す
-   - `変えた:` に `…\setup-notes\scripts` が出て、`状態: 確認済み` ならよい
-   - `中断:` が出たら、先へ進まずに原因を直してこの手順からやり直す
-
-<details id="手順書のスクリプトを取る-の補足と注意点">
-  <summary>手順書のスクリプトを取る の補足と注意点</summary>
-
-**[手順書のスクリプトを取る](#手順書のスクリプトを取る)の手順 1: 5.1 にする理由**
-
-- PowerShell 7 を入れる前なので、Windows に含まれる Windows PowerShell 5.1 を使う。貼り付けの設定もまだなので、ブロックは `& { … }` にまとめて Ctrl+V で貼る
-
-**[手順書のスクリプトを取る](#手順書のスクリプトを取る)の手順 2: 取る版と置き場所**
-
-- Git を使わず、GitHub の main の ZIP を `curl.exe` で取る。展開した `setup-notes-main\scripts` だけを `%LOCALAPPDATA%\setup-notes\scripts` に置く
-- ZIP は `%TEMP%\setup-notes-<ランダムな名前>` に取って展開し、最後に消す。手順書の呼び出しは `%LOCALAPPDATA%` の写しを使う
-- 前の版は `scripts.old-<ランダムな名前>` に名前を変えて退け、新しい版を置けたら消す。置けなければ前の版を `scripts` に戻す
-- `scripts` の外にある `setup-notes` の控えは置き換えない
-
-</details>
-
----
-
-### Windows Update
-
-- Windows Update の更新を検索・適用し、必要なら再起動する
-- 前提: 無し
-- 実行場所: 管理者の Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. Windows のデスクトップで、管理者の Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、右クリック →「管理者として実行」。UAC の確認で「はい」
-   - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする
-   - この項の手順 2〜8 はこの窓に貼る
-
-1. 管理者であることを確かめ、今の窓だけモジュールを使えるようにする。
-
-   ```powershell
-   & {
-     # PowerShell の版と権限を確認する
-     $ErrorActionPreference = 'Stop'
-     if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
-       throw '中断: Windows PowerShell 5.1 で実行する'
-     }
-     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-       throw '中断: この項の手順 1 で管理者の Windows PowerShell を開く'
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # 更新モジュールの有無を確認する
-     Get-Module -ListAvailable -Name PSWindowsUpdate | Select-Object Name, Version, ModuleBase
-     # 実行ポリシーと通信方式を設定する
-     if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
-       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-     }
-     if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
-       throw '中断: 実行ポリシーによりモジュールを読み込めない'
-     }
-     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-     'この窓の実行ポリシー: {0}' -f (Get-ExecutionPolicy)
-   }
-   ```
-
-   - PSWindowsUpdate の一覧が出たら、版と場所を控える。何も並ばなければ、この項の手順 3 で初めて入れる
-   - 最後に `RemoteSigned`・`Unrestricted`・`Bypass` のいずれかが出ればよい
-   - エラーが出たら進まない
-
-1. PSWindowsUpdate が無ければ自分のユーザーに入れ、読み込む。
-
-   ```powershell
-   & {
-     # 更新モジュールを準備する
-     $ErrorActionPreference = 'Stop'
-     if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
-       $gallery = Get-PSRepository -Name PSGallery
-       if ($gallery.SourceLocation.TrimEnd('/') -ne 'https://www.powershellgallery.com/api/v2') {
-         throw '中断: PSGallery の取得先が PowerShell Gallery ではない'
-       }
-       $nuget = Get-PackageProvider -ListAvailable | Where-Object { $_.Name -eq 'NuGet' -and $_.Version -ge [version]'2.8.5.201' }
-       if (-not $nuget) {
-         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force | Out-Null
-       }
-       Install-Module -Name PSWindowsUpdate -Repository PSGallery -Scope CurrentUser -Force
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Import-Module -Name PSWindowsUpdate -Global -PassThru | Select-Object Name, Version, ModuleBase
-   }
-   ```
-
-   - `PSWindowsUpdate` の版と場所が出ればよい
-   - ダウンロードや読み込みのエラーが出たら進まない
-   - この項の手順 2 で入っていなかった場合は、そのことを控える
-   - **次の手順は、モジュールの読み込みが終わってから貼る**
-
-1. 再起動待ちでないことを確かめ、通常の Windows Update を検索する。
-
-   ```powershell
-   & {
-     # エラー時に処理を止める設定にする
-     $ErrorActionPreference = 'Stop'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # 再起動待ちの有無を確認する
-     $rebootRequired = Get-WURebootStatus -Silent
-     if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
-     if ($rebootRequired) {
-       throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
-     }
-     # 対象の更新を検索して表示する
-     $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
-     '対象の更新: {0} 件' -f $updates.Count
-     $updates | Format-Table KB, Size, Title -AutoSize
-   }
-   ```
-
-   - 更新の件数と一覧を確かめる
-   - `対象の更新: 0 件` なら、この項の手順 5 は飛ばす（この項の手順 6・7 で最終確認する）
-   - 再起動が必要と出たら、この項の手順 5〜7 は飛ばしてこの項の手順 8 へ。検索のエラーなら進まない
-   - **次の手順は、検索が終わり、更新の一覧を確かめてから貼る**
-
-1. 対象の更新があるときだけ、ダウンロードしてインストールする。
-
-   ```powershell
-   & {
-     # エラー時に処理を止める設定にする
-     $ErrorActionPreference = 'Stop'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # 再起動待ちの有無を確認する
-     $rebootRequired = Get-WURebootStatus -Silent
-     if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
-     if ($rebootRequired) {
-       throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
-     }
-     # 対象の更新を適用する
-     Install-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' -AcceptAll -IgnoreReboot |
-       ForEach-Object {
-         $_
-         if ($_.Result -notin 'Accepted', 'Downloaded', 'Installed') {
-           throw "中断: 更新が成功しなかった（$($_.Result)）: $($_.Title)"
-         }
-       }
-   }
-   ```
-
-   - `Accepted`・`Downloaded` だけではインストール完了ではない
-   - `Installed` になったことを確かめる。エラーや `中断:` が出たら、理由を解決するまで次へ進まない
-   - **次の手順は、インストールが終わり、プロンプトが戻ってから貼る**
-
-1. Windows Update が再起動を必要としているか確かめる。
-
-   ```powershell
-   & {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $rebootRequired = Get-WURebootStatus -Silent -ErrorAction Stop
-     if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
-     $rebootRequired
-   }
-   ```
-
-   - `True` なら、この項の手順 7 は飛ばしてこの項の手順 8 へ
-   - `False` なら、この項の手順 7 へ。何も出ない場合やエラーの場合は、再起動不要とはみなさず進まない
-
-1. 再起動が不要なときだけ、同じ条件で更新が残っていないか確かめる。
-
-   ```powershell
-   & {
-     # 更新と再起動待ちを確認する
-     $ErrorActionPreference = 'Stop'
-     $updates = @(Get-WindowsUpdate -Criteria 'IsInstalled=0 and IsHidden=0 and IsAssigned=1 and BrowseOnly=0' | ForEach-Object { $_ })
-     $rebootRequired = Get-WURebootStatus -Silent
-     if ($rebootRequired -isnot [bool]) { throw '中断: 再起動待ちかを確認できない' }
-     if ($rebootRequired) {
-       throw '中断: 再起動が必要。この項の手順 8 を行ってから検索し直す'
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     '残っている対象の更新: {0} 件' -f $updates.Count
-     $updates | Format-Table KB, Size, Title -AutoSize
-     if ($updates.Count -gt 0) {
-       Write-Warning '更新が残っている。この項の手順 5 から繰り返す'
-     } else {
-       'Windows Update の確認完了（対象の更新なし・再起動待ちなし）'
-     }
-   }
-   ```
-
-   - 完了の行が出たら、この項の手順 8 は飛ばして[Microsoft Store の更新](#microsoft-store-の更新)の手順 1 へ
-   - 更新が残っていたら、この項の手順 5〜7 を繰り返す。同じ更新が失敗し続ける場合は止め、エラーを調べる
-   - **次の手順は、対象の更新が無くなり、再起動待ちも無くなってから行う**
-
-1. 再起動が必要なときだけ、作業を保存して再起動する。
-
-   ```powershell
-   Restart-Computer
-   ```
-
-   - 自分で保存してから貼る。`-Force` は付けない
-   - **次の手順は、起動してサインインし、この項の手順 1〜7 をもう一度通してから行う**（新しい窓ではこの項の手順 2・3 の準備と読み込みも必要）
-
-<details id="windows-update-の補足と注意点">
-  <summary>Windows Update の補足と注意点</summary>
-
-**[Windows Update](#windows-update)の手順 1: 先に更新する理由**
-
-- インストールしたばかりの Windows は、インストールのメディアを作った時点の版。この後の手順には、新しい版を前提にするものがある（[PC 全体の設定](#pc-全体の設定)の手順 8 の sudo は 24H2 以降、[表示と入力](#表示と入力)の手順 5 の時計の秒など）
-- この後の[WSL と再起動](#wsl-と再起動)の手順 3 の再起動より前に、Windows Update の再起動を済ませておく。途中で更新の再起動が入ると、[PC 全体の設定](#pc-全体の設定)の手順 2 から[WSL と再起動](#wsl-と再起動)の手順 2 までの設定が効く時期が読みにくくなる
-
-**[Windows Update](#windows-update)の手順 1: 5.1 にする理由**
-
-- PowerShell 7 を入れる前に通す項なので、Windows に含まれる Windows PowerShell 5.1 を使う
-- PSWindowsUpdate は Windows PowerShell 5.1 だけで動くため、PowerShell 7 を入れた後も 5.1 で通す
-
-**[Windows Update](#windows-update)の手順 2: 今の窓だけにする理由**
-
-- `Process` の実行ポリシーと TLS 1.2 の追加は、この窓を閉じると無くなる。[貼り付けの設定](#貼り付けの設定)の手順 3 で控える `CurrentUser` の実行ポリシーは変えない
-- 再起動したら[Windows Update](#windows-update)の手順 1・2・3 をもう一度通す。モジュールのファイルは残るが、新しい窓では読み込み直す必要がある
-- グループ ポリシーによる制限は、この手順では変えない
-
-**[Windows Update](#windows-update)の手順 4: 更新の対象**
-
-- Windows Update Agent の条件で、未導入（`IsInstalled=0`）・非表示でない（`IsHidden=0`）・自動更新の配信対象（`IsAssigned=1`）・オプションでない（`BrowseOnly=0`）ものに絞る
-- オプションのドライバーやプレビュー更新は含めない。通常の自動配信に含まれるドライバーは対象になる
-- 更新名の「Preview」「プレビュー」の文字では除外しないので、Windows の表示言語には依存しない
-- 更新の取得先はこの PC の既定のまま。`-MicrosoftUpdate` による対象の拡大や、WSUS・Windows Update のポリシーの変更は行わない
-- この手順はダウンロードとインストールを行わない
-
-**[Windows Update](#windows-update)の手順 4・7: 設定と確認方法の根拠**
-
-- PSWindowsUpdate 2.2.1.5 は複数件の結果を 1 つの `Collection` として返す場合がある。`ForEach-Object { $_ }` で各更新を展開してから件数を数える。更新対象の Criteria と実際の適用コマンドは変えない。
-
-**[Windows Update](#windows-update)の手順 5: 自動では再起動しない**
-
-- `-AcceptAll` は対象の更新を承認する。検索条件は[Windows Update](#windows-update)の手順 4 と同じで、オプションの更新は増やさない
-- `-IgnoreReboot` は、必要になっても再起動せず、再起動するかを聞く対話も出さない（PSWindowsUpdate のヘルプ）
-- `-AutoReboot`・`-RecurseCycle` は使わない。再起動と再検索は[Windows Update](#windows-update)の手順 8 の後に自分で行い、再開用のタスクも作らない
-
-**[Windows Update](#windows-update)の手順 5: Result の段階**
-
-- `Result` は、受け付け・ダウンロード・インストールの段階ごとに出る
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### Microsoft Store の更新
-
-- Store CLI を用意し、Microsoft Store のアプリを更新する
-- 前提: 無し
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. Windows のデスクトップで、管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（右クリックの「管理者として実行」にはしない）
-   - PowerShell 7（`pwsh`）ではなく、Windows PowerShell 5.1 にする
-   - Windows Terminal の中に開いた窓に複数行のブロックを貼ると、「複数の行を含むテキストを貼り付けようとしています」の警告が出る。「強制的に貼り付け」を押す
-
-1. 管理者ではないことと、Store CLI・winget の有無を確かめる。
-
-   ```powershell
-   & {
-     # PowerShell の版と権限を確認する
-     $ErrorActionPreference = 'Stop'
-     if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
-       throw '中断: Windows PowerShell 5.1 で実行する'
-     }
-     if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-       throw '中断: この項の手順 1 で管理者ではない窓を開く'
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # Microsoft Store の版を確認する
-     Get-AppxPackage -Name Microsoft.WindowsStore | Select-Object Name, Version
-     # Store CLI と winget の場所を確認する
-     foreach ($name in 'store.exe', 'winget.exe') {
-       $command = Get-Command -Name $name -ErrorAction SilentlyContinue
-       if ($command) { $command | Select-Object Name, Source } else { Write-Warning "見つからない: $name" }
-     }
-   }
-   ```
-
-   - `winget.exe` に場所が出れば、この項の手順 3 は飛ばす
-   - `store.exe` があれば、この項の手順 4 はいったん飛ばしてこの項の手順 5 で一括更新に対応しているか確かめる
-   - `store.exe` が無ければ、この項の手順 3（winget が無い場合だけ）・4 で準備する
-
-1. winget が無いときだけ、このユーザーにアプリ インストーラーを登録する。
-
-   ```powershell
-   & {
-     # App Installer を登録する
-     $ErrorActionPreference = 'Stop'
-     Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-Command -Name winget.exe | Select-Object Name, Source
-     winget.exe --version
-     if ($LASTEXITCODE -ne 0) { throw "中断: winget の確認に失敗（終了コード $LASTEXITCODE）" }
-   }
-   ```
-
-   - `winget.exe` の場所と版が出ればよい
-   - アプリ インストーラー自体が無い場合や、登録が失敗した場合は止める
-
-1. Store CLI が無いか一括更新に非対応のときだけ、Store 本体を更新する。
-
-   ```powershell
-   & {
-     # エラー時に処理を止める設定にする
-     $ErrorActionPreference = 'Stop'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     foreach ($id in '9NBLGGH4NNS1', '9WZDNCRFJBMP') {
-       winget.exe upgrade --exact --id $id --source msstore --include-unknown --accept-source-agreements --accept-package-agreements --disable-interactivity
-       if ($LASTEXITCODE -notin 0, -1978335189) {
-         throw "中断: $id の更新に失敗（終了コード $LASTEXITCODE）"
-       }
-     }
-   }
-   ```
-
-   - 更新が無い旨の表示なら、そのアプリは何も変えない
-   - 終わったらこの項の手順 5 へ。まだ CLI が使えない場合は止める
-   - **次の手順は、両方の更新が終わり、プロンプトが戻ってから貼る**
-
-1. Store CLI が一括更新に対応していることを確かめ、更新を検索する。
-
-   ```powershell
-   & {
-     # Store CLI の一括更新に対応するか確認する
-     $ErrorActionPreference = 'Stop'
-     if (-not (Get-Command -Name store.exe -ErrorAction SilentlyContinue)) {
-       throw '中断: Store CLI が無い。この項の手順 4 で準備してから再確認する'
-     }
-     $help = store.exe updates --help
-     if ($LASTEXITCODE -ne 0 -or ($help -join "`n") -notmatch '--apply\b') {
-       throw '中断: Store CLI の一括更新を確認できない。この項の手順 4 の後も同じなら進まない'
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     store.exe updates
-     if ($LASTEXITCODE -ne 0) { throw "中断: Store の検索に失敗（終了コード $LASTEXITCODE）" }
-   }
-   ```
-
-   - CLI が出す更新の一覧を確かめる。エラーが出たら進まない
-   - 更新が無いと明示された場合だけ、この項の手順 6 は飛ばす
-   - **次の手順は、検索が終わり、更新の一覧を確かめてから貼る**
-
-1. Store の更新があるときだけ、すべての更新を適用する。
-
-   ```powershell
-   & {
-     # エラー時に処理を止める設定にする
-     $ErrorActionPreference = 'Stop'
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     store.exe updates --apply
-     if ($LASTEXITCODE -ne 0) { throw "中断: Store の更新に失敗（終了コード $LASTEXITCODE）" }
-   }
-   ```
-
-   - エラーや適用できないアプリが出たら進まない。使用中のアプリが原因なら、作業を保存してそのアプリを閉じてから、この手順を貼り直す
-   - **次の手順は、更新処理が終わり、プロンプトが戻ってから貼る**（コマンドの終了だけで更新完了とはみなさない）
-
-1. Store の更新が残っていないかと、必要なアプリの状態を確かめる。
-
-   ```powershell
-   & {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     # Store の更新を再検索する
-     $ErrorActionPreference = 'Stop'
-     store.exe updates
-     if ($LASTEXITCODE -ne 0) { throw "中断: Store の再検索に失敗（終了コード $LASTEXITCODE）" }
-     # App Installer と端末の状態を確認する
-     foreach ($name in 'Microsoft.DesktopAppInstaller', 'Microsoft.WindowsTerminal') {
-       $package = Get-AppxPackage -Name $name
-       if (-not $package) { throw "中断: 必要なアプリが無い: $name" }
-       $package | Select-Object Name, Version, Status
-       if ($package.Status -ne 'Ok') { throw "中断: アプリの状態を確認する: $name" }
-     }
-     # winget の版を確認する
-     winget.exe --version
-     if ($LASTEXITCODE -ne 0) { throw "中断: winget の確認に失敗（終了コード $LASTEXITCODE）" }
-   }
-   ```
-
-   - Store CLI が更新なしを明示し、2 つのアプリの `Status` が `Ok` で、winget の版が出ることを確かめる
-   - 更新が残っていたらこの項の手順 6・7 を繰り返す。進行中・失敗の表示や、結果を判定できない場合は次へ進まない
-   - 更新で窓が閉じた場合は、この項の手順 1 で通常の PowerShell を開き直してからこの項の手順 5〜7 で確認する
-   - **次の手順は、Store の更新がすべて終わってから貼る**
-
-<details id="microsoft-store-の更新-の補足と注意点">
-  <summary>Microsoft Store の更新 の補足と注意点</summary>
-
-**[Microsoft Store の更新](#microsoft-store-の更新)の手順 1: 5.1 にする理由**
-
-- PowerShell 7 を入れる前に通す項なので、Windows に含まれる Windows PowerShell 5.1 を使う
-- 実行ポリシーとプロファイルは、5.1 と 7 で別々に持つ
-
-**[Microsoft Store の更新](#microsoft-store-の更新)の手順 3: インストール直後の winget**
-
-- Microsoft の WinGet の文書は、初回サインイン後に Store が非同期で登録するため、まだ使えない場合にこの `Add-AppxPackage` を挙げている
-- この文書は、アプリ インストーラーと Microsoft Store が含まれる Windows 11 を前提にする。これらを削ったイメージの復旧は扱わない
-
-**[Microsoft Store の更新](#microsoft-store-の更新)の手順 4: CLI を使えるようにする準備だけを winget で行う**
-
-- 製品 ID はアプリ インストーラーが `9NBLGGH4NNS1`、Microsoft Store が `9WZDNCRFJBMP`。`--exact` と `--source msstore` で、この 2 つだけを対象にする
-- Store の配布情報は版が `Unknown` の場合があるので `--include-unknown` を付ける。`winget upgrade --all` に置き換えない
-- `-1978335189`（`0x8A15002B`）は、winget の `UPDATE_NOT_APPLICABLE`（適用する更新が無い）。それ以外の失敗では中断する
-- アプリ インストーラー、Microsoft Store の順に更新する
-
-**[Microsoft Store の更新](#microsoft-store-の更新)の手順 6: 対象**
-
-- 名前や発行元のフィルターは付けず、すべての Store アプリを対象にする
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### 貼り付けの設定
-
-- 複数行を元の順に貼れるように、Ctrl+Enter とプロファイルを設定する
-- 前提: [手順書のスクリプトを取る](#手順書のスクリプトを取る)と[Microsoft Store の更新](#microsoft-store-の更新)を通してある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-
-1. 今の窓だけ、Ctrl+Enter を「行を足す」にする。
-
-   ```powershell
-   Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine
-   ```
-
-   - 何も出なければよい
-
-1. 管理者ではないことと、今の状態を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # 環境と既存の設定を確認する
-   $sm = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout' -ErrorAction SilentlyContinue).'Scancode Map'
-   [pscustomobject]@{
-     PowerShell    = $PSVersionTable.PSVersion.ToString()
-     Admin         = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Winget        = (Get-Command winget -ErrorAction SilentlyContinue).Source
-     Scoop         = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git           = (Get-Command git -ErrorAction SilentlyContinue).Source
-     ClassicMenu   = Test-Path -LiteralPath 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'
-     ScancodeMap   = if ($sm) { ($sm | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
-   } | Format-List
-   & {
-     # この呼び出しの間だけスクリプトを許可する
-     $beforeProcess = Get-ExecutionPolicy -Scope Process
-     try {
-       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop
-       "`n$([char]27)[7m 確認 $([char]27)[0m"
-       & "$env:LOCALAPPDATA\setup-notes\scripts\windows\paste-ps51\check.ps1"
-     } catch {
-       Write-Error ('中断: ' + $_.Exception.Message)
-     } finally {
-       Set-ExecutionPolicy -Scope Process -ExecutionPolicy $beforeProcess -Force -ErrorAction SilentlyContinue
-     }
-   }
-   ```
-
-   - `PowerShell : 5.1.…` と `Admin : False` が出ればよい。`7.…` か `True` なら、窓を閉じてこの項の手順 1 から
-   - `Winget` に `…\WindowsApps\winget.exe` の場所が出ればよい。空なら、[Microsoft Store の更新](#microsoft-store-の更新)の手順 2〜7 でアプリ インストーラーの登録と更新を確かめてから
-   - `ScancodeMap` が空でなければ控える。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 は、別の割り当てがあれば止まる
-   - `Scoop` に場所が出たら、scoop はもう入っている
-   - `今: CurrentUser` の値（未設定なら `Undefined`）を控える
-   - `状態: 確認済み` か `状態: 変更が要る` なら先へ進む。`中断:` が出たら、この項の手順 4・5 は行わず、ほかの手順書は Ctrl+V で貼る
-
-1. 実行ポリシーと、プロファイルの貼り付けの行を設定する。
-
-   ```powershell
-   & {
-     # この呼び出しの間だけスクリプトを許可する
-     $beforeProcess = Get-ExecutionPolicy -Scope Process
-     try {
-       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop
-       "`n$([char]27)[7m 確認 $([char]27)[0m"
-       & "$env:LOCALAPPDATA\setup-notes\scripts\windows\paste-ps51\apply.ps1"
-     } catch {
-       Write-Error ('中断: ' + $_.Exception.Message)
-     } finally {
-       Set-ExecutionPolicy -Scope Process -ExecutionPolicy $beforeProcess -Force -ErrorAction SilentlyContinue
-     }
-   }
-   ```
-
-   - `状態: 確認済み` ならよい
-   - `中断:` が出たら、先へ進まない。グループ ポリシーで許可されない PC では、ほかの手順書は Ctrl+V で貼る
-
-1. 実行ポリシーと、プロファイルの貼り付けの行を読み戻す。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\paste-ps51\check.ps1"
-   ```
-
-   - `状態: 確認済み` ならよい。`中断:` が出たら、先へ進まない
-
-<details id="貼り付けの設定-の補足と注意点">
-  <summary>貼り付けの設定 の補足と注意点</summary>
-
-**[貼り付けの設定](#貼り付けの設定)の手順 1: 5.1 にする理由**
-
-- PowerShell 7 を入れる前に通す項なので、Windows に含まれる Windows PowerShell 5.1 を使う。7 の貼り付けの設定は[アプリを入れる](#アプリを入れる)の手順 7 で別に足す
-
-**[貼り付けの設定](#貼り付けの設定)の手順 2**
-
-- この窓を閉じるまで効く
-
-**[貼り付けの設定](#貼り付けの設定)の手順 2: 行を足す理由**
-
-- [貼り付けの設定](#貼り付けの設定)の手順 3 から後の複数行のブロックを、この窓に右クリックで貼れるようにするため
-
-**[貼り付けの設定](#貼り付けの設定)の手順 3: 見ているもの**
-
-- `Admin` は、この PowerShell が管理者の権限で動いているか（UAC で昇格しているか）。Administrators の一員でも、普通に開いた PowerShell は `False` になる
-- `ClassicMenu` は、[表示と入力](#表示と入力)の手順 3 で作るキー（`HKCU:\Software\Classes\CLSID\{86ca1aa0-…}`）があるか
-- `ScancodeMap` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で書く値（`HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout` の `Scancode Map`）を 16 進で並べたもの。読むだけなら管理者は要らない
-- `$PROFILE` は、このユーザーの、Windows PowerShell のコンソールのプロファイル（`Microsoft.PowerShell_profile.ps1`）。管理者で開いた窓も、同じユーザーなら同じファイルを読む。PowerShell 7・PowerShell ISE・VS Code は別のファイルを読む（about_Profiles）。OneDrive でドキュメントをバックアップしていると、`OneDrive` の下のパスになる
-- check は `MachinePolicy`・`UserPolicy`・`CurrentUser`・`LocalMachine` の順に、`Undefined` ではない最初の実行ポリシーを使う。全部 `Undefined` なら Windows の既定の `Restricted`。呼び出しのために一時的に許可した `Process` は判定から除く。グループ ポリシーの制限は変えない
-- プロファイルもスクリプト（`.ps1`）なので、実行ポリシーが `Restricted` だと読まれない（Microsoft の about_Execution_Policies。`Restricted` は Windows のクライアントの既定）
-- `Git` は、Git for Windows がもうあるか（無ければ空。この文書の後に [Git for Windows](#git-for-windows) で入れる）
-- `今: PasteLine = false` なら、[貼り付けの設定](#貼り付けの設定)の手順 4 でプロファイルに行を足す
-- `今: ExecutionPolicy` が `RemoteSigned`・`Unrestricted`・`Bypass` のどれかなら、実行ポリシーは変えない。Windows 11 の既定の `Restricted` のままではプロファイルも scoop も動かない
-
-**[貼り付けの設定](#貼り付けの設定)の手順 4: スクリプトの動作**
-
-- 呼び出しの間だけ `Process` を `Bypass` にし、最後に元へ戻す。次の窓でも使う実行ポリシーが `RemoteSigned`・`Unrestricted`・`Bypass` のどれでもなければ、`CurrentUser` を `RemoteSigned` にする
-- `CurrentUser` を書いた後に、一時的な `Process` が優先される通知（`ExecutionPolicyOverride`）だけが出た場合は、`CurrentUser` の読み戻しが `RemoteSigned` であることを確かめて続ける
-- `$PROFILE` が無ければ作る。`Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine  # windows-setup.md` と同じ文字列が無いときだけ、その行を足す。末尾に改行が無いファイルには、先に CRLF を入れる
-- 印・既存の行・`Add-Content` の文字コードの扱いは変えず、ファイルの控えも新しくは作らない。変更前の `CurrentUser` と行の有無を `控える:` に出す
-- check は実行ポリシーと印付きの行を読み直す。プロファイルの任意のコードは実行せず、貼り付けの動作は人が試す
-
-**[貼り付けの設定](#貼り付けの設定)の手順 5**
-
-- OneDrive のバックアップ対象なら、プロファイルのパスは OneDrive の下
-
-**[貼り付けの設定](#貼り付けの設定)の手順 5: この行を読む窓**
-
-- プロファイルにほかの行があれば、そのまま残る
-- これより後に開く Windows PowerShell 5.1 の窓は、この行を読む。PowerShell 7 は[アプリを入れる](#アプリを入れる)の手順 7 で別のプロファイルに書く行を読む
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### アプリを入れる
-
-- scoop・UniGet UI・PowerToys・PowerShell 7 を入れ、7 の貼り付けの設定を足す
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)と[貼り付けの設定](#貼り付けの設定)を通してある
-- 実行場所: 管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 9 は、この項の手順 8 で開く PowerShell 7
-
-1. 管理者ではない Windows PowerShell（5.1）を開く。
-
-   - スタートメニューで「Windows PowerShell」を探し、クリックして開く（「管理者として実行」にはしない）
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-
-1. scoop を入れる。
-
-   ```powershell
-   Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-   ```
-
-   - 最後に `Scoop was installed successfully!` が出ればよい
-   - `Running the installer as administrator is disabled by default` が出たら、管理者の PowerShell に貼っている。閉じてこの項の手順 1 から
-   - `Scoop is already installed` が出たら、もう入っている（何も変えずに終わる）。この項の手順 3 へ進む
-   - `'C:\Users\<WIN_USER>\scoop' exists and is not empty` が出たら中断する。既存の scoop の状態と保存したデータを確かめる
-
-1. scoop が入ったことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # scoop の版とバケットを確認する
-   scoop --version
-   scoop bucket list
-   # shims のパスを確認する
-   [Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -like '*\scoop\shims' }
-   ```
-
-   - `Current Scoop version:` の次に版と公開日が出ればよい
-   - `scoop bucket list` に `main` の行が出る
-   - 最後に `C:\Users\<WIN_USER>\scoop\shims` が出る
-
-1. UniGet UI（winget）と、その scoop の検索に使う scoop-search を入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # scoop-search を導入する
-   scoop install scoop-search
-   # UniGet UI を導入して確認する
-   winget install --exact --id Devolutions.UniGetUI --source winget --scope user --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Devolutions.UniGetUI --source winget
-   ```
-
-   - `scoop-search` が `was installed successfully!` になればよい
-   - UAC が出たら製品名と発行元を確かめて許可する。Visual C++ ランタイムの発行元は Microsoft Corporation
-   - 最後の表に `UniGetUI` と `Devolutions.UniGetUI` の行が出ればよい
-
-1. PowerToys を、自分のユーザーに入れる。
-
-   ```powershell
-   # PowerToys を導入する
-   winget install --exact --id Microsoft.PowerToys --source winget --scope user --accept-source-agreements --accept-package-agreements
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget list --exact --id Microsoft.PowerToys --source winget
-   ```
-
-   - 最後の表に `PowerToys` と `Microsoft.PowerToys` の行が出ればよい
-   - 管理者の確認（UAC）は出ないはず
-
-1. PowerShell 7 を、自分のユーザーに入れる。
-
-   ```powershell
-   # PowerShell 7 を導入する
-   winget install --exact --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget list --exact --id Microsoft.PowerShell --source winget
-   ```
-
-   - 最後の表に `PowerShell` と `Microsoft.PowerShell` の行が出ればよい
-   - 管理者の確認（UAC）は出ないはず
-
-1. PowerShell 7 のプロファイルに、貼り付けの行を足す。
-
-   ```powershell
-   & {
-     # PowerShell 7 のプロファイルを準備する
-     $p = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Microsoft.PowerShell_profile.ps1'
-     $line = 'if (Get-Module -Name PSReadLine) { Set-PSReadLineKeyHandler -Chord Ctrl+Enter -Function AddLine }  # windows-setup.md'
-     if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType File -Path $p -Force -ErrorAction Stop | Out-Null }
-     $text = Get-Content -LiteralPath $p -Raw
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($text -and $text.Contains($line)) { "すでにある: $line" } else {
-       $add = $line
-       if ($text -and -not $text.EndsWith("`n")) { $add = "`r`n" + $line }
-       Add-Content -LiteralPath $p -Value $add -ErrorAction Stop
-       "足した: $line"
-     }
-     "--- $p"
-     Get-Content -LiteralPath $p
-   }
-   ```
-
-   - `足した:` か `すでにある:` が出て、最後にプロファイルの中身が出ればよい
-
-1. スタートメニューから、管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 一覧の名前は「PowerShell」。検索の最も一致する候補に「Windows PowerShell」が出ることがあるので、名前で選ぶ
-   - 「PowerShell」が無ければ、この項の手順 6 を確かめる
-   - 窓の名前に「管理者:」が付いていないことを確かめる
-   - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
-
-1. PowerShell 7 で、版・Ctrl+Enter の割り当て・実行ポリシーを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # PowerShell の版を確認する
-   $PSVersionTable.PSVersion.ToString()
-   # Ctrl+Enter の割り当てを確認する
-   Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Ctrl+Enter' | Format-Table Key, Function -AutoSize
-   # 実行ポリシーを確認する
-   Get-ExecutionPolicy
-   ```
-
-   - 版が `7.` で始まればよい。`5.1.` なら、「Windows PowerShell」を開いている。閉じて、この項の手順 8 から
-   - `Ctrl+Enter` の `Function` が `AddLine` ならよい。`InsertLineAbove` なら、この項の手順 7 を確かめ、新しい窓で開き直す
-   - 実行ポリシーが `RemoteSigned`（`Unrestricted`・`Bypass` でもよい）ならよい。`Restricted` などでプロファイルを読めないときは、[shell-terminal.md の「PowerShell 7 のプロファイルを設定する」の手順 4・5](shell-terminal.md#powershell-7-のプロファイルを設定する)で確かめる
-
-<details id="アプリを入れる-の補足と注意点">
-  <summary>アプリを入れる の補足と注意点</summary>
-
-**注意点**
-
-- **PowerShell 7 で scoop を使うとき**: 実行ポリシーは Windows PowerShell 5.1 とは別に持つ。UniGet UI は、PowerShell 7 があればそれで scoop を動かす（`-ExecutionPolicy Bypass` 付き）
-
-- **PowerShell 7 のプロファイルは別**: PowerShell 7 のプロファイルには、[アプリを入れる](#アプリを入れる)の手順 7 で貼り付けの行を書く
-  - PowerShell 7 は `Documents\PowerShell\Microsoft.PowerShell_profile.ps1` を読む。この文書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く
-  - 履歴検索や zoxide・starship の設定も足すなら、[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)
-
-- **scoop のアプリは自分のユーザーだけ**: `~\scoop` に入るので、ほかのユーザーには見えない。scoop の `--global` は管理者が要り、本書では使わない
-
-**[アプリを入れる](#アプリを入れる)の手順 1: 5.1 にする理由**
-
-- [アプリを入れる](#アプリを入れる)の手順 1〜7 は、PowerShell 7 を入れて貼り付けの設定を足すまでの操作なので、Windows PowerShell 5.1 で通す。[アプリを入れる](#アプリを入れる)の手順 8 で PowerShell 7 を開き、[アプリを入れる](#アプリを入れる)の手順 9 を 7 に貼る
-
-**[アプリを入れる](#アプリを入れる)の手順 2: インストーラのすること**
-
-- `https://get.scoop.sh` は、公式のインストーラ（`https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1`）へ飛ぶ。`Invoke-Expression` で、取ったスクリプトをそのまま動かす（公式の README の方法）
-- 中身を読んでから動かすなら、`Invoke-RestMethod -Uri https://get.scoop.sh -OutFile install.ps1` で保存して読み、`.\install.ps1` で動かす（同じ README の方法）。インストーラに Authenticode の署名は無い
-- インストーラは、PowerShell 5 以上・管理者でないこと・実行ポリシー・scoop がまだ無いことを確かめてから入れる
-- 入るもの
-  - `~\scoop\apps\scoop\current`（scoop 本体）・`~\scoop\buckets\main`（main のバケット）・`~\scoop\shims`（コマンドの入口）
-  - ユーザーの環境変数 `PATH` の先頭に `~\scoop\shims` を足す。変えたことを Windows 全体に知らせる（`WM_SETTINGCHANGE`）ので、この後にスタートメニューから起動したアプリにも届く
-  - 設定のファイル `~\.config\scoop\config.json`
-- git があれば、本体と main のバケットを `git clone` で取る。無ければ zip で取る
-- git の無い PC では、`scoop update` が `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。この文書の後に [Git for Windows](#git-for-windows) で Git for Windows を入れれば、`scoop update` は scoop 本体と main のバケットを git の形に直して上げる（scoop 0.6.0 の `libexec/scoop-update.ps1`。scoop の `git` は入れない）。検証記録（`docs/verification/windows-setup.md` の「選択した方針」）
-- 管理者で入れる方法（インストーラの `-RunAsAdmin`）は、公式の README が安全のために既定で止めているので、使わない
-
-**[アプリを入れる](#アプリを入れる)の手順 3: 版**
-
-- `Current Scoop version:` の次の版は、実行した日の最新
-
-**[アプリを入れる](#アプリを入れる)の手順 4**
-
-- `scoop install scoop-search` の最後に `'scoop-search' (2.1.0) was installed successfully!` の形の行が出る
-
-**[アプリを入れる](#アプリを入れる)の手順 4: winget のハッシュの確認と、版とショートカット**
-
-- winget はインストーラのハッシュを確かめてから入れる
-- 最後の表の版は、実行した日の最新
-- デスクトップに UniGetUI のショートカットができる（[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 4 で消す）
-
-**[アプリを入れる](#アプリを入れる)の手順 4: 設定と確認方法の根拠**
-
-- UniGet UI のユーザー向け [winget 定義](https://github.com/microsoft/winget-pkgs/blob/master/manifests/d/Devolutions/UniGetUI/2026.3.0/Devolutions.UniGetUI.installer.yaml)も `elevatesSelf` で、[インストーラー](https://github.com/Devolutions/UniGetUI/blob/v2026.3.0/InstallerExtras/CodeDependencies.iss)は Visual C++ Runtime などを必要に応じて導入する。共有 DLL の導入には[管理者権限が必要](https://learn.microsoft.com/en-us/cpp/windows/choosing-a-deployment-method?view=msvc-170)なため、ユーザー領域への導入でも管理者確認が出る場合がある。
-
-**[アプリを入れる](#アプリを入れる)の手順 4〜6: 設定と確認方法の根拠**
-
-- 確認の [`winget list`](https://learn.microsoft.com/en-us/windows/package-manager/winget/list) も `--source winget` で導入元に絞る。source 未指定では `msstore` の初回の規約と地域情報の同意待ちになる場合がある。
-
-**[アプリを入れる](#アプリを入れる)の手順 5: 入れ方と入る場所**
-
-- winget の定義（`Microsoft.PowerToys` 0.101.2362.0）には、自分のユーザーに入れるインストーラ（`PowerToysUserSetup-<版>-x64.exe`。管理者の確認の指定が無い）と、PC 全体に入れるインストーラ（`PowerToysSetup-<版>-x64.exe`。`elevatesSelf`）がある。`--scope user` を付けて、自分のユーザーのほうを選ばせる
-- インストーラの形式は WiX の Burn で、winget は `/quiet /norestart` を渡す
-- 入る場所は、Microsoft の情報どうしで食い違う
-  - Install PowerToys のページは、自分のユーザーなら `%USERPROFILE%\AppData\Local\Programs` の下と書く（下のフォルダーの名前は書かれていない）
-  - インストーラのソース（`installer/PowerToysSetupVNext/Common.wxi` の `DefaultInstallDir` と `Product.wxs`）と、DSC・Peek のページは `%LOCALAPPDATA%\PowerToys`
-  - そのため、[PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)は、場所を決め打ちせず、動いている PowerToys から取る
-- PowerToys のいくつかの機能は、PowerToys を管理者として動かしていないと、管理者の窓には効かない（PowerToys の設定の「常に管理者として実行」）
-- WebView2 のランタイムが無ければ一緒に入れる（Windows 11 には最初からある）
-
-**[アプリを入れる](#アプリを入れる)の手順 5: 版と、Caps Lock を変える所**
-
-- 最後の表の版は、実行した日の最新
-- Caps Lock は、PowerToys の Keyboard Manager ではなく、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 の Scancode Map で変える（`docs/verification/windows-setup.md` の「選択した方針」）
-
-**[アプリを入れる](#アプリを入れる)の手順 6: MSIX と MSI**
-
-- Microsoft の文書は、winget のパッケージは 7.6.0 から既定で MSIX を入れると書いている。winget の定義（`Microsoft.PowerShell` 7.6.6.0）も、MSIX（自分のユーザー）を先に、MSI（PC 全体。`elevatesSelf`）を後に並べている
-- MSIX は自分のユーザーだけに入り、更新は winget かストアで行う。PC 全体の実行ポリシーやリモートの受け口は設定できない（Microsoft の文書）。このリポジトリの使い方では足りる
-  - Store 版の PowerShell 7 の実行ポリシーの既定は `RemoteSigned`
-- PC 全体の MSI（`$Env:ProgramFiles\PowerShell\7`、Microsoft Update で更新）にするなら `--installer-type wix` を付ける。ただし Microsoft の文書では、7.7.0 から MSI は無くなる
-- PowerShell 7.6.6 の PSReadLine 2.4.5 も、Ctrl+Enter は `InsertLineAbove`。[アプリを入れる](#アプリを入れる)の手順 7 で、PowerShell 7 のプロファイルにも `AddLine` の行を書く（この折りたたみの「注意点」）
-- winget の既定の範囲: 設定（`settings.json`）の `installBehavior.preferences.scope` は、書かなくても `user`（winget の `UserSettings.h`）で、user のインストーラが無ければ machine を選ぶ。そのため、範囲を変える設定は足さない
-  - PowerShell 7 の MSIX（範囲の宣言が無い）と MSI（machine）は、どちらも user に当たらない。インストーラの種類の順（MSIX が MSI より先）で MSIX が選ばれる
-  - `installBehavior.requirements.scope` は絞り込みで、machine だけのパッケージと、範囲を宣言しないインストーラ（MSIX・Store・持ち運び版・フォントを除く）が外れるので書かない。UniGet UI のスコープも「デフォルト」のまま（「ユーザー | ローカル」は `--scope user` を付ける）
-- 管理者の確認（UAC）が出ないのは、MSIX のパッケージで、自分のユーザーに入るため
-
-**[アプリを入れる](#アプリを入れる)の手順 6: 版とスタートメニュー**
-
-- 最後の表の版は、実行した日の最新
-- スタートメニューの一覧の名前は「PowerShell」（7 は付かない）
-
-**[アプリを入れる](#アプリを入れる)の手順 7**
-
-- プロファイルは `C:\Users\<WIN_USER>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`（OneDrive でドキュメントをバックアップしていると、`OneDrive` の下）
-
-- 何度貼ってもよい
-
-**[アプリを入れる](#アプリを入れる)の手順 7: 7 のプロファイルに足す行**
-
-- 管理者の PowerShell は conhost の窓で開き、右クリックの貼り付けは LF を Ctrl+Enter として送る。PowerShell 7.6 の PSReadLine 2.4.5 も Ctrl+Enter が `InsertLineAbove` なので、`AddLine` の行が無いと複数行が逆順に貼られる
-- 足す行は、[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 2 の 1 行目と同じで、印も `# windows-setup.md`。後で同じ項を通すと、この行は `すでにある:` になる
-- Windows PowerShell 5.1 の窓から書くので、`$PROFILE`（5.1 のもの）ではなく PowerShell 7 のパスを明示する
-- Windows PowerShell 5.1 の `Add-Content` は ANSI で書くが、足す行は ASCII だけなので、PowerShell 7 でも同じに読む
-- `Get-Module -Name PSReadLine` の条件は、PSReadLine を読まない窓（`-NonInteractive` など）で止めないため
-
-**参照**
-
-- 文書: [winget settings](https://learn.microsoft.com/en-us/windows/package-manager/winget/settings)（Microsoft Learn）と、コードの [microsoft/winget-cli](https://github.com/microsoft/winget-cli)（`doc/Settings.md`・`src/AppInstallerCommonCore/Public/winget/UserSettings.h`・`Manifest/ManifestComparator.cpp`）、[Devolutions/UniGetUI](https://github.com/Devolutions/UniGetUI)（`WinGetPkgOperationHelper.cs`） — winget の既定の範囲（[アプリを入れる](#アプリを入れる)の手順 6 の補足）
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### Git for Windows
-
-- Git for Windows を PC 全体に入れる
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
-   - ユーザーアカウント制御（UAC）の確認は「はい」
-
-1. Git for Windows がまだ入っていないことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Get-Command git -All -ErrorAction SilentlyContinue | Format-Table Source
-   Test-Path 'C:\Program Files\Git\bin\bash.exe'
-   winget list --exact --id Git.Git --accept-source-agreements --source winget
-   ```
-
-   - 1 行目は何も出さず、`False` と、`入力条件に一致するインストール済みのパッケージが見つかりませんでした。`（英語の Windows では `No installed package found matching input criteria.`）が出ればよい
-   - `False` で、1 行目に `…\AppData\Local\Programs\Git\cmd\git.exe` が出たら、管理者の権限無しで入れた Git for Windows がある。中断し、既存の導入元と設定を確かめる
-   - 1 行目に scoop の `…\scoop\shims\git.exe` だけが出たら、そのまま進めてよい
-   - `winget` が見つからないというエラーになったら、Microsoft Store で「アプリ インストーラー」を更新してから始める
-   - `True` なら、Git for Windows はもう `C:\Program Files\Git` に入っている。この項の手順 3 は飛ばす（新しい版にするなら[Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 2）
-
-1. まだ入っていなければ、winget で Git for Windows を PC 全体（`C:\Program Files\Git`）に入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   winget install --exact --id Git.Git --source winget --scope machine --accept-source-agreements --accept-package-agreements
-   winget list --exact --id Git.Git --source winget
-   ```
-
-   - `インストールが完了しました`（英語の Windows では `Successfully installed`）と出て、`winget list` に `Git.Git` の行が出ればよい
-   - この窓では `git` は見つからない。再起動後、[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)の手順 2 で確かめる
-   - インストーラの画面は出ない（進み具合の小さな窓が出て、終わると消える）
-
-<details id="git-for-windows-の補足と注意点">
-  <summary>Git for Windows の補足と注意点</summary>
-
-**注意点**
-
-- **Git: Windows の PowerShell や cmd から呼ぶ git** も、同じ `global`（`C:/Users/<WIN_USER>/.gitconfig`）を読む
-  - Windows 11 の PC で、Git Bash・PowerShell・cmd の `git config --global --list --show-origin` が同じファイルを示した
-
-- **Git: Git for Windows 2.56.0 から、内部のパスが `mingw64` から `ucrt64` に変わった**（上流のリリースノート）
-  - `C:\Program Files\Git\mingw64\bin\git.exe` を直接指す設定は、上げた後に見直す
-
-**[Git for Windows](#git-for-windows)の手順 2: 確かめていること**
-
-- Git for Windows を PC 全体に入れると、`git` は `C:\Program Files\Git\cmd\git.exe`、Git Bash は `C:\Program Files\Git\git-bash.exe`（スタートメニューの Git Bash）と `C:\Program Files\Git\bin\bash.exe`（ほかのプログラムから bash を起動する入口）になる
-- 管理者の権限が無いと、インストーラは入れる先の既定を `%LOCALAPPDATA%\Programs\Git` に変える（上流の `install.iss`。画面で入れるとき）。その形では、上の 2 つのパスが無い
-- `--source winget` を付けた `winget list` は、入っているアプリを winget のカタログと照合し、確認に要らない Microsoft Store のソースの初回同意を避ける
-- `--accept-source-agreements` は、winget を初めて使う PC で出るソースの同意の問いに答えるため
-- `…\AppData\Local\Programs\Git\cmd\git.exe` の Git for Windows を外してから始めるのは、ほかの手順書が `C:\Program Files\Git` を前提にしているため
-
-**[Git for Windows](#git-for-windows)の手順 3: UAC**
-
-- 管理者の窓から動かすので、UAC の確認も出ないはず
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### PC 全体の設定
-
-- PC の名前・長いパス・電源・ロック・LAN の省電力を設定する
-- 前提: [手順書のスクリプトを取る](#手順書のスクリプトを取る)を通してあり、設定する LAN が接続されている
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-
-- **この項の手順 8 のインラインの sudo は、同じ窓の管理者ではないプロセスからも管理者のコマンドに入力を送れる**
-- **この項の手順 9 の後、PC の前にいる人は、このユーザーとしてそのまま使える**
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
-   - UAC の確認で「はい」を押す
-   - 開いたときにプロファイルを読めないエラーが出たら、[アプリを入れる](#アプリを入れる)の手順 9 で PowerShell 7 の実行ポリシーを確かめる
-
-1. 変数を設定する（PC の名前を変えるなら、`PC_NAME` に値を入れる）。
-
-   ```powershell
-   $PC_NAME = ''   # この PC の新しい名前（15 文字まで。英字・数字・ハイフン）。<HOSTNAME>
-   ```
-
-   ```powershell
-   $LAN_IF = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).InterfaceAlias   # ほかの PC とつながる LAN の接続（自動）。<LAN_IF>
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   'PC_NAME = {0}' -f $PC_NAME
-   'LAN_IF  = {0}' -f $LAN_IF
-   ```
-
-   - 名前を変えないなら、空のままにしてこの項の手順 5 を飛ばす
-   - `LAN_IF` は、インターネットにつながっている接続の名前（`イーサネット`、`Wi-Fi` など）。ほかの PC とつながる接続と違えば、`$LAN_IF = 'Wi-Fi'` のように直す
-   - **新しい PowerShell を開いたら**、この項の手順 2 のブロックを貼り直してから先へ進む
-
-1. 管理者であることと、プロファイルの行が効いていることと、今の値を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # PC とネットワークの設定を確認する
-   $cv = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
-   [pscustomobject]@{
-     Admin            = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     CtrlEnter        = (Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Ctrl+Enter').Function
-     Edition          = $cv.EditionID
-     Version          = '{0}（{1}.{2}）' -f $cv.DisplayVersion, $cv.CurrentBuild, $cv.UBR
-     LanCategory      = if ($LAN_IF) { (Get-NetConnectionProfile -InterfaceAlias $LAN_IF).NetworkCategory } else { '' }
-     RemoteDesktop    = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server').fDenyTSConnections
-     RemoteAssistance = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -ErrorAction SilentlyContinue).fAllowToGetHelp
-     HelloOnly        = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device' -ErrorAction SilentlyContinue).DevicePasswordLessBuildVersion
-     Keyboard         = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters' -ErrorAction SilentlyContinue).'LayerDriver JPN'
-     Hypervisor       = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
-   } | Format-List
-   # 配信の最適化の設定を確認する
-   Get-DODownloadMode
-   # スクリプトで今の値と状態を確認する
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\pc-name\check.ps1" -PcName $PC_NAME
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\long-paths\check.ps1"
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\developer-mode\check.ps1"
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\sudo-inline\check.ps1"
-   ```
-
-   - `Admin : True` と `CtrlEnter : AddLine` が出ればよい
-   - `Admin` が `False` なら、管理者ではない窓に貼っている。この項の手順 1 から
-   - `CtrlEnter : InsertLineAbove` なら、[アプリを入れる](#アプリを入れる)の手順 7〜9 を通し、この項の手順 1 から
-   - 次の値を控える
-     - `今: ComputerName`（PC の名前）と `LanCategory`（LAN の種類）
-     - `RemoteDesktop`（1 なら無効、0 ならもう有効）と `RemoteAssistance`（1 なら有効、0 なら無効）
-     - `HelloOnly`（2 ならオン、0 ならオフ）と `Keyboard`（`kbd106.dll` なら JIS 配列）
-     - 最後の行の配信の最適化のモード（`Lan` が Windows の既定）
-   - PC 名の `状態: 今の値だけ` は、`PC_NAME` が空のとき。名前を入れた場合とほかの設定の `状態: 変更が要る` は、後の手順で変える
-   - sudo が `状態: 前提が足りない・対象外` なら、この項の手順 8 だけを飛ばす。それ以外の `中断:` が出たら先へ進まない
-   - `Edition` が `Core` で始まる（Home）なら、[ネットワークとリモート](#ネットワークとリモート)の手順 4 は飛ばす
-
-1. 複数行のブロックをコピーボタンでコピーして右クリックで貼り、元の順に動くことを確かめる。
-
-   ```powershell
-   & {
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     '1 行目'
-     '2 行目'
-     '3 行目'
-   }
-   ```
-
-   - このブロックを GitHub のコピーボタンでコピーし、この項の手順 1 の窓の中で右クリックして貼る
-   - 最後の `}` の行で止まるので、Enter を押す
-   - `1 行目`・`2 行目`・`3 行目` の順に出ればよい
-
-1. PC の名前を変えるときだけ、名前を変える（効くのは再起動の後）。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\pc-name\apply.ps1" -PcName $PC_NAME
-   ```
-
-   - `状態: 再起動待ち` か `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
-   - 名前を変えないなら（この項の手順 2 の `PC_NAME` が空なら）、この手順は飛ばす
-
-1. 長いパスを有効にする。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\long-paths\apply.ps1"
-   ```
-
-   - `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
-
-1. 開発者モードを有効にする。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\developer-mode\apply.ps1"
-   ```
-
-   - `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
-
-1. sudo を今の窓で動く形（インライン）にする。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\sudo-inline\apply.ps1"
-   ```
-
-   - `状態: 確認済み` ならよい
-   - `状態: 前提が足りない・対象外` なら、この手順は飛ばす。それ以外の `中断:` が出たら先へ進まない
-
-1. 電源接続中の眠りと蓋の動作を止め、電源に関係なく休止状態と放置後のロックを切る。
-
-   ```powershell
-   # 電源とロックの設定を変更する
-   powercfg /change standby-timeout-ac 0
-   powercfg /hibernate off
-   powercfg /setacvalueindex SCHEME_CURRENT SUB_BUTTONS LIDACTION 0
-   powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONSOLELOCK 0
-   powercfg /setactive SCHEME_CURRENT
-   Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name DelayLockInterval -Type DWord -Value 0xFFFFFFFF
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   foreach ($s in 'SUB_SLEEP STANDBYIDLE', 'SUB_BUTTONS LIDACTION', 'SUB_NONE CONSOLELOCK') { '{0}: {1}' -f $s, ((powercfg /qh SCHEME_CURRENT $s.Split(' ')) | Select-String -Pattern 'AC' | Select-Object -Last 1) }
-   'HibernateEnabled: {0}' -f (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled
-   ```
-
-   - 3 つの行の AC の値が `0x00000000` で、`HibernateEnabled: 0` が出ればよい（`powercfg` の表示は日本語）
-
-1. LAN のアダプターを、電力の節約のために止めないようにする。
-
-   ```powershell
-   # アダプターの省電力設定を変更する
-   if (-not $LAN_IF) {
-     Write-Error 'この項の手順 2 の $LAN_IF が空'
-   } else {
-     $pm = Get-NetAdapterPowerManagement -Name $LAN_IF
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     if ($pm.AllowComputerToTurnOffDevice -eq 'Unsupported') { "このアダプターは対象外: $LAN_IF" } else {
-       $pm.AllowComputerToTurnOffDevice = 'Disabled'
-       $pm | Set-NetAdapterPowerManagement -NoRestart
-     }
-     Get-NetAdapterPowerManagement -Name $LAN_IF | Format-List Name, AllowComputerToTurnOffDevice, WakeOnMagicPacket
-   }
-   ```
-
-   - `AllowComputerToTurnOffDevice : Disabled` が出ればよい
-   - `このアダプターは対象外:` なら、このアダプターには設定が無い（何もしない）
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
-
-<details id="pc-全体の設定-の補足と注意点">
-  <summary>PC 全体の設定 の補足と注意点</summary>
-
-**[PC 全体の設定](#pc-全体の設定)の手順 1: プロファイルの行**
-
-- この窓は、[アプリを入れる](#アプリを入れる)の手順 7 で PowerShell 7 のプロファイルに書いた行を読む（[PC 全体の設定](#pc-全体の設定)の手順 3 で確かめる）
-
-**[PC 全体の設定](#pc-全体の設定)の手順 2**
-
-- 最後に値を読み戻して確かめる
-
-- 変数はその PowerShell の中だけで有効
-
-**[PC 全体の設定](#pc-全体の設定)の手順 2: 変数について**
-
-- `$PC_NAME` は[PC 全体の設定](#pc-全体の設定)の手順 5（PC の名前を変える）で使う
-- `$LAN_IF` は、[PC 全体の設定](#pc-全体の設定)の手順 3（今の状態）・[PC 全体の設定](#pc-全体の設定)の手順 10（アダプターの省電力）で使う。「ネットワークとリモート」は、同じ式をその項の手順 2 で取り直す
-- 接続の一覧は `Get-NetConnectionProfile` で見られる
-
-**[PC 全体の設定](#pc-全体の設定)の手順 3: 見ているもの**
-
-- `CtrlEnter` は、この窓の PSReadLine の Ctrl+Enter の働き。[アプリを入れる](#アプリを入れる)の手順 7 のプロファイルを読んでいれば `AddLine`、読んでいなければ既定の `InsertLineAbove`
-- `Edition` は `HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion` の `EditionID`。`Core`・`CoreN`・`CoreSingleLanguage`・`CoreCountrySpecific` が Home、`Professional` などが Pro。Microsoft の文書では、Home はリモート デスクトップでつながれる側になれない
-- sudo の check の `今: SudoPath` は、Windows に入っている `sudo.exe` の場所。Microsoft の文書では、sudo は 24H2 以降
-- `Hypervisor` は、Windows のハイパーバイザー（Hyper-V）が動いているか。WSL 2（[WSL と再起動](#wsl-と再起動)の手順 2）・メモリ整合性・Credential Guard などで動く
-- `Get-DODownloadMode` は、配信の最適化のモード（`CdnOnly`・`Lan`・`Internet` など）
-- ビルドが 26100 より前か、Windows の `sudo.exe` が無ければ、sudo の check と apply は終了コード 13（対象外）を返す
-- `Hypervisor : True` なら、Hyper-V がもう動いている（[Windows 11 で VirtualBox を入れる](virtual-machines.md#windows-11-で-virtualbox-を入れる)の VM は、その上で動く）
-
-**[PC 全体の設定](#pc-全体の設定)の手順 5: スクリプトの動作**
-
-- 稼働中の名前を `ActiveComputerName`、次に使う名前を `ComputerName` のレジストリのキーから読む。入力が無い check は今の値を表示するだけで、終了コード 14 を返す
-- 先に入力を検査し、合わなければ何も変えずに止まる。稼働中と次の名前の両方が入力と同じなら何も変えない。次の名前だけが一致する場合は、変更せず再起動待ちを返す。どちらも違うときだけ `Rename-Computer -NewName` で名前を変える
-- 書いた後も 2 つのキーを読み直し、次の名前が一致したら再起動待ちとする。元の名前は `控える:` に出し、ファイルの控えは作らない
-- 稼働中の名前と入力が同じで、別の名前への変更が再起動待ちなら、先に再起動してからやり直すように止まる
-
-**[PC 全体の設定](#pc-全体の設定)の手順 5: 名前の決まりと、確認の問いを出さないこと**
-
-- Windows の PC の名前は 15 文字まで（NetBIOS の名前の長さ）で、使える文字は英字・数字・ハイフン。先頭は英数字で、末尾はハイフンにしない（Microsoft の文書。数字だけの名前はドメインに入れない）
-- `Rename-Computer` は、15 文字を超える名前だと確認の問いで短縮されうるため、先に 15 文字までかを確かめ、指定した名前をそのまま使える場合だけ変更する
-- 今と同じ名前を渡すと、`Rename-Computer` はエラー（`NewNameIsOldName`）を出すので、先に比べる
-- SSH・リモート デスクトップは、この名前でこの PC を見分ける
-
-**[PC 全体の設定](#pc-全体の設定)の手順 6: スクリプトの動作**
-
-- **長いパス**: `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem` の `LongPathsEnabled` を 1 にすると、260 文字を超えるパスを、それを宣言したアプリ（マニフェストの `longPathAware`）が使える（Microsoft の文書）。エクスプローラーなど、宣言していないアプリは変わらない。プロセスが最初に使うときに読むので、効くのは[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後。Git for Windows には別に `core.longpaths` がある
-
-**[PC 全体の設定](#pc-全体の設定)の手順 7: スクリプトの動作**
-
-- **開発者モード**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock` の `AllowDevelopmentWithoutDevLicense` を 1（Microsoft の文書の `reg add` と同じ値）。管理者でなくてもシンボリック リンクを作れる（`mklink` や Git for Windows のように、作る側がその印を渡すとき）。Microsoft の文書では、レジストリで有効にしても、設定の画面で有効にしたときと違い、デバイスのポータルなどは入らない
-- `AppModelUnlock` のキーが無ければ作り、既にあるキーは作り直さない
-
-**[PC 全体の設定](#pc-全体の設定)の手順 8: スクリプトの動作**
-
-- **sudo**: Windows 11 24H2 から Windows に入っている `sudo.exe`。`sudo config --enable` の形は 3 つ（Microsoft の文書）
-  - `forceNewWindow`（既定）: 管理者のコマンドを新しい窓で動かす。Microsoft が勧める形
-  - `disableInput`: 今の窓に出すが、入力を受け付けない
-  - `normal`（インライン）: 今の窓で入出力する。Linux の sudo に近い。同じ窓のほかのプロセスが、管理者のプロセスを操作できるおそれがあると Microsoft は書いている
-  - 利用者の選択で `normal` にした。値は `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo` の `Enabled`（0 が無効、1〜3 が上の順。microsoft/sudo のソース）
-- 長いパス・開発者モード・sudo は、変更前の値を `控える:` に出し、ファイルの控えは作らない。check と同じレジストリの値で読み戻し、長いパスと開発者モードは 1、sudo は `Enabled=3` を確認する。sudo の表示言語は判定に使わない
-- 長いパス・開発者モード・sudo は、設定の「システム」→「開発者向け」（25H2 では「システム」→「詳細設定」）でも変えられる
-- 管理者ではない窓で `sudo <コマンド>` を打つと、UAC の確認の後に、同じ窓でそのコマンドが管理者の権限で動く
-
-**[PC 全体の設定](#pc-全体の設定)の手順 9: どの設定で何が変わるか**
-
-- `standby-timeout-ac 0`: 電源につないでいる間、放置しても眠らない（`SUB_SLEEP` の `STANDBYIDLE` を 0 にするのと同じ。Microsoft の文書）
-- `/hibernate off`: 休止状態を切り、`hiberfil.sys` を消す。高速スタートアップもこのファイルを使うので、使えなくなる（ハイブリッド スリープも）
-- `LIDACTION` を 0: 電源につないでいる間、蓋を閉じても何もしない（1 が眠る、2 が休止状態、3 がシャットダウン）。`/setactive SCHEME_CURRENT` で、今の電源プランに効かせる
-- `CONSOLELOCK` を 0: 電源につないでいる間、眠りから戻ったときにサインインを求めない（既定は 1）。眠らないようにしても、手で眠らせたときのため
-- `DelayLockInterval` を `0xFFFFFFFF`: Modern Standby（S0）の PC で、画面が消えた後のロック（設定の「アカウント」→「サインイン オプション」の「一定時間不在にした場合、もう一度サインインを求めるタイミング」）を「しない」にする。この値は Microsoft の文書に無く、広く使われているもの。S3 の PC では、画面が消えるだけではロックしない（ロックするのは、眠り・パスワード付きのスクリーン セーバー・ポリシー・動的ロック）
-- Modern Standby の PC かは、`powercfg /a` に「スタンバイ (S0 低電力アイドル)」が出るかで分かる
-- 画面を消す時間は変えない
-- バッテリー用の電源プランの値（スリープ時間・蓋を閉じたときの動作・`CONSOLELOCK`）は変えない
-- 休止状態の無効化と `DelayLockInterval` は電源接続中だけに限定されない（バッテリーのときもかかる）
-
-**[PC 全体の設定](#pc-全体の設定)の手順 9: 設定と確認方法の根拠**
-
-- 確認には、隠れた電源設定も表示する `/qh` を使う。設定を書き込むコマンドは変えない。
-
-**[PC 全体の設定](#pc-全体の設定)の手順 10: デバイス マネージャーの「電力の節約のために、コンピューターでこのデバイスの電源をオフにできるようにする」**
-
-- この手順は、デバイス マネージャーのアダプターの「電源の管理」タブの、上の項目を外すのと同じ
-- `Set-NetAdapterPowerManagement` の文書にこの項目の引数は無く、`Get-NetAdapterPowerManagement` で取ったものの `AllowComputerToTurnOffDevice` を変えて渡す形は、広く使われているもの（Microsoft の文書には無い）
-- `Set-NetAdapterPowerManagement` は、`-NoRestart` が無いとアダプターを起動し直す（Microsoft の文書）。SSH・リモート デスクトップでつないでいると切れるので、付ける
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
+- サインイン・検索・キーボード・再起動・プライバシー・Edge
 
 ### サインイン・検索・キーボード
 
@@ -1251,7 +77,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
 
 1. 「Windows Hello サインインのみを許可する」を切る。
@@ -1279,7 +105,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
    ```
 
    - `DisableSearchBoxSuggestions : 1` が出ればよい
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
+   - 効くのは、[再起動](#再起動)の手順 2 の再起動の後
 
 1. デスクトップの Edge と UniGet UI のショートカットを消し、Edge が作り直したら消すようにする。
 
@@ -1308,7 +134,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
      $key = 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout'
      $want = '00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00'
      $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（「PC 全体の設定」の手順 1 から）'; return }
+     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない（この項の手順 1 から）'; return }
      $now = (Get-ItemProperty -Path $key -ErrorAction SilentlyContinue).'Scancode Map'
      $nowHex = if ($now) { ($now | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
      "`n$([char]27)[7m 確認 $([char]27)[0m"
@@ -1320,7 +146,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 
    - `Scancode Map = 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00` が出ればよい
    - `中断: 別の Scancode Map がある` が出たら、ほかのキーの割り当てがある（両方を使うなら、その値を手で直す。数を 1 つ増やし、終わりの印の前に `1D 00 3A 00` を足す）
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
+   - 効くのは、[再起動](#再起動)の手順 2 の再起動の後
 
 1. US 配列（101/102 キー）のキーボードを使うときだけ、キーボードの種類を変える。
 
@@ -1337,7 +163,7 @@ PowerToys・PowerShell 7 のプロファイル・Windows Terminal・WSL のネ�
 
    - `LayerDriver JPN : kbd101.dll`・`OverrideKeyboardIdentifier : PCAT_101KEY`・`OverrideKeyboardType : 7`・`OverrideKeyboardSubtype : 0` が出ればよい
    - JIS 配列（日本語の 106/109 キー）のキーボードなら、この手順は飛ばす
-   - 効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後。日本語の入力の切り替えは、[表示と入力](#表示と入力)の手順 8 の Ctrl+Space（または Alt+`）で行う
+   - 効くのは、[再起動](#再起動)の手順 2 の再起動の後。US 配列で日本語の入力を切り替えるときは Alt+` を使う
 
 <details id="サインイン検索キーボード-の補足と注意点">
   <summary>サインイン・検索・キーボード の補足と注意点</summary>
@@ -1388,9 +214,9 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - 日本語の Windows は、キーボードの種類（配列のドライバー）を PC 全体で 1 つ持つ。`HKLM\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters` の 4 つの値で決まり、名前は i8042prt（PS/2）だが、USB のキーボードにもかかる
 - US 配列の値は、Microsoft の日本の社員のブログ（Learn に残っている「英語キーボードを快適に使う」）と同じ。設定の「時刻と言語」→「言語と地域」→「日本語」の「言語のオプション」→「キーボード レイアウト」の「英語キーボード (101/102 キー)」も、同じ値を書くと報告されている
-- JIS 配列の値は、`kbd106.dll`・`PCAT_106KEY`・7・2（広く使われているもの）。[PC 全体の設定](#pc-全体の設定)の手順 3 の `Keyboard` で、元の値を控える
+- JIS 配列の値は、`kbd106.dll`・`PCAT_106KEY`・7・2（広く使われているもの）
 - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 の Scancode Map は、キーの位置（スキャン コード）で変えるので、US 配列でも Caps Lock の位置のキーが Ctrl になる
-- US 配列には半角/全角のキーが無いので、日本語の入力の切り替えは、[表示と入力](#表示と入力)の手順 8 の Ctrl+Space で行う
+- US 配列には半角/全角のキーが無いので、日本語の入力の切り替えは Alt+` で行う
 
 **参照**
 
@@ -1400,28 +226,18 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ---
 
-### WSL と再起動
+### 再起動
 
-- WSL の機能を有効にして、この PC を再起動する
-- 前提: 無し
+- 設定を反映するため、この PC を再起動する
+- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)など、再起動が必要な設定を済ませてある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-
-- この項の手順 2 の後、VirtualBox の VM は Hyper-V の上で動く。遅ければ[Windows 11 で VirtualBox を入れる の補足と注意点](virtual-machines.md#windows-11-で-virtualbox-を入れる-の補足と注意点)の「注意点」を読む
+- この項の手順 2 は、すぐに再起動を始める。保存していない作業は先に保存する
 
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
-
-1. WSL を使えるように、Windows の機能を入れる（ディストリビューションは再起動の後に入れる）。
-
-   ```powershell
-   wsl.exe --install --no-distribution
-   ```
-
-   - 必要な機能（仮想マシン プラットフォーム）を入れた旨と、再起動を求める旨の行が出ればよい
-   - もう入っていれば、何もしない
 
 1. 再起動する。
 
@@ -1429,105 +245,11 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    Restart-Computer
    ```
 
-   - 保存していない作業があれば、先に保存する（すぐに再起動が始まる）
    - ほかのユーザーがサインインしていると、エラーで止まる。そのときは、スタートメニューの電源から再起動する
    - **次の手順は、起動してサインインしてから行う**
 
-<details id="wsl-と再起動-の補足と注意点">
-  <summary>WSL と再起動 の補足と注意点</summary>
-
-**[WSL と再起動](#wsl-と再起動)の手順 2: 入るもの**
-
-- Windows 11 では、`wsl --install --no-distribution` は Windows の機能「仮想マシン プラットフォーム」（`VirtualMachinePlatform`）を入れ、WSL のパッケージを入れる（WSL のソースの `WslInstall.cpp`）。WSL 1 の機能（`Microsoft-Windows-Subsystem-Linux`）は `--enable-wsl1` を付けたときだけ
-- 機能を入れたときは、再起動が要る。この文書では[WSL と再起動](#wsl-と再起動)の手順 3 の再起動で済ませ、AlmaLinux 10 は[WSL の AlmaLinux 10](#wsl-の-almalinux-10)の手順 3 で入れる
-- VirtualBox は、Hyper-V が動いていると、それを通して VM を動かす（NEM）。仮想マシン プラットフォームを外しても、メモリ整合性などで Hyper-V が動き続けることがある
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### WSL の AlmaLinux 10
-
-- WSL に AlmaLinux 10 を入れる
-- 前提: [WSL と再起動](#wsl-と再起動)で機能を入れて再起動してある。状態確認は、通した項の値だけを確かめる
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
-   - 複数行のブロックを貼ると出る警告では、「強制的に貼り付け」を押す
-
-1. 再起動の後の状態を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   $sm = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout' -ErrorAction SilentlyContinue).'Scancode Map'
-   [pscustomobject]@{
-     ComputerName  = $env:COMPUTERNAME
-     CtrlEnter     = (Get-PSReadLineKeyHandler -Bound | Where-Object Key -eq 'Ctrl+Enter').Function
-     ScancodeMap   = if ($sm) { ($sm | ForEach-Object { '{0:X2}' -f $_ }) -join ' ' } else { '' }
-     Keyboard      = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters' -ErrorAction SilentlyContinue).'LayerDriver JPN'
-     LongPaths     = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem').LongPathsEnabled
-     DeveloperMode = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense
-     Sudo          = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo' -ErrorAction SilentlyContinue).Enabled
-     Hibernate     = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Power').HibernateEnabled
-     RemoteDesktop = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server').fDenyTSConnections
-     LanCategory   = (Get-NetConnectionProfile | Where-Object IPv4Connectivity -eq Internet | Select-Object -First 1).NetworkCategory
-     Hypervisor    = (Get-CimInstance -ClassName Win32_ComputerSystem).HypervisorPresent
-   } | Format-List
-   ```
-
-   - 次の値が出ればよい（行わなかった手順の値は、元のまま）
-     - `ComputerName` が設定した名前（大文字）、`LongPaths : 1`・`DeveloperMode : 1`・`Sudo : 3`・`Hibernate : 0`（[PC 全体の設定](#pc-全体の設定)を通したとき）
-     - `CtrlEnter : AddLine`（[アプリを入れる](#アプリを入れる)の手順 7〜9 を通したとき）
-     - `ScancodeMap : 00 00 00 00 00 00 00 00 02 00 00 00 1D 00 3A 00 00 00 00 00`（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-     - `Keyboard` は、[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら `kbd101.dll`
-     - `RemoteDesktop : 0`・`LanCategory : Private`（[ネットワークとリモート](#ネットワークとリモート)を通したとき。Home の `RemoteDesktop` は確かめない）
-     - `Hypervisor : True`（[WSL と再起動](#wsl-と再起動)を通したとき）
-
-1. WSL に AlmaLinux 10 を入れてユーザーを作り、WSL 2 の動作を確認する。
-
-   ```powershell
-   # WSL に AlmaLinux 10 を導入する
-   $env:WSL_UTF8 = '1'
-   [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
-   wsl.exe --install AlmaLinux-10
-   # WSL の出力を UTF-8 に設定する
-   $env:WSL_UTF8 = '1'
-   [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   wsl.exe --list --verbose
-   wsl.exe --distribution AlmaLinux-10 -- head -n 2 /etc/os-release
-   ```
-
-   - ダウンロードの後に `Enter new UNIX username:` と聞かれるので、Linux のユーザー名を入れる。続けてパスワードを 2 回入れる
-   - AlmaLinux 10 のシェル（`[<ユーザー>@<HOSTNAME> ~]$`）になったら、`exit` で PowerShell に戻る
-   - `AlmaLinux-10` の行の `VERSION` が `2` で、`NAME="AlmaLinux"` と `VERSION="10.…"` が出ればよい
-
-<details id="wsl-の-almalinux-10-の補足と注意点">
-  <summary>WSL の AlmaLinux 10 の補足と注意点</summary>
-
-**[WSL の AlmaLinux 10](#wsl-の-almalinux-10)の手順 1: Windows Terminal の中に開く**
-
-- [表示と入力](#表示と入力)の手順 7 の後なので、Windows Terminal の中に開く
-
-**[WSL の AlmaLinux 10](#wsl-の-almalinux-10)の手順 2: Hypervisor**
-
-- `Hypervisor : True` になるのは、[WSL と再起動](#wsl-と再起動)の手順 2 で WSL の機能を入れたため
-
-**[WSL の AlmaLinux 10](#wsl-の-almalinux-10)の手順 3: 版と、冒頭の 2 行**
-
-- `VERSION="10.2 …"` の版は、入れた日のイメージ
-- 冒頭の 2 行は、この PowerShell セッションで WSL の出力とコンソールの読み取りを UTF-8 にそろえる（[WSL の AlmaLinux 10](#wsl-の-almalinux-10)の手順 3 も同じ）
-
-**[WSL の AlmaLinux 10](#wsl-の-almalinux-10)の手順 3: 設定と確認方法の根拠**
-
-- `WSL_UTF8` が出力側、`Console.OutputEncoding` がコンソールの読み取り側を指定する。Microsoft の [WSL 診断スクリプト](https://github.com/microsoft/WSL/blob/master/diagnostics/collect-wsl-logs.ps1)もこの 2 つを併用する。出力の可読性と WSL 2 の実起動の成否は別に判定する。
+<details id="再起動-の補足と注意点">
+  <summary>再起動 の補足と注意点</summary>
 
 **参照**
 
@@ -1550,7 +272,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 自分のユーザーで、プライバシーと広告の設定を切る（元の値はファイルに控える）。
 
@@ -1702,7 +424,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - UAC の確認で「はい」を押す
 
 1. Edge のスタートアップ ブーストとバックグラウンドの実行を、ポリシーで切る。
@@ -1788,15 +510,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 ### 表示と入力
 
-- エクスプローラー・タスクバー・テーマ・既定の端末・IME を設定する
-- 前提: [手順書のスクリプトを取る](#手順書のスクリプトを取る)を通してあり、Windows Terminal が入っている（[Microsoft Store の更新](#microsoft-store-の更新)で更新する）
+- エクスプローラー・タスクバー・既定の端末を設定する
+- 前提: Windows Terminal が入り、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- **この項の手順 8 で Ctrl+Space を IME に割り当てると、アプリでは使えなくなるはず**。PowerShell（PSReadLine の `MenuComplete`）・VS Code・Excel などにもかかる
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. エクスプローラーで、拡張子と隠しファイルを表示し、「PC」で開き、最近使ったものを出さないようにする。
@@ -1817,7 +538,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `HideFileExt : 0`・`Hidden : 1`・`LaunchTo : 1`・`Start_TrackDocs : 0`・`ShowRecent : 0`・`ShowFrequent : 0` が出ればよい
-   - 開いているエクスプローラーの窓には、開き直すか[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
+   - 開いているエクスプローラーの窓には、開き直すか[再起動](#再起動)の手順 2 の再起動の後に効く
 
 1. 自分のユーザーで、旧形式のコンテキストメニューを出すようにする。
 
@@ -1828,7 +549,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `reg.exe add` が成功の 1 行を出し、`reg.exe query` に `(既定)`（英語の表示では `(Default)`）と `REG_SZ` の行が出ればよい（値は空）
-   - エクスプローラーに効くのは、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後
+   - エクスプローラーに効くのは、[再起動](#再起動)の手順 2 の再起動の後
 
 1. スタートと設定の、おすすめ・提案・ヒントを切る。
 
@@ -1866,16 +587,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `TaskbarAl : 0`・`ShowTaskViewButton : 0`・`ShowSecondsInSystemClock : 1`・`SearchboxTaskbarMode : 0` が出ればよい
-   - タスクバーには、すぐか、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
-
-1. ダークモードにする。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\dark-mode\apply.ps1"
-   ```
-
-   - `状態: 確認済み` ならよい。`中断:` が出たら先へ進まない
-   - 動いているアプリとタスクバーには、[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に効く
+   - タスクバーには、すぐか、[再起動](#再起動)の手順 2 の再起動の後に効く
 
 1. 既定の端末を Windows Terminal にする。
 
@@ -1891,28 +603,14 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
    - `DelegationConsole : {2EACA947-…}` と `DelegationTerminal : {E12CFF52-…}` が出ればよい
    - 次に起動したコンソールのアプリから効く
-   - **注意**: 管理者の PowerShell は conhost で開く。右クリックで貼るには、5.1 は[貼り付けの設定](#貼り付けの設定)の手順 5、7 は[アプリを入れる](#アプリを入れる)の手順 7 が必要
-
-1. Microsoft IME の設定を開き、Ctrl+Space で IME をオン・オフするようにする。
-
-   ```powershell
-   & "$env:LOCALAPPDATA\setup-notes\scripts\windows\ime-ctrl-space\apply.ps1"
-   ```
-
-   - `状態: 手作業待ち` が出て、設定の Microsoft IME の画面が開けばよい。`中断:` が出たら先へ進まない
-   - 「キーとタッチのカスタマイズ」を開き、「キーの割り当て」をオンにして、「Ctrl + Space」を「IME-オン/オフ」にする
-   - 「以前のバージョンの Microsoft IME を使う」がオンだと、この項目は出ない
-   - 効くのは、次に IME を使う窓から（確かめるのは[再起動の後に確かめる](#再起動の後に確かめる)の手順 1）
-   - 割り当てたら、設定を閉じる
+   - **注意**: 管理者の PowerShell は conhost で開く。右クリックで貼るには、使う版の PSReadLine で Ctrl+Enter が `AddLine` に割り当てられている必要がある
 
 <details id="表示と入力-の補足と注意点">
   <summary>表示と入力 の補足と注意点</summary>
 
 **注意点**
 
-- PowerShell 7 では、`MenuComplete` を Tab に割り当てられる（[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)の手順 3）
-
-- **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](#表示と入力)の手順 3）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[貼り付けの設定](#貼り付けの設定)の手順 3 の `ClassicMenu` と[表示と入力](#表示と入力)の手順 3 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](#表示と入力)の手順 2・4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
+- **サポート外の設定**: 旧形式のコンテキストメニュー（[表示と入力](#表示と入力)の手順 3）は Microsoft が説明していない設定で、Windows の更新で効かなくなることがある。そのときは、[表示と入力](#表示と入力)の手順 3 の `reg.exe query` で、設定が残っているかを見る。[表示と入力](#表示と入力)の手順 2・4 と[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 2 の値の多くも、Microsoft の文書には値が書かれておらず、広く使われているもの
 
 **[表示と入力](#表示と入力)の手順 4: 貼る順と、Web の結果**
 
@@ -1923,26 +621,12 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - ウィジェットのボタンは、[自動起動と標準アプリ](#自動起動と標準アプリ)の手順 4 でウィジェットを外すと消える（この手順では書けない）
 
-**[表示と入力](#表示と入力)の手順 6: スクリプトの動作**
-
-- `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize` の `AppsUseLightTheme`・`SystemUsesLightTheme` を両方 0 にする。check で同じ 2 つを読み直す。変更前の値は `控える:` に表示し、ファイルの控えは作らない
-
-**[表示と入力](#表示と入力)の手順 6: 値の意味**
-
-- `AppsUseLightTheme` はアプリ、`SystemUsesLightTheme` はタスクバー・スタート・通知の色。0 で濃色、1 で淡色（Windows 11 の既定）
-- Microsoft の DSC のリソース（`Microsoft.Windows.Settings`）も同じ 2 つを書き、すぐに効かせるために `WM_SETTINGCHANGE`（`ImmersiveColorSet`）を全部の窓に送る。本書は、[WSL と再起動](#wsl-と再起動)の手順 3 で再起動するので送らない
-- 設定の「個人用設定」→「色」から変えると、すぐに効く
-
-**[表示と入力](#表示と入力)の手順 7: 値と、管理者の窓が conhost になる理由**
+**[表示と入力](#表示と入力)の手順 6: 値と、管理者の窓が conhost になる理由**
 
 - 値は、Windows Terminal の文書（グループ ポリシーの「既定のターミナル アプリケーション」）にある GUID。Windows Terminal は `DelegationConsole` が `{2EACA947-7F5F-4CFA-BA87-8F7FBEEFBE69}`、`DelegationTerminal` が `{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}`
 - Windows 11 22H2 以降の既定は「Windows に任せる」（2 つとも `{00000000-0000-0000-0000-000000000000}`）で、Windows Terminal が入っていればそれを使う（Microsoft のサポートの記事）。この手順は、それを Windows Terminal に決める
 - 管理者として起動したコンソールは、既定の端末に引き渡されず、conhost で開く。Windows Terminal の課題（microsoft/terminal の #13392。「管理者のコマンド ラインの受け手として登録できる端末は無く、COM の側の対応が要る」）が開いたまま。管理者の Windows Terminal は、Win+X の「ターミナル (管理者)」で開ける
 - 設定の「システム」→「開発者向け」→「ターミナル」と、Windows Terminal の設定の「スタートアップ」→「既定のターミナル アプリケーション」でも変えられる
-
-**[表示と入力](#表示と入力)の手順 8: スクリプトの動作**
-
-- `ms-settings:regionlanguage-jpnime` を開いて手作業待ちを返す。Ctrl+Space の割り当てを確実に読み取る方法は未確認のため、check は置かず、設定の画面と実際のキー操作で確かめる
 
 **参照**
 
@@ -1972,7 +656,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 今の値を表示し、ファイルに控える。
 
@@ -2260,7 +944,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 日本語の IME だけの PC では、ふだんは切り替える先が無い。タスクバーに「英語 (米国)」が勝手に出たときや、後で英語の配列を足したときに、Ctrl+Shift・Alt+Shift を押して離すだけで切り替わるのを防ぐ。WezTerm の自分用の設定は、Ctrl+Shift の組み合わせを多く使う
 - Win+Space（入力言語とキー配列を順に切り替える）は、この値では消えない（サポートの記事）。誤って切り替わったときに戻す手段として残る
 - 文書では、値を書いてから `SPI_SETLANGTOGGLE` を呼ぶと読み直す。この節では呼ばず、サインインし直して効かせる
-- 半角/全角と、[表示と入力](#表示と入力)の手順 8 の Ctrl+Space（IME のオン・オフ）には関係しない
+- 半角/全角と、IME のオン・オフに割り当てたキーには関係しない
 - タスクバーに「英語 (米国)」のキーボードが勝手に出るのは、この設定では防げない（言語の一覧から消す）
 
 **[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 5: Alt+Tab とシェイクの値**
@@ -2287,7 +971,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - `Explorer\Advanced\TaskbarDeveloperSettings` の `TaskbarEndTask` = 1。Microsoft の WindowsDeveloperConfig の設定スクリプトが、同じキーと値を書く（コード）
 - 機能は KB5031455（2023-10、22621.2506・22631.2506）で足された（文書）。25H2 以降は「開発者向け」のページが「詳細設定」に変わった（文書。Windows の詳細設定）
-- 開発者モード（[PC 全体の設定](#pc-全体の設定)の手順 7）は要らない
+- 開発者モードは要らない
 - 設定の画面では、24H2 は「システム」→「開発者向け」、25H2 以降は「システム」→「詳細設定」の「タスクの終了」
 
 **[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 8**
@@ -2323,7 +1007,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 起動音はサインインの前に鳴るので、ユーザーごとではなく PC 全体の設定（`HKLM`）
 - レジストリの値は、資料どうしで食い違う（`BootAnimation` の `DisableStartupSound` と `EditionOverrides` の `UserSetting_DisableStartupSound`。多くは 1 が鳴らさない側だが、Winaero は別の値を書く。どれも広く）。ポリシー（「Windows スタートアップのサウンドをオフにする」）は Policy CSP の一覧に無い
 - そのため、サウンドの画面のチェックで行う。`control.exe mmsys.cpl,,2` は、サウンドの画面を「サウンド」のタブで開く（広く）。PowerShell ではカンマが配列の区切りになるので、引数を引用符で囲む
-- [PC 全体の設定](#pc-全体の設定)の手順 9 で休止状態を切った（高速スタートアップも無くなる）ので、起動のたびに鳴るはず（推測）
 
 **[表示・入力・音・ストレージを控えて変える](#表示入力音ストレージを控えて変える)の手順 11: ストレージ センサーの値**
 
@@ -2397,7 +1080,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 自動で起動するアプリのうち、OneDrive・Edge・Teams を止める。
@@ -2451,7 +1134,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `外した:` か `無い:` が出ればよい
-   - タスクバーのウィジェットのボタンと、設定のウィジェットの切り替えが消える（[WSL と再起動](#wsl-と再起動)の手順 3 の再起動の後に確かめる）
+   - タスクバーのウィジェットのボタンと、設定のウィジェットの切り替えが消える（[再起動](#再起動)の手順 2 の再起動の後に確かめる）
 
 <details id="自動起動と標準アプリ-の補足と注意点">
   <summary>自動起動と標準アプリ の補足と注意点</summary>
@@ -2494,7 +1177,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### PowerToys のユーティリティを絞る
 
 - PowerToys の使わないユーティリティを、設定ファイルで切る
-- 前提: [アプリを入れる](#アプリを入れる)で PowerToys を入れてある
+- 前提: [PowerToys の公式の導入案内](https://learn.microsoft.com/en-us/windows/powertoys/install)に従って入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - 切るユーティリティは好みで選ぶ。この項の手順 2 の `$PT_OFF` は案
@@ -2504,7 +1187,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 変数を設定する。
 
@@ -2517,7 +1200,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `PT_OFF` に指定した名前、`PT_EXE` に `PowerToys.exe` のパスが出ればよい
-   - `PT_EXE` が空なら、PowerToys が見つからない。[アプリを入れる](#アプリを入れる)の手順 5 を確かめる
+   - `PT_EXE` が空なら、PowerToys が見つからない。[PowerToys の導入](https://learn.microsoft.com/en-us/windows/powertoys/install)を確かめる
    - `$PT_OFF` の名前は、設定ファイルの名前（空白を含むものがある）。変えるなら、この項の手順 3 の表の `Name` から選ぶ
    - 新しい窓を開いたら、このブロックを貼り直す
 
@@ -2605,16 +1288,16 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 **[PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)の手順 2: 入る場所と、切るユーティリティの案**
 
-- 入る場所は、Microsoft の情報どうしで食い違う（[アプリを入れる の補足と注意点](#アプリを入れる-の補足と注意点)の「アプリを入れるの手順 5: 入れ方と入る場所」）。決め打ちせず、動いている PowerToys のプロセスの場所を取り、無ければ `%LOCALAPPDATA%\PowerToys` と `%LOCALAPPDATA%\Programs\PowerToys` のうち、あるものにする
+- 入る場所は、Microsoft の情報どうしで食い違う。決め打ちせず、動いている PowerToys のプロセスの場所を取り、無ければ `%LOCALAPPDATA%\PowerToys` と `%LOCALAPPDATA%\Programs\PowerToys` のうち、あるものにする
 - 設定ファイルの `enabled` の名前は、設定の画面のコード（`EnabledModules.cs`）の JSON の名前。`Measure Tool`・`File Locksmith`・`Image Resizer` などは空白を含む。DSC の文書の App の例の名前（`MeasureTool`・`PowerOCR` など）とは違う
 - 既定で有効なもの（main のソース）: FancyZones・Image Resizer・File Explorer Preview・PowerRename・ColorPicker・Awake・FindMyMouse・MouseHighlighter・AlwaysOnTop・Measure Tool・File Locksmith・Peek・CmdNotFound・CmdPal。ほかは既定で無効。0.101.2362.0 で同じかは、[PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)の手順 3 の表で確かめる
 - `$PT_OFF` の案（利用者の好みで変えてよい）
   - FindMyMouse: 既定は左 Ctrl を 2 回で出る。[サインイン・検索・キーボード](#サインイン検索キーボード)の手順 5 で Caps Lock を左 Ctrl にしたので、Caps Lock を 2 回押しても出る
   - MouseHighlighter（Win+Shift+H）・ColorPicker（Win+Shift+C）・Measure Tool: 使わないなら、Win のキーの割り当てを空ける
   - FancyZones: Windows のスナップで足りるなら要らない
-  - Awake: [PC 全体の設定](#pc-全体の設定)の手順 9 で、電源接続中は眠らないようにした。既定のモードは何もしない
+  - Awake: 電源接続中にスリープしない設定なら不要。既定のモードは何もしない
 - 残す案: Always On Top（Win+Ctrl+T）・コマンド パレット（Win+Alt+Space）・PowerRename・File Locksmith・Peek・エクスプローラーのプレビュー・Image Resizer。Text Extractor（Win+Shift+T。画面の文字を読み取ってコピーする）は既定で無効で、使うなら画面でオンにする
-- LightSwitch（既定で無効）は、時刻で明暗を切り替えるので、[表示と入力](#表示と入力)の手順 6 のダークモードとぶつかる。オンにしない
+- LightSwitch（既定で無効）は、時刻で明暗を切り替える。ダークモードに固定する場合はオンにしない
 - WezTerm の自分用の設定は Win のキーを使わないので、PowerToys の Win+ のショートカットとはぶつからない
 
 **[PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)の手順 5**
@@ -2637,7 +1320,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 **[PowerToys のユーティリティを絞る](#powertoys-のユーティリティを絞る)の手順 6: Peek・Find My Mouse・Command Not Found**
 
-- Peek の起動のキーの既定は Ctrl+Space だが、「Space で開く」（`EnableSpaceToActivate`）が既定でオンの間は Space だけになる（0.95 から。`PeekProperties.cs`・`dllmain.cpp`）。オフにすると Ctrl+Space に戻り、[表示と入力](#表示と入力)の手順 8 の IME とぶつかる。0.95 より前の設定を引き継いだ PC も同じ
+- Peek の起動のキーの既定は Ctrl+Space だが、「Space で開く」（`EnableSpaceToActivate`）が既定でオンの間は Space だけになる（0.95 から。`PeekProperties.cs`・`dllmain.cpp`）。オフにすると Ctrl+Space に戻り、IME にも Ctrl+Space を割り当てているとぶつかる。0.95 より前の設定を引き継いだ PC も同じ
 - Find My Mouse の起動の方法は、設定ファイル（`FindMyMouse\settings.json`）の `activation_method`（0 が左 Ctrl を 2 回、1 が右 Ctrl を 2 回、2 が振る、3 がショートカット）と `include_win_key`（Windows キーを押しているときだけ。0 と 1 のときだけ画面に出る）。この節では画面で変える
 - Command Not Found は、有効の印があっても、画面で「インストール」を押すまで何もしない。押すと、PowerShell 7 のプロファイルに行を足す（Microsoft の文書）
 - 通知領域のアイコンを 1 回クリックすると、クイック アクセス（`enable_quick_access` が既定で true）が開く。設定の窓は、右クリックのメニューの「設定」か、ダブルクリックで開く（`src/runner/tray_icon.cpp`）
@@ -2785,7 +1468,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 対象キーと、メニューからの操作結果を記録する。
@@ -2848,7 +1531,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. 試験する修飾キーと仮想キーコードを設定する。
@@ -3068,22 +1751,21 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### 再起動の後に確かめる
 
 - 通した項の設定が再起動後にも効いていることを画面で確かめる
-- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)・[表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[アプリを入れる](#アプリを入れる)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)のうち、確かめたい項を通し、再起動してサインインしてある
-- 実行場所: この PC のデスクトップ（メモ帳・エクスプローラー・設定・UniGet UI）
+- 前提: [サインイン・検索・キーボード](#サインイン検索キーボード)・[表示と入力](#表示と入力)・[自動起動と標準アプリ](#自動起動と標準アプリ)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)のうち、確かめたい項を通し、再起動してサインインしてある
+- 実行場所: この PC のデスクトップ（メモ帳・エクスプローラー・設定）
 
-1. キーボードで、Caps Lock・Ctrl+Space・配列を確かめる。
+1. キーボードで、Caps Lock・配列を確かめる。
 
    - メモ帳を開いて何か打ち、Caps Lock を押したまま A を押すと、全部が選ばれる（Ctrl+A）（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - Caps Lock だけを押しても、Caps Lock のランプは点かず、大文字にもならない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - 日本語の配列（JIS）のキーボードでは、「英数」（Caps Lock）のキーが Ctrl になる（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
-   - Ctrl+Space を押すたびに、IME のオンとオフが入れ替わる（タスクバーの「あ」と「A」）（[表示と入力](#表示と入力)を通したとき）
    - [サインイン・検索・キーボード](#サインイン検索キーボード)の手順 6 を行ったなら、記号が US 配列の位置で出る（Shift+2 で `@`）
 
 1. エクスプローラー・タスクバー・スタートが変わったことを確かめる。
 
    - ファイルかデスクトップを右クリックすると、「その他のオプションを確認」を選ばなくても、「送る」「プロパティ」などの並ぶ旧形式のメニューが出る（[表示と入力](#表示と入力)を通したとき）
    - エクスプローラーを開くと「PC」が出て、ファイル名に拡張子が付き、隠しファイルも見える（[表示と入力](#表示と入力)を通したとき）
-   - タスクバーのアイコンが左に寄り、タスク ビュー・検索のボタンが無く、時計に秒が出る。全体が濃い色になっている（[表示と入力](#表示と入力)を通したとき）
+   - タスクバーのアイコンが左に寄り、タスク ビュー・検索のボタンが無く、時計に秒が出る（[表示と入力](#表示と入力)を通したとき）
    - タスクバーにウィジェットのボタンが無い（[自動起動と標準アプリ](#自動起動と標準アプリ)を通したとき）
    - スタートを開いて文字を打っても、Web（Bing）の結果が出ない（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
    - デスクトップに Edge と UniGet UI のショートカットが無い（[サインイン・検索・キーボード](#サインイン検索キーボード)を通したとき）
@@ -3093,13 +1775,6 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    - タスクバーのアイコン（Microsoft Edge・Microsoft Store など）を右クリックし、「タスクバーからピン留めを外す」
    - スタートを開き、ピン留めされたアプリを右クリックし、「スタートからピン留めを外す」
    - Copilot は外さない。使うアプリは残す
-
-1. [アプリを入れる](#アプリを入れる)を通したときだけ、UniGet UI を起動し、WinGet と Scoop が使えることを確かめる。
-
-   - スタートメニューで「UniGetUI」を探して開く
-   - 初回は、使い方の案内や設定の問いが出ることがある。読んで進める
-   - 左の「パッケージマネージャー」で、WinGet と Scoop が有効で「利用可能」になっていることを確かめる（版は、それぞれの「バージョンを表示」で出る）（[アプリを入れる](#アプリを入れる)を通したとき）
-   - 「インストール済みのパッケージ」に、[アプリを入れる](#アプリを入れる)の手順 4 で scoop で入れた `scoop-search` と、winget の `UniGetUI` などが出る（[アプリを入れる](#アプリを入れる)を通したとき）
 
 1. [HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通したときだけ、フォントの一覧で、HackGen Console NF が出ることを確かめる。
 
@@ -3142,7 +1817,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
 
 1. 変数を設定する。
@@ -3247,7 +1922,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 
 - リモート アシスタンス（Windows の「クイック アシスト」とは別）は、ほかの人を招いて画面を見せる古い仕組み。システムのプロパティの「リモート」タブの「このコンピューターへのリモート アシスタンス接続を許可する」が `fAllowToGetHelp`
 - グループの ID `@FirewallAPI.dll,-33002` は、Microsoft の文書には無い（Windows の `racpldlg.dll` の文字列にある）。違っていたら、`Get-NetFirewallRule | Sort-Object Group -Unique | Format-Table DisplayGroup, Group` で「リモート アシスタンス」の行の `Group` を見る
-- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている。[PC 全体の設定](#pc-全体の設定)の手順 3 の `RemoteAssistance` で、元の値を控える
+- Microsoft の無人インストールの文書は、`fAllowToGetHelp` の既定を無効と書いているが、店頭の Windows では有効なことが多いと報告されている
 
 **[ネットワークとリモート](#ネットワークとリモート)の手順 6: 自分で規則を作る理由**
 
@@ -3261,7 +1936,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 配信の最適化は、Windows Update とストアのアプリのファイルを、ほかの PC と分け合う仕組み。設定の「Windows Update」→「詳細オプション」→「配信の最適化」の「他のデバイスからのダウンロードを許可する」と同じ
 - `Lan` は同じ NAT の後ろ（同じ LAN）の PC とだけ、`Internet` はインターネットの PC とも、`CdnOnly` は分け合わない。Microsoft の文書の既定は `Lan`（ポリシーの文書は 0 = HTTP だけと書いていて、文書の間で食い違う）
 - `Set-DODownloadMode` は設定の画面と同じことをする（Microsoft の文書）。グループ ポリシーで決まっていると、そちらが優先される
-- Windows の既定も `Lan` なので、[PC 全体の設定](#pc-全体の設定)の手順 3 で `Lan` だったなら何も変わらない
+- Windows の既定も `Lan` なので、変更前が `Lan` なら何も変わらない
 
 **参照**
 
@@ -3274,7 +1949,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### WSL のネットワークをミラーにする
 
 - WSL 2 のネットワークを、Windows と同じ IP を使うミラーに変える
-- 前提: [WSL と再起動](#wsl-と再起動)と[WSL の AlmaLinux 10](#wsl-の-almalinux-10)で WSL 2 の AlmaLinux 10 を導入済み
+- 前提: [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)と[WSL の AlmaLinux 10](https://wiki.almalinux.org/documentation/wsl.html)で WSL 2 の AlmaLinux 10 を導入済み
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 - **この項の手順 4・6 の `wsl.exe --shutdown` は、動いているディストリビューションをすべて止める**（WezTerm の WSL のタブも切れる）。WSL の中の作業を保存してから貼る
@@ -3288,7 +1963,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 今の `.wslconfig` と、WSL の版と、動いているディストリビューションを確かめる。
 
@@ -3472,7 +2147,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. RDP でつないだセッションの中で、管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - UAC の確認で「はい」を押す
    - ウィンドウのタイトルが「管理者:」で始まる
    - **次の手順は、このウィンドウが開いてから、そこに貼る**
@@ -3514,7 +2189,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. RDP でつないだセッションの中で、管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. デスクトップに、管理者として実行するショートカットを作る。
@@ -3653,7 +2328,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### Windows の OpenSSH クライアント
 
 - Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
-- 前提: [Git for Windows](#git-for-windows)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
+- 前提: [Git for Windows](https://gitforwindows.org/)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる
@@ -3661,7 +2336,7 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 1. Windows で、管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 変数を設定する（`SSH_HOST` と `SSH_ALIAS` は必ず値を入れる）。
 
@@ -3846,12 +2521,12 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 - 更新後や config の変更後に、Windows と Git の ssh の版と設定を確かめる
 - 前提: [Windows の OpenSSH クライアント](#windows-の-openssh-クライアント)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- Windows の ssh は[Windows Update](#windows-update)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
+- Windows の ssh は[Windows Update](https://support.microsoft.com/en-us/windows/install-windows-updates-3c5ae7fc-9fb6-9af1-1984-b5e0412c556a)、Git の ssh は[Git for Windows の更新](#git-for-windowsfirefoxwezterm-を上げる)の手順 2 で上がる。この項で別に上げるものは無い
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 変数を設定する（`SSH_ALIAS` は必ず値を入れる）。
 
@@ -4070,13 +2745,13 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### git-delta
 
 - scoop で delta を入れ、Git の差分表示を設定する
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
 
@@ -4093,8 +2768,8 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](https://gitforwindows.org/)
    - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行い、この窓でこのブロックを貼り直す
    - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。中断し、既存の導入元と設定を確かめる
 
@@ -4220,13 +2895,13 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
 ### GitHub CLI
 
 - scoop で GitHub CLI を入れ、GitHub にログインする
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
+- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 管理者ではないことと、scoop・git・Git の資格情報のヘルパー・ほかの gh を確かめる。
 
@@ -4243,8 +2918,8 @@ Microsoft の文書（Scan code mapper for keyboards）の書式で、4 バイ�
    ```
 
    - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](#git-for-windows)
+   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](https://gitforwindows.org/)
    - `GitCred` が `credential.helper manager` ならよい
    - `GitCred` が空なら、この項の手順 4 の Git の認証には `Y` と答えてよい
    - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。中断し、既存の導入元と設定を確かめる
@@ -4401,13 +3076,13 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### lazygit
 
 - scoop で lazygit を入れ、自分用の設定と起動を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある
+- 前提: [scoop の導入](https://scoop.sh/)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 管理者ではないことと、scoop・git・extras のバケット・ほかの lazygit を確かめる。
 
@@ -4424,8 +3099,8 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    ```
 
    - `PowerShell : 7.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
-   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](#git-for-windows)
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
+   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](https://gitforwindows.org/)
    - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、中断し、既存の導入元と設定を確かめる
    - `Extras : True` なら、extras のバケットはもうある（[Neovim](neovim.md#windows-11-で-neovim-を入れる)の手順 4 で足した）。この項の手順 3 は飛ばす
 
@@ -4503,7 +3178,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 既存設定を退避して、設定ディレクトリへ clone する。
 
@@ -4537,7 +3212,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 手元の変更を確かめる。
 
@@ -4701,13 +3376,13 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### yazi
 
 - scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
-- 前提: [アプリを入れる](#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 変数を設定する。
 
@@ -4741,8 +3416,8 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    ```
 
    - `PowerShell : 7.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[アプリを入れる](#アプリを入れる)の手順 2・3 で入れる
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](#git-for-windows)
+   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](https://gitforwindows.org/)
    - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、この手順を貼り直す
    - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、中断し、既存の導入元と設定を確かめる
    - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きする
@@ -4831,14 +3506,14 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 #### yazi の設定を導入する
 
 - Windows の yazi の既存設定を退避し、自分用の設定を入れる
-- 前提: [yazi](#yazi)の手順 1〜5 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](#git-for-windows)で入れてある
+- 前提: [yazi](#yazi)の手順 1〜5 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](https://gitforwindows.org/)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - yazi をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. yazi を終了し、自分用の設定を clone する。
 
@@ -4870,7 +3545,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. yazi の `init.lua` を Neovim で開く。
 
@@ -4913,7 +3588,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 手元の変更を確かめる。
 
@@ -5036,7 +3711,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 **[yazi](#yazi)の手順 10**
 
-- [表示と入力](#表示と入力)の手順 7 で既定の端末を Windows Terminal にした PC では、この窓も Windows Terminal で開く
+- [表示と入力](#表示と入力)の手順 6 で既定の端末を Windows Terminal にした PC では、この窓も Windows Terminal で開く
 
 **[yazi の設定を更新する](#yazi-の設定を更新する)の手順 3**
 
@@ -5105,14 +3780,14 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### Firefox
 
 - 日本語版の Firefox を PC 全体に入れ、既定のブラウザーにする
-- 前提: [Microsoft Store の更新](#microsoft-store-の更新)を通し、winget が使える
+- 前提: [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)が使え、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Firefox の起動と設定は、この PC のデスクトップ
 - 言語パックは足さない。足すと、閉じている間の更新（Background Update）が止まる
 
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - ユーザーアカウント制御（UAC）の確認は「はい」
 
 1. Firefox がまだ入っていないことを確かめる。
@@ -5234,9 +3909,9 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 ## 更新
 
-- OS・Store の更新は[Windows Update](#windows-update)（管理者）・[Microsoft Store の更新](#microsoft-store-の更新)（通常）を通す。再起動は手動で行う
+- OS の更新は[Windows Update の公式の案内](https://support.microsoft.com/en-us/windows/install-windows-updates-3c5ae7fc-9fb6-9af1-1984-b5e0412c556a)に従う。Microsoft Store のアプリの更新を済ませ、必要なら再起動する
 - scoop・winget で入れたアプリは、入れた方法で上げる
-  - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 7 で修正版を確かめ、同じ項の手順 8 で上げる
+  - zoxide は 0.9.9 に固定中。[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 6 で修正版を確かめ、同じ項の手順 7 で上げる
 - Firefox は、自分で新しい版に上がる。待たずに上げるときだけ、その手順を行う
 - WezTerm は自分では更新しない
   - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 5・6 で、設定を残して `C:\Program Files\WezTerm` に上書きする
@@ -5256,9 +3931,8 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### scoop・winget・WSL を上げる
 
 - scoop・winget のアプリと WSL・AlmaLinux 10 を上げる
-- 前提: [アプリを入れる](#アプリを入れる)・[Git for Windows](#git-for-windows)・[WSL の AlmaLinux 10](#wsl-の-almalinux-10)を通してある。zoxide を上げるときは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
+- 前提: [scoop](https://scoop.sh/)・[winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)・[Git for Windows](https://gitforwindows.org/)・[WSL](https://learn.microsoft.com/en-us/windows/wsl/install)・[WSL の AlmaLinux 10](https://wiki.almalinux.org/documentation/wsl.html)を導入してある。zoxide を上げるときは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。zoxide のリリースはブラウザ、上げた後の確認は WezTerm の Git Bash のタブ
-- PSWindowsUpdate は、[Windows Update](#windows-update)を通してこの文書で入れたときだけ上げる
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
 
@@ -5273,7 +3947,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    ```
 
    - `scoop update` は `Scoop was updated successfully!` を出す
-   - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [Git for Windows](#git-for-windows)で Git for Windows を入れる
+   - git が無いと `Scoop uses Git to update itself. Run 'scoop install git' and try again.` で止まる。先に [Git for Windows](https://gitforwindows.org/)で Git for Windows を入れる
    - `scoop status` は、古いものがあれば名前と版を並べる。`Everything is ok!` なら、この項の手順 3 は飛ばす
 
 1. 古いものがあるときだけ、scoop で入れたものを上げる。
@@ -5309,32 +3983,11 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    - `wsl.exe --update` は、新しい版が無ければ、最新である旨を出す
    - `dnf -y upgrade` の最後に `Complete!` か `Nothing to do.` が出ればよい
 
-1. この文書で PSWindowsUpdate を入れたときだけ、モジュールを更新する。
-
-   ```powershell
-   & {
-     # モジュールの更新に使う実行環境を準備する
-     $ErrorActionPreference = 'Stop'
-     if ((Get-ExecutionPolicy) -notin 'RemoteSigned', 'Unrestricted', 'Bypass') {
-       Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-     }
-     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-     # Windows Update のモジュールを更新する
-     Update-Module -Name PSWindowsUpdate -Force
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     Get-InstalledModule -Name PSWindowsUpdate | Select-Object Name, Version, InstalledLocation
-   }
-   ```
-
-   - モジュールの版と場所が出ればよい
-   - 次の Windows Update は[Windows Update](#windows-update)の手順 1 で新しく開いた管理者の窓で行う
-   - この文書の前から入っていた PSWindowsUpdate は、元の導入方法で管理する
-
 1. zoxide を上げるときは、ブラウザで、Git Bash の記録を直した版が出たかを確かめる。
 
    - `https://github.com/ajeetdsouza/zoxide/releases` を開く
    - 0.10.0 より新しい版の変更点に、「Bash/Zsh: fix `z` failing on Cygwin/MSYS2」で始まる行があれば、直った版が出ている
-   - 無ければ、この項の手順 8 は飛ばす（0.9.9 のまま使う）
+   - 無ければ、この項の手順 7 は飛ばす（0.9.9 のまま使う）
    - **次の手順は、管理者ではない Windows PowerShell（5.1）に貼る**
 
 1. Git Bash の記録を直した版が出ているときだけ、zoxide を止めるのをやめて上げる。
@@ -5346,7 +3999,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
      $v = (Get-Content -LiteralPath "$env:USERPROFILE\scoop\buckets\main\bucket\zoxide.json" -Raw | ConvertFrom-Json).version
      "`n$([char]27)[7m 確認 $([char]27)[0m"
      # zoxide の版を確認する
-     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この項の手順 7 から"; return }
+     if ($v -notmatch '^\d+\.\d+\.\d+$' -or [version]$v -le [version]'0.10.0') { Write-Error "中断: scoop の main のバケットの zoxide はまだ $v。日を置いて、この項の手順 6 から"; return }
      # zoxide の固定を解除して更新する
      scoop unhold zoxide
      scoop update zoxide --force
@@ -5369,7 +4022,6 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 **[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 1: 5.1 にする理由**
 
 - [scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 4 の更新の対象に PowerShell 7 自身（`Microsoft.PowerShell`）があるので、更新される 7 の窓からは動かさない
-- [scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 6 で案内する Windows Update の PSWindowsUpdate は Windows PowerShell 5.1 だけで動く
 
 **[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 3**
 
@@ -5379,12 +4031,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 - `wsl.exe --update` は WSL のパッケージ（とカーネル）を上げる
 
-**[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 6: Windows の更新と、新しい窓**
-
-- Windows の更新は、このコマンドでは行わない
-- 新しく開いた管理者の窓で Windows Update を行うのは、読み込み済みの窓では古いモジュールが残るため
-
-**[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 8: zoxide を上げた後の更新**
+**[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 7: zoxide を上げた後の更新**
 
 - これより後は、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で、ほかのツールと一緒に上がる
 
@@ -5399,13 +4046,13 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### Git for Windows・Firefox・WezTerm を上げる
 
 - Git for Windows・Firefox・WezTerm を、設定を残して上げる
-- 前提: [Git for Windows](#git-for-windows)・[Firefox](#firefox)・[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
+- 前提: [Git for Windows](https://gitforwindows.org/)・[Firefox](#firefox)・[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
 
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - UAC の確認で「はい」を押す
 
 1. Git Bash と WezTerm を閉じてから、winget で Git for Windows を上げる。

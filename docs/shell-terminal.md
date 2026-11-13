@@ -6,11 +6,11 @@
 > [!IMPORTANT]
 > - AlmaLinux 10 の項は、[AlmaLinux 10 のセットアップ](almalinux-setup.md)と同じく、**GNOME にログインした、インストール時の管理者ユーザー（`wheel`）の bash で行う**。`sudo -i`・`su -` のシェルでは行わない
 > - AlmaLinux 10 の項は、パスワードを聞かない `sudo` を前提に書いてある。各項のリードの前提に無くても、その項を行うユーザーで[ログインと sudo](almalinux-setup.md#ログインと-sudo)を先に通す
-> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（7 と貼り付けの設定は、[Windows 11 のセットアップの「アプリを入れる」](windows-setup.md#アプリを入れる)の手順 6〜9）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓と Git Bash は、各項のリードに従う
-> - Windows 11 で[貼り付けの設定](windows-setup.md#貼り付けの設定)より前は **Ctrl+V で貼る**。設定後は GitHub のコピーボタンでコピーし、右クリックで貼れる
+> - Windows 11 の項は、[Windows 11 のセットアップ](windows-setup.md)と同じく、**この PC のデスクトップで、Administrators のユーザーが行う**。PowerShell のブロックは **PowerShell 7** に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓と Git Bash は、各項のリードに従う
+> - conhost の窓で複数行を右クリックで貼るときは、使う版の PSReadLine の Ctrl+Enter が `AddLine` に割り当てられ、貼った行が順番どおりに 1 つの入力になることを前提にする。未設定の窓では Ctrl+V で貼る
 
 - どの項も単独で通せる。目的の項のリードの前提を先に満たす
-- ほかの手順書の項を前提にする項がある（各項のリードの前提からリンクで開く）。AlmaLinux 10 は[Homebrew](almalinux-setup.md#homebrew)（オフラインのホストは[Homebrew のオフライン導入](almalinux-setup.md#homebrew-のオフライン導入)）、Windows 11 は[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)・[アプリを入れる](windows-setup.md#アプリを入れる)（scoop・PowerShell 7）・[Git for Windows](windows-setup.md#git-for-windows)
+- ほかの手順書の項を前提にする項がある（各項のリードの前提からリンクで開く）。AlmaLinux 10 は[Homebrew](almalinux-setup.md#homebrew)（オフラインのホストは[Homebrew のオフライン導入](almalinux-setup.md#homebrew-のオフライン導入)）、Windows 11 は[scoop](https://scoop.sh/)・[PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)・[Git for Windows](https://gitforwindows.org/)を導入し、Microsoft Store のアプリの更新を済ませてある
 - bash のブロックは、ブラケットペーストの効く端末（GNOME の端末・WezTerm・SSH の先）に貼り、貼った後に Enter を押す
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - 新しい端末では、使う項の変数の手順を貼り直す
@@ -1666,7 +1666,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 窓の名前に「管理者:」が付いていないことを確かめる
 
 1. HackGen がまだ入っていないことを確かめる。
@@ -1723,7 +1723,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
    - `HackGen` のフォントの登録が 4 行出ればよい
    - `中断:` で始まるエラーが出たら、そこで止まっている
-   - アプリで使えるのは、[WSL と再起動](windows-setup.md#wsl-と再起動)の手順 3 の再起動の後（確かめるのは[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 5）
+   - アプリで使えるのは、[再起動](windows-setup.md#再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 4）
 
 #### HackGen Console NF を上げる
 
@@ -1734,7 +1734,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. HackGen の新しい版が出ているかを確かめる。
 
@@ -1777,7 +1777,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 新しい版にするときだけ、直した導入の手順で入れ直し、版を確かめる。
 
    - 直した[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 を貼る
-   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 5 で確かめる
+   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 4 で確かめる
 
 <details id="windows-11-で-hackgen-console-nf-を入れる-の補足と注意点">
   <summary>Windows 11 で HackGen Console NF を入れる の補足と注意点</summary>
@@ -1846,7 +1846,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### Windows Terminal のフォントと貼り付けの警告を変える
 
 - Windows Terminal のフォントを HackGen にし、必要なら複数行の貼り付けの警告を切る
-- 前提: [Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)を通し、サインインし直してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）
+- 前提: [Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)を通し、サインインし直してある。Windows Terminal が入り、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows Terminal の PowerShell 7 のタブ。この項の手順 1 で開く
 
 - **この項の手順 5 は Windows Terminal の設定の画面で行う**
@@ -1861,7 +1861,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない Windows Terminal の PowerShell 7 のタブを開く。
 
    - スタートメニューで「Windows Terminal」を開き、タブのメニューから「PowerShell」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. Windows Terminal の設定ファイルを控え、今のフォントと警告の値を確かめる。
 
@@ -1963,7 +1963,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない Windows Terminal の PowerShell 7 のタブを開く。
 
    - スタートメニューで「Windows Terminal」を開き、タブのメニューから「PowerShell」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 設定ファイルの最上位の `copyOnSelect` を `true` にする。
 
@@ -1991,14 +1991,14 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 #### Windows Terminal で複数行を 1 つの入力として貼る
 
 - Windows Terminal に貼った複数行を 1 つの入力にするため、Enter の割り当てをプロファイルに足す。ほかの手順書の PowerShell のブロックは、この項を通した窓に貼る前提で書いてある
-- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある。Windows Terminal が入っている（[Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)で更新する）
+- 前提: 使う版のユーザープロファイルが存在して読み込め、PSReadLine の Ctrl+Enter が `AddLine` に割り当てられている。Windows Terminal が入り、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3・4 は、Windows Terminal の新しいタブ
 - 同じプロファイルを読む窓すべてに効く（管理者の窓も）。構文エラーがあれば全体が動かない
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 7 と、既にある 5.1 のプロファイルの末尾に Enter の割り当てを足す。
 
@@ -2036,9 +2036,9 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    ```
 
    - `Enter` の行に `PasteAwareEnter` が出ればよい
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
-   - 出なければ、この項の手順 2 と、7 の実行ポリシー（[アプリを入れる](windows-setup.md#アプリを入れる)の手順 9）を確かめる
-   - 5.1 でも使うなら、新しい「Windows PowerShell」のタブでも同じ 1 行を貼る。出なければ、5.1 のプロファイルと実行ポリシー（[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 4）を確かめる
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
+   - 出なければ、この項の手順 2 と、7 の実行ポリシーがプロファイルを読み込める設定かを確かめる
+   - 5.1 でも使うなら、新しい「Windows PowerShell」のタブでも同じ 1 行を貼る。出なければ、5.1 のプロファイルと、それを読み込める実行ポリシーかを確かめる
 
 1. 同じタブに右クリックで貼って Enter を押し、1 つの入力として動くことを確かめる。
 
@@ -2093,7 +2093,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **[Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 3: フォント**
 
 - `profiles.defaults.font.face`。既定は `Cascadia Mono`（見つからなければ Consolas）、大きさは 12（WezTerm の自分用の設定も 12）
-- 「表示と入力」の手順 7 で既定の端末にしたので、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
+- [Windows 11 のセットアップの「表示と入力」の手順 6](windows-setup.md#表示と入力)で既定の端末にしたので、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
 - 管理者として開いた窓（conhost）のフォントは、`HKCU\Console` などの別の設定で、この節では扱わない
 - hackgen.md は自分のユーザーのフォントに入れ、パッケージのアプリ向けに読み取りの権限（`S-1-15-2-1`・`S-1-15-2-2`）を足す。MSIX の Windows Terminal から見えるかは確かめていない
 - 見つからないと、設定の画面に「見つからないフォント:」、端末に「次のフォントが見つかりません: …」が出る（`Resources.resw` の日本語の訳）
@@ -2167,13 +2167,13 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### Windows 11 で WezTerm を入れる
 
 - WezTerm nightly と、必要な Visual C++ ランタイムを PC 全体に入れる
-- 前提: [Microsoft Store の更新](windows-setup.md#microsoft-store-の更新)を通し、winget が使える
+- 前提: [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)が使え、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
 
 1. 管理者の PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - ユーザーアカウント制御（UAC）の確認は「はい」
 
 1. 管理者であることと、今の WezTerm と `VCRUNTIME140.dll` があるかを確かめる。
@@ -2357,13 +2357,13 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### Git Bash と WezTerm の設定
 
 - Git の共通設定・共通の bash 設定と、自分用の WezTerm の設定を入れる
-- 前提: [Git for Windows](windows-setup.md#git-for-windows)・[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)を通してある。導入後に Windows を再起動するか、サインアウトしてサインインし直し、PATH を読み直してある。GitHub のアカウントがある
+- 前提: [Git for Windows](https://gitforwindows.org/)・[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)を通してある。導入後に Windows を再起動するか、サインアウトしてサインインし直し、PATH を読み直してある。GitHub のアカウントがある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3 からは Git Bash の窓、最後は WezTerm の Git Bash のタブ
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. Git for Windows の git の場所と版と、Git Bash があることを確かめる。
 
@@ -2555,7 +2555,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 #### WezTerm のシェル統合を WSL で使う
 
 - WSL の bash で Windows 側の WezTerm のシェル統合を読む
-- 前提: [Windows 11 で WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)・[WSL の AlmaLinux 10](windows-setup.md#wsl-の-almalinux-10)と、WSL 側の[共通の bash 設定](#共通の-bash-設定)を通してある
+- 前提: [Windows 11 で WezTerm の設定を導入する](#windows-11-で-wezterm-の設定を導入する)・[WSL の AlmaLinux 10](https://wiki.almalinux.org/documentation/wsl.html)と、WSL 側の[共通の bash 設定](#共通の-bash-設定)を通してある
 - 実行場所: この PC のデスクトップの WezTerm の WSL の bash のタブ。この項の手順 1 で開く
 - WSL の `~/.bashrc` の既存の変更を確かめ、Windows 側の統合を共通の bash 設定の読み込み行より後ろで読む
 
@@ -2717,7 +2717,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 5: Git for Windows の長いパス対応**
 
 - `core.longpaths=true` は Git for Windows の C で実装されたコマンドの長いパス対応を有効にする。初期設定の clone より前に、自分のユーザーの `global` に設定する
-- [PC 全体の設定](windows-setup.md#pc-全体の設定)の手順 6 の `LongPathsEnabled=1` とは別の設定。Windows の一般的な長いパス対応には、OS 側の値に加えてアプリ側の対応も必要
+- Windows 側の `LongPathsEnabled=1` とは別の設定。Windows の一般的な長いパス対応には、OS 側の値に加えてアプリ側の対応も必要
 - Git for Windows の公式資料は、スクリプトで実装された Git のコマンドや、エクスプローラー・IDE などには制限が残ると説明している。この設定だけで周辺ツールも長いパスを扱えるとは限らない
 - リポジトリの `local` は `global` より優先される。ホームでの設定確認に加え、既存のリポジトリでは有効な値と出どころを確かめる
 - `--global --includes` で、`global` のファイルが読み込む別の設定も含めて判定する。真偽値がすでに `true` なら書き換えず、元の表記と設定ファイルを保つ
@@ -2788,13 +2788,13 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### シェルのツールを入れる
 
 - scoop で fzf・zoxide・starship・eza・bat を入れ、Git Bash で確かめる
-- 前提: [アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)を通し、scoop と Git・共通の bash 設定を入れてある。Visual C++ ランタイムも[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)で入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 7・8 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 管理者ではないことと、前提と、ほかの方法で入れた同じツールが無いかを確かめる。
 
@@ -2813,8 +2813,8 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    ```
 
    - `PowerShell : 7.…`・`Admin : False`・`BashConfig : True`・`VCRuntime : True` ならよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` が空なら、先に[アプリを入れる](windows-setup.md#アプリを入れる)の手順 2・3 を通す
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](windows-setup.md#git-for-windows)を通す
+   - `Scoop` が空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
+   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](https://gitforwindows.org/)を通す
    - `BashConfig : False` なら、先に[Git Bash と WezTerm の設定](#git-bash-と-wezterm-の設定)の手順 6 を通す
    - `VCRuntime : False` なら、[Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、このブロックを貼り直す
    - `C:\Users\<WIN_USER>\scoop\` の下の `shims\<名前>.exe` と `apps\starship\current\starship.exe` だけなら、scoop で入れたもの（この項の手順 4 は、入っているものを飛ばす）
@@ -2848,7 +2848,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    - `zoxide` の `is already installed.` は正常
    - `zoxide` の `is already held.` は正常
    - `Notes` の starship のプロファイル追記と、`suggests installing` の VC++ ランタイム・less の導入は行わない
-   - **zoxide は 0.9.9 に固定する**。0.10.0 は Git Bash の移動を記録しない。修正版は[更新](windows-setup.md#scoopwingetwsl-を上げる)の手順 7・8、ほかのツールは同じ項の手順 2・3 で上げる
+   - **zoxide は 0.9.9 に固定する**。0.10.0 は Git Bash の移動を記録しない。修正版は[更新](windows-setup.md#scoopwingetwsl-を上げる)の手順 6・7、ほかのツールは同じ項の手順 2・3 で上げる
    - `scoop update` は `Scoop was updated successfully!` を出す（Git for Windows より前に scoop を入れた PC では、初めてのときに `Converting 'main' bucket to git repo...` も出る）
 
 1. 版と場所と、zoxide を止めたことを確かめる。
@@ -3040,7 +3040,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - **版の指定と止め方**（Scoop v0.6.0 のソース）
   - `scoop install zoxide@0.9.9` は、バケットの今の定義と版が違うと、バケットの git の履歴から `0.9.9` の定義を探し（`git log --follow -n 1 -G …` で見つけたコミットと、その親）、`~\scoop\workspace\zoxide.json` に書いてから入れる（v0.6.0 の #6370）。見つからなければ `WARN` の行を出して、定義の `autoupdate` で作る
   - 履歴を探すのは、main のバケットが git のリポジトリのときだけ（`lib/manifest.ps1` の `Find-HistoricalManifestInGit`）。そうでなければ `WARN  Bucket 'main' is not a git repository. Cannot search historical versions.` を出して `autoupdate` に移り、hash はバケットの履歴の定義のものではなく、そのときに取ったものになる。`autoupdate` も失敗すると、`Could not install: zoxide@0.9.9` で止まる
-  - 本書の「アプリを入れる」の手順 2・3 は Git for Windows より前に scoop を入れるので、main のバケットは zip で置かれる（ScoopInstaller/Install の `install.ps1`）。git の形になるのは、最初の `scoop update`（`scoop-update.ps1` の `Sync-Bucket` の `Converting 'main' bucket to git repo...`）。`scoop install` が自分で `scoop update` を動かすのは、前の更新から 3 時間たったとき（`is_scoop_outdated`）だけなので、[シェルのツールを入れる](#シェルのツールを入れる)の手順 4 の先頭で `scoop update` を貼る
+  - Git for Windows を入れる前に scoop を導入した場合、main のバケットは zip で置かれる（ScoopInstaller/Install の `install.ps1`）。git の形になるのは、最初の `scoop update`（`scoop-update.ps1` の `Sync-Bucket` の `Converting 'main' bucket to git repo...`）。`scoop install` が自分で `scoop update` を動かすのは、前の更新から 3 時間たったとき（`is_scoop_outdated`）だけなので、[シェルのツールを入れる](#シェルのツールを入れる)の手順 4 の先頭で `scoop update` を貼る
   - main のバケットでは、`73b1eafab`（2026-01-31）で 0.9.9 に、`f8683b6ce`（2026-07-04）で 0.10.0 になった。`f8683b6ce` の親の定義が 0.9.9
   - こうして入れたものは、`install.json` に `bucket` が無く、`url` が `workspace` の定義を指す。`scoop status` と `scoop update` は、その定義の版（0.9.9）を最新とみなすので、それだけでも上がらない。`scoop list` の `Source` は `<auto-generated>`
   - そのうえで `scoop hold` を付けた（`install.json` に `hold` を書く）。`scoop list` の `Info` が `Held package` になり、止めてあることが見える。`scoop update * --force` でも、止めたものは上げない
@@ -3050,7 +3050,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - 同じ 0.9.9 がもう入っていると、`'zoxide' (0.9.9) is already installed.` の警告の後の `continue`（`scoop-install.ps1` の `ForEach-Object` の中で、囲むループが無い）が `bin/scoop.ps1` の `switch` まで抜け、同じ行のほかの名前を入れずに終わる。そのため、[シェルのツールを入れる](#シェルのツールを入れる)の手順 4 では zoxide だけを別の `scoop install` にした
   - 版を指定しない名前を並べたとき（[シェルのツールを入れる](#シェルのツールを入れる)の手順 4 の `scoop install fzf starship eza bat`）は、もう入っているものを `prune_installed` で飛ばす。`'<名前>' (<版>) is already installed. Skipping.` の警告は出ない（`Get-Dependency` が名前を `main/<名前>` の形に変えるので、警告を出す前の、指定した名前との突き合わせに当たらない）
   - 名前を 1 つだけ渡したときは、もう入っていれば `'<名前>' (<版>) is already installed.` と `Use 'scoop update <名前>' to install a new version.` の警告を出して終わる（`$apps.length -eq 1` の分かれ）
-  - [scoop・winget・WSL を上げる](windows-setup.md#scoopwingetwsl-を上げる)の手順 8 で、先に main のバケットの `bucket\zoxide.json` の版を見るのは、`scoop update zoxide --force` が Releases ではなく、main のバケットの今の定義を入れるため（`update` の `$pin_broken` から `Find-AppBucket`）。バケットの定義は、Releases に出てから自動の更新で上がるまで遅れる。0.10.0 のまま上げると、止めるのをやめた 0.10.0 になる
+  - [scoop・winget・WSL を上げる](windows-setup.md#scoopwingetwsl-を上げる)の手順 7 で、先に main のバケットの `bucket\zoxide.json` の版を見るのは、`scoop update zoxide --force` が Releases ではなく、main のバケットの今の定義を入れるため（`update` の `$pin_broken` から `Find-AppBucket`）。バケットの定義は、Releases に出てから自動の更新で上がるまで遅れる。0.10.0 のまま上げると、止めるのをやめた 0.10.0 になる
 - **VC++ ランタイム**: 5 つの Windows の実行ファイル（x64）の DLL の読み込みの表（PE のインポート表）で、`VCRUNTIME140.dll` を使うのは bat だけだった
   - fzf（Go）は `kernel32.dll` だけ。zoxide と starship は MSVC のビルドだが、C のランタイムを静的にリンクする（zoxide の `.cargo/config.toml`、starship の `release.yml` の `+crt-static`）。eza は MinGW のビルドで、Windows に付いている `msvcrt.dll` を使う
   - bat の定義の `suggest` は、extras の `vcredist2022` と `less` を勧める表示だけで、入れはしない。本書では [Windows 11 で WezTerm を入れる](#windows-11-で-wezterm-を入れる)の手順 3（winget の `Microsoft.VCRedist.2015+.x64`、PC 全体）を前提にした。starship の定義の `suggest`（`vcredist2022`）は、入れなくてよい
@@ -3161,7 +3161,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### PowerShell 7 のプロファイルを設定する
 
 - PowerShell 7 に貼り付け・↑/↓ の履歴検索と、導入済みの zoxide・starship を読む設定を足す
-- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を通してある
+- 前提: [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)を導入してあり、使う版のユーザープロファイルが存在して読み込め、PSReadLine の Ctrl+Enter が `AddLine` に割り当てられている
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 6 は PowerShell 7 の窓
 - 対象は PowerShell 7 のプロファイル（Windows PowerShell 5.1 とは別）
 - zoxide と starship は、入れていなければ読まない。入れた後に PowerShell 7 を開き直せば読む
@@ -3169,7 +3169,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. PowerShell 7 のプロファイルに、貼り付けと履歴の検索のキーと、zoxide・starship を読む行を足す。
 
@@ -3234,7 +3234,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    - 次のとおりならよい
      - 実行ポリシーの表の `LocalMachine` か `CurrentUser` が `RemoteSigned`
      - キーの表の `Ctrl+Enter` が `AddLine`、`UpArrow` が `HistorySearchBackward`、`DownArrow` が `HistorySearchForward`（この項の手順 3 を行ったなら、`Tab` が `MenuComplete`）
-   - `pwsh.exe` が見つからない旨が出たら、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を確かめる
+   - `pwsh.exe` が見つからない旨が出たら、[PowerShell 7 の導入](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)と PATH を確かめる
    - 実行ポリシーがどれも `Undefined` なら、プロファイルは読まれず、キーは既定のまま（`Ctrl+Enter` が `InsertLineAbove`）。そうでなければ、この項の手順 5 は飛ばす
 
 1. 実行ポリシーがどれも `Undefined` のときだけ、PowerShell 7 の CurrentUser を RemoteSigned にする。
@@ -3249,7 +3249,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. スタートメニューから PowerShell 7 を開き、キーとプロンプトを確かめる。
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く（一覧の名前に 7 は付かないことがある）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 何か打ってから ↑ を押すと、打った文字で始まる履歴だけが出る
    - 打っている途中に、履歴からの候補が薄い文字で出る（PowerShell 7 の既定の予測。→ で受け入れ、F2 で一覧の表示に切り替わる）。[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)を通してあれば一覧で出る
    - starship を入れていればプロンプトが starship の形になり、zoxide を入れていれば `z` が使える
@@ -3268,7 +3268,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. PowerShell 7 のプロファイルに、モードとキーの 2 行を入れる。
 
@@ -3342,7 +3342,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
    - 「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
 1. 新しい PowerShell 7 で、モードとキーを確かめる。
@@ -3379,7 +3379,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - プロファイルは PowerShell 7 の `$PROFILE`（CurrentUserCurrentHost）で、ドキュメントの既知のフォルダーの下の `PowerShell\Microsoft.PowerShell_profile.ps1`（`CorePsPlatform.cs`・about_Profiles）。書き先を明示するため、`[Environment]::GetFolderPath('MyDocuments')` で求める。PowerShell はプロファイルを自分では作らない。MSIX の PowerShell 7 は、全ユーザーのプロファイル（`$PSHOME`）を使えない
 - Ctrl+Enter: PowerShell 7.5 の PSReadLine 2.3.6 と、7.6 の 2.4.5 も、Windows モードの Ctrl+Enter は `InsertLineAbove`（`KeyBindings.cs`）
-  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（「表示と入力」の手順 7 の補足）、右クリックで貼ると 5.1 と同じく行が逆順になるはず
+  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（[Windows 11 のセットアップの「表示と入力」の手順 6](windows-setup.md#表示と入力)の補足）、Ctrl+Enter が `AddLine` に割り当てられていなければ、右クリックで貼ると 5.1 と同じく行が逆順になるはず
   - Windows Terminal は、貼るときに LF を CR に直す（`ControlCore::PasteText`）ので起きない。WezTerm（Windows では、貼るときに改行を CRLF に直す）は確かめていない
 - ↑/↓: `HistorySearchBackward`・`HistorySearchForward`（既定は F8・Shift+F8 に割り当て）。[共通の bash 設定](#共通の-bash-設定)の `~/.inputrc` の `history-search-backward` と同じく、打った文字で始まる履歴だけを出す
   - `-HistorySearchCursorMovesToEnd` は付けない（既定の False で、カーソルは打った文字の後ろに残る。bash と同じ）。Microsoft の `SamplePSReadLineProfile.ps1` は付けている
@@ -3407,7 +3407,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 3: Tab の一覧**
 
 - 既定の Tab は、候補を 1 つずつ入れ替える
-- 一覧を出す既定のキーの Ctrl+Space は、[「表示と入力」](windows-setup.md#表示と入力)の手順 8 で IME が受け取るので、Tab がその代わりになる
+- IME に Ctrl+Space を割り当てている場合、一覧を出す既定のキーを IME が受け取るので、Tab がその代わりになる
 
 **[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 4: 子のプロセスで確かめる形と実行ポリシー**
 
@@ -3416,7 +3416,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 - 結果は、子の pwsh で `Out-String` にして文字列で受け取る。5.1 でオブジェクトのまま受け取ると、最初に届いた実行ポリシーの列で表を作るので、キーの行が空になる
   - `-Width 120` を付けるのは、子が端末の幅を取れないと、`Out-String` が空の行だけを返すため
 - `-NoProfile` でも `$PROFILE` は設定される（`ConsoleHost.cs`）ので、`. $PROFILE` で読む
-- Windows 版の PowerShell 7 は、`$PSHOME\powershell.config.json` に `RemoteSigned` を持って配られ、これが `LocalMachine` の値になる（`build.psm1`。MSIX の `$PSHOME` にもあるかは推測）。「貼り付けの設定」の手順 4 の 5.1 の値（レジストリ）は効かない
+- Windows 版の PowerShell 7 は、`$PSHOME\powershell.config.json` に `RemoteSigned` を持って配られ、これが `LocalMachine` の値になる（`build.psm1`。MSIX の `$PSHOME` にもあるかは推測）。Windows PowerShell 5.1 の実行ポリシーの値（レジストリ）は効かない
 - すべてが `Undefined` なら `Restricted` になり、プロファイルが読まれない。そのときだけ、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 5 で `CurrentUser` を `RemoteSigned` にする（`Documents\PowerShell\powershell.config.json` に書かれる）。MSIX では `LocalMachine` に書けない
 - `Set-ExecutionPolicy` に `-Force` を付けるのは、確認の問いで止まらないようにするため
 - UniGet UI は scoop を `-NoProfile -ExecutionPolicy Bypass` で動かすので、このプロファイルと実行ポリシーに依らない
@@ -3445,7 +3445,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
   - プロファイルは、5.1 に貼る項で使う管理者の conhost の窓でも読まれ、キーや補完にも効く
   - starship と zoxide は 5.1 に足さない。見た目と起動の時間が変わる
 - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: 各手順書の AlmaLinux 10 の実施手順と共通の bash 設定を、WSL の中で通す
-- **Windows Terminal の既定のプロファイルは Windows PowerShell のまま**: 手順書は、各項でスタートメニューから指定の窓を開き、Windows Terminal の項ではタブを選ぶ。貼る窓は既定のプロファイルに頼らないので、この設定は変えない。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。「Microsoft Store の更新」の手順 1 の窓で Windows Terminal が先に設定を作るので、「アプリを入れる」の手順 6 の後も既定は Windows PowerShell のままのはず（コードからの推測）
+- **Windows Terminal の既定のプロファイルは変えない**: 手順書は、各項でスタートメニューから指定の窓を開き、Windows Terminal の項ではタブを選ぶ。貼る窓は既定のプロファイルに頼らないので、この設定は変えない。PowerShell 7 は実行ポリシーとプロファイルも別に持つ。
 
 | 項目 | 採った方法 | 採らなかった方法と理由 |
 |---|---|---|
@@ -3466,12 +3466,12 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### Windows PowerShell 5.1 のキー操作を変える
 
 - 任意で、Windows PowerShell 5.1 を Emacs モードにし、Ctrl+V と ↑/↓ の履歴検索を割り当てる
-- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 を通してある
+- 前提: 使う版のユーザープロファイルが存在して読み込め、PSReadLine の Ctrl+Enter が `AddLine` に割り当てられている
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。この項の手順 3・4 は新しい Windows PowerShell（5.1）の窓
 - 対象は Windows PowerShell 5.1 の自分のユーザーのプロファイル
 - 足す 4 行は、Ctrl+Enter などのキーの割り当てより前、先頭の宣言より後に入れる
-- Ctrl+V は `Paste` を割り当て直す。複数行を作る Ctrl+Enter は、貼り付けの設定の `AddLine` のまま
-- conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、文字をキーとして送る。LF は Ctrl+Enter として届くので、[貼り付けの設定](windows-setup.md#貼り付けの設定)の Ctrl+Enter の `AddLine` の行が、この項の EditMode の行より後に残っている必要がある（この項の手順 2 は、その順に入れる）。Emacs モードの窓に右クリックで貼ることは、実機では確かめていない（[Windows PowerShell 5.1 のキー操作を変える の補足と注意点](#windows-powershell-51-のキー操作を変える-の補足と注意点)の「Windows PowerShell 5.1 のキー操作を変えるの手順 2: 適用範囲と貼り付け」）
+- Ctrl+V は `Paste` を割り当て直す。複数行を作る Ctrl+Enter は、既存の `AddLine` のまま
+- conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、文字をキーとして送る。LF は Ctrl+Enter として届くので、Ctrl+Enter を `AddLine` にする既存の行が、この項の EditMode の行より後に残っている必要がある（この項の手順 2 は、その順に入れる）。Emacs モードの窓に右クリックで貼ることは、実機では確かめていない（[Windows PowerShell 5.1 のキー操作を変える の補足と注意点](#windows-powershell-51-のキー操作を変える-の補足と注意点)の「Windows PowerShell 5.1 のキー操作を変えるの手順 2: 適用範囲と貼り付け」）
 
 > [!WARNING]
 > - この項の手順 2 で変えるプロファイルは、5.1 に貼る項で使う管理者の conhost の窓や、プロファイルを読む 5.1 の SSH のセッションにも効く。
@@ -3569,7 +3569,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    ```
 
    - `Emacs` と、`Ctrl+v` の `Paste`・`Ctrl+Enter` の `AddLine`・`UpArrow` の `HistorySearchBackward`・`DownArrow` の `HistorySearchForward` が出ればよい
-   - 出なければ、この項の手順 2 と[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 3〜5 を確かめる
+   - 出なければ、この項の手順 2 と、プロファイルを読み込める実行ポリシーか、Ctrl+Enter の `AddLine` の行がモードの変更より後にあるかを確かめる
 
 <details id="windows-powershell-51-のキー操作を変える-の補足と注意点">
   <summary>Windows PowerShell 5.1 のキー操作を変える の補足と注意点</summary>
@@ -3577,8 +3577,8 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **注意点**
 
 - **Windows PowerShell 5.1 のキーは、5.1 に貼る項で使う管理者の conhost の窓にも効く**: 任意の[Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)で変える。先に全ユーザーのプロファイルが付けたキーも EditMode で既定に戻る
-  - Ctrl+V は `Paste`、Ctrl+Enter は[貼り付けの設定](windows-setup.md#貼り付けの設定)の `AddLine` を使う
-  - conhost の右クリックの貼り付けは、LF を Ctrl+Enter として送る。貼り付けの設定の `AddLine` の行が、EditMode の行より後に残っている必要がある（任意の項の手順 2 は、その順に入れる）。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
+  - Ctrl+V は `Paste`、Ctrl+Enter は既存の `AddLine` を使う
+  - conhost の右クリックの貼り付けは、LF を Ctrl+Enter として送る。既存の Ctrl+Enter の `AddLine` の行が、EditMode の行より後に残っている必要がある（任意の項の手順 2 は、その順に入れる）。Emacs モードでの右クリックと複数行の貼り付けは、実機では確かめていない
 
 **[Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)のリード**
 
@@ -3594,12 +3594,12 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - 5.1 の CurrentUserCurrentHost は、ドキュメントの既知のフォルダーの下の `WindowsPowerShell\Microsoft.PowerShell_profile.ps1`。通常の窓と、同じユーザーで開いた管理者の conhost の窓の両方で読まれる
 - プロファイルは、全ユーザー・全ホスト → 全ユーザー・現在のホスト → 現在のユーザー・全ホスト → 現在のユーザー・現在のホストの順に読まれる（[about_Profiles](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-5.1#profile-types-and-locations)）。先に読まれた `$PSHOME\profile.ps1` などが付けたキーも、EditMode を変えると既定に戻る
-- 書く順は Emacs → Ctrl+V の `Paste` → ↑↓ の履歴検索 → 既存のキーの行。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 5 の Ctrl+Enter の `AddLine` は、後から読むので残る
+- 書く順は Emacs → Ctrl+V の `Paste` → ↑↓ の履歴検索 → 既存のキーの行。既存の Ctrl+Enter の `AddLine` の行は、後から読むので残る
 - 挿入する位置、印の無い EditMode が後ろにあるときの中断、バイトを保った書き込みは、[PowerShell 7 で Emacs モードを使う](#powershell-7-で-emacs-モードを使う)の手順 2 と同じ考え方
 - `if (Get-Module -Name PSReadLine)` で囲み、PSReadLine が読み込まれていない起動では何もしない
 - conhost の右クリックの貼り付けは、PSReadLine の `Paste` を呼ばず、クリップボードの文字をキー入力へ変えて入力バッファへ書く
   - [Clipboard.cpp](https://github.com/microsoft/terminal/blob/main/src/interactivity/win32/Clipboard.cpp)の `Clipboard::Paste` → `StringPaste` → `TextToKeyEvents` → `pInputBuffer->Write`
-  - キーとして届くので、Ctrl+Enter の割り当てには依る。コピーボタンの中身の LF は Ctrl+Enter として届き、Windows モードの既定の `InsertLineAbove` では行が逆順になる（[貼り付けの設定 の補足と注意点](windows-setup.md#貼り付けの設定-の補足と注意点)の「貼り付けの設定の手順 2: 行を足す理由」）。EditMode を変えると、それより前に付けた `AddLine` は消えるので、この項の行は、貼り付けの設定の Ctrl+Enter の行より前に入れる
+  - キーとして届くので、Ctrl+Enter の割り当てには依る。コピーボタンの中身の LF は Ctrl+Enter として届き、Windows モードの既定の `InsertLineAbove` では行が逆順になる。EditMode を変えると、それより前に付けた `AddLine` は消えるので、この項の行は、既存の Ctrl+Enter の `AddLine` の行より前に入れる
   - Emacs モードの管理者の conhost で、右クリックと複数行の貼り付けは実機では確かめていない
 
 **[Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)の手順 4**
@@ -3617,7 +3617,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### PowerShell を開発に使う
 
 - PowerShell 7 と Windows PowerShell 5.1 に開発用の検査・テストのモジュールを入れ、7 のテレメトリと更新の通知を止める
-- 前提: [貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 1〜5 と[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6（PowerShell 7）を通してある。外部コマンドは[シェルのツールを入れる](#シェルのツールを入れる)（fzf・eza・bat・starship）・[git-delta](windows-setup.md#git-delta)・[GitHub CLI](windows-setup.md#github-cli)で入れる
+- 前提: [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)を導入してあり、使う版のユーザープロファイルが存在して読み込め、PSReadLine の Ctrl+Enter が `AddLine` に割り当てられている。外部コマンドは[シェルのツールを入れる](#シェルのツールを入れる)（fzf・eza・bat・starship）・[git-delta](windows-setup.md#git-delta)・[GitHub CLI](windows-setup.md#github-cli)で入れる
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。7 の操作は `pwsh.exe -NoLogo -NoProfile -Command { … }` で行う。この項の手順 8・9 の確認は新しい Windows PowerShell（5.1）の窓
 - 無い外部コマンドの補完と関数は飛ばす。rg・fd は、[Windows 11 で LazyVim の設定を導入する](neovim.md#windows-11-で-lazyvim-の設定を導入する)で入れてあれば対象にする
 - エディターは [Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で設定する
@@ -3625,7 +3625,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 版・モジュール・環境変数と、補完の控えの有無を確かめる。
 
@@ -3648,7 +3648,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    Get-ChildItem -Path "$env:LOCALAPPDATA\PowerShell\completions\*.ps1" -ErrorAction SilentlyContinue | Select-Object Name,Length,FullName | Format-Table -AutoSize
    ```
 
-   - 5.1 と 7 の版、`pwsh.exe` の場所、PSResourceGet の 3 つのコマンドが出ればよい。`pwsh.exe` が無いときは、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6 を確かめる
+   - 5.1 と 7 の版、`pwsh.exe` の場所、PSResourceGet の 3 つのコマンドが出ればよい。`pwsh.exe` が無いときは、[PowerShell 7 の導入](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)と PATH を確かめる
    - モジュールの名前・版・`ModuleBase` と、2 つの環境変数の値を控える
    - 補完の控えがあれば、名前と大きさが出る。[PowerShell 7 のプロファイルに開発の設定を足す](#powershell-7-のプロファイルに開発の設定を足す)の手順 2 は、同じ名前の控えを作り直す（上書きする）
    - モジュールや控えが無いときは、その一覧には何も出ない
@@ -3710,7 +3710,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
 1. 新しい PowerShell 7 で、モジュールと環境変数を確かめる。
@@ -3765,7 +3765,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 入っている道具の補完を生成し、UTF-8 の控えのファイルに保存する。
 
@@ -3852,7 +3852,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. スタートメニューから、新しい PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - 日本語のコミットがあるローカルの Git リポジトリへ `Set-Location` で移る
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
@@ -4019,7 +4019,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
    }
    ```
 
-   - [PC 全体の設定](windows-setup.md#pc-全体の設定)の手順 4 と同じく、GitHub のコピーボタンでコピーし、右クリックで貼る。最後の `}` で Enter を押す
+   - GitHub のコピーボタンでコピーし、右クリックで貼る。最後の `}` で Enter を押す
    - `1 行目`・`2 行目`・`3 行目`・`入れ子の行` の順に出て、版が `2.4.5`、`Ctrl+Enter` が `AddLine`、予測の元が `History` ならよい
    - [Windows PowerShell 5.1 のキー操作を変える](#windows-powershell-51-のキー操作を変える)を通してあれば、`Ctrl+v` が `Paste`、↑/↓ が `HistorySearchBackward`・`HistorySearchForward` のままであることも確かめる
    - 5.1 に貼る項で使う管理者の窓と 5.1 の SSH を使う場合は、それぞれ新しい窓・セッションでも版と貼り付けを確かめる。うまく貼れなければ、この項の手順 6・7 で戻す
@@ -4028,7 +4028,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
    - この項の手順 1 の窓、管理者の窓、5.1 の SSH のセッションも閉じる。5.1 の窓は、開いている間 2.4.5 の DLL を使い続けるので、その版のフォルダーを消せない
    - スタートメニューで「PowerShell」を探し、「Windows PowerShell」ではない「PowerShell」（PowerShell 7）をクリックして開く
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
    - **次の手順は、新しく開いた PowerShell 7 の窓に貼る**
 
 1. この項の手順 6 を行ったときだけ、新しい PowerShell 7 で、この項で保存した PSReadLine 2.4.5 の版のフォルダーだけを、名前を変えてから消す。
@@ -4066,7 +4066,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 管理者ではない PowerShell 7 を開く。
 
    - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[アプリを入れる](windows-setup.md#アプリを入れる)の手順 6〜9 を通す
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
 
 1. 補完の設定を行ったときは、入っている道具の補完の控えを作り直す。
 
@@ -4215,7 +4215,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - `POWERSHELL_TELEMETRY_OPTOUT=1` と `POWERSHELL_UPDATECHECK=Off` は、ユーザーの環境変数に置く。PowerShell の起動時に使うので、プロファイルには書かない
 - ほかの値があれば止める形は、[Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)と同じ
-- 設定アプリの「詳細設定」→「PowerShell」のスイッチは実行ポリシーを RemoteSigned にするもの。[貼り付けの設定](windows-setup.md#貼り付けの設定)の手順 4 と、[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 5 で扱う
+- 設定アプリの「詳細設定」→「PowerShell」のスイッチは実行ポリシーを RemoteSigned にするもの。5.1 ではプロファイルを読み込める実行ポリシーが必要で、7 では[PowerShell 7 のプロファイルを設定する](#powershell-7-のプロファイルを設定する)の手順 5 で扱う
 
 **[PowerShell を開発に使う](#powershell-を開発に使う)の手順 8: 5.1 にする理由**
 
