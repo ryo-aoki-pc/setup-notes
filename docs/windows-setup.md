@@ -4,7 +4,7 @@
 
 > [!IMPORTANT]
 > - **この PC のデスクトップで、Administrators のユーザーが行う**。別の PC や SSH・RDP で行う操作は、各項の実行場所に従う
-> - PowerShell のブロックは **PowerShell 7** に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。複数行は、[「Windows Terminal で複数行を 1 つの入力として貼る」](shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
+> - PowerShell のブロックは **PowerShell 7** に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。複数行は、貼った全体が 1 つの入力になり、Enter で実行する設定の窓に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者・通常の窓は、各項のリードに従う
 > - conhost の窓で複数行を右クリックで貼るときは、使う版の PSReadLine の Ctrl+Enter が `AddLine` に割り当てられ、貼った行が順番どおりに 1 つの入力になることを前提にする。未設定の窓では Ctrl+V で貼る
 
 - 新しく入れた PC では、カテゴリを上から順に、要る項を選んで通す
@@ -14,7 +14,7 @@
 - GitHub のコピーボタンでコピーしたブロックは末尾に改行が無いので、貼った後に Enter を押す
 - 設定を更新するときは[更新](#更新)を使う
 - 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で作って使う
-- フォント（HackGen Console NF）・Windows Terminal・WezTerm・Git Bash と共通の bash 設定・シェルのツール・PowerShell 7 のプロファイル・PowerShell の開発の設定は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で整える
+- フォント・共通の bash 設定・WezTerm の設定・PowerShell の開発の設定の更新は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)を参照する
 - Neovim と Samba のクライアントは、[Neovim のセットアップ](neovim.md#windows-11-で使う)と[Samba のセットアップ](samba.md#windows-11-で使う)の「Windows 11 で使う」で入れる
 
 <details id="この文書の補足と注意点">
@@ -50,7 +50,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 
 ## デスクトップ
 
-- ホットキー競合と、HackGen Console NF を入れた後の再起動とフォントの確認。フォントの導入と Windows Terminal の設定は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)で行う
+- アプリと Windows のホットキーの競合を調べる
 
 ### Windows のホットキー競合
 
@@ -380,63 +380,6 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 
 ---
 
-### 再起動
-
-- HackGen Console NF をアプリで使えるようにするため、この PC を再起動する
-- 前提: [Windows 11 で HackGen Console NF を入れる](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く
-- この項の手順 2 は、すぐに再起動を始める。保存していない作業は先に保存する
-
-1. 管理者の PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、右クリックして「管理者として実行」を選ぶ（「Windows PowerShell」ではない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-   - UAC の確認で「はい」を押す。窓の名前が「管理者:」で始まる
-
-1. 再起動する。
-
-   ```powershell
-   Restart-Computer
-   ```
-
-   - ほかのユーザーがサインインしていると、エラーで止まる。そのときは、スタートメニューの電源から再起動する
-   - 起動してサインインしてから、後の項へ進む
-
-<details id="再起動-の補足と注意点">
-  <summary>再起動 の補足と注意点</summary>
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### 再起動の後に確かめる
-
-- HackGen Console NF がフォントの一覧に出ることを確かめる
-- 前提: [Windows 11 で HackGen Console NF を入れる](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通し、再起動またはサインアウトしてサインインし直してある
-- 実行場所: この PC のデスクトップ（設定・メモ帳）
-
-1. フォントの一覧で、HackGen Console NF が出ることを確かめる。
-
-   - 設定 → 個人用設定 → フォント を開き、「HackGen」で探すと、`HackGen Console NF` と `HackGen35 Console NF` が出る（どちらも「2 フォント フェイス」）
-   - ライセンス認証していない Windows では、フォントの画面の検索欄が使えないことがある。そのときは一覧をスクロールして探す
-   - メモ帳のフォントの一覧に出ても同じ
-   - 端末のフォントにするなら、アプリの設定にファミリー名 `HackGen Console NF` を書く（WezTerm は `config.font = wezterm.font 'HackGen Console NF'`。自分用の設定（`ryo-aoki-pc/wezterm`）は、もうこのフォントを使う）
-
-<details id="再起動の後に確かめる-の補足と注意点">
-  <summary>再起動の後に確かめる の補足と注意点</summary>
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
 ## ネットワークとリモート操作
 
 - RDP の切断
@@ -582,7 +525,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 ### Windows の OpenSSH クライアント
 
 - Windows と Git の ssh で同じ接続設定と鍵を使い、AlmaLinux 10 のホストにログインする
-- 前提: [Git for Windows](https://gitforwindows.org/)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)も通してある
+- 前提: [Git for Windows](https://gitforwindows.org/)を通してある。つなぐ先の AlmaLinux 10 のホストでは sshd が動き、そのユーザーのパスワードで SSH に入れる（[AlmaLinux 10 のセットアップ](almalinux-setup.md)の標準の Workstation）。WezTerm の起動メニューを試すときは、自分用の WezTerm の設定も入っている
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8 は AlmaLinux 10 のホストの自分のユーザーの端末（bash）
 - Windows で変えるのは、自分のユーザーの `%USERPROFILE%\.ssh` だけ。ホストでは、この項の手順 9 で自分のユーザーの `~/.ssh/authorized_keys` に足す
 - ssh-agent は使わない。鍵にパスフレーズを付けたら、その鍵を使うたびに聞かれる
@@ -999,7 +942,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 ### git-delta
 
 - scoop で delta を入れ、Git の差分表示を設定する
-- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [scoop](https://scoop.sh/)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -1024,7 +967,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
    - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
    - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](https://gitforwindows.org/)
-   - `VCRuntime : True` ならよい。`False` なら、先に [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行い、この窓でこのブロックを貼り直す
+   - `VCRuntime : True` ならよい。`False` なら、先に[Visual C++ 再頒布可能パッケージの公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れ、この窓でこのブロックを貼り直す
    - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。中断し、既存の導入元と設定を確かめる
 
 1. scoop で delta を入れ、版と場所を確かめる。
@@ -1070,7 +1013,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 
 - scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（検証記録の付録（`docs/verification/windows-setup.md` の「git-delta: 付録: Windows 11 の配布物と資料の調査（2026-10-08）」））。無い PC では起動しない
 - scoop の `delta.json` は VC++ ランタイムを入れない（`depends` も `suggest` も無い）。winget の `dandavison.delta` は、依存として `Microsoft.VCRedist.2015+.x64` を持つ
-- 入れ方は新しく書かず、[Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3（管理者の窓の winget。PC 全体）を指す。手順書の並びでは WezTerm を先に入れるので、ふつうはもう入っている
+- Visual C++ ランタイムは、[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れてあることを前提にする
   - 設定の「インストールされているアプリ」では「Microsoft Visual C++ v14 Redistributable (x64)」と出る（前の版で入れた PC では「… 2015-2022 …」）
   - extras のバケットの `vcredist2022`（scoop）でも入るが、extras を足すことになり、入れるときに UAC の確認も出るので採らない
 - 同じ前提は bat・Neovim・yazi にもある。eza（windows-gnu のビルド）と starship・zoxide・fd（CRT を静的にリンク）、gh（Go）には無い
@@ -1125,12 +1068,12 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
   - winget の `dandavison.delta` 0.20.1 も、同じ上流の zip（portable）を同じ sha256 で入れる。違うのは入れ方と上げ方と、VC++ ランタイムを依存として入れるかだけ
   - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
   - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）
-  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)）
+  - 版は固定しない（`scoop hold` しない）
 - **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（この折りたたみの「git-delta の手順 4: 実施手順の手順 1・3 を Git Bash で貼る」）
 - **シェルとの組み込み方**
   - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[git-delta](almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
-  - **PowerShell 7 には補完を足す**。[PowerShell 7 のプロファイルに開発の設定を足す](shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)で、`delta --generate-completion powershell` の出力を控えたファイルから読む。delta を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
+  - PowerShell 7 の補完を設定してあれば、`delta --generate-completion powershell` の出力を控えたファイルから読む。delta を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
   - **Windows PowerShell 5.1 には delta の補完を足さない**。git が読む `~/.gitconfig` の設定は、5.1 から使う git にも効く
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[git-delta](almalinux-setup.md#git-delta)を WSL の中で通す
 - **VC++ ランタイムは前提にした**: この折りたたみの「git-delta の手順 2: VC++ ランタイム」
@@ -1149,7 +1092,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 ### GitHub CLI
 
 - scoop で GitHub CLI を入れ、GitHub にログインする
-- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。GitHub のアカウントがある
+- 前提: [scoop](https://scoop.sh/)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。GitHub のアカウントがある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -1306,7 +1249,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
   - winget の `GitHub.cli` は、先に並ぶのが MSI（`Scope: machine`。`C:\Program Files\GitHub CLI` に入り、UAC が出る）。同じ zip の portable もあるが、採らない
   - 上流の MSI や zip を手で入れる形は、更新が手作業になる
   - scoop は、定義の sha256（上流の `gh_<版>_checksums.txt` と同じ値）で zip を確かめる。`gh.exe` には `GitHub, Inc.` の Authenticode の署名があるが、手順では確かめない
-  - 版は固定しない（`scoop hold` しない）。scoop で止めるのは、Git Bash で移動先を記録しない 0.10.0 を避ける zoxide だけ（[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)）
+  - 版は固定しない（`scoop hold` しない）
 - **`XDG_CONFIG_HOME` は設定しない**: 設定すると、gh の設定の場所が `%XDG_CONFIG_HOME%\gh` に変わり、設定した窓と設定していない窓で、gh が別のログインの一覧を読む
   - Git for Windows の起動スクリプト、自分用の bash 設定、WezTerm の設定は、どれも `XDG_CONFIG_HOME` を設定しない。そのため、Git Bash・PowerShell・cmd の gh は、同じ `%APPDATA%\GitHub CLI` を読む（ソースと設定を読んだだけ）
   - トークンは資格情報マネージャー（ユーザーごと）にあるので、どのシェルからも同じ
@@ -1314,10 +1257,10 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - **シェルとの組み込み方**
   - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
   - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
-  - **PowerShell 7 には補完を足す**: [PowerShell 7 のプロファイルに開発の設定を足す](shell-terminal.md#powershell-7-のプロファイルに開発の設定を足す)で、`gh completion -s powershell` の出力を控えたファイルから読む。gh を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
+  - PowerShell 7 の補完を設定してあれば、`gh completion -s powershell` の出力を控えたファイルから読む。gh を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
   - **Windows PowerShell 5.1 には gh の補完を足さない**。gh の設定とログインは、5.1 からも共通のものを使う
   - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[GitHub CLI](almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
-- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ。bat・delta と違い、[Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を前提にしない
+- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ
 
 **参照**
 
@@ -1330,7 +1273,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### lazygit
 
 - scoop で lazygit を入れ、自分用の設定と起動を確かめる
-- 前提: [scoop の導入](https://scoop.sh/)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)・[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)を通してある
+- 前提: [scoop の導入](https://scoop.sh/)・[git-delta](#git-delta)・[HackGen Console NF](https://github.com/yuru7/HackGen)を導入し、WezTerm の Git Bash と共通の bash 設定が使える
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -1425,7 +1368,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 #### lazygit の設定を導入する
 
 - Windows の lazygit の既存設定を退避し、自分用の設定を入れる
-- 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)も通し、Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](https://github.com/yuru7/HackGen)も通し、Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - lazygit をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
 
@@ -1630,7 +1573,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### yazi
 
 - scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
-- 前提: [scoop の導入](https://scoop.sh/)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある。Visual C++ ランタイムも[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)で入れてある
+- 前提: [scoop](https://scoop.sh/)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
 
 1. 管理者ではない PowerShell 7 を開く。
@@ -1672,7 +1615,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    - `PowerShell : 7.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
    - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
    - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](https://gitforwindows.org/)
-   - `VCRuntime : False` なら、[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3 を管理者の PowerShell 7 で行ってから、この手順を貼り直す
+   - `VCRuntime : False` なら、[Visual C++ 再頒布可能パッケージの公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れてから、この手順を貼り直す
    - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、中断し、既存の導入元と設定を確かめる
    - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きする
 
@@ -1994,8 +1937,8 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 - **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
 - **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
-  - 公式の文書の scoop の一覧（ffmpeg・7zip・jq・poppler・fd・ripgrep・fzf・zoxide・resvg・imagemagick）から zoxide を外した。AlmaLinux 10 の一覧にも無く、AlmaLinux 10 は [シェルのツール](shell-terminal.md#シェルのツール)の手順 1、Windows 11 は [シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)で入れる（Windows の zoxide は、Git Bash での記録の問題があるので、その節で 0.9.9 に止めてある）
-  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[Windows 11 で HackGen Console NF を入れる](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)の HackGen Console NF
+  - scoop の依存ツールの一覧には zoxide を含めない。Git Bash で zoxide 0.9.9 が使えることを前提にする
+  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[HackGen](https://github.com/yuru7/HackGen)の HackGen Console NF
   - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。検証記録の付録（`docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））
     - そのため、[yazi](#yazi)の手順 4 は、[yazi](#yazi)の手順 2 を貼っていない窓では止める
 - **`file` は、Git for Windows の `usr\bin\file.exe` を `YAZI_FILE_ONE` で渡す**
@@ -2005,10 +1948,10 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
     - Lua の `Command` は、`yazi-binding/src/process/command.rs` の `tokio::process::Command::new`（シェルを挟まない）。`ya env` も `Command::new` で動かす（`yazi-cli/src/env/env.rs`）
   - PowerShell の `PATH` には `file` が無い。Git Bash には `/usr/bin/file` があるが、PowerShell や Windows Terminal から起動したときにも同じに動くよう、ユーザーの環境変数にする
   - [yazi](#yazi)の手順 5 は、前の値を確かめずに上書きする。元の値は[yazi](#yazi)の手順 3 で控える
-- **VC++ のランタイムは、Neovim と同じく「Windows 11 で WezTerm を入れる」の手順 3 を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。検証記録の付録（`docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））
+- **VC++ のランタイムは x64 版を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。検証記録の付録（`docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））
 - **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定は、[yazi の設定を導入する](#yazi-の設定を導入する)で入れる
 - **`y` は Git Bash の共通の設定だけで使う**: 手順書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。PowerShell 版の `y` は足さず、WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
-  - PowerShell 7 のプロファイル（[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する)）にも、`y` は足していない。その節が足すのは貼り付け・履歴の検索と zoxide・starship の行だけで、PowerShell 版の `y` はこの文書の範囲の外にした
+  - PowerShell 版の `y` は、この文書の範囲の外にする
 - **ファイルを開くエディタは、自分用の設定の Neovim を前提にした**（Windows 11 で使うのリードで、先に Neovim を通すよう案内する）
   - 上流の既定（yazi 26.9.1 の `yazi-config/preset/yazi-default.toml`）の `[opener]` の `edit` は、Windows では `code %s` と `code -w %s`（VS Code）
   - `${EDITOR:-vi}` は `for = "unix"` の行だけで、Windows の yazi は `EDITOR` を見ない
@@ -2035,7 +1978,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - Firefox は、自分で新しい版に上がる。待たずに上げるときだけ、その手順を行う
 - WezTerm は自分では更新しない
   - [Git for Windows・Firefox・WezTerm を上げる](#git-for-windowsfirefoxwezterm-を上げる)の手順 5・6 で、設定を残して `C:\Program Files\WezTerm` に上書きする
-- フォントは[シェルと端末のセットアップの「HackGen Console NF を上げる」](shell-terminal.md#hackgen-console-nf-を上げる)に従い、その文書の版と sha256 を確かめて直してから入れ直す
+- フォントは[シェルと端末のセットアップの「HackGen Console NF を上げる」](shell-terminal.md#hackgen-console-nf-を上げる)に従い、更新する版と sha256 を確かめてから入れ直す
 - 共通の bash 設定は、[シェルと端末のセットアップの「Windows 11 で共通の bash 設定を更新する」](shell-terminal.md#windows-11-で共通の-bash-設定を更新する)を通して上げる
 - PowerShell の開発の設定は、[シェルと端末のセットアップの「PowerShell の開発の設定を更新する」](shell-terminal.md#powershell-の開発の設定を更新する)で上げる。scoop で gh・rg・fd・delta・bat・starship を上げた後は、同じ項で補完の控えを作り直す
 - 自分用の設定のうち、WezTerm・Neovim はそれぞれのリポジトリの更新で上げ、lazygit・yazi は[lazygit の設定を更新する](#lazygit-の設定を更新する)・[yazi の設定を更新する](#yazi-の設定を更新する)で合わせる
@@ -2049,7 +1992,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### scoop・winget・WSL を上げる
 
 - scoop・winget のアプリと WSL・AlmaLinux 10 を上げる
-- 前提: [scoop](https://scoop.sh/)・[winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)・[Git for Windows](https://gitforwindows.org/)・[WSL](https://learn.microsoft.com/en-us/windows/wsl/install)・[WSL の AlmaLinux 10](https://wiki.almalinux.org/documentation/wsl.html)を導入してある。zoxide を上げるときは、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)と[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
+- 前提: [scoop](https://scoop.sh/)・[winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)・[Git for Windows](https://gitforwindows.org/)・[WSL](https://learn.microsoft.com/en-us/windows/wsl/install)・[WSL の AlmaLinux 10](https://wiki.almalinux.org/documentation/wsl.html)を導入してある。zoxide を上げるときは、共通の bash 設定が入り、WezTerm の Git Bash で zoxide 0.9.9 が使える
 - 実行場所: この PC のデスクトップの管理者ではない Windows PowerShell（5.1）。この項の手順 1 で開く。zoxide のリリースはブラウザ、上げた後の確認は WezTerm の Git Bash のタブ
 
 1. 管理者ではない Windows PowerShell（5.1）を開く。
@@ -2128,7 +2071,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    - `zoxide is no longer held and can be updated again.` と、`'zoxide' (<版>) was installed successfully!` が出て、最後に新しい版が出ればよい
    - `中断:` が出たら、Releases に出た版が、まだ scoop の main のバケットに入っていない。zoxide は何も変えていない（0.9.9 に止めたまま）
    - `Running process detected, skip updating.` が出たら、上がっていない。Git Bash で開いている `zi` の一覧などを閉じてから、このブロックを貼り直す
-   - WezTerm の新しいタブで、[シェルと端末のセットアップの「シェルのツール」](shell-terminal.md#シェルのツール)の手順 9・10 を貼って確かめ直す（Windows との違いは、同じ文書の[「シェルのツールを入れる」](shell-terminal.md#シェルのツールを入れる)の手順 7 の箇条書き）
+   - WezTerm の新しい Git Bash のタブで、`z` が使え、移動先を `zoxide query -l` で確認できることを確かめる
 
 <details id="scoopwingetwsl-を上げる-の補足と注意点">
   <summary>scoop・winget・WSL を上げる の補足と注意点</summary>
@@ -2164,7 +2107,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 ### Git for Windows・Firefox・WezTerm を上げる
 
 - Git for Windows・Firefox・WezTerm を、設定を残して上げる
-- 前提: [Git for Windows](https://gitforwindows.org/)を導入し、[Firefox](https://www.firefox.com/ja/)の日本語版を PC 全体の `C:\Program Files\Mozilla Firefox` に入れてある。[WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)・[Git Bash と WezTerm の設定](shell-terminal.md#git-bash-と-wezterm-の設定)を通してある
+- 前提: [Git for Windows](https://gitforwindows.org/)を導入し、[Firefox](https://www.firefox.com/ja/)の日本語版を PC 全体の `C:\Program Files\Mozilla Firefox` に入れてある。[WezTerm nightly](https://wezterm.org/install/windows.html) が入り、共通の bash 設定と自分用の WezTerm の設定が使える。Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
 - 実行場所: この PC のデスクトップの管理者の PowerShell 7。この項の手順 1 で開く。Git の設定の確認は、WezTerm の新しい Git Bash のタブ
 
 1. 管理者の PowerShell 7 を開く。
@@ -2183,7 +2126,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
    - 上がったら `インストールが完了しました` と出て、`winget list` の `Git.Git` の版が新しくなる
    - 新しい版が無ければ、`利用可能なアップグレードが見つかりませんでした。`（英語の Windows では `No available upgrade found.`）と出る
-   - 上げた後は、WezTerm の新しい Git Bash のタブを開き、[AlmaLinux 10 の初期設定の「Git」](almalinux-setup.md#git)の手順 6 を貼り直す（`pull.ff` が `only` なら同じ項の手順 7 も）
+   - 上げた後は、WezTerm の新しい Git Bash のタブで `git config --show-scope --get pull.ff` を確かめる。`only` なら、`git config --global pull.ff true` で上書きして確かめ直す
 
 1. Firefox の今の版と、winget に新しい版があるかを確かめる。
 
@@ -2221,10 +2164,43 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    - 1 行目に今の版が出る
    - プロセスが出たら、その WezTerm の窓をすべて閉じる
 
-1. [WezTerm](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 4 のブロックを貼る。
+1. nightly のインストーラを取り、sha256 を確かめて、黙って更新する。
 
-   - 最後に出る `wezterm <版>` が、この項の手順 5 の版より新しければ上がった
-   - 同じ版なら、main に新しいコミットが無かった（同じ版を入れ直しただけ）
+   ```powershell
+   & {
+     # 導入先と取得先を設定し、実行条件を確かめる
+     $dir = 'C:\Program Files\WezTerm'
+     $curl = "$env:WINDIR\System32\curl.exe"
+     $url = 'https://github.com/wezterm/wezterm/releases/download/nightly/WezTerm-nightly-setup.exe'
+     $tmp = "$env:TEMP\wezterm-setup"
+     $setup = "$tmp\WezTerm-nightly-setup.exe"
+     $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+     if (-not $admin) { Write-Error '中断: 管理者の PowerShell ではない'; return }
+     if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { Write-Error '中断: VCRUNTIME140.dll が無い（公式の再頒布可能パッケージを先に入れる）'; return }
+     if (Get-Process -Name wezterm, wezterm-gui, wezterm-mux-server -ErrorAction SilentlyContinue) { Write-Error '中断: WezTerm が動いている（窓をすべて閉じる）'; return }
+     # 配布物を取得し、ハッシュ値を照合する
+     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+     New-Item -ItemType Directory -Path $tmp | Out-Null
+     & $curl -fsSL -o "$setup.sha256" "$url.sha256"
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 を取れない'; return }
+     & $curl -fsSL -o $setup $url
+     if ($LASTEXITCODE -ne 0) { Write-Error '中断: WezTerm-nightly-setup.exe を取れない'; return }
+     $m = Select-String -LiteralPath "$setup.sha256" -Pattern '^([0-9a-f]{64})  WezTerm-nightly-setup\.exe$' | Select-Object -First 1
+     if (-not $m) { Write-Error '中断: WezTerm-nightly-setup.exe.sha256 に sha256 の行が無い'; return }
+     if ((Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash -ne $m.Matches[0].Groups[1].Value) { Write-Error '中断: WezTerm-nightly-setup.exe の sha256 が一致しない'; return }
+     # WezTerm を更新し、一時ファイルを削除する
+     $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /LOG=`"$tmp\setup.log`"" -Wait -PassThru
+     if ($p.ExitCode -ne 0) { Write-Error "中断: インストーラが終了コード $($p.ExitCode) で終わった（ログは $tmp\setup.log）"; return }
+     Remove-Item -LiteralPath $tmp -Recurse -Force
+     "`n$([char]27)[7m 確認 $([char]27)[0m"
+     'WezTerm-nightly-setup.exe: sha256 一致、インストーラの終了コード 0'
+     & "$dir\wezterm.exe" --version
+   }
+   ```
+
+   - `sha256 一致、インストーラの終了コード 0` と、wezterm の版が出ればよい
+   - `中断:` が出たら止まる。nightly の入れ替わり中で取得や照合に失敗したときは、少し待って貼り直す
+   - 最後に出る `wezterm <版>` が、この項の手順 5 の版より新しければ上がった。同じ版なら新しいコミットは無かった
 
 <details id="git-for-windowsfirefoxwezterm-を上げる-の補足と注意点">
   <summary>Git for Windows・Firefox・WezTerm を上げる の補足と注意点</summary>

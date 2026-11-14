@@ -8,7 +8,7 @@
 
 ビルド・テストフレームワークは無い。ドキュメントとコミットメッセージは日本語で書く。
 
-共通の bash 設定は、`docs/shell-terminal.md` の「共通の bash 設定」、Windows では同じ文書の「Git Bash と WezTerm の設定」で導入する。`~/.bashrc` への標準の追記は bash リポジトリで扱う。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは各手順書で扱う。
+AlmaLinux 10 の共通の bash 設定は、`docs/shell-terminal.md` の「共通の bash 設定」で導入する。Windows 11 は、導入済みの共通設定を前提にする。`~/.bashrc` への標準の追記は bash リポジトリで扱う。各ツールの実施手順では共通設定を前提にし、直接追記・削除のブロックは置かない。読み込みと確認のコマンドだけを書く。共通設定の変更時は bash の `docs/reference/readme.md` の「読むもの」の表も合わせる。ツールの導入・ソケットの有効化・`~/.inputrc`・別形式の設定ファイルは各手順書で扱う。
 
 検証の状態と範囲（実施済みと扱わない範囲を含む）は、非公開側の各検証記録と、その要約の `docs/verification-status.md` にある。状態や検証範囲の記述を変える前に読む。
 
@@ -19,7 +19,7 @@ AI エージェントの手順と、職場で使わない手順は、Forgejo の
 - 既存・新規の Windows 11・AlmaLinux 10 の操作は、2冊のカテゴリの該当する用途の項へ集約する（骨格は writing-rules.md の「2 冊の骨格（カテゴリ別）」）
 - 仮想マシン（AlmaLinux 10 の VirtualBox・VirtualBox の bootc ゲスト・kvm-container、Windows 11 の Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は両 OS とも `docs/virtual-machines.md` へ集約する。2冊には項を置かず、冒頭と `## 更新` のリードから案内する
 - 大きな項のうち、GNOME のリモート操作（デスクトップ共有・ヘッドレスセッション・リモートログイン）は `docs/gnome-remote.md`、Neovim・Samba（クライアント・サーバー）は両 OS とも `docs/neovim.md`・`docs/samba.md` へ集約する。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
-- シェルと端末（共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm・Windows Terminal・Git Bash の設定・PowerShell 7 のプロファイル・PowerShell の開発の設定）は、両 OS とも `docs/shell-terminal.md` へ集約する。Homebrew・btop・gdu・SSH の項は2冊に残す。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
+- シェルと端末（AlmaLinux 10 の共通の bash 設定・シェルのツール・HackGen Console NF・WezTerm と、Windows 11 のフォント・設定・開発用モジュールの更新）は、両 OS とも `docs/shell-terminal.md` へ集約する。Homebrew・btop・gdu・SSH の項は2冊に残す。2冊には項を置かず、冒頭・カテゴリ・`## 更新` のリードから案内する
 - コンテナ（Podman・podman-compose・podman-tui・lazydocker・Distrobox）は、AlmaLinux 10 の `docs/containers.md` へ集約する。almalinux-setup.md には項を置かず、冒頭と `## 更新` のリードから案内する
 - 自作の道具の excel-diff・md-table-excel（mdtable）・md-format・md-preview（mdpreview）・md-table-sticky の導入・使い方・更新の手順は、それぞれの道具の置き場所の `docs/install.md`・`docs/usage.md` に置く（excel-diff・md-format はそのリポジトリ、md-preview は md-tools のルート、md-table-excel は md-tools の `mdtable/`、md-table-sticky は md-tools の `sticky/`）。2冊には項を置かず、「Git と開発の道具」のリードと `## 更新` のリードから案内する
 - 正本を増やす・減らすのは、利用者の決定があるときだけにする。以下の「正本」は、この 9 冊を指す

@@ -8,9 +8,9 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 | 手順書 | 対象 | 内容 |
 | --- | --- | --- |
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合とフォントの確認、RDP の切断、SSH、Git と開発の道具と更新 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合、RDP の切断、SSH、Git と開発の道具と更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
-| [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 のプロファイル、PowerShell の開発の設定 |
+| [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | AlmaLinux 10 の bash・シェルのツール・フォント・WezTerm の導入と使い方、Windows 11 のフォント・設定・開発用モジュールの更新 |
 | [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | Neovim の導入と設定 |
 | [仮想マシンのセットアップ](docs/virtual-machines.md) | Windows 11・AlmaLinux 10 | VirtualBox、bootc ゲスト、kvm-container、Hyper-V、VMware Workstation Pro、Windows Sandbox |
 | [Samba のセットアップ](docs/samba.md) | Windows 11・AlmaLinux 10 | Samba サーバーと、両 OS のクライアント |
@@ -26,7 +26,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### 共通の bash 設定を先に入れる
 
-- AlmaLinux 10 はシェルと端末の「[共通の bash 設定](docs/shell-terminal.md#共通の-bash-設定)」、Windows 11 は同じ文書の「[Git Bash と WezTerm の設定](docs/shell-terminal.md#git-bash-と-wezterm-の設定)」で入れる
+- AlmaLinux 10 はシェルと端末の「[共通の bash 設定](docs/shell-terminal.md#共通の-bash-設定)」で入れる。Windows 11 の手順は、共通の bash 設定が入り、WezTerm で Git Bash が開くことを前提にする
 
 ### 導入の基盤
 
@@ -53,11 +53,11 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### 端末とシェル
 
-- シェルと端末の手順書の「[AlmaLinux 10 で使う](docs/shell-terminal.md#almalinux-10-で使う)」・「[Windows 11 で使う](docs/shell-terminal.md#windows-11-で使う)」で、シェルのツール・HackGen Console NF・WezTerm を入れ、Windows Terminal と PowerShell 7 の設定も行う
+- シェルと端末の手順書の「[AlmaLinux 10 で使う](docs/shell-terminal.md#almalinux-10-で使う)」でシェルのツール・フォント・WezTerm を入れる。「[Windows 11 で使う](docs/shell-terminal.md#windows-11-で使う)」では、導入済みのフォント・設定・開発用モジュールを更新する
 
 ### ファイル・ディスク・リソースを見る
 
-- bat・eza はシェルと端末の「[シェルのツール](docs/shell-terminal.md#シェルのツール)」（Windows 11 は「[シェルのツールを入れる](docs/shell-terminal.md#シェルのツールを入れる)」）、yazi は [AlmaLinux 10](docs/almalinux-setup.md#yazi)・[Windows 11](docs/windows-setup.md#yazi)、ディスク使用量は [gdu](docs/almalinux-setup.md#gdu)、CPU・メモリなどは [btop](docs/almalinux-setup.md#btop) で見る
+- bat・eza はシェルと端末の「[シェルのツール](docs/shell-terminal.md#シェルのツール)」（AlmaLinux 10）、yazi は [AlmaLinux 10](docs/almalinux-setup.md#yazi)・[Windows 11](docs/windows-setup.md#yazi)、ディスク使用量は [gdu](docs/almalinux-setup.md#gdu)、CPU・メモリなどは [btop](docs/almalinux-setup.md#btop) で見る
 
 ### エディタ
 
@@ -105,6 +105,6 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 - 手順は番号付きリストにし、各手順は「1 行の説明 → コマンドのブロック → 確認・分岐・注意の箇条書き」の順にする。補足と注意点は、各用途の末尾の折りたたみで確かめる（全体は [手順書の書き方](docs/dev/writing-rules.md)）
 - 貼った後は、反転表示の「確認」から後ろの出力を箇条書きで確かめる
 - `sudo` はパスワードを聞かない設定（NOPASSWD）を前提にする（[AlmaLinux 10 の「ログインと sudo」の手順 3](docs/almalinux-setup.md#ログインと-sudo)で設定する）
-- ブロックは、貼った全体が 1 つの入力になる窓に貼る前提で書く。bash はブラケットペーストの効く端末（bash 5.1 以降）、PowerShell は[シェルと端末のセットアップの「Windows Terminal で複数行を 1 つの入力として貼る」](docs/shell-terminal.md#windows-terminal-で複数行を-1-つの入力として貼る)を通した窓。貼った後に Enter を押す（実測: `docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）。その前に通す項など、1 行ずつ届く窓の項は、その項のリードに書く
+- ブロックは、貼った全体が 1 つの入力になる窓に貼る前提で書く。bash はブラケットペーストの効く端末（bash 5.1 以降）、PowerShell は貼った全体が 1 つの入力になり、Enter で実行する設定の窓。貼った後に Enter を押す（実測: `docs/verification/shell-terminal.md` の「付録: ブラケットペーストで貼ったときの対話と sudo（2026-11-07）」）。その前に通す項など、1 行ずつ届く窓の項は、その項のリードに書く
 - Windows の `powershell` のブロックは PowerShell 7 に貼る（[公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)）。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。管理者の窓か通常の窓かは、各項のリードの実行場所に従う
 - 未検証のことは手順書に明記する。パスワード・秘密鍵・トークンなどの秘密情報は残さない
