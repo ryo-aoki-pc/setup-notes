@@ -15,7 +15,7 @@
 - 設定を更新するときは[更新](#更新)を使う
 - 仮想マシン（Hyper-V・VirtualBox・VMware Workstation Pro・Windows Sandbox）は、[仮想マシンのセットアップの「Windows 11 で使う」](virtual-machines.md#windows-11-で使う)で作って使う
 - フォント・共通の bash 設定・WezTerm の設定・PowerShell の開発の設定の更新は、[シェルと端末のセットアップの「Windows 11 で使う」](shell-terminal.md#windows-11-で使う)を参照する
-- Neovim と Samba のクライアントは、[Neovim のセットアップ](neovim.md#windows-11-で使う)と[Samba のセットアップ](samba.md#windows-11-で使う)の「Windows 11 で使う」で入れる
+- Neovim の設定とプラグインの更新は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)を参照する。Samba のクライアントは、[Samba のセットアップの「Windows 11 で使う」](samba.md#windows-11-で使う)で入れる
 
 <details id="この文書の補足と注意点">
   <summary>この文書の補足と注意点</summary>
@@ -936,470 +936,13 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 
 ## Git と開発の道具
 
-- git-delta・GitHub CLI・lazygit・yazi。Neovim（LazyVim）は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)で入れる
+- lazygit・yazi の自分用の設定の更新と、yazi の使い方。Neovim（LazyVim）の設定とプラグインの更新は、[Neovim のセットアップの「Windows 11 で使う」](neovim.md#windows-11-で使う)を参照する
 - excel-diff・mdtable・md-format（mdfmt）・md-preview（mdpreview）・md-table-sticky は、それぞれのリポジトリの手順（[excel-diff](https://github.com/ryo-aoki-pc/excel-diff/blob/main/docs/install.md#windows-11-で-excel-diff-を導入更新する)・[mdtable](https://github.com/ryo-aoki-pc/md-tools/blob/main/mdtable/docs/install.md#windows-11-で-mdtable-を導入更新する)・[md-format](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)・[md-preview](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)・[md-table-sticky](https://github.com/ryo-aoki-pc/md-tools/blob/main/sticky/docs/install.md#md-table-sticky-のブックマークレットを登録する)）で入れる。使い方は、各リポジトリの `docs/usage.md` にある
 
-### git-delta
-
-- scoop で delta を入れ、Git の差分表示を設定する
-- 前提: [scoop](https://scoop.sh/)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 4・5 は WezTerm の新しい Git Bash のタブ
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 管理者ではないことと、scoop・git・VC++ ランタイム・ほかの delta を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell = $PSVersionTable.PSVersion.ToString()
-     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
-     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-     Delta      = (Get-Command delta -All -ErrorAction SilentlyContinue).Source -join ', '
-   } | Format-List
-   ```
-
-   - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](https://gitforwindows.org/)
-   - `VCRuntime : True` ならよい。`False` なら、先に[Visual C++ 再頒布可能パッケージの公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れ、この窓でこのブロックを貼り直す
-   - ほかの場所（winget の `…\WinGet\Links\delta.exe` など）が出たら、ほかの方法で入れた delta がある。中断し、既存の導入元と設定を確かめる
-
-1. scoop で delta を入れ、版と場所を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop install delta
-   delta --version
-   (Get-Command delta -All).Source
-   ```
-
-   - `delta` が `was installed successfully!` になればよい
-   - 導入済みなら `is already installed.` と更新の案内が出て、何も変えない
-   - `delta` と入れた版が出ればよい。版が出なければ、この項の手順 2 の `VCRuntime` を確かめる
-   - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\delta.exe` の 1 行だけを出せばよい
-
-1. WezTerm の新しいタブ（Git Bash）で、[AlmaLinux 10 の初期設定の「git-delta」](almalinux-setup.md#git-delta)の手順 1・3 を貼る。
-
-   - WezTerm を起動するか、新しいタブ（既定のキーは Ctrl+Shift+T）を開く（自分用の WezTerm の設定では Git Bash が開く）
-   - 同書の「git-delta」の手順 1 の 3 つの変数は、AlmaLinux 10 と同じ既定のままでよい。同じ項の手順 3 も同じタブに貼る
-   - 同書の「git-delta」の手順 3 は、AlmaLinux 10 と同じく、設定した 6 項目が出ればよい（`interactive.difffilter` は小文字）
-   - 同書の「git-delta」の手順 2・4 は行わない
-
-1. 同じ Git Bash のタブで `git diff` を打ち、delta の表示になることを確かめる。
-
-   - 変更のあるリポジトリに `cd` してから打つ。変更のあるリポジトリが無ければ、代わりに `git -C ~/.config/bash show` を打つ
-   - ファイル名のヘッダと、行番号・行ごとに背景色の付いた差分が出ればよい（同書の「git-delta」の手順 4 と同じ見え方）
-   - 1 画面に収まらないときは、less で止まる。`q` で閉じる
-   - 素の差分（背景色の無い `+` / `-` の行）が出たら、この項の手順 4 で貼った同書の「git-delta」の手順 3 の読み戻しに `core.pager delta` があるかを確かめる
-   - `git diff | head` のようにパイプに繋ぐと、AlmaLinux 10 と同じく delta を通らない
-   - **ほかのブロックは、less を `q` で閉じてから貼る**（less を開いたまま貼ると、less への入力になる）
-
-<details id="git-delta-の補足と注意点">
-  <summary>git-delta の補足と注意点</summary>
-
-**注意点**
-
-- **git-delta: Windows 11 の PowerShell と cmd で打つ git も、delta を通る**: `~/.gitconfig` は Git Bash と同じファイル
-  - PowerShell の `git`（`C:\Program Files\Git\cmd\git.exe`）は、Git の `usr\bin` を PATH の先頭に足してから git を動かすので、delta は Git Bash と同じ Git for Windows の less をページャに使う（ソースを読んだだけ。この折りたたみの「git-delta の手順 5: ページャの less と PowerShell の git」）
-  - そのため、scoop の less は入れていない。PowerShell で delta を直に動かす（`git diff | delta` など）ときは、PATH に less が無いので、ページャを使わずに出る
-
-**[git-delta](#git-delta)の手順 2: VC++ ランタイム**
-
-- scoop の delta は、上流の `x86_64-pc-windows-msvc` のビルドで、`delta.exe` のインポート表に `VCRUNTIME140.dll` がある（検証記録の付録（`docs/verification/windows-setup.md` の「git-delta: 付録: Windows 11 の配布物と資料の調査（2026-10-08）」））。無い PC では起動しない
-- scoop の `delta.json` は VC++ ランタイムを入れない（`depends` も `suggest` も無い）。winget の `dandavison.delta` は、依存として `Microsoft.VCRedist.2015+.x64` を持つ
-- Visual C++ ランタイムは、[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れてあることを前提にする
-  - 設定の「インストールされているアプリ」では「Microsoft Visual C++ v14 Redistributable (x64)」と出る（前の版で入れた PC では「… 2015-2022 …」）
-  - extras のバケットの `vcredist2022`（scoop）でも入るが、extras を足すことになり、入れるときに UAC の確認も出るので採らない
-- 同じ前提は bat・Neovim・yazi にもある。eza（windows-gnu のビルド）と starship・zoxide・fd（CRT を静的にリンク）、gh（Go）には無い
-
-**[git-delta](#git-delta)の手順 2: 確かめる値の意味**
-
-- `Delta` が空なら、delta は入っていない。`C:\Users\<WIN_USER>\scoop\shims\delta.exe` だけなら、もう scoop で入っている（[git-delta](#git-delta)の手順 3 の `scoop install` は何も変えない）
-- ほかの方法で入れた delta を外すのは、混ざらないようにするため
-
-**[git-delta](#git-delta)の手順 3**
-
-- 導入時の行は `'delta' (0.20.1) was installed successfully!` の形
-
-- 版の表示は `delta 0.20.1` の形
-
-**[git-delta](#git-delta)の手順 3: scoop の名前と版**
-
-- scoop の名前は `delta`（Homebrew の formula の `git-delta` ではない）
-- `'delta' (<版>) was installed successfully!` の版は、実行した日の最新
-
-**[git-delta](#git-delta)の手順 4: 実施手順の手順 1・3 を Git Bash で貼る**
-
-- [git-delta](almalinux-setup.md#git-delta)の手順 1・3 のブロックは bash と git だけを使うので、Git Bash にそのまま貼れる。PowerShell 向けに書き分けない（[Git](almalinux-setup.md#git) と同じ考え方）
-- `git config --global` が書くのは `C:\Users\<WIN_USER>\.gitconfig`（Git Bash の `HOME`）。Git Bash・PowerShell 7・cmd の `git config --global --list --show-origin` が同じファイルを示すことは、Git の検証記録（`docs/verification/windows-setup.md` の「Git: 付録: Windows 11 の Git Bash での検証記録（2026-09-30）」）で確かめてある
-- [git-delta](almalinux-setup.md#git-delta)の手順 2（`brew install`）と[git-delta](almalinux-setup.md#git-delta)の手順 4（`brew list` を含む）は指さない。入れることと版・場所は、[git-delta](#git-delta)の手順 3 で PowerShell から確かめる
-- [git-delta](almalinux-setup.md#git-delta)の手順 3 は `merge.conflictstyle zdiff3` も書く。[Git](almalinux-setup.md#git) の手順 5 と同じ値なので、どちらを先に通してもよい（AlmaLinux 10 と同じ）
-- [git-delta](almalinux-setup.md#git-delta)の手順 1 の変数はそのタブの中だけで有効なので、[git-delta](almalinux-setup.md#git-delta)の手順 3 も同じタブに貼る
-
-**[git-delta](#git-delta)の手順 5: 変更のあるリポジトリが無いとき**
-
-- `git -C ~/.config/bash show` が出すのは、[共通の bash 設定](../README.md#共通の-bash-設定を先に入れる)の clone の、最後のコミットの差分
-
-**[git-delta](#git-delta)の手順 5: ページャの less と PowerShell の git**
-
-- git は `core.pager` の `delta` を PATH から探して起動する（scoop の shim の `~\scoop\shims\delta.exe`）
-- delta 0.20.1 のページャは、`delta.pager`（`--pager`）・`DELTA_PAGER`・`BAT_PAGER`・`PAGER` の順に決まり、どれも無ければ `less`。そのコマンドを PATH から探し、見つからなければ、ページャを使わずに標準出力へ書く（ソースの `src/utils/bat/output.rs` と `src/env.rs`）
-- **Git Bash** では、PATH の先頭が Git の `/usr/bin` なので、delta は Git for Windows の `usr\bin\less.exe` を使う
-- **PowerShell・cmd** の PATH には Git の `cmd` しか無い（Git for Windows の既定の `Path Option=Cmd`）。それでも、そこの `git.exe`（Git for Windows の git-wrapper）は、`ucrt64\bin`・`usr\bin`・`%HOME%\bin` を PATH の先頭に足してから本体の `ucrt64\bin\git.exe` を動かす（2.55 までは `mingw64\bin`。git-wrapper のソースの `setup_environment`。`cmd\git.exe` は `git.res` の版の情報だけを持ち、PATH を絞る `MINIMAL_PATH=1` の文字列のリソースが無い）。その PATH を受け継ぐ delta も、Git for Windows の less を使う
-- 上流の文書は、Windows では新しい less が要り、古い `less.exe` を使うと色が崩れたり変な文字が出たりすると書いている。Git for Windows の less は MSYS2 の今の版なので、これに当たらないはず（版は確かめていない）
-- **scoop の less は入れなかった**: 設計の段階では、PowerShell から git を使うときだけ scoop の less（main の `less.json`。上流の文書が勧める `jftuga/less-Windows` の配布物）を入れる任意の手順を考えた。上のとおり、git が起動する delta には、Git Bash でも PowerShell でも Git の `usr\bin` が scoop の shims より前に来るので、入れても使われない（`DELTA_PAGER` か `delta.pager` で場所を指したときと、PowerShell で delta を直に動かしたときだけ使われる）
-- PowerShell で delta を直に動かす（`git diff | delta` など）と、PATH に less が無いので、delta はページャを使わずに出す（上の `output.rs` の動き）
-- `delta.navigate`（[git-delta](almalinux-setup.md#git-delta)の手順 1 の `DELTA_NAVIGATE`）が `true` だと、delta は less の検索履歴の写しを `%LOCALAPPDATA%\delta\delta.lesshst` に作り、`LESSHISTFILE` で less に渡す（ソースの `src/features/navigate.rs`。Linux では `~/.local/share/delta/lesshst`）。Windows で `n` / `N` が効くかは確かめていない
-- PowerShell・cmd で打つ `git diff` も、同じ `~/.gitconfig` を読んで delta を通る（[git-delta の補足と注意点](almalinux-setup.md#git-delta-の補足と注意点)の「注意点」）
-- どれも、ソースを読んだだけで、Windows では確かめていない（検証記録（`docs/verification/windows-setup.md` の「git-delta: Windows 11 で使う: 検証状況の記録」））
-
-**選択した方針**
-
-[git-delta](#git-delta)の理由。**Windows の実機では未検証**（検証記録（`docs/verification/windows-setup.md` の「git-delta: Windows 11 で使う: 検証状況の記録」））。
-
-- **scoop の main のバケットで入れた**（winget は採らない）
-  - [README の導入の基盤](../README.md#導入の基盤)の「CLI ツールは scoop」と同じ。管理者が要らず、[更新](#更新)の `scoop update *` と UniGet UI で上がる
-  - winget の `dandavison.delta` 0.20.1 も、同じ上流の zip（portable）を同じ sha256 で入れる。違うのは入れ方と上げ方と、VC++ ランタイムを依存として入れるかだけ
-  - 上流の zip を手で置く形や `cargo install git-delta`（Rust が要る）は、更新が手作業になる
-  - scoop の定義は x64 だけ。arm64 の Windows 11 では、scoop はこの x64 の版を入れる（Scoop のソースの `Get-SupportedArchitecture`。確かめていない）
-  - 版は固定しない（`scoop hold` しない）
-- **設定は git の `~/.gitconfig` だけ**: delta は自分の設定ファイルを持たず、`[delta]` セクションを読む。`XDG_CONFIG_HOME` は関係しないので設定しない。Git Bash・PowerShell・cmd の git が同じファイルを読む（この折りたたみの「git-delta の手順 4: 実施手順の手順 1・3 を Git Bash で貼る」）
-- **シェルとの組み込み方**
-  - delta はどのシェルにも初期化の行が要らない。git が `core.pager` と `interactive.diffFilter` で呼ぶので、`~/.gitconfig` を書けば、どのシェルの git にも効く
-  - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。git の設定は Git Bash で[git-delta](almalinux-setup.md#git-delta)の手順 1・3 を貼って書く（AlmaLinux 10 と同じブロック）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は delta を扱わず、`PAGER` なども設定しない
-  - PowerShell 7 の補完を設定してあれば、`delta --generate-completion powershell` の出力を控えたファイルから読む。delta を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
-  - **Windows PowerShell 5.1 には delta の補完を足さない**。git が読む `~/.gitconfig` の設定は、5.1 から使う git にも効く
-  - **WSL の AlmaLinux 10 は Linux のホストとして扱う**。WSL の git は WSL の中の `~/.gitconfig` を読むので、[git-delta](almalinux-setup.md#git-delta)を WSL の中で通す
-- **VC++ ランタイムは前提にした**: この折りたたみの「git-delta の手順 2: VC++ ランタイム」
-- **scoop の less は入れない**: この折りたたみの「git-delta の手順 5: ページャの less と PowerShell の git」
-- **lazygit**: 自分用の lazygit の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）は、`git.diffRenderers` で `delta --no-gitconfig …` を呼ぶ。`~/.gitconfig` の `[delta]` を読まないので、この文書の変数は lazygit の表示に効かない。Windows の lazygit は描画のコマンドを cmd.exe で動かすので、単一引用符を使わない（その README の「Windows で使う場合」）。この文書の任意節の yaml は引用符を使わない
-- **Git Bash は WezTerm のタブで確かめる**: 自分用の設定で Git Bash が開く。スタートメニューの「Git Bash」（mintty）でも同じ `~/.gitconfig` を読むはずだが、確かめていない
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### GitHub CLI
-
-- scoop で GitHub CLI を入れ、GitHub にログインする
-- 前提: [scoop](https://scoop.sh/)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。GitHub のアカウントがある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 管理者ではないことと、scoop・git・Git の資格情報のヘルパー・ほかの gh を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell = $PSVersionTable.PSVersion.ToString()
-     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
-     GitCred    = $(if (Get-Command git -ErrorAction SilentlyContinue) { (git config --get-regexp '^credential\..*helper$') -join ', ' })
-     Gh         = (Get-Command gh -All -ErrorAction SilentlyContinue).Source -join ', '
-   } | Format-List
-   ```
-
-   - `PowerShell : 7.…` と `Admin : False` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `C:\Users\<WIN_USER>\scoop\shims\scoop.ps1` が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でなければ、先に [Git for Windows](https://gitforwindows.org/)
-   - `GitCred` が `credential.helper manager` ならよい
-   - `GitCred` が空なら、この項の手順 4 の Git の認証には `Y` と答えてよい
-   - ほかの場所（winget の MSI の `C:\Program Files\GitHub CLI\gh.exe` など）が出たら、ほかの方法で入れた gh がある。中断し、既存の導入元と設定を確かめる
-
-1. scoop で gh を入れ、版と場所を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop install gh
-   gh --version
-   (Get-Command gh -All).Source
-   ```
-
-   - `gh` が `was installed successfully!` になればよい
-   - 導入済みなら `is already installed.` と更新の案内が出て、何も変えない
-   - `gh version <版> (<日付>)` の形で、入れた版が出ればよい
-   - 最後のコマンドは、`C:\Users\<WIN_USER>\scoop\shims\gh.exe` の 1 行だけを出せばよい
-
-1. GitHub へのログインを始める。
-
-   ```powershell
-   gh auth login
-   ```
-
-   - 問いには、矢印キーで選んで Enter で答える
-     - `Where do you use GitHub?` は `GitHub.com`
-     - `What is your preferred protocol for Git operations on this host?` は `HTTPS`
-     - `Authenticate Git with your GitHub credentials?` は、**`n` と打って Enter**（既定は `Y`）
-     - `How would you like to authenticate GitHub CLI?` は `Login with a web browser`
-   - Git の認証の問いが出なければ、gh がもう Git の資格情報のヘルパーになっている（この項の手順 2 の `GitCred`）
-   - `One-time code (<コード>) copied to clipboard` の行のワンタイムコードを、この項の手順 5 のブラウザで使う
-   - クリップボードに入れられなかったときは、`First copy your one-time code:` の後にコードが出る
-   - `Press Enter to open https://github.com/login/device in your browser...` で Enter を押すと、既定のブラウザが開く
-   - **トークン（`gh auth token` の出力）や、認証中に表示されるワンタイムコードはこの文書に載せない**
-
-1. ブラウザで、GitHub の認証を済ませる。
-
-   - `https://github.com/login/device` にこの項の手順 4 のワンタイムコードを入れ、画面の案内に従う
-   - ブラウザが開かなければ（`Failed opening a web browser at …`）、`https://github.com/login/device` を自分でブラウザで開く
-   - PowerShell に `Logged in as <GITHUB_USER>` が出れば、`gh auth login` は終わっている
-   - `Authentication credentials saved in plain text` なら、トークンは `%APPDATA%\GitHub CLI\hosts.yml` に平文で入った（[GitHub CLI の補足と注意点](#github-cli-の補足と注意点)の「注意点」）
-   - **次の手順は、`gh auth login` が終わってから貼る**（ブラウザで認証を済ませ、PowerShell にログイン完了が出たことを確かめる）
-
-1. ログインできたことと、Git の資格情報のヘルパーが変わっていないことを確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # GitHub CLI の認証を確認する
-   gh auth status
-   # Git の資格情報ヘルパーを確認する
-   git config --get-regexp '^credential\..*helper$'
-   ```
-
-   - `Logged in to github.com account <GITHUB_USER> (keyring)` の行と、`Git operations protocol: https` の行が出ればよい
-   - `(keyring)` の代わりに `(C:\Users\<WIN_USER>\AppData\Roaming\GitHub CLI\hosts.yml)` が出たら、トークンは平文のファイルにある
-   - `You are not logged into any GitHub hosts.` なら、ログインしていない。この項の手順 4 からやり直す
-   - 最後のコマンドが、この項の手順 2 の `GitCred` と同じ行（ふつうは `credential.helper manager`）を出せばよい
-   - `GitCred` が空で、Git の認証に `Y` と答えたときは、代わりに `auth git-credential` で終わる行が出る
-
-<details id="github-cli-の補足と注意点">
-  <summary>GitHub CLI の補足と注意点</summary>
-
-**注意点**
-
-- **GitHub CLI: Windows 11 のトークンの置き場所**: 資格情報マネージャー（Windows 資格情報の汎用資格情報）を優先し、使えない場合は `%APPDATA%\GitHub CLI\hosts.yml` に平文で保存する
-
-- **GitHub CLI: Windows 11 では、gh と git が別々に GitHub にログインする**: git の HTTPS は、Git for Windows の Git Credential Manager が自分のサインインで行う
-  - [GitHub CLI](#github-cli)の手順 4 で、Git の認証に `n` と答えるため
-  - `gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことは、git の HTTPS の認証に影響しない
-
-**[GitHub CLI](#github-cli)の手順 2: 確かめる値の意味**
-
-- `GitCred` の `credential.helper manager` は、Git for Windows のインストーラの既定の Git Credential Manager
-- `GitCred` に `auth git-credential` で終わる行があれば、前に gh を Git の資格情報のヘルパーにしてある（`gh auth setup-git` など）。[GitHub CLI](#github-cli)の手順 4 で Git の認証は聞かれない
-- `GitCred` が空なのは、Git の資格情報のヘルパーが無いこと。[GitHub CLI](#github-cli)の手順 4 で `Y` と答えると、gh が `~/.gitconfig` に自分をヘルパーとして書く
-- `Gh` が空なら、gh は入っていない。`C:\Users\<WIN_USER>\scoop\shims\gh.exe` だけなら、もう scoop で入っている（[GitHub CLI](#github-cli)の手順 3 の `scoop install` は何も変えない）
-- ほかの方法で入れた gh を外すのは、混ざらないようにするため。外してもログインと設定は残り、scoop の gh も同じ場所を読む
-
-**[GitHub CLI](#github-cli)の手順 3**
-
-- 導入時の行は `'gh' (2.102.0) was installed successfully!` の形
-
-**[GitHub CLI](#github-cli)の手順 3: 版**
-
-- `'gh' (<版>) was installed successfully!` の版は、実行した日の最新
-
-**[GitHub CLI](#github-cli)の手順 4: Git の認証に n と答える理由**
-
-gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/verification/windows-setup.md` の「GitHub CLI: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））。**Windows では確かめていない**。
-
-- **問いが出る条件**: `gh auth login` で HTTPS を選ぶと、github.com の Git の資格情報のヘルパーが gh でなければ、`Authenticate Git with your GitHub credentials?`（既定は Yes）を聞く
-  - ヘルパーは `credential.https://github.com.helper`、無ければ `credential.helper` を、スコープを問わずに読む
-  - Git for Windows は、インストーラの既定の選択で `system`（`C:\Program Files\Git\etc\gitconfig`）に `credential.helper=manager`（Git Credential Manager）を書く（Git の検証記録（`docs/verification/almalinux-setup.md` の「Git: 実施手順 / 手順 3: 補足: 設定の 3 つの場所」））。そのため、[Windows 11 のセットアップ](#windows-11-のセットアップ)の順に通した PC では、この問いが出る
-- **Yes と答えたとき**（ソースからの推論）
-  - ヘルパーがある（Git for Windows の既定）: `~/.gitconfig` は変えない。`git credential reject` で github.com の資格情報を消してから、`git credential approve` で gh のトークンを Git Credential Manager に入れる。以後、git の HTTPS も gh のトークン（GitHub CLI の OAuth アプリ。`workflow` の権限も付く）で GitHub につなぐ
-  - ヘルパーが無い: `~/.gitconfig` の `credential.https://github.com.helper` と `credential.https://gist.github.com.helper` に、空の値（ほかのヘルパーを切る）と `!<gh の場所> auth git-credential` を書く。`gh auth setup-git` と同じ
-- **No を選んだ理由**
-  - git の HTTPS の認証は、Git for Windows の Git Credential Manager が自分のサインイン（Git Credential Manager の OAuth アプリ）で行う。gh と git のトークンが別になるので、`gh auth logout`・GitHub CLI の認可の取り消し・gh を消すことが、git の push に効かない
-  - Yes にすると、gh のトークンが Git Credential Manager にも残る。`gh auth logout` は gh 自身の置き場所しか消さない
-  - `~/.gitconfig` に gh の場所を書かない。書くと、scoop を外した後も git がその場所の gh を呼ぶ
-- **Git の資格情報のヘルパーが無い PC**（[GitHub CLI](#github-cli)の手順 2 の `GitCred` が空）では、Yes でよい。git の HTTPS の認証を gh に任せることになる
-- **gh が書く自分の場所**: 環境変数 `GH_PATH` が無ければ、`PATH` の上の同じ名前のファイルが自分自身（かそのシンボリックリンク）ならそれ、違えば自分の実行ファイルの場所を書く（`internal/ghcmd/cmd.go`）
-  - scoop の shim（`~\scoop\shims\gh.exe`）は別の実行ファイルなので、`C:\Users\<WIN_USER>\scoop\apps\gh\current\bin\gh.exe` になるはず（推論）。`current` は scoop の更新の後も同じ場所を指す
-
-**[GitHub CLI](#github-cli)の手順 4: ワンタイムコード**
-
-- gh の既定では、ワンタイムコードはクリップボードにも入る
-
-**[GitHub CLI](#github-cli)の手順 6: トークンと設定の置き場所**
-
-ソースから（gh 2.102.0、go-gh 2.16.1、go-keyring 0.2.8）。**Windows では確かめていない**。
-
-| もの | Windows 11 の場所 | AlmaLinux 10 の場所 |
-|---|---|---|
-| トークン | 資格情報マネージャーの汎用資格情報 `gh:github.com:<GITHUB_USER>` と、今のアカウントの写しの `gh:github.com:`（名前はソースからの推論） | OS の資格情報ストア |
-| トークン（ストアを使えないとき） | `%APPDATA%\GitHub CLI\hosts.yml`（平文） | `~/.config/gh/hosts.yml`（平文） |
-| 設定（`config.yml`・`hosts.yml`） | `%APPDATA%\GitHub CLI` | `~/.config/gh` |
-| 状態・拡張機能・キャッシュ | `%LOCALAPPDATA%\GitHub CLI` | `~/.local/state/gh`・`~/.local/share/gh`・`~/.cache/gh` |
-
-- 設定の場所は、環境変数 `GH_CONFIG_DIR`、次に `XDG_CONFIG_HOME`（`%XDG_CONFIG_HOME%\gh`）があれば、そちらが先になる（go-gh の `ConfigDir`）
-- `gh auth status` の `(keyring)` は、トークンが資格情報マネージャーにあること。平文のときは `hosts.yml` の場所が出る
-- Git Credential Manager が git のために置く資格情報（`git:https://github.com` の名前になるはず）は、gh の項目とは別
-
-**選択した方針**
-
-[GitHub CLI](#github-cli)の理由。**Windows の実機では未検証**（検証記録（`docs/verification/windows-setup.md` の「GitHub CLI: Windows 11 で使う: 検証状況の記録」））。
-
-- **scoop の main のバケットの `gh`**: [README の導入の基盤](../README.md#導入の基盤)の「CLI ツールは scoop」に合わせた
-  - 管理者の権限が要らない。[更新](#更新)の `scoop update *` でほかのツールとまとめて上がり、UniGet UI にも出る
-  - winget の `GitHub.cli` は、先に並ぶのが MSI（`Scope: machine`。`C:\Program Files\GitHub CLI` に入り、UAC が出る）。同じ zip の portable もあるが、採らない
-  - 上流の MSI や zip を手で入れる形は、更新が手作業になる
-  - scoop は、定義の sha256（上流の `gh_<版>_checksums.txt` と同じ値）で zip を確かめる。`gh.exe` には `GitHub, Inc.` の Authenticode の署名があるが、手順では確かめない
-  - 版は固定しない（`scoop hold` しない）
-- **`XDG_CONFIG_HOME` は設定しない**: 設定すると、gh の設定の場所が `%XDG_CONFIG_HOME%\gh` に変わり、設定した窓と設定していない窓で、gh が別のログインの一覧を読む
-  - Git for Windows の起動スクリプト、自分用の bash 設定、WezTerm の設定は、どれも `XDG_CONFIG_HOME` を設定しない。そのため、Git Bash・PowerShell・cmd の gh は、同じ `%APPDATA%\GitHub CLI` を読む（ソースと設定を読んだだけ）
-  - トークンは資格情報マネージャー（ユーザーごと）にあるので、どのシェルからも同じ
-- **git の HTTPS の認証は Git Credential Manager のまま**: この折りたたみの「GitHub CLI の手順 4: Git の認証に n と答える理由」
-- **シェルとの組み込み方**
-  - gh はシェルの初期化が要らない。scoop の shims（ユーザーの `PATH`）にあるので、Git Bash・PowerShell・cmd のどれからでも動く
-  - **Git Bash が主**: WezTerm の自分用の設定の `default_prog` は Git Bash（`bash.exe -i -l`）。共通の bash 設定（[ryo-aoki-pc/bash](https://github.com/ryo-aoki-pc/bash)）は gh を扱わない。bash の補完も入れない（足すなら bash リポジトリの変更になる）
-  - PowerShell 7 の補完を設定してあれば、`gh completion -s powershell` の出力を控えたファイルから読む。gh を上げた後は、[PowerShell の開発の設定を更新する](shell-terminal.md#powershell-の開発の設定を更新する)で控えを作り直す
-  - **Windows PowerShell 5.1 には gh の補完を足さない**。gh の設定とログインは、5.1 からも共通のものを使う
-  - **WSL の AlmaLinux 10 は Linux のホストとして扱う**: WSL の中で[GitHub CLI](almalinux-setup.md#github-cli)を通す。設定とトークンは WSL の中にあり、Windows の gh とは別
-- **Visual C++ のランタイムは要らない**: `gh.exe`（Go）のインポートは `kernel32.dll` だけ
-
-**参照**
-
-- 検証記録（`docs/verification/windows-setup.md`）
-
-</details>
-
----
-
-### lazygit
-
-- scoop で lazygit を入れ、自分用の設定と起動を確かめる
-- 前提: [scoop の導入](https://scoop.sh/)・[git-delta](#git-delta)・[HackGen Console NF](https://github.com/yuru7/HackGen)を導入し、WezTerm の Git Bash と共通の bash 設定が使える
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 管理者ではないことと、scoop・git・extras のバケット・ほかの lazygit を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell = $PSVersionTable.PSVersion.ToString()
-     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
-     Extras     = if (Get-Command scoop -ErrorAction SilentlyContinue) { [bool](scoop bucket list | Where-Object Name -eq 'extras') } else { $false }
-     Lazygit    = (Get-Command lazygit -All -ErrorAction SilentlyContinue).Source -join ', '
-   } | Format-List
-   ```
-
-   - `PowerShell : 7.…` と `Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
-   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](https://gitforwindows.org/)
-   - ほかの場所（winget の `JesseDuffield.lazygit` など）が出たら、中断し、既存の導入元と設定を確かめる
-   - `Extras : True` なら、extras のバケットはもうある（[Neovim](neovim.md#windows-11-で-neovim-を入れる)の手順 4 で足した）。この項の手順 3 は飛ばす
-
-1. extras のバケットが無いときだけ、scoop に足す。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   scoop bucket add extras
-   scoop bucket list
-   ```
-
-   - `The extras bucket was added successfully.` が出て、一覧に `main` と `extras` の行が出ればよい
-
-1. scoop で lazygit を入れる。
-
-   ```powershell
-   scoop install lazygit
-   ```
-
-   - `lazygit` が `was installed successfully!` になればよい
-   - `is already installed.` なら導入済みで、何も変えない
-
-1. 自分用の設定（[ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit)）を入れる。
-
-   - [lazygit の設定を導入する](#lazygit-の設定を導入する)の全項を通す
-   - `custom` と `C:\Users\<WIN_USER>\AppData\Local\lazygit` が出れば、入っている
-   - lazygit を起動する（この項の手順 7）前に入れる。先に起動すると、できた状態ファイルごと `lazygit.bak` に退避される
-
-1. 版と、設定の置き場所を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # lazygit の版を確認する
-   lazygit --version
-   # 設定と実行ファイルの場所を確認する
-   lazygit --print-config-dir
-   (Get-Command lazygit -All).Source
-   ```
-
-   - 1 行目に `version=` と版、`os=windows, arch=amd64` を含む行が出ればよい
-   - 2 行目は `C:\Users\<WIN_USER>\AppData\Local\lazygit`（[AlmaLinux 10 の初期設定の「lazygit の設定ファイル」](almalinux-setup.md#lazygit-の設定ファイル)）
-   - 最後は `C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` の 1 行だけならよい
-
-1. 確かめ用の git のリポジトリで、lazygit を起動して確かめる。
-
-   ```powershell
-   # 確認用のリポジトリを作成する
-   git init --quiet "$env:TEMP\lazygit-check"
-   if (-not (Test-Path -LiteralPath "$env:TEMP\lazygit-check\.git")) { Write-Error '中断: 確かめ用のリポジトリ（%TEMP%\lazygit-check）を作れない' } else {
-     # 確認用のリポジトリで lazygit を起動する
-     Set-Location -LiteralPath "$env:TEMP\lazygit-check"
-     lazygit
-   }
-   ```
-
-   - `中断:` と出たら、lazygit は起動していない（git が呼べるかを、この項の手順 2 で確かめ直す）
-   - 初回に `Thanks for using lazygit...` の案内が出たら Enter で閉じる
-   - Status・Files・Branches・Commits などの欄が出ればよい
-   - ほかのリポジトリで確かめるなら、そのフォルダーに `Set-Location` してから `lazygit` を打つ（git 管理外のフォルダーで起動すると、リポジトリを作るか聞かれる）
-   - **注意**: PowerShell 7 から起動した lazygit の `e` キーは、git の `core.editor` と環境変数 `VISUAL`・`EDITOR` などが無いと `vim` で開こうとして失敗する
-     - [Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で `nvim` にし、新しい窓で lazygit を起動し直す
-     - Git Bash から起動したときは、共通の bash 設定が `nvim` にしてある
-   - `q` で閉じる
-   - `%TEMP%\lazygit-check` は、要らなければ手で消す
-     - 消す前に `Set-Location ~` で出る
-   - **ほかのブロックは、`q` で閉じてから貼る**（lazygit を開いたまま貼ると、lazygit への入力になる）
-
-#### lazygit の設定を導入する
-
-- Windows の lazygit の既存設定を退避し、自分用の設定を入れる
-- 前提: [lazygit](#lazygit)の手順 1〜4 までを通し、本体を入れてある。[git-delta](#git-delta)・[HackGen Console NF](https://github.com/yuru7/HackGen)も通し、Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- lazygit をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 既存設定を退避して、設定ディレクトリへ clone する。
-
-   ```powershell
-   # lazygit の設定を退避して取得する
-   $d = "$env:LOCALAPPDATA\lazygit"
-   if (Test-Path -LiteralPath "$d.bak") {
-     Write-Warning "$d.bak がすでにあるため中止しました。中身を確かめて片付けてから、貼り直してください"
-   } else {
-     if (Test-Path -LiteralPath $d) { Move-Item -LiteralPath $d -Destination "$d.bak" -ErrorAction Stop; "moved: $d -> $d.bak" }
-     git clone https://github.com/ryo-aoki-pc/lazygit.git $d
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     git -C $d branch --show-current
-     lazygit --print-config-dir
-   }
-   ```
-
-   - `.bak` が既にあるときは退避・clone をせず中断する
-   - `custom` と `%LOCALAPPDATA%\lazygit` が出ればよい
-
-#### lazygit の設定を更新する
+### lazygit の設定を更新する
 
 - 自分用の lazygit の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
-- 前提: [lazygit の設定を導入する](#lazygit-の設定を導入する)を通してある
+- 前提: lazygit と自分用の設定が入り、`%LOCALAPPDATA%\lazygit` が `custom` ブランチの clone になっている
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
 - lazygit 本体は[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 
@@ -1482,41 +1025,8 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    - 上流のデフォルト設定の版と、その次の `version=` の版が同じならよい
    - 本体の方が古ければ、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 
-<details id="lazygit-の補足と注意点">
-  <summary>lazygit の補足と注意点</summary>
-
-**注意点**
-
-- **lazygit: Windows 11 では、winget の lazygit（`JesseDuffield.lazygit`）と両方入れない**: どちらが使われるかが `PATH` の順で決まり、分かりにくくなる。どちらか一方にする
-
-**[lazygit](#lazygit)の手順 2: 確かめる値の意味**
-
-- `Lazygit` が空なら、lazygit は入っていない。`C:\Users\<WIN_USER>\scoop\shims\lazygit.exe` だけなら、もう scoop で入っている（自分用の Neovim の設定の導入でも入る）
-
-**[lazygit](#lazygit)の手順 4**
-
-- 導入時の行は `'lazygit' (0.66.0) was installed successfully!` の形
-
-**[lazygit](#lazygit)の手順 4・6: 版**
-
-- [lazygit](#lazygit)の手順 4 の `'lazygit' (<版>) was installed successfully!` と、[lazygit](#lazygit)の手順 6 の `version=` の版は、実行した日の最新
-
-**[lazygit](#lazygit)の手順 6**
-
-- 版の表示は `version=0.66.0, os=windows, arch=amd64` の形
-
-**[lazygit](#lazygit)の手順 7**
-
-- 確かめ用は空のリポジトリなので、一覧は空
-
-**[lazygit](#lazygit)の手順 7: 新しい窓と確かめ用のリポジトリ**
-
-- `EDITOR` を `nvim` にした後、新しい窓で lazygit を起動し直すのは、今の窓には入らないため
-- `%TEMP%\lazygit-check` を消す前に `Set-Location ~` で出るのは、この窓の今のフォルダーがそこにあり、今のフォルダーのままでは使用中で消せないため
-
-**[lazygit の設定を導入する](#lazygit-の設定を導入する)の手順 2**
-
-- 状態ファイルも同じ場所に置くが Git の追跡対象からは除外する
+<details id="lazygit-の設定を更新する-の補足と注意点">
+  <summary>lazygit の設定を更新する の補足と注意点</summary>
 
 **[lazygit の設定を更新する](#lazygit-の設定を更新する)の手順 3**
 
@@ -1545,22 +1055,41 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 - 版の読み方と `--no-pager` の理由は、[lazygit の補足と注意点](almalinux-setup.md#lazygit-の補足と注意点)の「lazygit の設定を更新するの手順 5: 版の表示と pager」を参照する
 - Windows PowerShell 5.1 のコンソール（コードページ shift_jis）でも、日本語のコミットの題は正しく表示された。Git for Windows がコンソールへ直接書くため
 
-**選択した方針**
+**参照**
 
-[lazygit](#lazygit)の理由。**Windows 実機では未検証**（検証記録（`docs/verification/windows-setup.md` の「lazygit: Windows 11 で使う: 検証状況の記録」））。
+- 検証記録（`docs/verification/windows-setup.md`）
 
-- **scoop の extras の `lazygit`**（main のバケットには無い）
-  - extras のバケットを足すのに git が要る（Git for Windows）。extras は、ほかのアプリ（`vcredist2022`・`neovide` など）も使う
-  - lazygit は Go の 1 つの実行ファイルなので、VC++ のランタイムは要らない（自分用の設定が使う delta は要る。[git-delta](#git-delta)の手順 2 で確かめる）
-  - winget の `JesseDuffield.lazygit` と両方あると、`PATH` の順でどちらかが使われ、分かりにくい。[lazygit](#lazygit)の手順 2 で見つけたら、外してから始める
-- **設定の置き場所は `%LOCALAPPDATA%\lazygit`**
-  - lazygit 0.66.0 の Config.md の Windows の既定の場所。`%APPDATA%\lazygit\config.yml` も探す（adrg/xdg の Windows の `XDG_CONFIG_DIRS` は `%ProgramData%` と `%APPDATA%`）
-  - `XDG_CONFIG_HOME` は設定しない（[Windows 11 で Neovim を入れる の補足と注意点](neovim.md#windows-11-で-neovim-を入れる-の補足と注意点)の「選択した方針」）
-- **自分用の設定**: `%LOCALAPPDATA%\lazygit` に直接 clone する（シンボリックリンクには、開発者モードか管理者の権限が要るため）。状態ファイル `state.yml` は、そのリポジトリの `.gitignore` で除いてある
-- **確かめの起動は `%TEMP%\lazygit-check` の空のリポジトリで行う**
-  - 読者のリポジトリの場所を決め打ちできないため。git 管理外で起動すると、リポジトリを作るか聞かれる
-  - `git init` が失敗したまま起動すると、元のフォルダーでリポジトリを作るか聞かれるので、`.git` ができたことを確かめてから起動する
-- **`e` キーのエディタ**: PowerShell 7 から起動したときは、ユーザーの環境変数 `EDITOR` で決まる（[Windows 11 で Neovim を入れる の補足と注意点](neovim.md#windows-11-で-neovim-を入れる-の補足と注意点)の「選択した方針」）。自分用の設定は `os.editInTerminal` を `true` にした（`false` を明示すると、lazygit 0.66.0 ではプリセットより優先され、端末のエディタに端末が渡らない。ryo-aoki-pc/lazygit#10）
+</details>
+
+---
+
+### yazi で複数ファイルをまとめて開く
+
+- yazi で選択した複数ファイルを、`l` / Enter でまとめて開く
+- 前提: yazi・Neovim と自分用の設定が入り、smart-enter の `open_multi` が `true` になっている
+- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。手順 2 は yazi の画面
+
+1. 管理者ではない PowerShell 7 を開く。
+
+   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
+   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
+
+1. yazi を起動し、複数ファイルを選んでまとめて開く。
+
+   ```powershell
+   yazi
+   ```
+
+   - Space で複数ファイルを選び、`l` / Enter でまとめて開く
+   - `q` で yazi を閉じる
+   - **ほかのブロックは、yazi を閉じてから貼る**（yazi を開いたまま貼ると、yazi への入力になる）
+
+<details id="yazi-で複数ファイルをまとめて開く-の補足と注意点">
+  <summary>yazi で複数ファイルをまとめて開く の補足と注意点</summary>
+
+**注意点**
+
+- `l` / Enter で選択したファイルをまとめて開くには、smart-enter の `open_multi` が有効な設定を使う
 
 **参照**
 
@@ -1570,212 +1099,10 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
 ---
 
-### yazi
-
-- scoop で yazi と依存ツールを入れ、自分用の設定とプレビュー・移動を確かめる
-- 前提: [scoop](https://scoop.sh/)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 8・9 は WezTerm の新しい Git Bash のタブ
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 変数を設定する。
-
-   ```powershell
-   $YAZI_EXTRAS = @('ffmpeg', '7zip', 'jq', 'poppler', 'fd', 'ripgrep', 'fzf', 'resvg', 'imagemagick')   # プレビューと検索に使う。@() にすると yazi 本体だけ
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   'YAZI_EXTRAS = {0}' -f ($YAZI_EXTRAS -join ' ')
-   ```
-
-   - **編集が必須の変数は無い**
-   - 最小構成にするなら、`$YAZI_EXTRAS = @()` にする
-   - 減らして 1 つだけにするときも、`@('fd')` の形のままにする
-   - 最後の行で値を読み戻して確かめる
-   - **新しい PowerShell を開いたら**、先にこのブロックを貼り直す
-
-1. 管理者ではないことと、scoop・`file.exe`・VC++ のランタイム・ほかの yazi・設定を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell  = $PSVersionTable.PSVersion.ToString()
-     Admin       = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop       = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git         = (Get-Command git -ErrorAction SilentlyContinue).Source
-     FileExe     = Test-Path -LiteralPath 'C:\Program Files\Git\usr\bin\file.exe'
-     VCRuntime   = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-     Yazi        = (Get-Command yazi -All -ErrorAction SilentlyContinue).Source -join ', '
-     YaziFileOne = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
-     Config      = Test-Path -LiteralPath "$env:APPDATA\yazi\config"
-   } | Format-List
-   ```
-
-   - `PowerShell : 7.…`・`Admin : False`・`FileExe : True` が出ればよい。`Admin : True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す（この項の手順 2 も貼り直す）
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
-   - `Git` が `C:\Program Files\Git\cmd\git.exe` でないか、`FileExe : False` なら、先に [Git for Windows](https://gitforwindows.org/)
-   - `VCRuntime : False` なら、[Visual C++ 再頒布可能パッケージの公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れてから、この手順を貼り直す
-   - `Yazi` は空か `C:\Users\<WIN_USER>\scoop\shims\yazi.exe` ならよい。ほかの場所なら、中断し、既存の導入元と設定を確かめる
-   - `YaziFileOne` の元の値を控える。この項の手順 5 で Git for Windows の `file.exe` に上書きする
-
-1. scoop で yazi と、プレビュー・検索に使うツールを入れる。
-
-   ```powershell
-   if ($null -eq $YAZI_EXTRAS) { Write-Error '中断: この項の手順 2 の $YAZI_EXTRAS が無い。この項の手順 2 を貼り直す' } else { scoop install yazi @YAZI_EXTRAS }
-   ```
-
-   - アプリごとに `was installed successfully!` が出ればよい。導入済みのものは `is already installed.` が出て、飛ばされる
-   - `'ripgrep' suggests installing 'extras/vcredist2022'.` などの `suggests installing` の行は、入れなくてよい
-   - `中断:` と出たら、何も入れていない（新しい窓では、この項の手順 2 を貼り直す。yazi 本体だけにするなら `$YAZI_EXTRAS = @()`）
-
-1. ユーザーの環境変数 `YAZI_FILE_ONE` を Git for Windows の `file.exe` にする。
-
-   ```powershell
-   # yazi が使う file の場所を設定する
-   if (-not (Test-Path -LiteralPath 'C:\Program Files\Git\usr\bin\file.exe')) { Write-Error '中断: C:\Program Files\Git\usr\bin\file.exe が無い（「Git for Windows」で入れる）' } else {
-     [Environment]::SetEnvironmentVariable('YAZI_FILE_ONE', 'C:\Program Files\Git\usr\bin\file.exe', 'User')
-     $env:YAZI_FILE_ONE = [Environment]::GetEnvironmentVariable('YAZI_FILE_ONE', 'User')
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     'YAZI_FILE_ONE = {0}' -f $env:YAZI_FILE_ONE
-   }
-   ```
-
-   - `YAZI_FILE_ONE = C:\Program Files\Git\usr\bin\file.exe` が出ればよい
-   - ほかの窓は開き直してから効く（WezTerm は新しいタブから）
-   - `中断:` と出たら、何も変えていない
-
-1. 自分用の設定（[ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi)）を入れる。
-
-   - [yazi の設定を導入する](#yazi-の設定を導入する)の全項を通す
-   - `custom` が出れば、入っている
-   - 本体の依存と `YAZI_FILE_ONE` はこの項で設定済み。参照先は設定リポジトリの導入・確認を行う
-
-1. 版と、yazi から見た環境を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # yazi と ya の版を確認する
-   yazi --version
-   ya --version
-   # yazi の実行環境を確認する
-   ya env
-   ```
-
-   - `yazi --version` と `ya --version` に同じ `Version:` が出て、yazi の `Triple` が `windows-x86_64` ならよい
-   - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 3 で確かめる
-     - 窓が出たら、OK で閉じる
-   - `ya env` の `Config` の各行に `C:\Users\<WIN_USER>\AppData\Roaming\yazi\config\…` が出る
-     - 設定のフォルダーが無ければ、パスが見つからない旨と `os error 3` が出る
-     - フォルダーはあってファイルが無い行は、ファイルが見つからない旨と `os error 2`
-   - `Variables` の `YAZI_FILE_ONE` が `Some("C:\\Program Files\\Git\\usr\\bin\\file.exe")` ならよい
-   - `Dependencies` の `file` に版が出て、最後の `Routine` の `` `file -bL --mime-type` `` が `text/plain` ならよい
-   - `Dependencies` に、`$YAZI_EXTRAS` で入れたもの（ffmpeg・pdftoppm・magick・fzf・fd・rg・7z・resvg・jq）の版が出る
-
-1. WezTerm で新しいタブを開く。
-
-   - 自分用の WezTerm の設定では、新しいタブで Git Bash が開く
-   - **次の手順は、開いた Git Bash のタブに貼る**（bash の構文なので、PowerShell には貼らない）
-
-1. そのタブで `y` を確かめ、yazi を開く。
-
-   ```bash
-   printf '\n\033[7m 確認 \033[0m\n'
-   type -t y
-   y
-   ```
-
-   - `function` が出ればよい
-   - 最後の `y` で yazi が開く。別のフォルダーへ移って `q` で閉じると、Git Bash もそのフォルダーへ移る（`Q` なら移らない）
-   - **次の手順は、yazi を閉じて、この項の手順 1 の PowerShell に戻ってから貼る**（続けて貼ると、後ろの行も Git Bash で動き、PowerShell での確認にならない）
-
-1. yazi を起動して確かめる。
-
-   ```powershell
-   yazi
-   ```
-
-   - プレビューを確かめるには、PDF・動画・画像・書庫のあるフォルダーで右のペインを見る
-   - 画像のプレビューは、WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）の中で出る。conhost の窓では出ない
-   - `q` で閉じる
-   - **ほかのブロックは、`q` で閉じてから貼る**（yazi を開いたまま貼ると、yazi への入力になる）
-
-#### yazi の設定を導入する
-
-- Windows の yazi の既存設定を退避し、自分用の設定を入れる
-- 前提: [yazi](#yazi)の手順 1〜5 までを通し、本体と依存ツールを入れ、`YAZI_FILE_ONE` を設定してある。Git も[Git for Windows](https://gitforwindows.org/)で入れてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- yazi をすべて閉じてから始める。既存設定の確認と、この項の手順 2 の退避を省かない
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. yazi を終了し、自分用の設定を clone する。
-
-   ```powershell
-   # yazi の設定を退避して取得する
-   $dst = "$env:APPDATA\yazi\config"
-   if ((Test-Path -LiteralPath $dst) -and (Test-Path -LiteralPath "$dst.bak")) {
-     Write-Error "中断: $dst.bak が既にある。中身を確かめて片付けてから貼り直す"
-   } else {
-     if (Test-Path -LiteralPath $dst) { Move-Item -LiteralPath $dst -Destination "$dst.bak" -ErrorAction Stop }
-     git clone -b custom https://github.com/ryo-aoki-pc/yazi.git $dst
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     git -C $dst branch --show-current
-   }
-   ```
-
-   - `custom` ブランチを使う。導入先は `%APPDATA%\yazi\config`
-   - 既存設定と `.bak` が両方ある場合は何も変更せず中断する
-   - `ya env` の Config で読み込む場所を確かめる
-
-#### yazi で複数ファイルをまとめて開く
-
-- yazi で選択した複数ファイルを、`l` / `<Enter>` でまとめて開く設定を足す
-- 前提: [yazi](#yazi)と[Neovim](neovim.md#windows-11-で-neovim-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2・3 は Neovim、手順 4 は yazi の画面
-- 既存の `init.lua` の変更を確かめ、yazi をすべて閉じてから始める
-- `l` / `<Enter>` は既定でホバー中の 1 ファイルだけを開く。選択した複数ファイルをまとめて開くときだけ行う
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. yazi の `init.lua` を Neovim で開く。
-
-   ```powershell
-   nvim "$env:APPDATA\yazi\config\init.lua"
-   ```
-
-   - 既存の `init.lua` の本文が開けばよい
-   - **次の手順は、Esc → `G` → `o` で末尾に行を足し、挿入モードの本文に貼る**（PowerShell には貼らない）
-
-1. Neovim で開いた `init.lua` に、複数ファイルを開く行を足す。
-
-   ```lua
-   require("smart-enter"):setup { open_multi = true }
-   ```
-
-   - 貼り終えたら Esc を押し、`:wq` を打って Enter で保存して閉じる
-   - **次の手順は、Neovim を閉じてから、この項の手順 1 の PowerShell に貼る**（Neovim を開いたまま貼ると、Neovim への入力になる）
-
-1. yazi を起動し、選択した複数ファイルをまとめて開けるか確かめる。
-
-   ```powershell
-   yazi
-   ```
-
-   - 選択した複数ファイルが `l` / `<Enter>` でまとめて開けばよい
-   - `q` で yazi を閉じる
-   - **ほかのブロックは、yazi を閉じてから貼る**（yazi を開いたまま貼ると、yazi への入力になる）
-
-#### yazi の設定を更新する
+### yazi の設定を更新する
 
 - 自分用の yazi の設定の clone を GitHub の `custom` に合わせる。持ち主が上流の新しい版に合わせて `custom` を載せ替えた（force push した）後も、この項で合わせる
-- 前提: [yazi の設定を導入する](#yazi-の設定を導入する)を通してある
+- 前提: yazi と自分用の設定が入り、`%APPDATA%\yazi\config` が `custom` ブランチの clone になっている
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 の手元の変更の確認を省かない
 - yazi 本体は[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 
@@ -1843,8 +1170,7 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 
    - `status` が `## custom...origin/custom` の 1 行だけになり、その後ろに手元の変更の差分が出ればよい
    - 手元の変更は、ぶつからなかったファイルの分も作業ツリーから消え、stash にだけ残っている
-   - `init.lua` の `open_multi` の行は、[yazi で複数ファイルをまとめて開く](#yazi-で複数ファイルをまとめて開く)を通し直して足す。新しい `init.lua` に同じ行が既にあれば、足さない
-   - ほかの変更は、要るものをエディタで書き直す
+   - 複数ファイルをまとめて開く設定を含め、要る変更をエディタで書き直す。新しい設定に同じ内容が既にあれば、足さない
    - 書き直したら、`git -C "$env:APPDATA\yazi\config" stash drop` で stash を消す
 
 1. 設定の元にした上流の版と、入っている本体の版を比べる。
@@ -1860,55 +1186,8 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
    - `upstream/v…` の版と、その後ろの `Version:` の版が同じならよい
    - 本体の方が古ければ、[scoop・winget・WSL を上げる](#scoopwingetwsl-を上げる)の手順 2・3 で上げる
 
-<details id="yazi-の補足と注意点">
-  <summary>yazi の補足と注意点</summary>
-
-**注意点**
-
-- **yazi: Windows 11 では、`file` を `YAZI_FILE_ONE` で渡す**: 無いと PowerShell から起動した yazi はファイルの種類が分からず、開く・プレビューの規則が効かない（[yazi](#yazi)の手順 5）。Git for Windows を外すと、同じことになる
-  - PowerShell の `PATH` には `file` が無い（Git Bash には `/usr/bin/file` がある）
-
-- **yazi: Windows 11 の画像プレビューは、端末と ConPTY に依存する**: WezTerm（nightly）か Windows Terminal（1.22.10352.0 以降）で出る。ConPTY の制約で、Linux と同じには出ないことがある
-
-**[yazi](#yazi)の手順 2: 変数について**
-
-- 既定は、プレビュー・検索用のツールを一緒に入れる想定になっている（どれも scoop の main のバケットにある）
-- 1 つだけにするときも `@('fd')` の形のままにするのは、`'fd'` だけにすると、1 文字ずつ別の名前として scoop に渡るため
-
-**[yazi](#yazi)の手順 3: 確かめる値の意味**
-
-- ほかの場所の yazi を外すのは、混ざらないようにするため
-- `Config : True` なら、設定がもうある（[yazi の設定ファイル](almalinux-setup.md#yazi-の設定ファイル)）
-
-**[yazi](#yazi)の手順 4**
-
-- scoop の `file` は入れない
-
-- 導入時の行は `'yazi' (26.9.1) was installed successfully!` などの形
-
-**[yazi](#yazi)の手順 4: 版と、出る行・環境変数**
-
-- [yazi](#yazi)の手順 4 の `'yazi' (<版>) was installed successfully!` と、[yazi](#yazi)の手順 7 の `Version:` の版は、実行した日の最新
-- `suggests installing` の行のものを入れなくてよいのは、VC++ のランタイムを[yazi](#yazi)の手順 3 で確かめてあるため
-- imagemagick が足すユーザーの環境変数（`MAGICK_HOME` など）と `PATH` は、今の窓にも入る。ほかの開いている窓は、開き直してから効く
-
-**[yazi](#yazi)の手順 5**
-
-- 何度貼ってもよい
-
-- ユーザーの環境変数は、今の窓にも入れる
-
-**[yazi](#yazi)の手順 7**
-
-- 版の表示は、yazi と ya が `Version: 26.9.1 (…)` の形
-
-**[yazi](#yazi)の手順 9**
-
-- Git Bash の `y` の確かめは、[yazi](almalinux-setup.md#yazi)の手順 4 と同じ
-
-**[yazi](#yazi)の手順 10**
-
-- 既定の端末が Windows Terminal の PC では、この窓も Windows Terminal で開く
+<details id="yazi-の設定を更新する-の補足と注意点">
+  <summary>yazi の設定を更新する の補足と注意点</summary>
 
 **[yazi の設定を更新する](#yazi-の設定を更新する)の手順 3**
 
@@ -1925,42 +1204,11 @@ gh 2.102.0 のソースを読んで決めた（検証記録の付録（`docs/ver
 **[yazi の設定を更新する](#yazi-の設定を更新する)の手順 5: autostash の衝突と reset の範囲**
 
 - reset の範囲は、[yazi の補足と注意点](almalinux-setup.md#yazi-の補足と注意点)の「yazi の設定を更新するの手順 4: autostash の衝突と reset の範囲」を参照する
-- Windows の git 2.55.0.windows.5 の文言は、[lazygit の補足と注意点](#lazygit-の補足と注意点)の「lazygit の設定を更新するの手順 5: autostash の衝突と reset の範囲」と同じ
+- Windows の git 2.55.0.windows.5 の文言は、[lazygit の補足と注意点](#lazygit-の設定を更新する-の補足と注意点)の「lazygit の設定を更新するの手順 5: autostash の衝突と reset の範囲」と同じ
 
 **[yazi の設定を更新する](#yazi-の設定を更新する)の手順 6**
 
 - 比べる表示の例は、`upstream/v26.9.1` と `Version: 26.9.1`
-
-**選択した方針**
-
-[yazi](#yazi)の理由。**Windows 実機では未検証**（検証記録（`docs/verification/windows-setup.md` の「yazi: Windows 11 で使う: 検証状況の記録」））。
-
-- **scoop の main の `yazi`**: yazi の公式の文書が Windows で案内する経路の 1 つ。依存のツールも main にある
-- **`$YAZI_EXTRAS` は、AlmaLinux 10 の `YAZI_EXTRAS` に合わせた**
-  - scoop の依存ツールの一覧には zoxide を含めない。Git Bash で zoxide 0.9.9 が使えることを前提にする
-  - Homebrew の `font-symbols-only-nerd-font` の代わりは、[HackGen](https://github.com/yuru7/HackGen)の HackGen Console NF
-  - 変数が無いまま `scoop install yazi @YAZI_EXTRAS` を流すと、空の引数が 1 つ scoop に渡った（Linux の PowerShell 7.5.3 での模擬。検証記録の付録（`docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））
-    - そのため、[yazi](#yazi)の手順 4 は、[yazi](#yazi)の手順 2 を貼っていない窓では止める
-- **`file` は、Git for Windows の `usr\bin\file.exe` を `YAZI_FILE_ONE` で渡す**
-  - yazi の文書が勧める唯一の形。scoop・Chocolatey の `file` は Unicode のファイル名を扱えない
-  - yazi は `YAZI_FILE_ONE` をシェルを通さずに起動するので、`Program Files` の空白は問題にならない
-    - yazi 26.9.1 の `yazi-plugin/preset/plugins/mime-local.lua`・`file.lua` は、`Command(<YAZI_FILE_ONE の値>)` で起動する
-    - Lua の `Command` は、`yazi-binding/src/process/command.rs` の `tokio::process::Command::new`（シェルを挟まない）。`ya env` も `Command::new` で動かす（`yazi-cli/src/env/env.rs`）
-  - PowerShell の `PATH` には `file` が無い。Git Bash には `/usr/bin/file` があるが、PowerShell や Windows Terminal から起動したときにも同じに動くよう、ユーザーの環境変数にする
-  - [yazi](#yazi)の手順 5 は、前の値を確かめずに上書きする。元の値は[yazi](#yazi)の手順 3 で控える
-- **VC++ のランタイムは x64 版を前提にする**: yazi 26.9.1 の Windows 版（msvc）の `yazi.exe`・`ya.exe` は `VCRUNTIME140.dll` を使い、scoop の `yazi` はランタイムを入れない（リリースの zip のインポート表。検証記録の付録（`docs/verification/windows-setup.md` の「yazi: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））
-- **設定は `%APPDATA%\yazi\config`**: Windows の yazi は `XDG_CONFIG_HOME` を見ない（yazi 26.9.1 の `yazi-fs/src/xdg.rs`）。状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`。自分用の設定は、[yazi の設定を導入する](#yazi-の設定を導入する)で入れる
-- **`y` は Git Bash の共通の設定だけで使う**: 手順書の PowerShell のブロックは PowerShell 7 に貼る。Windows PowerShell 5.1 に貼る項は、その項のリードに書く。PowerShell 版の `y` は足さず、WezTerm の自分用の設定は、Windows の新しいタブで Git Bash を開く
-  - PowerShell 版の `y` は、この文書の範囲の外にする
-- **ファイルを開くエディタは、自分用の設定の Neovim を前提にした**（Windows 11 で使うのリードで、先に Neovim を通すよう案内する）
-  - 上流の既定（yazi 26.9.1 の `yazi-config/preset/yazi-default.toml`）の `[opener]` の `edit` は、Windows では `code %s` と `code -w %s`（VS Code）
-  - `${EDITOR:-vi}` は `for = "unix"` の行だけで、Windows の yazi は `EDITOR` を見ない
-  - テキスト（`text/*`）は `edit` が最初の候補なので、自分用の設定が無いと、Git Bash の `y` から開いても Enter で `code` が動く
-  - 自分用の設定（`ryo-aoki-pc/yazi` の `yazi.toml`）は、Windows の `edit` を `nvim %s`（`block = true`）にしてある
-- **確かめは `ya env`**: 26.9.1 には `yazi --debug` が無く、`ya env` が設定の場所・変数・依存の版・`file -bL --mime-type` の結果を出す
-- **TUI の手順を節の最後にした**: Git Bash の `y` の確かめを先にし、PowerShell の `yazi` の起動を最後に置いた
-  - Git Bash のタブを開くところ（コマンドの無い[yazi](#yazi)の手順 8）と、そこに貼る `type -t y` と `y`（`bash` のブロックの手順 9。Git と同じく、Git Bash には bash の構文で貼る）を分けた
-  - [yazi](#yazi)の手順 9 の `y` も TUI を開くので、[yazi](#yazi)の手順 9 の最後で閉じてから PowerShell に戻る
 
 **参照**
 
