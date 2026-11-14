@@ -1723,7 +1723,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
    - `HackGen` のフォントの登録が 4 行出ればよい
    - `中断:` で始まるエラーが出たら、そこで止まっている
-   - アプリで使えるのは、[再起動](windows-setup.md#再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 3）
+   - アプリで使えるのは、[再起動](windows-setup.md#再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 1）
 
 #### HackGen Console NF を上げる
 
@@ -1777,7 +1777,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 新しい版にするときだけ、直した導入の手順で入れ直し、版を確かめる。
 
    - 直した[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 を貼る
-   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 3 で確かめる
+   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 1 で確かめる
 
 <details id="windows-11-で-hackgen-console-nf-を入れる-の補足と注意点">
   <summary>Windows 11 で HackGen Console NF を入れる の補足と注意点</summary>
@@ -1846,7 +1846,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 ### Windows Terminal のフォントと貼り付けの警告を変える
 
 - Windows Terminal のフォントを HackGen にし、必要なら複数行の貼り付けの警告を切る
-- 前提: [Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)を通し、サインインし直してある。Windows Terminal が入り、Microsoft Store のアプリの更新を済ませてある
+- 前提: [Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)を通し、サインインし直してある。Windows Terminal を[公式の導入案内](https://learn.microsoft.com/en-us/windows/terminal/install)に従って入れ、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者ではない Windows Terminal の PowerShell 7 のタブ。この項の手順 1 で開く
 
 - **この項の手順 5 は Windows Terminal の設定の画面で行う**
@@ -1991,7 +1991,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 #### Windows Terminal で複数行を 1 つの入力として貼る
 
 - Windows Terminal に貼った複数行を 1 つの入力にするため、Enter の割り当てをプロファイルに足す。ほかの手順書の PowerShell のブロックは、この項を通した窓に貼る前提で書いてある
-- 前提: 使う版のユーザープロファイルが存在して読み込め、PSReadLine の Ctrl+Enter が `AddLine` に割り当てられている。Windows Terminal が入り、Microsoft Store のアプリの更新を済ませてある
+- 前提: 使う版のユーザープロファイルが存在して読み込め、PSReadLine の Ctrl+Enter が `AddLine` に割り当てられている。Windows Terminal を[公式の導入案内](https://learn.microsoft.com/en-us/windows/terminal/install)に従って入れ、Microsoft Store のアプリの更新を済ませてある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 3・4 は、Windows Terminal の新しいタブ
 - 同じプロファイルを読む窓すべてに効く（管理者の窓も）。構文エラーがあれば全体が動かない
 
@@ -2093,7 +2093,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 **[Windows Terminal のフォントと貼り付けの警告を変える](#windows-terminal-のフォントと貼り付けの警告を変える)の手順 3: フォント**
 
 - `profiles.defaults.font.face`。既定は `Cascadia Mono`（見つからなければ Consolas）、大きさは 12（WezTerm の自分用の設定も 12）
-- [Windows 11 のセットアップの「表示と入力」の手順 6](windows-setup.md#表示と入力)で既定の端末にしたので、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
+- 既定の端末が Windows Terminal の PC では、スタートメニューから開いた管理者ではない窓は Windows Terminal に渡される。Windows Terminal は、コマンド ラインが一致するプロファイル（Windows PowerShell など）を使い、無ければ `profiles.defaults` を使う（`CascadiaSettings.cpp`）。新しく作る設定の Windows PowerShell とコマンド プロンプトのプロファイルは、自分のフォントを持たない（`userDefaults.json`）ので、`profiles.defaults` が効く
 - 管理者として開いた窓（conhost）のフォントは、`HKCU\Console` などの別の設定で、この節では扱わない
 - hackgen.md は自分のユーザーのフォントに入れ、パッケージのアプリ向けに読み取りの権限（`S-1-15-2-1`・`S-1-15-2-2`）を足す。MSIX の Windows Terminal から見えるかは確かめていない
 - 見つからないと、設定の画面に「見つからないフォント:」、端末に「次のフォントが見つかりません: …」が出る（`Resources.resw` の日本語の訳）
@@ -3379,7 +3379,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
 - プロファイルは PowerShell 7 の `$PROFILE`（CurrentUserCurrentHost）で、ドキュメントの既知のフォルダーの下の `PowerShell\Microsoft.PowerShell_profile.ps1`（`CorePsPlatform.cs`・about_Profiles）。書き先を明示するため、`[Environment]::GetFolderPath('MyDocuments')` で求める。PowerShell はプロファイルを自分では作らない。MSIX の PowerShell 7 は、全ユーザーのプロファイル（`$PSHOME`）を使えない
 - Ctrl+Enter: PowerShell 7.5 の PSReadLine 2.3.6 と、7.6 の 2.4.5 も、Windows モードの Ctrl+Enter は `InsertLineAbove`（`KeyBindings.cs`）
-  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり（[Windows 11 のセットアップの「表示と入力」の手順 6](windows-setup.md#表示と入力)の補足）、Ctrl+Enter が `AddLine` に割り当てられていなければ、右クリックで貼ると 5.1 と同じく行が逆順になるはず
+  - スタートメニューから管理者として開いた PowerShell 7 は conhost の窓になり、Ctrl+Enter が `AddLine` に割り当てられていなければ、右クリックで貼ると 5.1 と同じく行が逆順になるはず
   - Windows Terminal は、貼るときに LF を CR に直す（`ControlCore::PasteText`）ので起きない。WezTerm（Windows では、貼るときに改行を CRLF に直す）は確かめていない
 - ↑/↓: `HistorySearchBackward`・`HistorySearchForward`（既定は F8・Shift+F8 に割り当て）。[共通の bash 設定](#共通の-bash-設定)の `~/.inputrc` の `history-search-backward` と同じく、打った文字で始まる履歴だけを出す
   - `-HistorySearchCursorMovesToEnd` は付けない（既定の False で、カーソルは打った文字の後ろに残る。bash と同じ）。Microsoft の `SamplePSReadLineProfile.ps1` は付けている

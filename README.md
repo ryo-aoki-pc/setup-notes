@@ -8,7 +8,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 | 手順書 | 対象 | 内容 |
 | --- | --- | --- |
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | デスクトップ、RDP の切断、SSH、Git と開発の道具と更新 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合とフォントの確認、RDP の切断、SSH、Git と開発の道具と更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 のプロファイル、PowerShell の開発の設定 |
 | [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | Neovim の導入と設定 |
@@ -40,7 +40,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### デスクトップ
 
-- AlmaLinux 10 は[日本語入力](docs/almalinux-setup.md#日本語入力)・[GNOME の表示と入力](docs/almalinux-setup.md#gnome-の表示と入力)・[画面オフ・画面ロック・自動サスペンド](docs/almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)、Windows 11 は[表示と入力](docs/windows-setup.md#表示と入力)・[表示・入力・音・ストレージ](docs/windows-setup.md#表示入力音ストレージを変える)を設定する
+- AlmaLinux 10 は[日本語入力](docs/almalinux-setup.md#日本語入力)・[GNOME の表示と入力](docs/almalinux-setup.md#gnome-の表示と入力)・[画面オフ・画面ロック・自動サスペンド](docs/almalinux-setup.md#画面オフ画面ロック自動サスペンドを止める)を設定する
 
 ### リモート接続
 
