@@ -65,7 +65,7 @@ PowerShell 7 のプロファイル・Windows Terminal の項の資料。「文�
 
 1. Hotkey Screener を起動する。
 
-   - 配置先の `hkscr64.exe` を開く
+   - Hotkey Screener を入れた場所の `hkscr64.exe` を開く
    - 問題が起きているアプリと、普段使う常駐アプリを起動した状態で行う
    - アプリの起動・終了後に一覧を更新するときは `Refresh` を押す
 
