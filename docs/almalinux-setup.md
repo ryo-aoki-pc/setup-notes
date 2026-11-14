@@ -2242,9 +2242,9 @@
 #### 改行を変換して clone したリポジトリを直す
 
 - 改行を変換する設定（`core.autocrlf=true`）のときに clone したリポジトリは、作業ツリーのファイルが CRLF のまま残る
-- [Git](#git)の手順 4 の後は、それらが変更ありと出る。編集してコミットすると、CRLF で入る
+- `core.autocrlf=false` にした後は、それらが変更ありと出る。編集してコミットすると、CRLF で入る
 - Windows で、Git for Windows の既定の設定のまま clone したリポジトリが当たる
-- 前提: [Git](#git)を通してある
+- 前提: `core.autocrlf=false` が設定され、改行を変換しない状態になっている（AlmaLinux 10 は[Git](#git)）
 - 実行場所: 自分のユーザーの端末（bash。Windows 11 では Git Bash）の、直すリポジトリのトップのディレクトリ。リポジトリごとに、この項の手順 1 から貼る
 - **この項の手順 3 は、作業ツリーの追跡しているファイルをすべて書き直し、未コミットの変更を消す**。この項の手順 1 で変更が出たら、手順 2 で退避してから貼る
 
@@ -2605,8 +2605,6 @@ aarch64 で降ってくるボトルは `git-delta--0.19.2.arm64_linux.bottle.tar
 - [git-for-windows/MINGW-packages — git-wrapper.c](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/git-wrapper.c)・[mingw-w64-git.mak](https://github.com/git-for-windows/MINGW-packages/blob/main/mingw-w64-git/mingw-w64-git.mak) — `cmd\git.exe` が PATH の先頭に `usr\bin` を足すこと
 - [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) — `install`・`update`・`uninstall` の表示と、arm64 の Windows 11 で x64 の定義を使うこと（`lib/manifest.ps1` の `Get-SupportedArchitecture`）
 - [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) — 自分用の lazygit の設定。README の「前提ツール」と「Windows で使う場合」
-- [scoop の公式の導入案内](https://scoop.sh/)・[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する) — Windows 11 の導入とプロファイル
-- [Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる) — VC++ ランタイム（[Windows 11 で WezTerm を入れる](shell-terminal.md#windows-11-で-wezterm-を入れる)の手順 3）と、Git Bash で開く自分用の設定
 
 - 検証記録（`docs/verification/almalinux-setup.md`）
 
@@ -2741,7 +2739,6 @@ AlmaLinux 10.2 の dnf は **4.20.0**（`dnf5` パッケージは未導入）な
 - [cli/go-gh v2.16.1 — pkg/config/config.go](https://github.com/cli/go-gh/blob/v2.16.1/pkg/config/config.go) — 設定・状態・データ・キャッシュの場所
 - [zalando/go-keyring v0.2.8 — keyring_windows.go](https://github.com/zalando/go-keyring/blob/v0.2.8/keyring_windows.go) — 資格情報マネージャーの項目の名前
 - [GitHub CLI manual — gh help environment](https://cli.github.com/manual/gh_help_environment) — `GH_CONFIG_DIR`・`GH_PATH` など
-- [scoop の公式の導入案内](https://scoop.sh/)・[PowerShell 7 のプロファイルを設定する](shell-terminal.md#powershell-7-のプロファイルを設定する) — Windows 11 の導入とプロファイル。[Git](#git) — Git for Windows と、その Git Credential Manager
 
 - 検証記録（`docs/verification/almalinux-setup.md`）
 
@@ -2953,8 +2950,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
   - Windows 11 は[lazygit](windows-setup.md#lazygit)の手順 5。リンクにせず `%LOCALAPPDATA%\lazygit` に直接 clone する
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）にする
-    - Windows 11 への導入は[Windows 11 で HackGen Console NF を入れる](shell-terminal.md#windows-11-で-hackgen-console-nf-を入れる)。WezTerm は自分用の設定で変わる
-    - Windows Terminal のフォントは[Windows Terminal のフォントと貼り付けの警告を変える](shell-terminal.md#windows-terminal-のフォントと貼り付けの警告を変える)で変える
   - 差分に delta を使う（[git-delta](#git-delta)・[git-delta](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 3）
     - Windows 11 で Windows PowerShell から起動するなら、[Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
@@ -3279,7 +3274,6 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
   - Windows 11 は[yazi](windows-setup.md#yazi)の手順 6。`custom` を `%APPDATA%\yazi\config` に clone する
   - キーは[独自キーバインド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、外部コマンドは[依存コマンド](https://github.com/ryo-aoki-pc/yazi#依存コマンド)を参照する
   - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](neovim.md#neovim)、zoxide と fzf のキー操作は[シェルのツール](shell-terminal.md#シェルのツール)で入れる
-    - Windows 11 の Git Bash の fzf のキー操作と zoxide は、[シェルのツールを入れる](shell-terminal.md#シェルのツールを入れる)で入る（zoxide は 0.9.9 に止める）
   - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
 
 **[yazi の設定を導入する](#yazi-の設定を導入する)の手順 1**
