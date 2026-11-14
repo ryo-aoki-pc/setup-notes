@@ -1723,7 +1723,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 
    - `HackGen` のフォントの登録が 4 行出ればよい
    - `中断:` で始まるエラーが出たら、そこで止まっている
-   - アプリで使えるのは、[再起動](windows-setup.md#再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 4）
+   - アプリで使えるのは、[再起動](windows-setup.md#再起動)の手順 2 の再起動の後（確かめるのは[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 3）
 
 #### HackGen Console NF を上げる
 
@@ -1777,7 +1777,7 @@ EL10 は glibc 2.39 / OpenSSL 3.5（`libssl.so.3` の soname と `OPENSSL_3.0.0`
 1. 新しい版にするときだけ、直した導入の手順で入れ直し、版を確かめる。
 
    - 直した[Windows 11 で HackGen Console NF を入れる](#windows-11-で-hackgen-console-nf-を入れる)の手順 3 を貼る
-   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 4 で確かめる
+   - サインアウトしてサインインし直してから、[再起動の後に確かめる](windows-setup.md#再起動の後に確かめる)の手順 3 で確かめる
 
 <details id="windows-11-で-hackgen-console-nf-を入れる-の補足と注意点">
   <summary>Windows 11 で HackGen Console NF を入れる の補足と注意点</summary>

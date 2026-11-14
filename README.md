@@ -8,7 +8,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 | 手順書 | 対象 | 内容 |
 | --- | --- | --- |
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | 基本の設定、デスクトップ、ネットワークとリモート操作、SSH、Git と開発の道具、アプリと更新 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | デスクトップ、RDP の切断、SSH、Git と開発の道具と更新 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | 共通の bash 設定、シェルのツール、HackGen Console NF、WezTerm、Git Bash の設定、Windows Terminal、PowerShell 7 のプロファイル、PowerShell の開発の設定 |
 | [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | Neovim の導入と設定 |
@@ -35,7 +35,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### ほかの手順書が使う仕組み
 
-- ほかの手順書が前提にする設定は、AlmaLinux 10 の [linger（ユーザーサービスの常駐）](docs/almalinux-setup.md#ユーザーサービスの常駐)・[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)・[Secure Boot の MOK](docs/almalinux-setup.md#secure-boot-の署名鍵)、Windows 11 の[LAN をプライベートにする手順](docs/windows-setup.md#ネットワークとリモート)にまとめてある。使う側の手順書は、その項を名指しする
+- ほかの手順書が前提にする設定は、AlmaLinux 10 の [linger（ユーザーサービスの常駐）](docs/almalinux-setup.md#ユーザーサービスの常駐)・[ssh の SOCKS トンネル](docs/almalinux-setup.md#ssh-の-socks-トンネル)・[Secure Boot の MOK](docs/almalinux-setup.md#secure-boot-の署名鍵)にまとめてある。使う側の手順書は、その項を名指しする
 - 設定はユーザーやホストに 1 つなので、別の用途で設定済みなら確認だけでよい
 
 ### デスクトップ
@@ -45,7 +45,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 ### リモート接続
 
 - GNOME は[デスクトップ共有](docs/gnome-remote.md#gnome-のデスクトップ共有)・[ヘッドレスセッション](docs/gnome-remote.md#gnome-のヘッドレスセッション)・[リモートログイン](docs/gnome-remote.md#gnome-のリモートログイン)から選ぶ
-- Windows 11 の [SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)・[RDP](docs/windows-setup.md#ネットワークとリモート)の手順を通す
+- Windows 11 の [SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)の手順を通す。RDP は[リモート デスクトップの公式の案内](https://support.microsoft.com/en-us/windows/how-to-use-remote-desktop-5fe128d5-8fb1-7a23-3b8a-41e636865e8c)に従って有効にする。接続した後は[RDP をロックせずに切断](docs/windows-setup.md#rdp-をロックせずに切断)を使える
 
 ### ファイル共有
 
@@ -83,7 +83,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### ブラウザ
 
-- Firefox は [AlmaLinux 10](docs/almalinux-setup.md#firefox)・[Windows 11](docs/windows-setup.md#firefox) の「Firefox」で入れる
+- Firefox は AlmaLinux 10 の「[Firefox](docs/almalinux-setup.md#firefox)」、Windows 11 では[Firefox の公式の案内](https://www.firefox.com/ja/)に従って入れる
 
 ### Windows の入力の切り分け
 
