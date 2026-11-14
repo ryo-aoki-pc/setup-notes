@@ -8,10 +8,10 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 | 手順書 | 対象 | 内容 |
 | --- | --- | --- |
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合、RDP の切断、SSH、Git と開発の道具と更新 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合、RDP の切断、SSH、lazygit・yazi の設定の更新と使い方 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | AlmaLinux 10 の bash・シェルのツール・フォント・WezTerm の導入と使い方、Windows 11 のフォント・設定・開発用モジュールの更新 |
-| [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | Neovim の導入と設定 |
+| [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | AlmaLinux 10 の導入と設定、Windows 11 の設定・プラグインの更新 |
 | [仮想マシンのセットアップ](docs/virtual-machines.md) | Windows 11・AlmaLinux 10 | VirtualBox、bootc ゲスト、kvm-container、Hyper-V、VMware Workstation Pro、Windows Sandbox |
 | [Samba のセットアップ](docs/samba.md) | Windows 11・AlmaLinux 10 | Samba サーバーと、両 OS のクライアント |
 | [GNOME のリモート操作のセットアップ](docs/gnome-remote.md) | AlmaLinux 10 | デスクトップ共有、ヘッドレスセッション、リモートログイン |
@@ -57,15 +57,15 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 ### ファイル・ディスク・リソースを見る
 
-- bat・eza はシェルと端末の「[シェルのツール](docs/shell-terminal.md#シェルのツール)」（AlmaLinux 10）、yazi は [AlmaLinux 10](docs/almalinux-setup.md#yazi)・[Windows 11](docs/windows-setup.md#yazi)、ディスク使用量は [gdu](docs/almalinux-setup.md#gdu)、CPU・メモリなどは [btop](docs/almalinux-setup.md#btop) で見る
+- bat・eza はシェルと端末の「[シェルのツール](docs/shell-terminal.md#シェルのツール)」（AlmaLinux 10）、yazi は [AlmaLinux 10 の手順](docs/almalinux-setup.md#yazi)・[Windows 11 の公式の導入案内](https://yazi-rs.github.io/docs/installation/)、ディスク使用量は [gdu](docs/almalinux-setup.md#gdu)、CPU・メモリなどは [btop](docs/almalinux-setup.md#btop) で見る
 
 ### エディタ
 
-- 端末では Neovim（[AlmaLinux 10](docs/neovim.md#neovim) / [Windows 11](docs/neovim.md#windows-11-で-neovim-を入れる)）、GUI では AlmaLinux 10 の [VS Code](docs/almalinux-setup.md#vs-code) を入れる
+- 端末では Neovim（[AlmaLinux 10](docs/neovim.md#neovim) / [Windows 11 の公式の導入案内](https://neovim.io/doc/install/)）、GUI では AlmaLinux 10 の [VS Code](docs/almalinux-setup.md#vs-code) を入れる
 
 ### git と GitHub
 
-- Git は AlmaLinux 10 の「[Git](docs/almalinux-setup.md#git)」・Windows 11 の「[Git for Windows](https://gitforwindows.org/)」、git-delta・lazygit・GitHub CLI は [AlmaLinux 10](docs/almalinux-setup.md#git-と開発の道具)・[Windows 11](docs/windows-setup.md#git-と開発の道具) の「Git と開発の道具」で入れる
+- Git は AlmaLinux 10 の「[Git](docs/almalinux-setup.md#git)」・Windows 11 の「[Git for Windows](https://gitforwindows.org/)」、git-delta・lazygit・GitHub CLI は [AlmaLinux 10 の「Git と開発の道具」](docs/almalinux-setup.md#git-と開発の道具)で入れる。Windows 11 は [delta](https://dandavison.github.io/delta/installation.html)・[lazygit](https://github.com/jesseduffield/lazygit#installation)・[GitHub CLI](https://github.com/cli/cli#installation) の公式の導入案内に従う。導入済みの lazygit・yazi の設定の更新と使い方は [Windows 11 の「Git と開発の道具」](docs/windows-setup.md#git-と開発の道具)にある
 
 ### 開発の補助
 

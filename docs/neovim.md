@@ -1,6 +1,6 @@
 # Neovim のセットアップ（AlmaLinux 10・Windows 11）
 
-- Neovim を入れ、自分用の設定（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)。LazyVim をもとにした設定）を導入する。AlmaLinux 10 は Homebrew、Windows 11 は scoop で入れる
+- AlmaLinux 10 は Homebrew で Neovim と自分用の設定（[LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter)。LazyVim をもとにした設定）を導入する。Windows 11 は、導入済みの設定とプラグインを更新する
 
 > [!IMPORTANT]
 >
@@ -130,10 +130,9 @@
 #### Neovim の設定ファイル
 
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値（素の Vim に近い挙動）で動く
-  - Windows 11 では `XDG_CONFIG_HOME` を設定しない（[Windows 11 で Neovim を入れる の補足と注意点](#windows-11-で-neovim-を入れる-の補足と注意点)の「選択した方針」）
+  - Windows 11 は、`XDG_CONFIG_HOME` が未設定の状態を前提にする
   - 導入は[Neovim](#neovim)の手順 2
-  - Windows 11 では既存の設定とデータを `.bak` に退避し、外部コマンドと設定を入れる
-  - Windows 11 は、[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 4 で通す
+  - Windows 11 は、`%LOCALAPPDATA%\nvim` に自分用の設定が入っていることを前提にする
 - インターネットに出られないホストで、Mason が npm で入れるパッケージ（LSP サーバー・リンター）を入れるなら、[npm のオフライン導入](almalinux-setup.md#npm-のオフライン導入) を通す
 
 #### LazyVim の設定を導入する
@@ -576,7 +575,7 @@
 
 **[Neovim の設定ファイル](#neovim-の設定ファイル)のリード**
 
-- Windows 11 の場所は[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 5 で確かめる
+- Windows 11 の設定は `%LOCALAPPDATA%\nvim`、データは `%LOCALAPPDATA%\nvim-data` にある
 - **自分用の設定**は [ryo-aoki-pc/LazyVimStarter](https://github.com/ryo-aoki-pc/LazyVimStarter) にある（LazyVim をベースに、日本語の入力・検索と Markdown（GLFM）の執筆を強くした設定）
 - 何ができるか・どこを変えたかは [README の「主なカスタマイズ」](https://github.com/ryo-aoki-pc/LazyVimStarter#主なカスタマイズ)
 
@@ -692,236 +691,14 @@
 
 ## Windows 11 で使う
 
-- Neovim と、自分用の LazyVim の設定
+- 導入済みの Neovim と自分用の設定・プラグインを更新する
 
-### Windows 11 で Neovim を入れる
-
-- scoop で Neovim を入れ、自分用の LazyVim の設定を導入する
-- 前提: [scoop](https://scoop.sh/)・[HackGen Console NF](https://github.com/yuru7/HackGen)を導入し、WezTerm の Git Bash と共通の bash 設定が使える。Visual C++ ランタイムの x64 版も[公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- scoop 版と、winget などで入れた Neovim は片方だけにする
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 管理者ではないことと、scoop・git・VC++ のランタイム・ほかの Neovim を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   [pscustomobject]@{
-     PowerShell = $PSVersionTable.PSVersion.ToString()
-     Admin      = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-     Scoop      = (Get-Command scoop -ErrorAction SilentlyContinue).Source
-     Git        = (Get-Command git -ErrorAction SilentlyContinue).Source
-     VCRuntime  = Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll"
-     Nvim       = (Get-Command nvim -All -ErrorAction SilentlyContinue).Source -join ', '
-   } | Format-List
-   ```
-
-   - `PowerShell` が `7.` で始まり、`Admin : False` が出ればよい。`True` なら、窓を閉じて、この項の手順 1 のとおりに開き直す
-   - `Scoop` に `…\scoop\shims\scoop.ps1` の場所が出ればよい。空なら、先に[scoop の公式の導入案内](https://scoop.sh/)に従って入れる
-   - `Git` は `C:\Program Files\Git\cmd\git.exe` ならよい。空か違う場所なら、先に [Git for Windows](https://gitforwindows.org/)
-   - `VCRuntime : False` なら、[Visual C++ 再頒布可能パッケージの公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って x64 版を入れてから、この手順を貼り直す
-   - `C:\Program Files\Neovim\bin\nvim.exe` など、ほかの場所が出たら、winget などで入れた Neovim がある。中断し、既存の導入元と設定を確かめる
-
-1. scoop で Neovim を入れる。
-
-   ```powershell
-   scoop install neovim
-   ```
-
-   - `was installed successfully!` または `is already installed.` ならよい
-   - `'neovim' suggests installing 'extras/vcredist2022'.` も出るが、この項の手順 2 が `VCRuntime : True` なら入れなくてよい
-   - この項の手順 4 の退避前には `nvim` を起動しない
-
-1. 自分用の LazyVim の設定を導入する。
-
-   - [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通す。scoop・Git for Windows・Neovim 本体とフォントは、この項の前提と本体導入で用意済み
-   - 参照先の既存設定の確認と退避を省かない
-   - Neovim の画面を開く手順では、指定された `:qa` または `:qa!` で閉じてから先へ進む
-
-1. 版と場所と、設定・データの置き場所を確かめる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   # Neovim の版と実行ファイルを確かめる
-   nvim --version | Select-Object -First 3
-   (Get-Command nvim -All).Source
-   # 設定とデータの保存先を確かめる
-   nvim --clean --headless "+lua io.stdout:write(vim.fn.stdpath('config'), '\n', vim.fn.stdpath('data'), '\n')" +qa
-   ```
-
-   - `NVIM` と版が出ればよい
-   - 無出力で終わるか `VCRUNTIME140.dll` のエラーなら、VC++ ランタイムをこの項の手順 2 で確かめる
-     - 窓が出たら、OK で閉じる
-   - 2 つ目は `C:\Users\<WIN_USER>\scoop\shims\nvim.exe` の 1 行だけならよい
-   - 最後に、設定の置き場所（`C:\Users\<WIN_USER>\AppData\Local\nvim`）とデータの置き場所（`…\AppData\Local\nvim-data`）の 2 行が出る（[この文書の補足と注意点](#この文書の補足と注意点)の「設定ファイルの場所」）
-
-#### Neovim を既定のエディタにする
-
-- PowerShell 7 や Windows Terminal から起動するツールにも Neovim を使わせる
-- 前提: [Neovim](#windows-11-で-neovim-を入れる)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- Git Bash では、共通の bash 設定が入っていれば、その設定が `EDITOR`・`VISUAL` を `nvim` にするので、この項は要らない
-- Git Bash の値は WezTerm の新しいタブで、[AlmaLinux 10 の「Neovim」](#neovim)の手順 3 のブロックを貼って確かめる（`. ~/.bashrc` は読み直さない）
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. Windows の PowerShell でも使うように、`EDITOR`・`VISUAL` を `nvim` にする。
-
-   ```powershell
-   & {
-     # エディタの環境変数にある既存の値を調べる
-     $other = @(foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::GetEnvironmentVariable($n, 'User') }) | Where-Object { $_ -and $_ -ne 'nvim' }
-     if ($other) { Write-Error "中断: ユーザーの環境変数 EDITOR か VISUAL に、nvim ではない値がある（$($other -join ', ')）" } else {
-       # EDITOR と VISUAL をユーザーの環境変数に設定する
-       foreach ($n in 'EDITOR', 'VISUAL') { [Environment]::SetEnvironmentVariable($n, 'nvim', 'User') }
-       "`n$([char]27)[7m 確認 $([char]27)[0m"
-       foreach ($n in 'EDITOR', 'VISUAL') { '{0} = {1}' -f $n, [Environment]::GetEnvironmentVariable($n, 'User') }
-     }
-   }
-   ```
-
-   - `EDITOR = nvim` と `VISUAL = nvim` が出ればよい（何度貼ってもよい）
-   - `中断:` と出たら、何も変えていない。ほかのエディタを使っているなら、この手順は行わない
-   - 値が入るのは、この後に開いた窓とアプリから
-
-#### Windows 11 で LazyVim の設定を導入する
-
-- Windows の Neovim に自分用の LazyVim の設定と外部コマンド・プラグインを入れる
-- 前提: [Git for Windows](https://gitforwindows.org/)・[scoop の導入](https://scoop.sh/)・[HackGen Console NF](https://github.com/yuru7/HackGen)と、[Neovim](#windows-11-で-neovim-を入れる)で本体を先に入れてある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
-- この項の手順 3 の退避前に Neovim をすべて閉じる。既存設定とデータの確認・退避を省かない
-- Visual C++ ランタイムの導入時だけインストーラーの UAC を許可する
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. git が無ければ入れ、scoop に `extras` のバケットを足す。
-
-   ```powershell
-   # Git が無ければ scoop から入れる
-   if (-not (Get-Command git -ErrorAction SilentlyContinue)) { scoop install git }
-   # scoop に extras の導入元を登録する
-   scoop bucket add extras
-   ```
-
-1. 既存の Neovim の設定とデータがあれば、`.bak` を付けて退避する。
-
-   ```powershell
-   & {
-     # 退避する場所と既存の控えの有無を調べる
-     $nvimPaths = @("$env:LOCALAPPDATA\nvim", "$env:LOCALAPPDATA\nvim-data")
-     foreach ($d in $nvimPaths) {
-       if (Test-Path -LiteralPath "${d}.bak") { throw "中断: ${d}.bak がすでにある。何も退避していない" }
-     }
-     # 既存の設定とデータを控えの場所へ移す
-     foreach ($d in $nvimPaths) {
-       if (Test-Path -LiteralPath $d) {
-         Move-Item -LiteralPath $d -Destination "${d}.bak" -ErrorAction Stop
-         "moved: $d"
-       }
-     }
-     "`n$([char]27)[7m 確認 $([char]27)[0m"
-     $nvimPaths | ForEach-Object { '{0}: {1}' -f $_, (Test-Path -LiteralPath $_) }
-   }
-   ```
-
-   - 最後がどちらも `False` なら、退避できている
-   - `.bak` が 1 つでもあれば、どちらも動かさず `中断:` で止まる。中身を確かめて片付けてから、この項の手順 3 を貼り直す
-
-1. この設定を `%LOCALAPPDATA%\nvim` に clone する。
-
-   ```powershell
-   # Neovim の設定リポジトリを取得する
-   if (-not (Test-Path "$env:LOCALAPPDATA\nvim\init.lua")) { git clone https://github.com/ryo-aoki-pc/LazyVimStarter.git "$env:LOCALAPPDATA\nvim" }
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   git -C "$env:LOCALAPPDATA\nvim" branch --show-current
-   ```
-
-   - `custom` と出ればよい
-
-1. Visual C++ のランタイムが無いときだけ入れ、外部コマンド・zenhan・lazygit を scoop で入れる。
-
-   ```powershell
-   # ランタイムと Neovim の外部コマンドを入れる
-   if (-not (Test-Path -LiteralPath "$env:WINDIR\System32\vcruntime140.dll")) { scoop install vcredist2022 }
-   scoop install ripgrep fd gcc nodejs zenhan lazygit
-   ```
-
-   - ランタイムが無ければ `vcredist2022` を入れる。PowerShell は非管理者のまま、Visual C++ のインストーラーの UAC を許可する (x64・x86 の両方を入れる。標準ユーザーなら管理者の認証情報が要る)
-
-1. 入ったか確かめ、フォントを入れる。
-
-   ```powershell
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   nvim --version | Select-Object -First 1
-   Get-Command rg, fd, gcc, node, npm, zenhan, lazygit | Format-Table Name, Source
-   ```
-
-   - Neovim の版と、各コマンドの場所が出ればよい
-   - 端末のフォントは[HackGen Console NF](https://github.com/yuru7/HackGen)にする
-   - `NVIM v0.12.…` と出ればよい (0.12 以上が要る)
-
-1. プラグインを入れ、`lazy-lock.json` の版に揃える。
-
-   ```powershell
-   # パーサーの導入を待ちながらプラグインを入れる
-   $tsWait = "lua pcall(require, 'mason'); local TS, want = require('nvim-treesitter'), LazyVim.opts('nvim-treesitter').ensure_installed; vim.wait(600000, function() return vim.fn.executable('tree-sitter') == 1 end, 1000); for _ = 1, 20 do if TS.update():wait(900000) and TS.install(want):wait(900000) then break end end"
-   nvim --headless "+$tsWait" +qa
-   # lock ファイルを戻してプラグインの版を揃える
-   git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json
-   nvim --headless "+Lazy! restore" "+$tsWait" +qa
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   git -C "$env:LOCALAPPDATA\nvim" status --short
-   ```
-
-   - `Error in command line`（中身は ``Failed to run `config` for nvim-treesitter`` と `Package is already installing.`）は出ても進んでよい
-   - 最後の `git status --short` が何も出さなければ、`lazy-lock.json` の版に揃っている
-   - `Lock file '…' appears stale` が出たら、[この文書の補足と注意点](#この文書の補足と注意点)の「注意点」で鍵を消してから、この項の手順 7 のブロックを貼り直す
-   - treesitter のパーサーを入れ終えて Neovim が閉じるまで待つ（数分かかる。途中で止めない）
-   - **次の手順は、プロンプトが戻ってから貼る**（続けて貼ると、導入結果や lock ファイルの状態を確認する前に次の導入処理が動く）
-
-1. Mason の導入を待ち、外部コマンドの健全性を確認する。
-
-   ```powershell
-   # 確認用の Markdown を作って Neovim で開く
-   Set-Content -Path "$env:TEMP\lazyvim-check.md" -Value '#  動作確認', '', '日本語の検索を試す。' -Encoding UTF8
-   nvim "$env:TEMP\lazyvim-check.md"
-   # 外部コマンドの健全性を検査して結果を保存する
-   nvim --headless "+Lazy! load mason.nvim luamigemo" "+checkhealth lazyvim luamigemo" "+w! $env:TEMP\lazyvim-health.txt" +qa
-   "`n$([char]27)[7m 確認 $([char]27)[0m"
-   Select-String -Path "$env:TEMP\lazyvim-health.txt" -Pattern 'ERROR|WARNING'
-   ```
-
-   - `:Mason` で導入中のものがなくなるまで待ち、`q` で閉じる
-   - 待ったら `:qa` で閉じる
-   - `` WARNING `fzf` is not installed `` の 1 行だけならよい (無視してよい)
-   - `ERROR` が出たら[注意点](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/extra/setup.md#注意点)
-   - `:Mason` を開き、Installed が 11 個になり、導入中のものが無くなるまで待つ (`q` で閉じる)
-
-1. 試験用の Markdown を開き、日本語検索・整形・IME 連携を確かめる。
-
-   ```powershell
-   nvim "$env:TEMP\lazyvim-check.md"
-   ```
-
-   - `/kensaku` で「検索」に移り、検索欄の `<Tab>` で「検索」に置き換わることを確かめる。`:w` で見出しの `#` の後の空白が 1 つになり (`# 動作確認`)、`<C-j>` で `A` / `あ` が切り替わり、ファイルピッカーのアイコンが表示されればよい
-   - 初めてなら [Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する) で整形器を入れ、[安全な整形の導入](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する) で確かめる
-   - `:lua =vim.fn.executable("zenhan")` が `1` なら IME 連携が有効 (`0` でもほかは動く)
-   - `:qa!` で閉じる
+### Windows 11 の LazyVim の更新
 
 #### Windows 11 で LazyVim の設定とプラグインの版を揃える
 
 - 設定と lazy-lock.json を取り込み、プラグインをその版に揃える
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある
+- 前提: scoop の Neovim と外部コマンドが入り、`%LOCALAPPDATA%\nvim` に自分用の設定の `custom` ブランチの clone がある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - Markdown の整形器 md-format は、この項では上がらない。[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)の手順 3 で上げる
@@ -950,85 +727,10 @@
    - `:Lazy update` の結果として残すのでなければ、`git -C "$env:LOCALAPPDATA\nvim" checkout -- lazy-lock.json` で戻してから、この手順を貼り直す
    - `Lock file '…' appears stale` が出たら、[この文書の補足と注意点](#この文書の補足と注意点)の「注意点」で鍵を消してから、この項の手順 2 のブロックを貼り直す
 
-#### Windows 11 で LazyVim の安全な Markdown 整形を導入する
-
-- 保存のときの Markdown の整形に使う md-format（`mdfmt`）を前提にし、保存と手動整形を確かめる
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 からは、その窓で起動する Neovim
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. 試験用の Markdown を Neovim で開く。
-
-   ```powershell
-   nvim "$env:TEMP\lazyvim-format-check.md"
-   ```
-
-   - **次の手順は、`i` を押し、挿入モードの本文に貼る**（PowerShell には貼らない）
-
-1. Neovim の試験用 Markdown に本文を貼り、保存と手動整形を確かめる。
-
-   ```markdown
-   #  動作確認
-
-   用語
-   : 説明
-
-     - 内部の項目
-
-   <details>
-   <summary>概要</summary>
-
-   本文
-
-   </details>
-
-   <table><tr><td>a</td><td>b</td></tr></table>
-   ```
-
-   - 貼り終えたら Esc を押し、ノーマルモードに戻る
-   - `:w` または `<leader>cf` で `#  動作確認` の `#` の後の空白が 1 つになる (`# 動作確認`)
-   - `内部の項目` の行頭の 2 スペースが保たれる
-   - `<summary>` の行が 2 スペース字下げになる。空行と `本文` はそのまま
-   - `<table>` の行が `<tr>`・`<td>` ごとの 6 行に分かれ、入れ子に合わせて 2 スペースずつ字下げされる
-   - `<leader>cf` はビジュアル選択した範囲にも使える
-   - 一部の lint 診断は残ることがある
-   - `:ConformInfo` に `mdfmt` が出る。設定不正・時間切れのときは原文を保持し、エラーを知らせる
-   - `md-format (mdfmt) が導入されていません` と出たら、[Windows 11 で md-format を導入・更新する](https://github.com/ryo-aoki-pc/md-format/blob/main/docs/install.md#windows-11-で-md-format-を導入更新する)を通してから、Neovim を開き直す
-   - 確かめ終えたら `:qa!` で閉じる。試験用の `%TEMP%\lazyvim-format-check.md` は、要らなければ手で消す
-   - **ほかのブロックは、Neovim を閉じてから貼る**（Neovim を開いたまま貼ると、Neovim への入力になる）
-
-#### Windows 11 で LazyVim の GitLab プレビューを導入する
-
-- md-preview を使い、LazyVim の Markdown をブラウザでプレビューする
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)と、[Windows 11 で md-preview を導入・更新する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-を導入更新する)を通してある
-- 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く。この項の手順 2 は、その窓で起動する Neovim
-- 公式スタイルは任意。[Windows 11 で md-preview の公式スタイルを取得する](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-md-preview-の公式スタイルを取得する)に従う（Neovim の `:GitLabPreviewInstall` でも取得できる）
-- PlantUML の図も任意。[Windows 11 で PlantUML を入れる](https://github.com/ryo-aoki-pc/md-tools/blob/main/docs/install.md#windows-11-で-plantuml-を入れる)に従う。入れた後は、Neovim を起動し直す
-
-1. 管理者ではない PowerShell 7 を開く。
-
-   - スタートメニューで「PowerShell」を探し、クリックして開く（「Windows PowerShell」ではない。「管理者として実行」にはしない）
-   - 「PowerShell」が無ければ、[PowerShell 7 の公式の導入案内](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)に従って入れる
-
-1. Windows 11 では、この設定の README を開き、プレビューで確かめる。
-
-   ```powershell
-   nvim "$env:LOCALAPPDATA\nvim\README.md"
-   ```
-
-   - `<leader>cp` を押す。ブラウザが開き、操作欄の左に `README.md`、右に「一覧」「見出し」「配色」「本文幅」が出ればよい（「GitLab との違い <件数>」は、知らせがあるときだけ出る）
-   - `md-preview が導入されていません` か `取り決めの版が違います` と出たら、前提の md-preview の導入・更新を通してから、この手順をやり直す
-   - もう一度 `<leader>cp` を押す。ページの上に「プレビューを止めた」と出ればよい
-   - `:qa` で閉じる。プレビューのアプリも終わり、ページの上に「プレビューが終了した」と出る
-
 #### Windows 11 で LazyVim の本体・外部コマンド・プラグインを更新する
 
 - scoop で入れた本体と外部コマンド・LazyVim のプラグインを更新する
-- 前提: [LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)を通してある
+- 前提: scoop の Neovim と外部コマンドが入り、`%LOCALAPPDATA%\nvim` に自分用の設定の `custom` ブランチの clone がある
 - 実行場所: この PC のデスクトップの管理者ではない PowerShell 7。この項の手順 1 で開く
 - 手元の変更は `git -C "$env:LOCALAPPDATA\nvim" status` で確認してから進む
 - 設定の取り込みは[LazyVim の設定とプラグインの版を揃える](#windows-11-で-lazyvim-の設定とプラグインの版を揃える)で行う
@@ -1064,79 +766,8 @@
    - `lazy-lock.json` だけが変わっていればよい
    - `Lock file '…' appears stale` が出たら、[この文書の補足と注意点](#この文書の補足と注意点)の「注意点」で鍵を消してから、この項の手順 3 のブロックを貼り直す
 
-<details id="windows-11-で-neovim-を入れる-の補足と注意点">
-  <summary>Windows 11 で Neovim を入れる の補足と注意点</summary>
-
-**注意点**
-
-- **Neovim: Windows 11 では、winget などで入れた Neovim と両方入れない**: winget の `Neovim.Neovim` は PC 全体（`C:\Program Files\Neovim`）に入り、PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、そちらが使われる。どちらか一方にする
-- **Neovim: Windows 11 で自分用の設定（LazyVimStarter）を使うと、`:!` や `:terminal` のシェルは PowerShell になる**: `pwsh` を実行ファイルとして見つけられれば PowerShell 7、見つけられなければ Windows PowerShell 5.1。素の Neovim の既定は `cmd.exe`
-  - [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows)（MSIX）は、PowerShell 7 の窓から起動した Neovim でだけ使われる（[LazyVimStarter の参考資料の「Windows の外部コマンド」](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#windows-11-で-lazyvim-の設定を導入する--手順-5-補足-windows-の外部コマンド)）
-
-**[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 2: 確かめる値の意味**
-
-- `Nvim` が空なら、Neovim は入っていない。`C:\Users\<WIN_USER>\scoop\shims\nvim.exe` だけなら、もう scoop で入っている
-
-**[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 3**
-
-- `'neovim' (0.12.5) was installed successfully!` の形の行が出ればよい
-- `'neovim' (0.12.5) is already installed.` の形なら、もう入っている（何も変えない）
-- まだ `nvim` は起動しない（この項の手順 4 の退避より前に起動すると、`nvim-data` などができて、それも退避される）
-
-**[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 3・5: 版**
-
-- 同じ項の手順 3 の `'neovim' (<版>) was installed successfully!` と、手順 5 の `NVIM v…` の版は、実行した日の最新
-
-**[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)の手順 5**
-
-- `NVIM v0.12.5`・`Build type: Release`・`LuaJIT 2.1.…` の 3 行が出ればよい
-
-**[Neovim を既定のエディタにする](#neovim-を既定のエディタにする)の手順 2**
-
-- 効くのは、この後に開いた窓とアプリから（開いている窓には入らない。WezTerm は新しいタブから）
-
-**[Neovim を既定のエディタにする](#neovim-を既定のエディタにする)の手順 2: git commit のエディタ**
-
-- git の `core.editor` が無ければ、PowerShell から動かす `git commit` も Neovim で開く（Git for Windows の既定の Vim から変わる。`git config --get core.editor` で確かめられる）
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)のリード**
-
-- [背景説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md)・検証記録（`repos/LazyVimStarter/docs/verification/setup.md`）
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 2**
-
-- Git for Windows などで git がすでにあれば、`scoop install git` は飛ばされる
-- バケットの追加に git が要る。lazygit は `extras` にある
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 3**
-
-- 退避したものは `moved: …` と出る。最後の 2 行がどちらも `False` なら、元の設定とデータは残っていない
-- `nvim` は設定、`nvim-data` はプラグイン・Mason のツール・undo など
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 4**
-
-- すでに clone してあれば、`git clone` は飛ばされる
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 5**
-
-- 1 行目は、ランタイム (`System32\vcruntime140.dll`) がすでにあれば何もしない (ほかのアプリや winget で入れてある PC では、UAC も出ない)
-- `zenhan` は IME 連携に使う。無ければ IME 連携だけが静かに無効になる
-- `lazygit` は任意 (無ければ `<leader>gg` が定義されないだけ)
-- 2 行目のパッケージは、導入済みなら何も出さずに飛ばされる (scoop は複数を並べると `already installed` を出さない)
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 6**
-
-- 7 つのコマンドの場所が並ぶ
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 7**
-
-- tree-sitter の CLI が無ければ、先に Mason が入れる（``Installed `tree-sitter-cli` with `mason.nvim`.`` が出る）
-- Mason の未完了の導入は、この項の手順 8 で補う
-- 理由は [lock 復元の説明](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/docs/reference/setup.md#lazyvim-の設定を導入する--手順-8-補足-lazy-lockjson-を戻してから-restore-する理由)を参照する
-
-**[Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する)の手順 9**
-
-- OS 側で IME を切り替えると、lualine の `あ` / `A` がずれることがある（[README](https://github.com/ryo-aoki-pc/LazyVimStarter/blob/custom/README.md#日本語入力検索)）
+<details id="windows-11-の-lazyvim-の更新-の補足と注意点">
+  <summary>Windows 11 の LazyVim の更新 の補足と注意点</summary>
 
 **[Windows 11 で LazyVim の設定とプラグインの版を揃える](#windows-11-で-lazyvim-の設定とプラグインの版を揃える)のリード**
 
@@ -1148,18 +779,6 @@
 - 戻したら、この項の手順 2 のブロックを貼り直す
 - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
 
-**[Windows 11 で LazyVim の安全な Markdown 整形を導入する](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する)のリード**
-
-- 整形器と依存は md-format の導入先（`%LOCALAPPDATA%\md-format`）にある。Neovim からは入れない。lint の診断用の markdownlint-cli2 は Mason で入る
-
-**[Windows 11 で LazyVim の安全な Markdown 整形を導入する](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する)の手順 2**
-
-- Neovim の編集画面が開けばよい
-
-**[Windows 11 で LazyVim の安全な Markdown 整形を導入する](#windows-11-で-lazyvim-の安全な-markdown-整形を導入する)の手順 3**
-
-- 説明の対応や本文を変える修正は除外するため、一部の lint 診断は残ることがある
-
 **[Windows 11 で LazyVim の本体・外部コマンド・プラグインを更新する](#windows-11-で-lazyvim-の本体外部コマンドプラグインを更新する)の手順 2**
 
 - 最新なら `latest version` と出る
@@ -1168,39 +787,9 @@
 
 - Neovim が閉じてプロンプトが戻るまで待つ（パーサーを組み立てると時間がかかる。途中で止めない）
 
-**選択した方針**
-
-[Windows 11 で Neovim を入れる](#windows-11-で-neovim-を入れる)・[既定のエディタにする](#neovim-を既定のエディタにする)の手順 2 の理由。**Windows 実機では未検証**（検証記録（`docs/verification/neovim.md` の「Neovim: Windows 11 で使う: 検証状況の記録」））。
-
-- **scoop の main の `neovim` で、自分のユーザーに入れる**（管理者の権限は要らない）
-  - [公式の導入案内](https://scoop.sh/)で入れた scoop に、CLI のツールをまとめる。自分用の設定（LazyVimStarter）の Windows の導入も scoop の `neovim` を使う
-  - winget の `Neovim.Neovim` は PC 全体に入る MSI（`C:\Program Files\Neovim`）。PC 全体の `PATH` はユーザーの `PATH` より先に引かれるので、両方あると winget の方が使われる。Windows 11 で使うの手順 2 で見つけたら、外してから始める
-- **VC++ のランタイムは x64 版を使う**: [公式の案内](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)に従って入れてあることを前提にする
-  - scoop の `neovim` はランタイムを入れず、`extras/vcredist2022` を勧めるだけ（`neovim.json` の `suggest`）。`nvim.exe` は `VCRUNTIME140.dll` を使う（リリースの zip のインポート表。検証記録の付録（`docs/verification/neovim.md` の「Neovim: 付録: Windows 11 の節の資料と Linux での確認（2026-10-08）」））
-  - 無いと、`nvim.exe` は何も出さずに終わる（LazyVimStarter の検証記録の 2026-10-06 のクリーンな Windows 11 の VM の記録。ブロックは自動で流したもの）
-  - デスクトップで打つと、`VCRUNTIME140.dll` が見つからない旨のシステム エラーの窓が出ることもある（読み込みに失敗したときの Windows の通常の振る舞い。確かめていない）。そのため手順書は、窓が出る場合も書いた
-  - Windows で入れる手順を 1 か所にするため、この文書には入れ方を書かない。scoop の `vcredist2022` は x64 と x86 の両方を入れ、UAC の確認が出る
-- **`XDG_CONFIG_HOME` をユーザーの環境変数にしない**
-  - Neovim と lazygit は追従するが、yazi は Windows では読まない（`%APPDATA%\yazi\config` のまま）
-  - WezTerm は、`~/.wezterm.lua` が無ければ、`~/.config/wezterm` の代わりに `$XDG_CONFIG_HOME/wezterm` を読む（`~/.config` の側は探さない。WezTerm の検証記録の実測（`docs/verification/shell-terminal.md` の「WezTerm: 設定ファイルの探索順序（実測）」））
-  - git は `~/.gitconfig`（[Git](almalinux-setup.md#git)が書く場所）を読み続け、`~/.config/git/config` の代わりに `$XDG_CONFIG_HOME/git/config` を読む
-  - このように、追従するもの・読まないもの・一部だけ変わるものがあり、ツールごとに読む場所が割れる
-  - LazyVimStarter の検証記録（2026-09-30）に、`XDG_CONFIG_HOME` を付けたまま Neovim が設定を見つけなかった記録がある
-- **`EDITOR`・`VISUAL` は、任意のユーザーの環境変数にする**
-  - WezTerm の Git Bash は、共通の bash 設定が `nvim` にするので要らない。PowerShell 7・Windows Terminal から起動したツールにだけ効かせる
-  - lazygit 0.66.0 は、`os.edit` などが無いと、git の `core.editor` → `GIT_EDITOR` → `VISUAL` → `EDITOR` の順に探し、最初の語のファイル名で既知のプリセットを選ぶ。どれも無いと `vim` のプリセットになる。Windows の lazygit はエディタを `cmd.exe` で動かすので、Git for Windows の `usr\bin\vim` は見つからない
-  - 値を `nvim` だけにするのは、`nvim.exe` やフルパスでは `nvim` のプリセットに合わないため
-  - Git for Windows のインストーラで Vim を選ぶと、`core.editor` は書かれず、git は `EDITOR` を使う。そのため PowerShell の `git commit` も Neovim になる
-  - ほかの値があれば止める
-- **健全性の確かめは `:checkhealth`**
-
 **参照**
 
 - 検証記録
-- [ScoopInstaller/Main — neovim.json](https://github.com/ScoopInstaller/Main/blob/master/bucket/neovim.json) — Windows 11 の scoop の定義（版・`bin`・`suggest`）
-- [neovim/neovim — runtime/doc/starting.txt（v0.12.5）](https://github.com/neovim/neovim/blob/v0.12.5/runtime/doc/starting.txt) — `base-directories`（Windows の設定・データ・キャッシュの場所）
-- [lazygit — Config.md の Configuring File Editing](https://github.com/jesseduffield/lazygit/blob/v0.66.0/docs/Config.md#configuring-file-editing) — `e` キーのエディタの決まり方（`EDITOR` とプリセット）
-- [Windows 11 で LazyVim の設定を導入する](#windows-11-で-lazyvim-の設定を導入する) — 自分用の設定の Windows の導入（scoop の Neovim と外部コマンドも入れる）
 
 </details>
 

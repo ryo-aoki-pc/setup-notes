@@ -2943,16 +2943,16 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 - パッケージは設定ファイルを置かない。無ければ組み込みの既定値で動く
 
 - Windows 11 は `%LOCALAPPDATA%\lazygit\config.yml`（`%APPDATA%\lazygit\config.yml` があれば、そちらも読む）。`state.yml` も同じフォルダー
-- Windows 11 の場所は[lazygit](windows-setup.md#lazygit)の手順 6 で確かめる
+- Windows 11 で実際に読む場所は `lazygit --print-config-dir` で確かめられる
 - **自分用の設定**は [ryo-aoki-pc/lazygit](https://github.com/ryo-aoki-pc/lazygit) にある（公式の既定の全項目に、あいまい検索・Nerd Fonts のアイコン・マウス無効などの変更を載せた `config.yml`）
   - 導入は[lazygit](#lazygit)の手順 2。`config.yml` を `~/.config/lazygit/config.yml` にリンクする
   - 更新は[lazygit の設定を更新する](#lazygit-の設定を更新する)（[lazygit の設定を更新する](windows-setup.md#lazygit-の設定を更新する)）で行う
-  - Windows 11 は[lazygit](windows-setup.md#lazygit)の手順 5。リンクにせず `%LOCALAPPDATA%\lazygit` に直接 clone する
+  - Windows 11 は `%LOCALAPPDATA%\lazygit` に自分用の設定の clone があることを前提にする
   - 何を変えたかは [設定のリポジトリの参考資料の「主な設定内容」](https://github.com/ryo-aoki-pc/lazygit/blob/custom/docs/reference/readme.md#主な設定内容)
   - アイコンに Nerd Fonts が要る（`gui.nerdFontsVersion: "3"`）。端末のフォントを HackGen Console NF（[HackGen Console NF](shell-terminal.md#hackgen-console-nf)）にする
-  - 差分に delta を使う（[git-delta](#git-delta)・[git-delta](windows-setup.md#git-delta)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
+  - 差分に delta を使う（[AlmaLinux 10 の導入](#git-delta)・[Windows の公式の導入案内](https://dandavison.github.io/delta/installation.html)）。Windows の引用符は[設定例](https://github.com/ryo-aoki-pc/lazygit#windows-で使う場合)を参照する
   - `e` キーで開くエディタは、`EDITOR` などから自動で決まる（[Neovim](neovim.md#neovim)の手順 3）
-    - Windows 11 で Windows PowerShell から起動するなら、[Neovim を既定のエディタにする](neovim.md#neovim-を既定のエディタにする)で、ユーザーの環境変数 `EDITOR` を `nvim` にする
+    - Windows 11 で PowerShell から Neovim を使うときは、ユーザーの環境変数 `EDITOR` が `nvim` になっていることを前提にする
 
 **[lazygit の設定を導入する](#lazygit-の設定を導入する)の手順 1**
 
@@ -3265,13 +3265,13 @@ git 管理下でないディレクトリで起動すると `Would you like to cr
 
 - Windows 11 の置き場所は `%APPDATA%\yazi\config\`（Windows の yazi は `XDG_CONFIG_HOME` を見ない。別の場所にするなら `YAZI_CONFIG_HOME` に絶対パスを入れる）
   - 状態は `%APPDATA%\yazi\state`、キャッシュは `%LOCALAPPDATA%\yazi`
-  - yazi が読む場所は `ya env` の `Config` の行で確かめられる（[yazi](windows-setup.md#yazi)の手順 7）
+  - yazi が読む場所は `ya env` の `Config` の行で確かめられる
 - **既定値のファイルは配布物に入っていない**。変更する項目だけを設定ファイルに書く
 - 既定値は[公式ドキュメントの Configuration](https://yazi-rs.github.io/docs/configuration/overview/) か、リポジトリの `yazi-config/preset/` を見る
 - **自分用の設定**は [ryo-aoki-pc/yazi](https://github.com/ryo-aoki-pc/yazi) にある（上流の既定の設定を丸ごと置き、3 ペインの比率・行表示・独自のキー割り当てなどを変えた設定）
   - 導入は[yazi](#yazi)の手順 3。`custom` を `~/.config/yazi` に clone する
   - 更新は[yazi の設定を更新する](#yazi-の設定を更新する)（[yazi の設定を更新する](windows-setup.md#yazi-の設定を更新する)）で行う
-  - Windows 11 は[yazi](windows-setup.md#yazi)の手順 6。`custom` を `%APPDATA%\yazi\config` に clone する
+  - Windows 11 は `%APPDATA%\yazi\config` に自分用の設定の `custom` の clone があることを前提にする
   - キーは[独自キーバインド](https://github.com/ryo-aoki-pc/yazi/blob/custom/docs/reference/readme.md#独自キーバインド抜粋)、外部コマンドは[依存コマンド](https://github.com/ryo-aoki-pc/yazi#依存コマンド)を参照する
   - fd・ripgrep・fzf は[yazi](#yazi)の手順 2、nvim は[Neovim](neovim.md#neovim)、zoxide と fzf のキー操作は[シェルのツール](shell-terminal.md#シェルのツール)で入れる
   - Windows 11 では、`O`（対話的に開く）の候補に Neovide も出る。選んで使うなら、Neovide（scoop の extras の `neovide`）を入れておく
