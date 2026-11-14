@@ -8,7 +8,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 
 | 手順書 | 対象 | 内容 |
 | --- | --- | --- |
-| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合、RDP の切断、SSH、lazygit・yazi の設定の更新と使い方 |
+| [Windows 11 のセットアップ](docs/windows-setup.md) | Windows 11 | ホットキー競合、RDP の切断、SSH クライアントの更新、lazygit・yazi の設定の更新と使い方 |
 | [AlmaLinux 10 のセットアップ](docs/almalinux-setup.md) | AlmaLinux 10 | 基本の設定、GNOME のデスクトップ、Git と開発の道具、アプリ、ネットワークとリモート操作、再起動の後の確認と更新 |
 | [シェルと端末のセットアップ](docs/shell-terminal.md) | Windows 11・AlmaLinux 10 | AlmaLinux 10 の bash・シェルのツール・フォント・WezTerm の導入と使い方、Windows 11 のフォント・設定・開発用モジュールの更新 |
 | [Neovim のセットアップ](docs/neovim.md) | Windows 11・AlmaLinux 10 | AlmaLinux 10 の導入と設定、Windows 11 の設定・プラグインの更新 |
@@ -45,7 +45,7 @@ AI エージェントの手順と、職場で使わない手順は、非公開�
 ### リモート接続
 
 - GNOME は[デスクトップ共有](docs/gnome-remote.md#gnome-のデスクトップ共有)・[ヘッドレスセッション](docs/gnome-remote.md#gnome-のヘッドレスセッション)・[リモートログイン](docs/gnome-remote.md#gnome-のリモートログイン)から選ぶ
-- Windows 11 の [SSH クライアント](docs/windows-setup.md#windows-の-openssh-クライアント)の手順を通す。RDP は[リモート デスクトップの公式の案内](https://support.microsoft.com/en-us/windows/how-to-use-remote-desktop-5fe128d5-8fb1-7a23-3b8a-41e636865e8c)に従って有効にする。接続した後は[RDP をロックせずに切断](docs/windows-setup.md#rdp-をロックせずに切断)を使える
+- Windows 11 の SSH クライアントは、[OpenSSH for Windows の公式の導入案内](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse)と[鍵管理の公式の案内](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement)に従って準備する。導入済みの SSH クライアントは[更新](docs/windows-setup.md#windows-の-openssh-クライアント-更新)で版と設定を確かめる。RDP は[リモート デスクトップの公式の案内](https://support.microsoft.com/en-us/windows/how-to-use-remote-desktop-5fe128d5-8fb1-7a23-3b8a-41e636865e8c)に従って有効にする。接続した後は[RDP をロックせずに切断](docs/windows-setup.md#rdp-をロックせずに切断)を使える
 
 ### ファイル共有
 
