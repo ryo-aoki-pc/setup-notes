@@ -9,7 +9,7 @@
 補足・参照資料・注意点は、正本の各用途の末尾の折りたたみに置く。
 
 - `docs/windows-setup.md` — Windows 11 の手順書。5 のカテゴリ（デスクトップ・ネットワークとリモート操作・SSH・Git と開発の道具・更新）に置き、項ごとに前提・実行場所を書いて、窓を開く手順と変数を項の中に持たせる
-  - デスクトップは、表示と入力・表示／入力／音／ストレージ・自動起動と標準アプリ・PowerToys・ホットキー競合・再起動とその後の確認を扱う。表示と入力は、エクスプローラー・スタートの提案・タスクバー・既定の端末を扱う。ネットワークとリモート操作は RDP の切断を扱う
+  - デスクトップは、ホットキー競合・HackGen Console NF を入れた後の再起動とフォントの確認を扱う。ネットワークとリモート操作は RDP の切断を扱う
   - 各用途は、検証記録・参考資料・注意点・選択した方針と、リードや手順の説明を、用途末尾の「補足と注意点」に置く。複数用途で共有する資料と注意点は、冒頭の「この文書の補足と注意点」に置く
 - `docs/almalinux-setup.md` — AlmaLinux 10 の手順書。7 のカテゴリ（基本の設定・GNOME のデスクトップ・Git と開発の道具・アプリ・ネットワークとリモート操作・再起動の後の確認・更新）に置き、項ごとに前提・実行場所を書いて、変数を項の中に持たせる。実行するホストを区別する
   - 各用途は、検証記録・参考資料・注意点・選択した方針と、リードや手順の説明を、用途末尾の「補足と注意点」に置く。文書全体の補足と「省略できない初期設定」は、冒頭の「この文書の補足と注意点」に置く
@@ -58,10 +58,9 @@
     - 通常のデスクトップからの起動・配布物の試験・窓を閉じてもう一度起動した後の内部の消去を確認する。24H2 以降に無いメモ帳などの標準アプリは確認に使わない。Sandbox 内での再起動は 22H2 以降では状態を保持する。ホストの共有ファイルは閉じても消えない
   - 2026-10-12 JST: shell-terminal.md の「Git Bash と WezTerm の設定」の手順 5 に、Windows 専用の `core.longpaths=true` を clone より前に追加した。元値を表示し、global の真偽値がすでに true なら、include 先も含めて書き換えない
   - 2026-10-11: 「WezTerm」の手順 5 から、キー操作だけ動かない場合の `docs/windows-hotkey-conflict.md` へ案内する。
-  - 「表示と入力」の管理者ではない PowerShell 7 を開く（1）・エクスプローラー（2）・コンテキストメニュー（3）・スタートの提案（4）・タスクバー（5）・既定の端末（6）、「自動起動と標準アプリ」の管理者ではない PowerShell 7 を開く（1）・自動で起動するアプリ（2。`StartupApproved\Run` と Teams の起動のタスク）・標準アプリ（3。`Remove-AppxPackage`、Copilot は残す）・ウィジェット（4）
-  - 「再起動」は、デスクトップの設定の後、「再起動の後に確かめる」の前に置く。前提は「表示と入力」などの再起動が必要な設定で、管理者の PowerShell 7 を開く（1）・再起動（2）
-  - WezTerm の導入と HackGen Console NF の導入は shell-terminal.md の Windows 11 の項で行う。フォントの確かめは「再起動の後に確かめる」の手順 3
-  - 再起動の後に、「再起動の後に確かめる」の画面の確かめ・ピン留めの解除・フォントの確認（1〜3）。ほかに「表示・入力・音・ストレージを変える」・「PowerToys のユーティリティを絞る」、更新を扱う。PowerShell・Windows Terminal の設定は shell-terminal.md、Neovim は neovim.md、Windows Sandbox は virtual-machines.md の項を使う
+  - 「再起動」は、「Windows のホットキー競合」の後、「再起動の後に確かめる」の前に置く。前提は shell-terminal.md の「Windows 11 で HackGen Console NF を入れる」で、管理者の PowerShell 7 を開く（1）・再起動（2）
+  - WezTerm の導入と HackGen Console NF の導入は shell-terminal.md の Windows 11 の項で行う。フォントの確かめは「再起動の後に確かめる」の手順 1
+  - 再起動またはサインアウトしてサインインし直した後に、「再起動の後に確かめる」の手順 1 でフォントを確認する。PowerShell・Windows Terminal の設定は shell-terminal.md、Neovim は neovim.md、Windows Sandbox は virtual-machines.md の項を使う
   - 再起動の後の項（管理者ではない PowerShell 7 の窓・Git Bash・WezTerm のタブ）: 「Git Bash と WezTerm の設定」（Git Bash で、clone より前に almalinux-setup.md の「Git」の手順 1〜10〔Git for Windows の `system` の `core.autocrlf=true` のため〕、共通の bash 設定、ryo-aoki-pc/wezterm の docs/install.md の手順 1〜4・8・9）→「シェルのツールを入れる」→「git-delta」→「GitHub CLI」→「Neovim」（LazyVimStarter の「Windows 11 に導入する」の手順 1・3〜11。scoop の手順 2 と手順 7 のフォントは飛ばす）→「lazygit」・「yazi」（自分用の設定を TUI の確かめより前に）。PATH を読み直すために PowerShell を開き直す手順は残した
   - AlmaLinux 10 と同じツールのうち、VirtualBox は仮想マシンの手順書の Windows 11 の節に置き、リードから案内する（scoop の `git` は入れず、git は Git for Windows にそろえる。`scoop update` は Git for Windows を入れた後に scoop を git の形に直す）。冒頭のアラートは全体の前提の `[!IMPORTANT]` だけにする
   - 2026-10-08: 「プライバシーと広告の表示を切る」（6 手順。管理者ではない窓で、広告 ID・言語リスト・カスタマイズされたエクスペリエンス・`TIPC`・フィードバックの頻度・オンライン音声認識・検索のクラウドと履歴・同期プロバイダーの通知の `HKCU` の値を書く。元の値は `%LOCALAPPDATA%\setup-notes\privacy-before.csv` に初回だけ控える。辞書・オプションの診断データ・設定アプリの通知は画面）・「表示・入力・音・ストレージを変える」（23 手順。管理者ではない窓。今の値を `display-before.csv` に控え、アクセシビリティの `Flags` の 0x4 だけを落とす・`Keyboard Layout\Toggle` を `'3'`・Alt+Tab とシェイク・ギャラリーとホームの CLSID を 1 つの手順で・`TaskbarEndTask`・`SystemParametersInfo` でアニメーション・効果音は `reg.exe export` で控えてから `.None`・起動音は画面・ストレージ センサーは `StoragePolicy` の 7 値と画面。透明効果〔WezTerm のアクリル〕と Game Bar は入れない）・「Edge の常駐をポリシーで止める」（6 手順。管理者の窓で `HKLM\SOFTWARE\Policies\Microsoft\Edge` の `StartupBoostEnabled`・`BackgroundModeEnabled`。「組織によって管理」の表示が出るので、画面だけで切る代わりの手順も置く）。
@@ -70,7 +69,7 @@
   - Neovim・lazygit・yazi は scoop で更新する
 - `docs/windows-setup.md` — 「Windows の OpenSSH クライアント」: Windows だけを対象にする（利用者の選択）。Windows 11 の PC から LAN の AlmaLinux 10 のホストに、ed25519 の鍵で SSH ログインする。すべて**管理者ではない** PowerShell 7 に貼り（手順 8 だけホスト）、`ssh`・`ssh-keygen` は `System32\OpenSSH\` と Git の `usr\bin\` からフルパスで呼ぶ。変数（手順 2）の後の手順 3 で 2 つの ssh の版・`PATH` の順・鍵と config の有無・git の `core.sshCommand`・`GIT_SSH`・`GIT_SSH_COMMAND`・`HOME` を確かめる（どちらの ssh も `%USERPROFILE%\.ssh` を共有する）。必須の変数は `SSH_HOST` と `SSH_ALIAS`、`SSH_USER` は既定 `$env:USERNAME`。鍵は無いときだけ `ssh-keygen -t ed25519 -f …` で作る（パスフレーズを `ssh-keygen` に聞かせるため `-N ''` は書かない。7.3 以降は空の引数も渡すので、書くとプロンプトにならない）。秘密鍵だけがあれば、`ssh-keygen -y` の出力が `ssh-ed25519 AAAA` で始まるときだけ `Set-Content -Encoding ascii` で公開鍵に書く（Win32 の `-y` も秘密鍵のアクセス権を確かめるので、悪ければ手順 5・6 の後に貼り直す）。秘密鍵のアクセス権を `icacls` で見て、ほかの主体があるときだけ `/reset` → `/inheritance:r /grant:r`（SID）で直す。config には印（`# BEGIN/END windows-ssh-client.md <SSH_ALIAS>`）で挟んだ `Host` のブロックを `-Encoding ascii` で足し（同じ別名は `Host <別名>` と `Host=<別名>` の両方で探して止める。Windows の ssh は UTF-8 の BOM を読み飛ばすが、Git の ssh は止まるので、BOM のある config には足さない）、両方の ssh の `-G` で確かめる。ホスト鍵の指紋はホストに貼る `bash` のブロック（`ssh-keygen -lf`）で見て、公開鍵はパスワードで 1 回入るパイプ（`umask 077`・`mkdir -p`・末尾の改行・`tr -d '\r'`・1 行目の先頭の BOM を `sed` で捨てる・あれば `restorecon`）で `authorized_keys` に足す（対話入力）。確かめは両方の ssh の `-o PreferredAuthentications=publickey` と、WezTerm の起動メニュー（コマンドの無い手順）。**ssh-agent は使わない**（利用者の選択。パスフレーズは毎回聞かれる）。AlmaLinux 10.2 の `openssh-server` は `PasswordAuthentication` の既定が yes（`#PasswordAuthentication yes`、`sshd_config.d` も書かない）で、preset で sshd が有効、public のゾーンが ssh を通す。
 - `docs/windows-setup.md` — 「Windows のホットキー競合」: Hotkey Screener の一覧から対象キーを選び、反応するアプリ名と PID を調べる。主手順は起動・対象選択・検出・使用アプリの確認・設定変更と動作確認・記録と終了の 6 手順
-  - 初回の ZIP 取得・展開・署名確認は別節にし、Program Files 配置は権限要求が頻発する場合の任意手順にする。未検出時は入力条件と常駐アプリを切り分け、PowerShell の登録可否試験は任意の補助にする。検出時は対象キーが入力されるため、作業を保存して対象の一組だけを調べる
+  - Hotkey Screener が入っていることを前提にする。未検出時は入力条件と常駐アプリを切り分け、PowerShell の登録可否試験は任意の補助にする。検出時は対象キーが入力されるため、作業を保存して対象の一組だけを調べる
   - 実測は `docs/verification/windows-hotkey-conflict.md`、Windows の仕組みと検出の限界・公式資料は用途の末尾の折りたたみに置く。README と Windows 初期設定の「WezTerm」の手順 5 から案内する
   - PowerShell 7 の登録可否試験は同じスレッドで登録・エラー取得・解除を完結する。アプリ名を返す試験ではなく、登録成功でも入力フックやアプリ内のキー割り当ては除外できない
 - `docs/virtual-machines.md` — 「Hyper-V」: Windows 11 の Hyper-V が有効で、自分が Hyper-V Administrators に入ってサインインし直してあることを前提に、管理者ではない PowerShell 7 から VM を作って使う。導入は公式の案内を指す。実施手順は 3 項（VM を作る・VM を起動して OS を入れる・動作を確かめる）で、後ろに「使い方の基本」（表）・「チェックポイントとクローン」・「VM どうしだけがつながるスイッチを作る」・「VM を消す」。変数は「VM を作る」の手順 2（必須は `HV_ISO`）。ISO を外す手順は、Windows PowerShell 5.1 ではパイプの `Set-VMDvdDrive -Path $null` が効かないので、5.1・7 のどちらでも動く `Remove-VMDvdDrive` にしてある
